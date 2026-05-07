@@ -75,8 +75,10 @@ export function ExceptionsList() {
   const handleOpenDialog = (exception?: AvailabilityException) => {
     if (exception) {
       setEditingException(exception);
+      // Normalize date from ISO to YYYY-MM-DD for date input
+      const dateOnly = exception.date.split('T')[0];
       setFormData({
-        date: exception.date,
+        date: dateOnly,
         isAvailable: exception.isAvailable,
         startTime: exception.startTime || '09:00',
         endTime: exception.endTime || '17:00',
@@ -102,6 +104,38 @@ export function ExceptionsList() {
     }
 
     setDateError(false);
+
+    // Normalize date to YYYY-MM-DD format
+    const selectedDateOnly = formData.date.includes('T') 
+      ? formData.date.split('T')[0] 
+      : formData.date;
+
+    // Check if date is in the past (only when creating new exception)
+    if (!editingException) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
+      const selectedDate = new Date(selectedDateOnly + 'T00:00:00');
+      
+      if (selectedDate < today) {
+        toast.error(t('pastDateNotAllowed') || 'Nie możesz dodać wyjątku dla daty z przeszłości');
+        setDateError(true);
+        return;
+      }
+    }
+
+    // Check for duplicate date (only when creating new exception)
+    if (!editingException) {
+      const duplicateException = exceptions.find(e => {
+        const existingDateOnly = e.date.split('T')[0];
+        return existingDateOnly === selectedDateOnly;
+      });
+
+      if (duplicateException) {
+        toast.error(t('duplicateExceptionDate'));
+        setDateError(true);
+        return;
+      }
+    }
 
     if (formData.isAvailable && formData.startTime >= formData.endTime) {
       toast.error(t('endBeforeStart'));
@@ -131,7 +165,9 @@ export function ExceptionsList() {
 
       toast.success(t('saveSuccess'));
       setIsDialogOpen(false);
-      fetchExceptions();
+      
+      // Refresh exceptions list
+      await fetchExceptions();
       
       window.dispatchEvent(new CustomEvent('exceptionsUpdated'));
     } catch (error) {
@@ -206,6 +242,7 @@ export function ExceptionsList() {
                 id="exception-date"
                 type="date"
                 value={formData.date}
+                min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => {
                   setFormData({ ...formData, date: e.target.value });
                   setDateError(false);
@@ -306,7 +343,7 @@ export function ExceptionsList() {
                 <CalendarIcon className="w-5 h-5 text-purple-500" />
                 <div>
                   <p className="text-white font-medium">
-                    {format(new Date(exception.date), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
+                    {format(new Date(exception.date.split('T')[0] + 'T12:00:00'), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
                   </p>
                   {exception.isAvailable ? (
                     <p className="text-sm text-slate-400">

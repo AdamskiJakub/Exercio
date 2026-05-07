@@ -6,6 +6,7 @@ import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api';
 import { MonthlyCalendarPreview } from './monthly-calendar-preview';
 import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
 import type { DaySchedule, AvailabilityException } from '@/types/availability';
@@ -22,20 +23,10 @@ export function WeeklySchedule() {
 
   const fetchExceptions = useCallback(async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/availability/exceptions`,
-        {
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to fetch exceptions');
-
-      const data = await response.json();
-      setExceptions(data);
+      const response = await apiClient.get<AvailabilityException[]>('/availability/exceptions');
+      setExceptions(response.data);
     } catch (error) {
-      console.error('Error fetching exceptions:', error);
-      // Don't show error toast, just keep empty array
+      console.error('Failed to fetch exceptions:', error);
     }
   }, []);
 

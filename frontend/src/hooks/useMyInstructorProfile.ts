@@ -29,6 +29,11 @@ interface InstructorProfileResponse {
   showPhone: boolean;
   showEmail: boolean;
   contactMessage: string | null;
+  // Booking settings
+  isBookingEnabled: boolean;
+  sessionDuration: number;
+  sessionPrice: number | null;
+  minNoticeHours: number;
   createdAt: string;
   updatedAt: string;
   user: {

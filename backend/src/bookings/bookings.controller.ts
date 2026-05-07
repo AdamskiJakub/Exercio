@@ -14,6 +14,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
+import { CreateManualBlockDto } from './dto/create-manual-block.dto';
 import { GetAvailableSlotsDto } from './dto/get-available-slots.dto';
 
 @Controller('bookings')
@@ -121,13 +122,7 @@ export class BookingsController {
   @Post('manual-block')
   async createManualBlock(
     @Request() req,
-    @Body()
-    body: {
-      instructorId: string;
-      startTime: string;
-      endTime: string;
-      notes?: string;
-    },
+    @Body() body: CreateManualBlockDto,
   ) {
     return this.bookingsService.createManualBlock(
       req.user.id,

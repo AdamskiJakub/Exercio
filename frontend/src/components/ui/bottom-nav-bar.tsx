@@ -12,7 +12,7 @@ export function BottomNavBar({ backText, backHref, actionButton }: BottomNavBarP
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         {/* Back Button */}
         <Link
-          href={backHref}
+          href={backHref as any}
           className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
         >
           <motion.div

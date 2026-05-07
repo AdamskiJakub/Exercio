@@ -29,9 +29,10 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
     const dateStr = format(day, 'yyyy-MM-dd');
     const dayOfWeek = getDay(day);
     
+    // Compare using date-only strings to avoid timezone issues
     const exception = exceptions.find(e => {
-      const exceptionDate = format(new Date(e.date), 'yyyy-MM-dd');
-      return exceptionDate === dateStr;
+      const exceptionDateOnly = e.date.split('T')[0];
+      return exceptionDateOnly === dateStr;
     });
     
     if (exception) {

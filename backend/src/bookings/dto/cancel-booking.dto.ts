@@ -1,7 +1,7 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CancelBookingDto {
-  @IsEnum(['client', 'instructor'])
+  @IsIn(['client', 'instructor'])
   @IsNotEmpty()
   cancelledBy: 'client' | 'instructor';
 

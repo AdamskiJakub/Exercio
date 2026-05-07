@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { Calendar, DollarSign, Clock, Bell } from 'lucide-react';
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api';
 import { SESSION_DURATION_OPTIONS, MIN_NOTICE_HOURS_OPTIONS } from '@/constants/availability';
 import { BookingSettingsProps } from '@/types/booking-settings';
 
@@ -37,22 +38,10 @@ export function BookingSettings({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/instructor-profiles/${profileId}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(settings),
-        }
+      await apiClient.patch(
+        `/instructor-profiles/${profileId}`,
+        settings
       );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
-      }
 
       toast.success(t('saveSuccess'));
     } catch (error: any) {

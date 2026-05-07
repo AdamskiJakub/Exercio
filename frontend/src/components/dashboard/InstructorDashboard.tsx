@@ -99,7 +99,7 @@ export function InstructorDashboard() {
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
           >
             <Clock className="w-5 h-5" />
-            Dostępność
+            {t('availability')}
           </Link>
         </motion.div>
       </div>

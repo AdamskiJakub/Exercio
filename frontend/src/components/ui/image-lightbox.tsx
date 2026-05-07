@@ -45,7 +45,8 @@ export function ImageLightbox({ images, initialIndex, isOpen, onClose }: ImageLi
     };
   }, [isOpen, onClose, handlePrevious, handleNext]);
 
-  if (!isOpen) return null;
+  // Early return AFTER all hooks
+  if (!isOpen || images.length === 0) return null;
 
   return (
     <Portal>

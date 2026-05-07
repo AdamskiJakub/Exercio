@@ -1,6 +1,6 @@
 export interface BottomNavBarProps {
   backText: string;
-  backHref: any;
+  backHref: string;
   actionButton?: {
     text: string;
     onClick: () => void;

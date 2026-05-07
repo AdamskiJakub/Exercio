@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   Request,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AvailabilityService } from './availability.service';
@@ -16,6 +17,7 @@ import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { CreateAvailabilityExceptionDto } from './dto/create-availability-exception.dto';
 import { UpdateAvailabilityExceptionDto } from './dto/update-availability-exception.dto';
+import { SetWeeklyAvailabilityDto } from './dto/set-weekly-availability.dto';
 
 @Controller('availability')
 export class AvailabilityController {
@@ -36,7 +38,7 @@ export class AvailabilityController {
       return this.availabilityService.getWeeklyAvailability(profile.id);
     } catch (error) {
       // If profile not found, return empty array
-      if (error.status === 404) {
+      if (error instanceof NotFoundException) {
         return [];
       }
       throw error;
@@ -60,14 +62,7 @@ export class AvailabilityController {
   @Post('weekly')
   async setWeeklyAvailability(
     @Request() req,
-    @Body() body: { 
-      schedule: Array<{
-        dayOfWeek: number;
-        isAvailable: boolean;
-        startTime: string;
-        endTime: string;
-      }> 
-    },
+    @Body() body: SetWeeklyAvailabilityDto,
   ) {
     // Find instructor profile by userId
     const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
