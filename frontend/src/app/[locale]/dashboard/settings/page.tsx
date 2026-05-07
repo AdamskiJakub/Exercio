@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
 import { useUpdateUser } from '@/hooks/useUpdateUser';
 import { useUpdatePassword } from '@/hooks/useUpdatePassword';
 import { useDeleteAccount } from '@/hooks/useDeleteAccount';
-import { useRouter } from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { User, Lock, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { BookingSettings } from '@/components/settings/booking-settings';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { createStrongPasswordSchema } from '@/lib/validations/schemas/auth-base';
@@ -20,8 +22,10 @@ import { createStrongPasswordSchema } from '@/lib/validations/schemas/auth-base'
 export default function SettingsPage() {
   const t = useTranslations('Dashboard.settings');
   const tAuth = useTranslations('auth');
-  const { user } = useAuthStore();
-  const router = useRouter();
+  const { isChecking, user } = useAuthGuard({
+    requireAuth: true,
+  });
+  const { data: instructorProfile } = useMyInstructorProfile();
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -38,14 +42,8 @@ export default function SettingsPage() {
   const updatePasswordMutation = useUpdatePassword();
   const deleteAccountMutation = useDeleteAccount();
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/login');
-    }
-  }, [user, router]);
-
-  if (!user) {
-    return null;
+  if (isChecking || !user) {
+    return <LoadingSpinner />;
   }
 
   const handleUpdateUser = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -128,19 +126,12 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-900 p-4 md:p-8 pb-32">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t('backToDashboard')}
-          </Link>
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">{t('title')}</h1>
-            <p className="text-slate-400">{t('subtitle')}</p>
+            <p className="text-slate-400 text-base">{t('subtitle')}</p>
           </div>
         </div>
 
@@ -160,54 +151,58 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* First Name */}
               <div className="space-y-2">
-                <Label htmlFor="firstName">{t('firstName')}</Label>
+                <Label htmlFor="firstName" className="text-base font-medium">{t('firstName')}</Label>
                 <Input
                   type="text"
                   name="firstName"
                   id="firstName"
                   defaultValue={user.firstName || ''}
+                  className="h-11"
                 />
               </div>
               
               {/* Last Name */}
               <div className="space-y-2">
-                <Label htmlFor="lastName">{t('lastName')}</Label>
+                <Label htmlFor="lastName" className="text-base font-medium">{t('lastName')}</Label>
                 <Input
                   type="text"
                   name="lastName"
                   id="lastName"
                   defaultValue={user.lastName || ''}
+                  className="h-11"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email">{t('email')}</Label>
+              <Label htmlFor="email" className="text-base font-medium">{t('email')}</Label>
               <Input
                 type="email"
                 name="email"
                 id="email"
                 defaultValue={user.email}
+                className="h-11"
               />
             </div>
 
             {/* Phone */}
             <div className="space-y-2">
-              <Label htmlFor="phone">{t('phone')}</Label>
+              <Label htmlFor="phone" className="text-base font-medium">{t('phone')}</Label>
               <Input
                 type="tel"
                 name="phone"
                 id="phone"
                 defaultValue={user.phone || ''}
                 placeholder={t('phonePlaceholder')}
+                className="h-11"
               />
             </div>
 
             <Button
               type="submit"
               disabled={updateUserMutation.isPending}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-orange-500 hover:bg-orange-600 text-white h-11 px-8 py-2.5 text-base font-semibold"
             >
               {updateUserMutation.isPending ? t('saving') : t('saveChanges')}
             </Button>
@@ -230,19 +225,20 @@ export default function SettingsPage() {
           <form onSubmit={handleUpdatePassword} noValidate className="space-y-4">
             {/* Current Password */}
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">{t('currentPassword')}</Label>
+              <Label htmlFor="currentPassword" className="text-base font-medium">{t('currentPassword')}</Label>
               <Input
                 type="password"
                 id="currentPassword"
                 value={passwordForm.currentPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                 required
+                className="h-11"
               />
             </div>
 
             {/* New Password */}
             <div className="space-y-2">
-              <Label htmlFor="newPassword">{t('newPassword')}</Label>
+              <Label htmlFor="newPassword" className="text-base font-medium">{t('newPassword')}</Label>
               <Input
                 type="password"
                 id="newPassword"
@@ -256,12 +252,13 @@ export default function SettingsPage() {
                 aria-invalid={passwordErrors.newPassword ? 'true' : 'false'}
                 required
                 minLength={8}
+                className="h-11"
               />
               {passwordErrors.newPassword && (
                 <p className="text-sm text-red-500">{passwordErrors.newPassword}</p>
               )}
               {!passwordErrors.newPassword && (
-                <p className="text-xs text-slate-400">
+                <p className="text-sm text-slate-400 leading-relaxed">
                   Min 8 znaków, wielkie i małe litery, cyfry oraz znaki specjalne (@$!%*?&)
                 </p>
               )}
@@ -269,7 +266,7 @@ export default function SettingsPage() {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
+              <Label htmlFor="confirmPassword" className="text-base font-medium">{t('confirmPassword')}</Label>
               <Input
                 type="password"
                 id="confirmPassword"
@@ -283,6 +280,7 @@ export default function SettingsPage() {
                 aria-invalid={passwordErrors.confirmPassword ? 'true' : 'false'}
                 required
                 minLength={8}
+                className="h-11"
               />
               {passwordErrors.confirmPassword && (
                 <p className="text-sm text-red-500">{passwordErrors.confirmPassword}</p>
@@ -292,12 +290,25 @@ export default function SettingsPage() {
             <Button
               type="submit"
               disabled={updatePasswordMutation.isPending}
-              className="bg-purple-500 hover:bg-purple-600 text-white"
+              className="bg-purple-500 hover:bg-purple-600 text-white h-11 px-8 py-2.5 text-base font-semibold"
             >
               {updatePasswordMutation.isPending ? t('updating') : t('updatePassword')}
             </Button>
           </form>
         </motion.div>
+
+        {/* Booking Settings - Only for instructors */}
+        {user?.role === 'INSTRUCTOR' && instructorProfile && (
+          <BookingSettings
+            profileId={instructorProfile.id}
+            initialSettings={{
+              isBookingEnabled: instructorProfile.isBookingEnabled ?? false,
+              sessionDuration: instructorProfile.sessionDuration ?? 60,
+              sessionPrice: instructorProfile.sessionPrice ?? null,
+              minNoticeHours: instructorProfile.minNoticeHours ?? 48,
+            }}
+          />
+        )}
 
         {/* Delete Account */}
         <motion.div
@@ -313,29 +324,29 @@ export default function SettingsPage() {
             <h2 className="text-2xl font-semibold text-red-400">{t('dangerZone')}</h2>
           </div>
 
-          <p className="text-slate-300 mb-4">{t('deleteAccountDescription')}</p>
+          <p className="text-slate-300 text-base mb-4">{t('deleteAccountDescription')}</p>
 
           {!showDeleteConfirm ? (
             <Button
               onClick={() => setShowDeleteConfirm(true)}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-red-600 text-white h-11 px-8 py-2.5 text-base font-semibold"
             >
               {t('deleteAccountButton')}
             </Button>
           ) : (
             <div className="space-y-4">
-              <p className="text-red-400 font-medium">{t('deleteAccountConfirm')}</p>
+              <p className="text-red-400 font-medium text-base">{t('deleteAccountConfirm')}</p>
               <div className="flex gap-3">
                 <Button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="bg-slate-700 hover:bg-slate-600 text-white"
+                  className="bg-slate-700 hover:bg-slate-600 text-white h-11 px-8 py-2.5 text-base font-semibold"
                 >
                   {t('cancel')}
                 </Button>
                 <Button
                   onClick={handleDeleteAccount}
                   disabled={deleteAccountMutation.isPending}
-                  className="bg-red-500 hover:bg-red-600 text-white"
+                  className="bg-red-500 hover:bg-red-600 text-white h-11 px-8 py-2.5 text-base font-semibold"
                 >
                   {t('confirmDelete')}
                 </Button>
@@ -343,6 +354,24 @@ export default function SettingsPage() {
             </div>
           )}
         </motion.div>
+      </div>
+
+      {/* Sticky Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-slate-700 bg-slate-900/98 backdrop-blur-sm shadow-2xl">
+        <div className="container mx-auto px-4 py-6 max-w-4xl">
+          <div className="flex justify-center">
+            <Link href="/dashboard">
+              <Button
+                type="button"
+                size="lg"
+                className="bg-slate-800 hover:bg-slate-700 text-white border-2 border-slate-600 hover:border-slate-500 font-semibold text-base px-8"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                {t('backToDashboard')}
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

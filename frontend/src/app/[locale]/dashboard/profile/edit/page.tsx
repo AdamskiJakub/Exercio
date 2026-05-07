@@ -4,7 +4,8 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
 import { usePublishInstructorProfile } from '@/hooks/usePublishInstructorProfile';
-import { useAuthStore } from '@/stores/auth-store';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { InstructorProfileForm } from '@/components/instructors/InstructorProfileForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye } from 'lucide-react';
@@ -15,34 +16,18 @@ export default function EditProfilePage() {
   const t = useTranslations('Dashboard');
   const tProfile = useTranslations('InstructorProfile');
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { isChecking, user, isAuthenticated } = useAuthGuard({
+    requireAuth: true,
+    requireRole: 'INSTRUCTOR',
+  });
   const { data: profile, isLoading, error } = useMyInstructorProfile({
     enabled: isAuthenticated && user?.role === 'INSTRUCTOR',
   });
   const { mutate: publishProfile, isPending: isPublishing } = usePublishInstructorProfile({ showToast: false });
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
-    if (user?.role !== 'INSTRUCTOR') {
-      router.push('/dashboard');
-      return;
-    }
-  }, [isAuthenticated, user, router]);
-
-  if (!isAuthenticated || user?.role !== 'INSTRUCTOR') {
-    return null;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-slate-300">{t('loadingProfile')}</div>
-      </div>
-    );
+  // Show loading while checking auth or loading profile
+  if (isChecking || isLoading) {
+    return <LoadingSpinner />;
   }
 
   if (error) {

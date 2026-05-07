@@ -1,25 +1,19 @@
 'use client';
 
-import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from '@/i18n/routing';
+import { useAuthGuard } from '@/hooks/useAuthGuard';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
 import { InstructorDashboard } from '@/components/dashboard/InstructorDashboard';
 import { ClientDashboard } from '@/components/dashboard/ClientDashboard';
 
 export default function DashboardPage() {
   const t = useTranslations('Dashboard');
-  const { user, isAuthenticated } = useAuthStore();
-  const router = useRouter();
+  const { isChecking, user } = useAuthGuard({
+    requireAuth: true,
+  });
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    }
-  }, [isAuthenticated, router]);
-
-  if (!isAuthenticated || !user) {
-    return null;
+  if (isChecking || !user) {
+    return <LoadingSpinner />;
   }
 
   return (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
@@ -27,14 +28,9 @@ export function InstructorDashboard() {
   const { data: profile, isLoading } = useMyInstructorProfile();
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
-  // Calculate stats (placeholder for now - will be real data later)
   const stats = {
     averageRating: profile?.averageRating || 0,
     totalReviews: profile?.reviewCount || 0,
@@ -97,6 +93,13 @@ export function InstructorDashboard() {
           >
             <Settings className="w-5 h-5" />
             {t('accountSettings')}
+          </Link>
+          <Link
+            href="/dashboard/availability"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
+          >
+            <Clock className="w-5 h-5" />
+            Dostępność
           </Link>
         </motion.div>
       </div>

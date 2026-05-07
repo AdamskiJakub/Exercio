@@ -52,6 +52,11 @@ export interface InstructorProfile {
   showPhone?: boolean;
   showEmail?: boolean;
   contactMessage?: string | null;
+  // Booking settings
+  sessionDuration?: number;
+  sessionPrice?: number | null;
+  isBookingEnabled?: boolean;
+  minNoticeHours?: number;
   createdAt: string;
   updatedAt: string;
   averageRating?: number;

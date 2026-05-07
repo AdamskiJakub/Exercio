@@ -14,6 +14,72 @@ import { UpdateAvailabilityExceptionDto } from './dto/update-availability-except
 export class AvailabilityService {
   constructor(private prisma: PrismaService) {}
 
+  // ==================== HELPER METHODS ====================
+
+  /**
+   * Find instructor profile by userId
+   */
+  async findInstructorProfileByUserId(userId: string) {
+    const profile = await this.prisma.instructorProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Instructor profile not found');
+    }
+
+    return profile;
+  }
+
+  /**
+   * Bulk set weekly schedule (create or update)
+   */
+  async setWeeklySchedule(
+    userId: string,
+    instructorId: string,
+    schedule: Array<{
+      dayOfWeek: number;
+      isAvailable: boolean;
+      startTime: string;
+      endTime: string;
+    }>,
+  ) {
+    // Verify ownership
+    await this.verifyInstructorOwnership(userId, instructorId);
+
+    // Validate all time ranges for available days
+    for (const slot of schedule) {
+      if (slot.isAvailable) {
+        this.validateTimeRange(slot.startTime, slot.endTime);
+      }
+    }
+
+    // Delete existing schedule
+    await this.prisma.availability.deleteMany({
+      where: { instructorId },
+    });
+
+    // Create new schedule (only for available days)
+    const availableSlots = schedule.filter((s) => s.isAvailable);
+    
+    if (availableSlots.length === 0) {
+      return [];
+    }
+
+    await this.prisma.availability.createMany({
+      data: availableSlots.map((slot) => ({
+        instructorId,
+        dayOfWeek: slot.dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        isActive: true,
+      })),
+    });
+
+    // Return updated schedule
+    return this.getWeeklyAvailability(instructorId);
+  }
+
   // ==================== WEEKLY AVAILABILITY ====================
 
   /**

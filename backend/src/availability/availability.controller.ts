@@ -24,8 +24,28 @@ export class AvailabilityController {
   // ==================== WEEKLY AVAILABILITY ====================
 
   /**
+   * GET /availability/weekly
+   * Get weekly availability for logged-in instructor
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('weekly')
+  async getMyWeeklyAvailability(@Request() req) {
+    try {
+      // Find instructor profile by userId
+      const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+      return this.availabilityService.getWeeklyAvailability(profile.id);
+    } catch (error) {
+      // If profile not found, return empty array
+      if (error.status === 404) {
+        return [];
+      }
+      throw error;
+    }
+  }
+
+  /**
    * GET /availability/weekly/:instructorId
-   * Get weekly availability for an instructor (public)
+   * Get weekly availability for a specific instructor (public)
    */
   @Get('weekly/:instructorId')
   async getWeeklyAvailability(@Param('instructorId') instructorId: string) {
@@ -33,20 +53,28 @@ export class AvailabilityController {
   }
 
   /**
-   * POST /availability/weekly/:instructorId
-   * Create weekly availability slot (instructor only)
+   * POST /availability/weekly
+   * Bulk create/update weekly availability (instructor only)
    */
   @UseGuards(JwtAuthGuard)
-  @Post('weekly/:instructorId')
-  async createWeeklyAvailability(
+  @Post('weekly')
+  async setWeeklyAvailability(
     @Request() req,
-    @Param('instructorId') instructorId: string,
-    @Body() dto: CreateAvailabilityDto,
+    @Body() body: { 
+      schedule: Array<{
+        dayOfWeek: number;
+        isAvailable: boolean;
+        startTime: string;
+        endTime: string;
+      }> 
+    },
   ) {
-    return this.availabilityService.createWeeklyAvailability(
+    // Find instructor profile by userId
+    const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+    return this.availabilityService.setWeeklySchedule(
       req.user.id,
-      instructorId,
-      dto,
+      profile.id,
+      body.schedule,
     );
   }
 
@@ -84,8 +112,38 @@ export class AvailabilityController {
   // ==================== AVAILABILITY EXCEPTIONS ====================
 
   /**
+   * GET /availability/exceptions
+   * Get availability exceptions for logged-in instructor
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('exceptions')
+  async getMyAvailabilityExceptions(
+    @Request() req,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+      const start = startDate ? new Date(startDate) : undefined;
+      const end = endDate ? new Date(endDate) : undefined;
+
+      return this.availabilityService.getAvailabilityExceptions(
+        profile.id,
+        start,
+        end,
+      );
+    } catch (error) {
+      // If profile not found, return empty array
+      if (error.status === 404) {
+        return [];
+      }
+      throw error;
+    }
+  }
+
+  /**
    * GET /availability/exceptions/:instructorId
-   * Get availability exceptions for an instructor (public)
+   * Get availability exceptions for a specific instructor (public)
    */
   @Get('exceptions/:instructorId')
   async getAvailabilityExceptions(
@@ -104,19 +162,19 @@ export class AvailabilityController {
   }
 
   /**
-   * POST /availability/exceptions/:instructorId
+   * POST /availability/exceptions
    * Create availability exception (instructor only)
    */
   @UseGuards(JwtAuthGuard)
-  @Post('exceptions/:instructorId')
+  @Post('exceptions')
   async createAvailabilityException(
     @Request() req,
-    @Param('instructorId') instructorId: string,
     @Body() dto: CreateAvailabilityExceptionDto,
   ) {
+    const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
     return this.availabilityService.createAvailabilityException(
       req.user.id,
-      instructorId,
+      profile.id,
       dto,
     );
   }
