@@ -129,7 +129,7 @@ export class AvailabilityController {
       );
     } catch (error) {
       // If profile not found, return empty array
-      if (error.status === 404) {
+      if (error instanceof NotFoundException) {
         return [];
       }
       throw error;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -51,7 +51,7 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
       let currentTime = startHour * 60 + startMin;
       const endTime = endHour * 60 + endMin;
 
-      while (currentTime < endTime) {
+      while (currentTime + sessionDuration <= endTime) {
         const hour = Math.floor(currentTime / 60);
         const min = currentTime % 60;
         slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
@@ -72,7 +72,7 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
     let currentTime = startHour * 60 + startMin;
     const endTime = endHour * 60 + endMin;
 
-    while (currentTime < endTime) {
+    while (currentTime + sessionDuration <= endTime) {
       const hour = Math.floor(currentTime / 60);
       const min = currentTime % 60;
       slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);

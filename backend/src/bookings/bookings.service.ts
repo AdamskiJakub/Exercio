@@ -140,8 +140,8 @@ export class BookingsService {
 
         if (!weeklySlot) {
           // No availability for this day of week
-          currentDate.setDate(currentDate.getDate() + 1);
-          currentDate.setHours(0, 0, 0, 0);
+          currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+          currentDate.setUTCHours(0, 0, 0, 0);
           continue;
         }
 
@@ -151,8 +151,8 @@ export class BookingsService {
 
       // Skip if no valid time range
       if (!dayStartTime || !dayEndTime) {
-        currentDate.setDate(currentDate.getDate() + 1);
-        currentDate.setHours(0, 0, 0, 0);
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+        currentDate.setUTCHours(0, 0, 0, 0);
         continue;
       }
 
@@ -161,10 +161,10 @@ export class BookingsService {
       const [endHour, endMinute] = dayEndTime.split(':').map(Number);
 
       let slotStart = new Date(currentDate);
-      slotStart.setHours(startHour, startMinute, 0, 0);
+      slotStart.setUTCHours(startHour, startMinute, 0, 0);
 
       const dayEnd = new Date(currentDate);
-      dayEnd.setHours(endHour, endMinute, 0, 0);
+      dayEnd.setUTCHours(endHour, endMinute, 0, 0);
 
       while (slotStart < dayEnd) {
         const slotEnd = new Date(
@@ -240,7 +240,23 @@ export class BookingsService {
       throw new BadRequestException('Cannot book time slot in the past');
     }
 
-    // Check if slot is available
+    // Validate slot is within instructor's availability
+    const availableSlots = await this.getAvailableSlots(
+      dto.instructorId,
+      startTime,
+      endTime,
+    );
+
+    const slotExists = availableSlots.some(slot => 
+      slot.startTime.getTime() === startTime.getTime() &&
+      slot.endTime.getTime() === endTime.getTime()
+    );
+
+    if (!slotExists) {
+      throw new BadRequestException('Time slot is not available. Please choose from available slots.');
+    }
+
+    // Check if slot is already booked (double-check for race conditions)
     const existingBooking = await this.prisma.booking.findFirst({
       where: {
         instructorId: dto.instructorId,
@@ -525,6 +541,17 @@ export class BookingsService {
       throw new ForbiddenException('You are not this instructor');
     }
 
+    // Validate time range
+    if (endTime <= startTime) {
+      throw new BadRequestException('End time must be after start time');
+    }
+
+    const duration = Math.floor((endTime.getTime() - startTime.getTime()) / (60 * 1000));
+
+    if (duration <= 0) {
+      throw new BadRequestException('Duration must be positive');
+    }
+
     // Check for overlapping bookings
     const existingBooking = await this.prisma.booking.findFirst({
       where: {
@@ -544,8 +571,6 @@ export class BookingsService {
     if (existingBooking) {
       throw new BadRequestException('Time slot overlaps with existing booking');
     }
-
-    const duration = Math.floor((endTime.getTime() - startTime.getTime()) / (60 * 1000));
 
     return this.prisma.booking.create({
       data: {
