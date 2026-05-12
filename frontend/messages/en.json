@@ -291,11 +291,24 @@
       "todayLabel": "Today",
       "confirmDelete": "Are you sure you want to delete this exception?",
       "confirmDeleteTitle": "Confirm deletion",
-      "backToDashboard": "Back to dashboard"
+      "backToDashboard": "Back to dashboard",
+      "availableSlots": "Available slots",
+      "sessionDuration": "Session duration",
+      "minutes": "min",
+      "close": "Close",
+      "selectMedia": "Select Files"
     },
     "profileForm": {
       "title": "Edit Your Profile",
       "subtitle": "Update your instructor profile information",
+      "basicInfoTitle": "Basic Information",
+      "basicInfoSubtitle": "Introduce yourself to potential clients",
+      "specializationTitle": "Specialization",
+      "specializationSubtitle": "What do you specialize in? Select your competencies",
+      "locationPricingTitle": "Location & Pricing",
+      "locationPricingSubtitle": "Where do you work and what are your rates?",
+      "contactMediaTitle": "Contact & Photos",
+      "contactMediaSubtitle": "How clients can contact you and showcase your work",
       "tagline": "Tagline",
       "taglinePlaceholder": "e.g., Certified Personal Trainer | Strength & Conditioning",
       "taglineHint": "Short phrase describing who you are (shown under your name)",
@@ -539,6 +552,8 @@
     "instructorNotFound": "Instructor Not Found",
     "instructorNotFoundDescription": "The instructor profile you're looking for doesn't exist.",
     "backToInstructors": "Back to Instructors",
+    "backToDashboard": "Back to Dashboard",
+    "backToListing": "Back to Listing",
     "loadingProfile": "Loading profile..."
   }
 }

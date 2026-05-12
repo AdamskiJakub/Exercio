@@ -1,18 +1,22 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { InstructorProfile } from '@/types';
 import { PublicInstructorProfile } from '@/components/instructors/profile/PublicInstructorProfile';
 import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import { useAuthStore } from '@/stores/auth-store';
 
 export default function InstructorPublicProfilePage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const username = params?.username as string;
+  const source = searchParams.get('from');
+  const { user, isAuthenticated } = useAuthStore();
   const t = useTranslations('InstructorProfile');
 
   const { data: profile, isLoading, error } = useQuery<InstructorProfile>({
@@ -25,7 +29,6 @@ export default function InstructorPublicProfilePage() {
   });
 
   useEffect(() => {
-    // If profile is draft and user views it, redirect (they should only see via preview)
     if (profile?.isDraft) {
       router.push('/instructors');
     }
@@ -56,10 +59,17 @@ export default function InstructorPublicProfilePage() {
     );
   }
 
+  const isOwnProfile = isAuthenticated && user?.role === 'INSTRUCTOR' && profile.user?.id === user.id;
+
   return (
-    <div className="min-h-screen bg-slate-950 pb-12">
+    <div className="min-h-screen bg-slate-950 pb-32">
       <div className="container mx-auto px-4 py-8 max-w-5xl">
-        <PublicInstructorProfile profile={profile} isPreview={false} />
+        <PublicInstructorProfile 
+          profile={profile} 
+          isPreview={false} 
+          source={source}
+          isOwnProfile={isOwnProfile}
+        />
       </div>
     </div>
   );

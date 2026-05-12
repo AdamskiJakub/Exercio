@@ -2,43 +2,59 @@
 
 import { Link } from '@/i18n/routing';
 import { BottomNavBarProps } from '@/types/bottom-nav';
-import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 
-export function BottomNavBar({ backText, backHref, actionButton }: BottomNavBarProps) {
+export function BottomNavBar({ backText, backHref, backOnClick, actionButton }: BottomNavBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-sm border-t border-slate-700 p-4 z-50">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        {/* Back Button */}
-        <Link
-          href={backHref as any}
-          className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
-        >
-          <motion.div
-            initial={{ x: 0 }}
-            whileHover={{ x: -4 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </motion.div>
-          {backText}
-        </Link>
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-slate-700 bg-slate-900/98 backdrop-blur-sm shadow-2xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 justify-center items-stretch">
+          {/* Back Button */}
+          {backOnClick ? (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={backOnClick}
+              className="flex-1 sm:flex-none sm:min-w-50 border-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 hover:border-slate-500 font-semibold text-sm sm:text-base h-11 sm:h-12 py-2.5 sm:py-3"
+            >
+              <ArrowLeft className="size-4 sm:size-5 mr-1.5 sm:mr-2 shrink-0" />
+              <span className="truncate">{backText}</span>
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="flex-1 sm:flex-none sm:min-w-50 border-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 hover:border-slate-500 font-semibold text-sm sm:text-base h-11 sm:h-12 py-2.5 sm:py-3"
+            >
+              <Link href={backHref as any}>
+                <ArrowLeft className="size-4 sm:size-5 mr-1.5 sm:mr-2 shrink-0" />
+                <span className="truncate">{backText}</span>
+              </Link>
+            </Button>
+          )}
 
-        {/* Optional Action Button */}
-        {actionButton && (
-          <button
-            onClick={actionButton.onClick}
-            disabled={actionButton.disabled}
-            className={`px-8 py-3 rounded-lg transition-colors flex items-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${
-              actionButton.variant === 'secondary'
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                : 'bg-orange-600 hover:bg-orange-700 text-white'
-            }`}
-          >
-            {actionButton.text}
-          </button>
-        )}
+          {/* Optional Action Button */}
+          {actionButton && (
+            <Button
+              type={actionButton.type || 'button'}
+              form={actionButton.form}
+              onClick={actionButton.onClick}
+              disabled={actionButton.disabled}
+              size="lg"
+              className={`flex-1 sm:flex-none sm:min-w-50 font-bold text-sm sm:text-base h-11 sm:h-12 py-2.5 sm:py-3 shadow-lg ${
+                actionButton.variant === 'secondary'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-orange-500/20'
+              }`}
+            >
+              {actionButton.icon && <span className="mr-1.5 sm:mr-2 shrink-0">{actionButton.icon}</span>}
+              <span className="truncate">{actionButton.text}</span>
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

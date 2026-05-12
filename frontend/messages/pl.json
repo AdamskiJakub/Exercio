@@ -287,15 +287,28 @@
       "moreSlots": "więcej",
       "moreSlotsTooltip": "Jeszcze {count} dostępnych slotów",
       "availableLabel": "Dostępne",
-      "unavailableLabel": "Niedostępne",
+      "unavailableLabel": "Niedostępny",
       "todayLabel": "Dzisiaj",
       "confirmDelete": "Czy na pewno chcesz usunąć ten wyjątek?",
       "confirmDeleteTitle": "Potwierdź usunięcie",
-      "backToDashboard": "Powrót do panelu"
+      "backToDashboard": "Powrót do panelu",
+      "availableSlots": "Dostępne sloty",
+      "sessionDuration": "Czas trwania sesji",
+      "minutes": "min",
+      "close": "Zamknij",
+      "selectMedia": "Wybierz pliki"
     },
     "profileForm": {
       "title": "Edytuj Swój Profil",
       "subtitle": "Zaktualizuj informacje w swoim profilu instruktora",
+      "basicInfoTitle": "Podstawowe informacje",
+      "basicInfoSubtitle": "Przedstaw się swoim potencjalnym klientom",
+      "specializationTitle": "Specjalizacja",
+      "specializationSubtitle": "W czym się specjalizujesz? Wybierz swoje kompetencje",
+      "locationPricingTitle": "Lokalizacja i cennik",
+      "locationPricingSubtitle": "Gdzie pracujesz i jak wyglądają Twoje ceny?",
+      "contactMediaTitle": "Kontakt i zdjęcia",
+      "contactMediaSubtitle": "Jak klienci mogą się z Tobą skontaktować i pokaż swoją pracę",
       "tagline": "Hasło przewodnie",
       "taglinePlaceholder": "np. Certyfikowany Trener Personalny | Trening Siłowy",
       "taglineHint": "Krótkie hasło opisujące kim jesteś (widoczne pod nazwiskiem)",
@@ -539,6 +552,8 @@
     "instructorNotFound": "Instruktor nie został znaleziony",
     "instructorNotFoundDescription": "Profil instruktora, którego szukasz, nie istnieje.",
     "backToInstructors": "Wróć do listy instruktorów",
+    "backToDashboard": "Powrót do panelu",
+    "backToListing": "Powrót do listy",
     "loadingProfile": "Ładowanie profilu..."
   }
 }

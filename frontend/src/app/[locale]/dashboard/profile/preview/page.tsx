@@ -8,7 +8,7 @@ import { usePublishInstructorProfile } from '@/hooks/usePublishInstructorProfile
 import { useAuthStore } from '@/stores/auth-store';
 import { InstructorCard } from '@/components/instructors/instructor-card';
 import { ProfileFullView } from '@/components/instructors/profile/ProfileFullView';
-import { Button } from '@/components/ui/button';
+import { BottomNavBar } from '@/components/ui/bottom-nav-bar';
 import { ArrowLeft, Eye, LayoutGrid, User } from 'lucide-react';
 
 export default function PreviewProfilePage() {
@@ -120,33 +120,17 @@ export default function PreviewProfilePage() {
         </div>
       </div>
 
-      {/* Action Buttons - FULL WIDTH STICKY BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-slate-700 bg-slate-900/98 backdrop-blur-sm shadow-2xl">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              onClick={() => router.push('/dashboard/profile/edit')}
-              className="flex-1 sm:flex-none border-2 border-slate-600 bg-slate-800 text-white hover:bg-slate-700 hover:border-slate-500 font-semibold text-base"
-            >
-              <ArrowLeft className="size-5 mr-2" />
-              {t('backToEdit')}
-            </Button>
-            
-            <Button
-              type="button"
-              size="lg"
-              onClick={handlePublish}
-              disabled={isPublishing}
-              className="flex-1 sm:flex-none bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-base shadow-lg shadow-orange-500/20"
-            >
-              {isPublishing ? t('publishing') : `🚀 ${t('publishProfile')}`}
-            </Button>
-          </div>
-        </div>
-      </div>
+      {/* Unified Bottom Navigation */}
+      <BottomNavBar
+        backText={t('backToEdit')}
+        backHref="/dashboard/profile/edit"
+        actionButton={{
+          text: isPublishing ? t('publishing') : `🚀 ${t('publishProfile')}`,
+          onClick: handlePublish,
+          disabled: isPublishing,
+          variant: 'primary',
+        }}
+      />
     </div>
   );
 }

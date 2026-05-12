@@ -184,11 +184,23 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
 
   return ( 
     <form id="instructor-profile-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      
+      {/* === BASIC INFO SECTION === */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">👤</span>
+            {t('basicInfoTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('basicInfoSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
       <div className="space-y-2">
-        <label htmlFor="tagline" className="block text-sm font-medium text-slate-200">
+        <label htmlFor="tagline" className="block text-base font-semibold text-slate-200">
           {t('tagline')}
         </label>
-        <p className="text-xs text-slate-400">{t('taglineHint')}</p>
+        <p className="text-sm text-slate-400 mb-2">{t('taglineHint')}</p>
         <input
           {...register('tagline')}
           id="tagline"
@@ -203,7 +215,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
 
       {/* Bio */}
       <div className="space-y-2">
-        <label htmlFor="bio" className="block text-sm font-medium text-slate-200">
+        <label htmlFor="bio" className="block text-base font-semibold text-slate-200">
           {t('bio')}
         </label>
         <textarea
@@ -217,10 +229,24 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
           <p className="text-red-400 text-sm">{errors.bio.message}</p>
         )}
       </div>
+        </div>
+      </div>
+
+      {/* === SPECIALIZATION SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">💪</span>
+            {t('specializationTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('specializationSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
 
       {/* Primary Specialization */}
       <div>
-        <label htmlFor="primarySpec" className="block text-sm font-medium text-slate-200 mb-2">
+        <label htmlFor="primarySpec" className="block text-base font-semibold text-slate-200 mb-2">
           {t('primarySpecialization')}
         </label>
         <Select
@@ -371,10 +397,24 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
           })}
         </div>
       </div>
+        </div>
+      </div>
+
+      {/* === LOCATION & PRICING SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">📍</span>
+            {t('locationPricingTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('locationPricingSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
 
       {/* Availability */}
       <div className="space-y-3">
-        <Label className="text-slate-200">
+        <Label className="text-base font-semibold text-slate-200">
           {t('availability')}
         </Label>
         <RadioGroup
@@ -400,7 +440,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       {/* Location & City */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="city" className="text-slate-200">
+          <Label htmlFor="city" className="text-base font-semibold text-slate-200">
             {t('city')}
           </Label>
           <Input
@@ -416,8 +456,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="yearsExperience" className="text-slate-200">
-            {t('yearsExperience')} <span className="text-slate-400 text-xs font-normal">{t('hourlyRateOptional')}</span>
+          <Label htmlFor="yearsExperience" className="text-base font-semibold text-slate-200">
+            {t('yearsExperience')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
           </Label>
           <Input
             {...register('yearsExperience', { 
@@ -438,9 +478,9 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       <div className="space-y-2">
         <Label 
           htmlFor="hourlyRate" 
-          className={`${watch('hourlyRateHidden') ? 'text-slate-500' : 'text-slate-200'}`}
+          className={`text-base font-semibold ${watch('hourlyRateHidden') ? 'text-slate-500' : 'text-slate-200'}`}
         >
-          {t('hourlyRate')} <span className="text-slate-400 text-xs font-normal">{t('hourlyRateOptional')}</span>
+          {t('hourlyRate')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
         </Label>
         <Input
           {...register('hourlyRate', { 
@@ -478,7 +518,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
             }`}>
               {t('hourlyRateHidden')}
             </span>
-            <span className="text-xs text-slate-400">
+            <span className="text-sm text-slate-400">
               {t('hourlyRateHiddenHint')}
             </span>
           </div>
@@ -517,7 +557,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         {/* Package Deals Description - pokazuje się tylko gdy checkbox zaznaczony */}
         {watch('packageDealsEnabled') && (
           <div className="ml-6 space-y-2">
-            <Label htmlFor="packageDealsDescription" className="text-slate-200 text-sm">
+            <Label htmlFor="packageDealsDescription" className="text-base font-semibold text-slate-200">
               {t('packageDealsDescription')}
             </Label>
             <Textarea
@@ -527,7 +567,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
               rows={3}
               className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
             />
-            <p className="text-slate-400 text-xs">
+            <p className="text-slate-400 text-sm">
               {t('packageDealsHint')}
             </p>
             {errors.packageDealsDescription && (
@@ -539,7 +579,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
 
       {/* Languages */}
       <div className="space-y-2">
-        <Label htmlFor="languages" className="text-slate-200">
+        <Label htmlFor="languages" className="text-base font-semibold text-slate-200">
           {t('languages')}
         </Label>
         <Input
@@ -553,6 +593,20 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
           <p className="text-red-400 text-sm">{errors.languages.message}</p>
         )}
       </div>
+        </div>
+      </div>
+
+      {/* === CONTACT & MEDIA SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">📸</span>
+            {t('contactMediaTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('contactMediaSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
 
       {/* Contact Settings Section */}
       <ContactSettingsSection 
@@ -614,6 +668,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       {errors.gallery && (
         <p className="text-red-400 text-sm">{errors.gallery.message}</p>
       )}
+        </div>
+      </div>
     </form>
   );
 }

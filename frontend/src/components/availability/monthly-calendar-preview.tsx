@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import type { MonthlyCalendarPreviewProps } from '@/types/availability';
 
 export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, exceptions = [] }: MonthlyCalendarPreviewProps) {
@@ -13,6 +15,8 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
   const dateLocale = locale === 'pl' ? pl : enUS;
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -78,15 +82,27 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
     return { slots, hasException: false };
   };
 
+  const handleDayClick = (day: Date, hasSlots: boolean) => {
+    if (!hasSlots) return; // Don't open modal for unavailable days
+    setSelectedDay(day);
+    setIsModalOpen(true);
+  };
+
+  const getSelectedDayData = () => {
+    if (!selectedDay) return null;
+    const { slots, hasException } = generateTimeSlots(selectedDay);
+    return { slots, hasException };
+  };
+
   return (
-    <div className="bg-slate-900/50 rounded-lg border border-slate-700 p-4">
+    <div className="bg-slate-900/50 rounded-lg border border-slate-700 p-3 sm:p-4">
       {/* Header with Month Navigation */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h3 className="text-white font-semibold text-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-3 sm:mb-2">
+        <div className="flex-1">
+          <h3 className="text-white font-semibold text-base sm:text-lg">
             {t('calendarPreview')}: {format(currentMonth, 'LLLL yyyy', { locale: dateLocale })}
           </h3>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             {t('calendarDescription')}
           </p>
         </div>
@@ -109,13 +125,12 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-1">
-        {/* Day Headers */}
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 overflow-hidden">{/* Day Headers */}
         {(locale === 'pl' 
           ? ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
           : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         ).map((day) => (
-          <div key={day} className="text-center text-xs font-medium text-slate-400 py-2">
+          <div key={day} className="text-center text-[10px] sm:text-xs font-medium text-slate-400 py-1.5 sm:py-2">
             {day}
           </div>
         ))}
@@ -134,15 +149,16 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
           return (
             <div
               key={day.toISOString()}
-              className={`aspect-square border rounded-lg p-1 overflow-hidden ${
+              onClick={() => handleDayClick(day, hasSlots)}
+              className={`aspect-square border rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-y-auto transition-all ${
                 hasSlots
                   ? hasException 
-                    ? 'bg-purple-500/10 border-purple-500/30' 
-                    : 'bg-green-500/10 border-green-500/30'
+                    ? 'bg-purple-500/10 border-purple-500/30 cursor-pointer hover:bg-purple-500/20' 
+                    : 'bg-green-500/10 border-green-500/30 cursor-pointer hover:bg-green-500/20'
                   : 'bg-slate-800/50 border-slate-700'
-              } ${isToday ? 'ring-2 ring-orange-500' : ''} ${hasException && hasSlots ? 'ring-1 ring-purple-400' : ''}`}
+              } ${isToday ? 'ring-1 sm:ring-2 ring-orange-500' : ''} ${hasException && hasSlots ? 'ring-1 ring-purple-400' : ''}`}
             >
-              <div className={`text-xs font-medium mb-1 ${
+              <div className={`text-[10px] sm:text-xs font-medium mb-0.5 sm:mb-1 text-center ${
                 hasSlots 
                   ? hasException ? 'text-purple-400' : 'text-green-400' 
                   : 'text-slate-500'
@@ -151,11 +167,11 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
               </div>
               
               {hasSlots ? (
-                <div className="space-y-0.5 overflow-y-auto max-h-20">
+                <div className="space-y-0.5 max-h-16 sm:max-h-20 overflow-hidden">
                   {slots.slice(0, 3).map((slot, idx) => (
                     <div
                       key={idx}
-                      className={`text-[9px] rounded px-1 py-0.5 text-center ${
+                      className={`text-[8px] sm:text-[9px] rounded px-0.5 sm:px-1 py-0.5 text-center font-medium truncate ${
                         hasException
                           ? 'bg-purple-500/20 text-purple-300'
                           : 'bg-green-500/20 text-green-300'
@@ -166,15 +182,15 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
                   ))}
                   {slots.length > 3 && (
                     <div 
-                      className="text-[8px] text-slate-400 text-center"
+                      className="text-[7px] sm:text-[8px] text-slate-400 text-center font-medium"
                       title={t('moreSlotsTooltip', { count: slots.length - 3 })}
                     >
-                      +{slots.length - 3} {t('moreSlots')}
+                      +{slots.length - 3}
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="text-[9px] text-slate-600 text-center mt-1">
+                <div className="text-[9px] sm:text-[10px] text-slate-600 text-center mt-1">
                   —
                 </div>
               )}
@@ -183,24 +199,94 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
         })}
       </div>
 
-      <div className="mt-3 text-xs text-slate-400 flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
+      <div className="mt-2 sm:mt-3 text-[10px] sm:text-xs text-slate-400 flex items-center gap-2 sm:gap-4 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
           <span>{t('availableLabel')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-purple-500/20 border border-purple-500/30 rounded ring-1 ring-purple-400"></div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-purple-500/20 border border-purple-500/30 rounded ring-1 ring-purple-400"></div>
           <span>{t('exceptions')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-slate-800/50 border border-slate-700 rounded"></div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-800/50 border border-slate-700 rounded"></div>
           <span>{t('unavailableLabel')}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 ring-2 ring-orange-500 rounded"></div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 ring-1 sm:ring-2 ring-orange-500 rounded"></div>
           <span>{t('todayLabel')}</span>
         </div>
       </div>
+
+      {/* Day Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="bg-slate-800 border-2 border-slate-600 text-white max-w-md mx-4 px-5 sm:px-6">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-white flex items-center justify-between">
+              <span>
+                {selectedDay && format(selectedDay, 'EEEE, d MMMM yyyy', { locale: dateLocale })}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-4">
+            {selectedDay && (() => {
+              const dayData = getSelectedDayData();
+              if (!dayData) return null;
+              
+              const { slots, hasException } = dayData;
+              
+              if (slots.length === 0) {
+                return (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400 text-base">{t('dayOff')}</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-3">
+                  {hasException && (
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
+                      <p className="text-purple-300 text-sm font-medium">{t('exceptions')}</p>
+                    </div>
+                  )}
+                  
+                  <div className="text-sm text-slate-400 mb-2">
+                    {t('availableSlots')}: <span className="text-white font-semibold">{slots.length}</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1">
+                    {slots.map((slot, idx) => (
+                      <div
+                        key={idx}
+                        className={`text-center py-2.5 px-3 rounded-lg font-medium ${
+                          hasException
+                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                            : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                        }`}
+                      >
+                        {slot}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 text-xs text-slate-500">
+                    {t('sessionDuration')}: {sessionDuration} {t('minutes')}
+                  </div>
+                </div>
+              );
+            })()}
+
+            <Button
+              onClick={() => setIsModalOpen(false)}
+              className="w-full bg-slate-700 hover:bg-slate-600 text-white h-11"
+            >
+              {t('close')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

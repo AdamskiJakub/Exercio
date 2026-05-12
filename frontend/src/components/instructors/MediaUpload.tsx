@@ -157,15 +157,16 @@ export function MediaUpload(props: MediaUploadProps) {
 
   if (variant === 'avatar') {
     return (
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-200">
+      <div className="space-y-3">
+        <label className="text-base font-semibold text-slate-200">
           {label}
         </label>
         {hint && <p className="text-sm text-slate-400">{hint}</p>}
         
-        <div className="flex items-start gap-4">
+        {/* Mobile: Stack vertically, Desktop: Side by side */}
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4 pb-4 mt-2">
           {previews[0] ? (
-            <div className="relative size-32 rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 shrink-0">
+            <div className="relative size-32 rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 shrink-0 mx-auto sm:mx-0">
               <img
                 src={previews[0].isBlob ? previews[0].url : getMediaUrl(previews[0].url)}
                 alt="Profile preview"
@@ -173,12 +174,12 @@ export function MediaUpload(props: MediaUploadProps) {
               />
             </div>
           ) : (
-            <div className="size-32 rounded-lg border-2 border-dashed border-slate-600 bg-slate-800/30 flex items-center justify-center shrink-0">
+            <div className="size-32 rounded-lg border-2 border-dashed border-slate-600 bg-slate-800/30 flex items-center justify-center shrink-0 mx-auto sm:mx-0">
               <Upload className="size-8 text-slate-500" />
             </div>
           )}
 
-          <div className="flex flex-col gap-2 flex-1">
+          <div className="flex flex-col gap-2.5 flex-1 w-full">
             <input
               ref={fileInputRef}
               type="file"
@@ -192,22 +193,22 @@ export function MediaUpload(props: MediaUploadProps) {
               size="lg"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="w-full bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold cursor-pointer"
+              className="w-full bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold cursor-pointer h-11 sm:h-10"
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-                  {t('uploading')}
+                  <Loader2 className="size-4 sm:size-4 mr-2 shrink-0 animate-spin" />
+                  <span className="truncate">{t('uploading')}</span>
                 </>
               ) : previews[0] ? (
                 <>
-                  <Upload className="size-4 mr-2" />
-                  {t('changePhoto')}
+                  <Upload className="size-4 sm:size-4 mr-2 shrink-0" />
+                  <span className="truncate">{t('changePhoto')}</span>
                 </>
               ) : (
                 <>
-                  <Upload className="size-4 mr-2" />
-                  {t('selectPhoto')}
+                  <Upload className="size-4 sm:size-4 mr-2 shrink-0" />
+                  <span className="truncate">{t('selectPhoto')}</span>
                 </>
               )}
             </Button>
@@ -219,10 +220,10 @@ export function MediaUpload(props: MediaUploadProps) {
                 size="lg"
                 onClick={() => handleRemove()}
                 disabled={isUploading}
-                className="w-full cursor-pointer"
+                className="w-full cursor-pointer h-11 sm:h-10"
               >
-                <X className="size-4 mr-2" />
-                {t('removePhoto')}
+                <X className="size-4 sm:size-4 mr-2 shrink-0" />
+                <span className="truncate">{t('removePhoto')}</span>
               </Button>
             )}
             
@@ -239,12 +240,12 @@ export function MediaUpload(props: MediaUploadProps) {
   // Gallery variant
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-slate-200">
+      <label className="text-base font-semibold text-slate-200">
         {label}
       </label>
       {hint && <p className="text-sm text-slate-400">{hint}</p>}
       
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 pb-4 mt-2">
         {previews.map((preview, index) => (
           <div key={index} className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 group">
             {preview.type === 'video' ? (
@@ -285,14 +286,14 @@ export function MediaUpload(props: MediaUploadProps) {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="aspect-square rounded-lg border-2 border-dashed border-slate-600 bg-slate-800/30 hover:bg-slate-800/50 flex flex-col items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="aspect-square rounded-lg border-2 border-dashed border-slate-600 bg-slate-800/30 hover:bg-slate-800/50 flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer p-2"
           >
             {isUploading ? (
-              <Loader2 className="size-8 text-slate-500 animate-spin" />
+              <Loader2 className="size-6 sm:size-8 text-slate-500 animate-spin" />
             ) : (
               <>
-                <Upload className="size-8 text-slate-500" />
-                <span className="text-xs text-slate-500">{t('selectMedia')}</span>
+                <Upload className="size-5 sm:size-6 text-slate-500" />
+                <span className="text-[10px] sm:text-xs text-slate-500 text-center leading-tight">{t('selectMedia')}</span>
               </>
             )}
           </button>

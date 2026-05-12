@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { apiClient } from '@/lib/api';
 import { format } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { useLocale } from 'next-intl';
@@ -53,17 +54,8 @@ export function ExceptionsList() {
 
   const fetchExceptions = async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/availability/exceptions`,
-        {
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to fetch exceptions');
-
-      const data = await response.json();
-      setExceptions(data);
+      const response = await apiClient.get<AvailabilityException[]>('/availability/exceptions');
+      setExceptions(response.data);
     } catch (error) {
       console.error('Error fetching exceptions:', error);
       toast.error(t('saveError'));
@@ -143,25 +135,21 @@ export function ExceptionsList() {
     }
 
     try {
-      const url = editingException
-        ? `${process.env.NEXT_PUBLIC_API_URL}/availability/exceptions/${editingException.id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/availability/exceptions`;
-
-      const response = await fetch(url, {
-        method: editingException ? 'PATCH' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+      if (editingException) {
+        await apiClient.patch(`/availability/exceptions/${editingException.id}`, {
           date: formData.date,
           isAvailable: formData.isAvailable,
           startTime: formData.isAvailable ? formData.startTime : null,
           endTime: formData.isAvailable ? formData.endTime : null,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to save exception');
+        });
+      } else {
+        await apiClient.post('/availability/exceptions', {
+          date: formData.date,
+          isAvailable: formData.isAvailable,
+          startTime: formData.isAvailable ? formData.startTime : null,
+          endTime: formData.isAvailable ? formData.endTime : null,
+        });
+      }
 
       toast.success(t('saveSuccess'));
       setIsDialogOpen(false);
@@ -178,15 +166,7 @@ export function ExceptionsList() {
 
   const handleDeleteException = async (id: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/availability/exceptions/${id}`,
-        {
-          method: 'DELETE',
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to delete exception');
+      await apiClient.delete(`/availability/exceptions/${id}`);
 
       toast.success(t('deleteSuccess'));
       fetchExceptions();
@@ -337,32 +317,32 @@ export function ExceptionsList() {
           {exceptions.map((exception) => (
             <div
               key={exception.id}
-              className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors"
+              className="flex items-center justify-between p-3 sm:p-4 bg-slate-900/50 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors gap-2"
             >
-              <div className="flex items-center gap-4">
-                <CalendarIcon className="w-5 h-5 text-purple-500" />
-                <div>
-                  <p className="text-white font-medium">
+              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <CalendarIcon className="w-6 h-6 sm:w-5 sm:h-5 text-purple-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm sm:text-base truncate">
                     {format(new Date(exception.date.split('T')[0] + 'T12:00:00'), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
                   </p>
                   {exception.isAvailable ? (
-                    <p className="text-sm text-slate-400">
+                    <p className="text-xs sm:text-sm text-slate-400">
                       {exception.startTime} - {exception.endTime}
                     </p>
                   ) : (
-                    <p className="text-sm text-red-400">{t('dayOff')}</p>
+                    <p className="text-xs sm:text-sm text-red-400">{t('dayOff')}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2 shrink-0">
                 <Button
                   onClick={() => handleOpenDialog(exception)}
                   size="sm"
-                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 h-9 px-3"
+                  className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 h-9 sm:h-9 w-9 sm:w-auto px-2 sm:px-3"
                   variant="ghost"
                 >
-                  <Edit className="w-5 h-5" />
+                  <Edit className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
                 <Button
                   onClick={() => {
@@ -370,10 +350,10 @@ export function ExceptionsList() {
                     setIsDeleteDialogOpen(true);
                   }}
                   size="sm"
-                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-9 px-3"
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-9 sm:h-9 w-9 sm:w-auto px-2 sm:px-3"
                   variant="ghost"
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Button>
               </div>
             </div>

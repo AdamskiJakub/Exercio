@@ -7,6 +7,7 @@ import {
   Min,
   ArrayMaxSize,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateInstructorProfileDto {
@@ -110,6 +111,7 @@ export class UpdateInstructorProfileDto {
   @IsOptional()
   sessionDuration?: number; // Duration in minutes (30, 60, 90, 120)
 
+  @ValidateIf((o) => o.sessionPrice !== null)
   @IsNumber()
   @Min(0)
   @IsOptional()

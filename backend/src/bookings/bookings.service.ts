@@ -45,13 +45,16 @@ export class BookingsService {
       throw new BadRequestException('Instructor does not accept bookings');
     }
 
-    // Get existing bookings in this range
+    // Get existing bookings that overlap with this range
+    // A booking overlaps if: startTime < endDate AND endTime > startDate
     const existingBookings = await this.prisma.booking.findMany({
       where: {
         instructorId,
         startTime: {
-          gte: startDate,
-          lte: endDate,
+          lt: endDate, // Booking starts before our range ends
+        },
+        endTime: {
+          gt: startDate, // Booking ends after our range starts
         },
         status: {
           in: ['PENDING', 'CONFIRMED'],
@@ -98,13 +101,23 @@ export class BookingsService {
     );
 
     while (currentDate <= endDate) {
-      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const dateStr = currentDate.toISOString().split('T')[0];
+      // Use UTC methods to avoid timezone shifts
+      const dayOfWeek = currentDate.getUTCDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Get date string in YYYY-MM-DD format using UTC
+      const year = currentDate.getUTCFullYear();
+      const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getUTCDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
 
       // Check for exception for this specific date
-      const exception = exceptions.find(
-        (ex) => ex.date.toISOString().split('T')[0] === dateStr,
-      );
+      const exception = exceptions.find((ex) => {
+        const exYear = ex.date.getUTCFullYear();
+        const exMonth = String(ex.date.getUTCMonth() + 1).padStart(2, '0');
+        const exDay = String(ex.date.getUTCDate()).padStart(2, '0');
+        const exDateStr = `${exYear}-${exMonth}-${exDay}`;
+        return exDateStr === dateStr;
+      });
 
       let dayStartTime: string | null = null;
       let dayEndTime: string | null = null;
@@ -113,8 +126,8 @@ export class BookingsService {
         // Exception overrides weekly template
         if (!exception.isAvailable) {
           // Completely unavailable this day
-          currentDate.setDate(currentDate.getDate() + 1);
-          currentDate.setHours(0, 0, 0, 0);
+          currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+          currentDate.setUTCHours(0, 0, 0, 0);
           continue;
         }
         dayStartTime = exception.startTime;
@@ -186,9 +199,9 @@ export class BookingsService {
         slotStart = new Date(slotStart.getTime() + sessionDuration * 60 * 1000);
       }
 
-      // Move to next day
-      currentDate.setDate(currentDate.getDate() + 1);
-      currentDate.setHours(0, 0, 0, 0);
+      // Move to next day (using UTC methods for consistency)
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+      currentDate.setUTCHours(0, 0, 0, 0);
     }
 
     return slots;

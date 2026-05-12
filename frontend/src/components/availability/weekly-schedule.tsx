@@ -46,16 +46,8 @@ export function WeeklySchedule() {
 
   const fetchSchedule = async () => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/availability/weekly`,
-        {
-          credentials: 'include',
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to fetch schedule');
-
-      const data = await response.json();
+      const response = await apiClient.get('/availability/weekly');
+      const data = response.data;
       
       const fullSchedule = DAYS_OF_WEEK.map((dayOfWeek) => {
         const existingDay = data.find((d: any) => d.dayOfWeek === dayOfWeek);
@@ -63,7 +55,7 @@ export function WeeklySchedule() {
         if (existingDay) {
           return {
             dayOfWeek,
-            isAvailable: true,
+            isAvailable: existingDay.isActive ?? true,
             startTime: existingDay.startTime,
             endTime: existingDay.endTime,
           };
@@ -139,19 +131,9 @@ export function WeeklySchedule() {
 
     setIsSaving(true);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/availability/weekly`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({ schedule: fullSchedule }),
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to save schedule');
+      await apiClient.post('/availability/weekly', { 
+        schedule: fullSchedule 
+      });
 
       toast.success(t('saveSuccess'));
 
@@ -181,7 +163,6 @@ export function WeeklySchedule() {
     <div className="space-y-6">
       {/* Monthly Calendar Preview */}
       <MonthlyCalendarPreview 
-        key={JSON.stringify(exceptions)}
         schedule={schedule} 
         sessionDuration={instructorProfile?.sessionDuration || 60}
         exceptions={exceptions}
@@ -198,11 +179,12 @@ export function WeeklySchedule() {
         return (
           <div
             key={dayOfWeek}
-            className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700"
+            className="flex flex-col gap-3 p-3 sm:p-4 bg-slate-900/50 rounded-lg border border-slate-700"
           >
+            {/* Day Name with Checkbox */}
             <label
               htmlFor={`day-${dayOfWeek}`}
-              className="flex items-center gap-3 cursor-pointer min-w-45"
+              className="flex items-center gap-3 cursor-pointer"
             >
               <Checkbox
                 id={`day-${dayOfWeek}`}
@@ -210,7 +192,7 @@ export function WeeklySchedule() {
                 onCheckedChange={(checked: boolean) =>
                   handleToggleDay(dayOfWeek, checked)
                 }
-                className="h-5 w-5 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
+                className="h-5 w-5 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600 shrink-0"
               />
               <span className="text-white font-medium text-base">
                 {getDayName(dayOfWeek)}
@@ -219,9 +201,15 @@ export function WeeklySchedule() {
 
             {/* Time Inputs */}
             {daySchedule.isAvailable ? (
-              <div className="flex items-center gap-3 flex-1">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-1.5 sm:gap-2 pl-0 sm:pl-8">
+                <div 
+                  className="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-lg px-2 py-2.5 w-35 sm:flex-1 cursor-pointer hover:bg-slate-700 transition-colors"
+                  onClick={(e) => {
+                    const input = e.currentTarget.querySelector('input');
+                    input?.showPicker?.();
+                  }}
+                >
+                  <Clock className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
                   <input
                     type="time"
                     value={daySchedule.startTime}
@@ -229,22 +217,31 @@ export function WeeklySchedule() {
                       handleTimeChange(dayOfWeek, 'startTime', e.target.value)
                     }
                     style={{ colorScheme: 'dark' }}
-                    className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                    className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
                   />
                 </div>
-                <span className="text-slate-400">—</span>
-                <input
-                  type="time"
-                  value={daySchedule.endTime}
+                <span className="text-slate-400 shrink-0">—</span>
+                <div 
+                  className="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-lg px-2 py-2.5 w-35 sm:flex-1 cursor-pointer hover:bg-slate-700 transition-colors"
+                  onClick={(e) => {
+                    const input = e.currentTarget.querySelector('input');
+                    input?.showPicker?.();
+                  }}
+                >
+                  <Clock className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
+                  <input
+                    type="time"
+                    value={daySchedule.endTime}
                   onChange={(e) =>
                     handleTimeChange(dayOfWeek, 'endTime', e.target.value)
                   }
                   style={{ colorScheme: 'dark' }}
-                  className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+                  className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
                 />
+                </div>
               </div>
             ) : (
-              <span className="text-slate-500 text-sm">{t('unavailable')}</span>
+              <span className="text-slate-500 text-sm pl-0 sm:pl-8">{t('unavailable')}</span>
             )}
           </div>
         );

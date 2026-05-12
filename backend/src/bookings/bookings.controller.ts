@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BookingsService } from './bookings.service';
@@ -56,6 +57,10 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createBooking(@Request() req, @Body() dto: CreateBookingDto) {
+    // Enforce CLIENT role only
+    if (req.user.role !== 'CLIENT') {
+      throw new ForbiddenException('Only clients can create bookings');
+    }
     return this.bookingsService.createBooking(req.user.id, dto);
   }
 
