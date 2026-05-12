@@ -3,7 +3,6 @@
 import { useTransition } from 'react';
 import { useRouter, usePathname, type Locale } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,27 +26,26 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="lg"
+        <button
+          type="button"
           disabled={isPending}
-          className="text-slate-300 hover:text-white hover:bg-slate-800 text-2xl px-3"
+          className="text-slate-300 hover:text-white hover:bg-slate-800 active:scale-95 rounded-lg px-3 h-9 text-2xl transition-all outline-none"
           aria-label={`${t('changeLanguage')}: ${locale === 'pl' ? t('polish') : t('english')}`}
         >
           {locale === 'pl' ? '🇵🇱' : '🇬🇧'}
-        </Button>
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700">
+      <DropdownMenuContent align="end" className="bg-slate-900 border-2 border-slate-700 shadow-xl">
         <DropdownMenuItem 
           onClick={() => onSelectChange('pl')}
-          className="hover:bg-slate-800 cursor-pointer text-slate-300 text-base"
+          className="cursor-pointer text-slate-300"
           role="menuitem"
         >
           <span className="mr-2" aria-hidden="true">🇵🇱</span> {t('polish')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => onSelectChange('en')}
-          className="hover:bg-slate-800 cursor-pointer text-slate-300 text-base"
+          className="cursor-pointer text-slate-300"
           role="menuitem"
         >
           <span className="mr-2" aria-hidden="true">🇬🇧</span> {t('english')}

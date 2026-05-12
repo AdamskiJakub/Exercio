@@ -4,10 +4,13 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { DumbbellIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
-  const { form, isLoading, error, onSubmit } = useLoginForm();
+  const { form, isLoading, error, onSubmit, clearServerError } = useLoginForm();
   const { register, formState: { errors } } = form;
 
   return (
@@ -28,62 +31,60 @@ export default function LoginPage() {
 
         {/* Form Card */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl">
-          <form onSubmit={onSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-slate-200 mb-2"
-              >
-                {t('email')}
-              </label>
-              <input
-                {...register('email')}
+          <form onSubmit={onSubmit} noValidate className="space-y-6">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('email')}</Label>
+              <Input
+                {...register('email', {
+                  onChange: clearServerError,
+                })}
                 id="email"
                 type="email"
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 placeholder="you@example.com"
+                aria-invalid={errors.email ? 'true' : 'false'}
               />
-              {errors.email && (
-                <p className="text-red-400 text-sm mt-1">
+              {errors.email && errors.email.message && (
+                <p className="text-sm text-red-500">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-slate-200 mb-2"
-              >
-                {t('password')}
-              </label>
-              <input
-                {...register('password')}
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password">{t('password')}</Label>
+              <Input
+                {...register('password', {
+                  onChange: clearServerError,
+                })}
                 id="password"
                 type="password"
-                className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 placeholder="••••••••"
+                aria-invalid={errors.password ? 'true' : 'false'}
               />
-              {errors.password && (
-                <p className="text-red-400 text-sm mt-1">
+              {errors.password && errors.password.message && (
+                <p className="text-sm text-red-500">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
+            {/* Server Error */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3">
                 <p className="text-red-400 text-sm">{error}</p>
               </div>
             )}
 
-            <button
+            {/* Submit Button */}
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-linear-to-r from-orange-500 to-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:from-orange-600 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all shadow-lg hover:shadow-xl"
+              className="w-full bg-linear-to-r from-orange-500 to-red-500 text-white font-semibold hover:from-orange-600 hover:to-red-600"
             >
               {isLoading ? t('loggingIn') : t('login')}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-center">

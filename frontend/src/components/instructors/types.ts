@@ -34,3 +34,31 @@ export interface ResultsSectionProps {
     value: InstructorFilters[K]
   ) => void;
 }
+
+// Base props shared by both variants
+interface BaseMediaUploadProps {
+  isUploading: boolean;
+  label: string;
+  hint?: string;
+  acceptVideo?: boolean;
+}
+
+// Avatar variant - single file upload
+interface AvatarMediaUploadProps extends BaseMediaUploadProps {
+  variant: 'avatar';
+  currentMediaUrl?: string | null;
+  onMediaChange: (url: string) => void;
+  onUpload: (file: File) => Promise<string>;
+}
+
+// Gallery variant - multiple file upload
+interface GalleryMediaUploadProps extends BaseMediaUploadProps {
+  variant: 'gallery';
+  currentMediaUrls?: string[];
+  maxFiles?: number;
+  onMediaChange: (urls: string[]) => void;
+  onUpload: (files: File[]) => Promise<string[]>;
+}
+
+// Discriminated union type
+export type MediaUploadProps = AvatarMediaUploadProps | GalleryMediaUploadProps;

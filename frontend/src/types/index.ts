@@ -16,10 +16,11 @@ export interface User {
 }
 
 // Basic user info returned by backend in instructor listings
-// (without phone, createdAt, updatedAt, and optionally without email for privacy)
+// (without createdAt, updatedAt, and optionally without email/phone for privacy)
 export interface UserBasic {
   id: string;
   email?: string; // Optional for privacy in public listings
+  phone?: string | null; // Optional for privacy in public listings
   username: string;
   firstName: string | null;
   lastName: string | null;
@@ -38,12 +39,24 @@ export interface InstructorProfile {
   location: string | null;
   city: string | null;
   hourlyRate: number | null;
+  hourlyRateHidden: boolean;
+  packageDealsEnabled: boolean;
+  packageDealsDescription: string | null;
   photoUrl: string | null;
   gallery: string[];
   verified: boolean;
+  isDraft: boolean;
   yearsExperience: number | null;
   availability: string | null;
   languages: string[];
+  showPhone?: boolean;
+  showEmail?: boolean;
+  contactMessage?: string | null;
+  // Booking settings
+  sessionDuration?: number;
+  sessionPrice?: number | null;
+  isBookingEnabled?: boolean;
+  minNoticeHours?: number;
   createdAt: string;
   updatedAt: string;
   averageRating?: number;

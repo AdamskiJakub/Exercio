@@ -38,6 +38,7 @@ export class AuthService {
           role: user.role,
           firstName: user.firstName,
           lastName: user.lastName,
+          phone: user.phone,
         },
       };
     } catch (error) {
@@ -100,6 +101,7 @@ export class AuthService {
           role: user.role,
           firstName: user.firstName,
           lastName: user.lastName,
+          phone: user.phone,
         },
       };
     } catch (error) {
@@ -136,6 +138,7 @@ export class AuthService {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
+        phone: user.phone,
       },
     };
   }
@@ -156,9 +159,11 @@ export class AuthService {
       select: {
         id: true,
         email: true,
+        username: true,
         role: true,
         firstName: true,
         lastName: true,
+        phone: true,
       },
     });
 

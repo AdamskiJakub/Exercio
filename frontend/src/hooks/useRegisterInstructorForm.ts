@@ -18,6 +18,7 @@ export function useRegisterInstructorForm() {
 
   const form = useForm<RegisterInstructorFormData>({
     resolver: zodResolver(createRegisterInstructorSchema(t)),
+    mode: 'onSubmit',
   });
 
   const onSubmit = async (data: RegisterInstructorFormData) => {
@@ -34,9 +35,9 @@ export function useRegisterInstructorForm() {
         ...registerData,
         username,
       });
-      const { user, access_token } = response.data;
+      const { user } = response.data;
       
-      setAuth(user, access_token);
+      setAuth(user);
       router.push('/dashboard');
     } catch (err: any) {
       if (err.response?.status === 409) {

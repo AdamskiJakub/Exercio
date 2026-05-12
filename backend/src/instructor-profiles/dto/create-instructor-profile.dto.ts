@@ -16,4 +16,7 @@ export class CreateInstructorProfileDto {
   @IsString()
   @IsOptional()
   city?: string;
+
+  // Note: Contact visibility settings (showPhone, showEmail, contactMessage)
+  // are only available in update DTO, not during profile creation
 }

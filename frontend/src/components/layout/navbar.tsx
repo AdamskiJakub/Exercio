@@ -4,10 +4,13 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { LocaleSwitcher } from '@/components/locale-switcher';
+import { UserMenu } from './user-menu';
+import { useAuthStore } from '@/stores/auth-store';
 import { DumbbellIcon } from 'lucide-react';
 
 export function Navbar() {
   const t = useTranslations('Common');
+  const { isAuthenticated } = useAuthStore();
   
   return (
     <nav className="border-b border-slate-800 bg-slate-900  backdrop-blur-md sticky top-0 z-50" role="navigation" aria-label="Main navigation">
@@ -24,24 +27,30 @@ export function Navbar() {
           <div className="flex items-center gap-4">
             <LocaleSwitcher />
             
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white text-base px-6 py-6"
-              asChild
-              aria-label={t('login')}
-            >
-              <Link href="/login">{t('login')}</Link>
-            </Button>
-            
-            <Button 
-              size="lg"
-              className="bg-linear-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-base px-8 py-6 font-semibold"
-              asChild
-              aria-label={t('register')}
-            >
-              <Link href="/register">{t('register')}</Link>
-            </Button>
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white text-base px-6 py-6"
+                  asChild
+                  aria-label={t('login')}
+                >
+                  <Link href="/login">{t('login')}</Link>
+                </Button>
+                
+                <Button 
+                  size="lg"
+                  className="bg-linear-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-base px-8 py-6 font-semibold"
+                  asChild
+                  aria-label={t('register')}
+                >
+                  <Link href="/register">{t('register')}</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

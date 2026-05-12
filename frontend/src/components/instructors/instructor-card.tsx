@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -8,6 +9,7 @@ import { getCategoryById } from '@/lib/config/specializations';
 import { getCategoryName } from '@/lib/utils/localization';
 import { getTagById, getTagName } from '@/lib/config/tags';
 import { MapPinIcon, VideoIcon, UserIcon, StarIcon } from 'lucide-react';
+import { getMediaUrl } from '@/lib/utils/media';
 import type { InstructorCardProps } from './types';
 
 export function InstructorCard({ instructor }: InstructorCardProps) {
@@ -22,14 +24,14 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
     .toUpperCase();
 
   return (
-    <div className="block group cursor-default">
+    <Link href={`/${locale}/instructors/${instructor.username}`} className="block group">
       <Card className="bg-slate-900/50 border-slate-800 hover:border-orange-500/50 transition-all duration-300 overflow-hidden">
         <div className="flex flex-col sm:flex-row gap-6 p-6">
           {/* Avatar Section */}
           <div className="shrink-0">
             <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-slate-700 group-hover:border-orange-500 transition-colors">
               <AvatarImage
-                src={instructor.photoUrl || undefined}
+                src={getMediaUrl(instructor.photoUrl)}
                 alt={instructor.fullName}
               />
               <AvatarFallback className="bg-slate-800 text-white text-2xl font-bold">
@@ -164,6 +166,6 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
           </div>
         </div>
       </Card>
-    </div>
+    </Link>
   );
 }

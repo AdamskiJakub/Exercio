@@ -17,20 +17,38 @@ export function useLoginForm() {
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(createLoginSchema(t)),
+    mode: 'onSubmit',
   });
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError(null);
+    // Clear any previous manual errors
+    form.clearErrors();
 
     try {
       const response = await apiClient.post('/auth/login', data);
-      const { user, access_token } = response.data;
+      const { user } = response.data;
       
-      setAuth(user, access_token);
+      setAuth(user);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(normalizeApiError(err, t('loginFailed')));
+      const backendMessage = err?.response?.data?.message;
+      // Map backend "Invalid credentials" to localized message
+      const errorMessage = backendMessage === 'Invalid credentials' 
+        ? t('loginFailed')
+        : normalizeApiError(err, t('loginFailed'));
+      setError(errorMessage);
+      
+      // Set errors on both fields since we don't know which one is wrong
+      form.setError('email', { 
+        type: 'manual',
+        message: '' // Don't show duplicate message, server error box will show it
+      });
+      form.setError('password', { 
+        type: 'manual',
+        message: ''
+      });
     } finally {
       setIsLoading(false);
     }
@@ -41,5 +59,9 @@ export function useLoginForm() {
     isLoading,
     error,
     onSubmit: form.handleSubmit(onSubmit),
+    clearServerError: () => {
+      setError(null);
+      form.clearErrors(['email', 'password']);
+    },
   };
 }

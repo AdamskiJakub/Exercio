@@ -18,8 +18,8 @@ enum UserRole {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // bcrypt hashed
-  username  String   @unique 
+  password  String // bcrypt hashed
+  username  String   @unique
   role      UserRole @default(CLIENT)
   firstName String?
   lastName  String?
@@ -27,36 +27,53 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  instructorProfile InstructorProfile?
-  bookings          Booking[]
-  reviews           Review[]
+  instructorProfile    InstructorProfile?
+  bookingsAsClient     Booking[]          @relation("ClientBookings")
+  bookingsAsInstructor Booking[]          @relation("InstructorBookings")
+  reviews              Review[]
 
   @@map("users")
 }
 
 model InstructorProfile {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bio             String?  @db.Text
-  tagline         String?  // Short description shown on card
-  specializations String[] // ["personal-training", "yoga-mobility"]
-  tags            String[] // Global tags: ["hiit", "strength-training", "bachata"]
-  goals           String[] // ["weight_loss", "muscle_gain", "flexibility"]
-  location        String?  // Full address
-  city            String?  // For filtering
-  hourlyRate      Float?
-  photoUrl        String?
-  gallery         String[] // Array of photo URLs
-  verified        Boolean  @default(false)
-  yearsExperience Int?
-  availability    String?  // "online" | "in-person" | "both"
-  languages       String[] // ["pl", "en"]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio                     String?  @db.Text
+  tagline                 String? // Short description shown on card
+  specializations         String[] // ["personal-training", "yoga-mobility"]
+  tags                    String[] // Global tags: ["hiit", "strength-training", "bachata"]
+  goals                   String[] // ["weight_loss", "muscle_gain", "flexibility"]
+  location                String? // Full address
+  city                    String? // For filtering
+  hourlyRate              Float?
+  hourlyRateHidden        Boolean  @default(false) // Hide rate, show "Contact for pricing"
+  packageDealsEnabled     Boolean  @default(false)
+  packageDealsDescription String?  @db.Text
+  photoUrl                String?
+  gallery                 String[] // Array of photo URLs
+  verified                Boolean  @default(false)
+  isDraft                 Boolean  @default(true) // Profile is draft until published
+  yearsExperience         Int?
+  availability            String? // "online" | "in-person" | "both"
+  languages               String[] // ["pl", "en"]
+  showPhone               Boolean  @default(false) // Show phone number on public profile
+  showEmail               Boolean  @default(false) // Show email on public profile
+  contactMessage          String?  @db.Text // Optional custom contact message
 
-  services Service[]
-  bookings Booking[]
+  // BOOKING SETTINGS
+  sessionDuration  Int     @default(60) // Duration in minutes (30, 60, 90, 120)
+  sessionPrice     Float? // Price per session in PLN
+  isBookingEnabled Boolean @default(false) // Whether instructor accepts bookings
+  minNoticeHours   Int     @default(48) // Minimum hours notice before booking (default 48h)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services               Service[]
+  bookings               Booking[]
+  weeklyAvailability     Availability[]          @relation("WeeklyAvailability")
+  availabilityExceptions AvailabilityException[] @relation("AvailabilityExceptions")
 
   @@map("instructor_profiles")
 }
@@ -67,8 +84,8 @@ model Service {
   instructor   InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
   name         String
   description  String?           @db.Text
-  price        Float             // Price per session
-  duration     Int               // Duration in minutes
+  price        Float // Price per session
+  duration     Int // Duration in minutes
   isActive     Boolean           @default(true)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
@@ -83,24 +100,47 @@ enum BookingStatus {
   CONFIRMED
   COMPLETED
   CANCELLED
+  EXPIRED // NEW: Instructor didn't confirm in time
 }
 
 model Booking {
-  id           String            @id @default(uuid())
-  clientId     String
-  client       User              @relation(fields: [clientId], references: [id])
-  instructorId String
-  instructor   InstructorProfile @relation(fields: [instructorId], references: [id])
-  serviceId    String
-  service      Service           @relation(fields: [serviceId], references: [id])
-  date         DateTime          // Booking date and time
-  status       BookingStatus     @default(PENDING)
-  notes        String?           @db.Text
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id             String            @id @default(uuid())
+  clientId       String? // NOW OPTIONAL: Null if manual block by instructor
+  client         User?             @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
+  instructorId   String
+  instructorUser User              @relation("InstructorBookings", fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_user_fkey")
+  instructor     InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_profile_fkey")
+  serviceId      String? // NOW OPTIONAL: deprecated, will use sessionDuration/Price from profile
+  service        Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  // OLD FIELD - kept for backward compatibility
+  date DateTime? // Booking date and time (deprecated, use startTime/endTime)
+
+  // NEW FIELDS - all optional for backward compatibility with existing bookings
+  startTime DateTime? // Booking start time
+  endTime   DateTime? // Booking end time
+  duration  Int? // Duration in minutes (snapshot from profile)
+  price     Float? // Price snapshot from profile at booking time
+
+  status        BookingStatus @default(PENDING)
+  isShortNotice Boolean       @default(false) // True if booked less than minNoticeHours
+  isManualBlock Boolean       @default(false) // True if instructor manually blocked this slot
+  notes         String?       @db.Text
+
+  // Cancellation info
+  cancelledAt        DateTime?
+  cancelledBy        String? // "client" or "instructor"
+  cancellationReason String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   review Review?
 
+  @@index([clientId])
+  @@index([instructorId])
+  @@index([startTime])
+  @@index([status])
   @@map("bookings")
 }
 
@@ -110,10 +150,50 @@ model Review {
   booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  rating    Int      // 1-5 stars
+  rating    Int // 1-5 stars
   comment   String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("reviews")
+}
+
+// Weekly availability template (e.g., "Every Monday 16:00-22:00")
+model Availability {
+  id           String            @id @default(uuid())
+  instructorId String
+  instructor   InstructorProfile @relation("WeeklyAvailability", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime String // Format: "HH:MM" (e.g., "16:00")
+  endTime   String // Format: "HH:MM" (e.g., "22:00")
+  isActive  Boolean @default(true) // Can temporarily disable without deleting
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([instructorId, dayOfWeek])
+  @@index([instructorId])
+  @@map("availability")
+}
+
+// Date-specific availability overrides (e.g., "May 6th only 16:00-20:00" or "May 7th unavailable")
+model AvailabilityException {
+  id           String            @id @default(uuid())
+  instructorId String
+  instructor   InstructorProfile @relation("AvailabilityExceptions", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  date        DateTime @db.Date // Specific date for this exception
+  isAvailable Boolean // False = completely unavailable this day
+  startTime   String? // Format: "HH:MM" - only if isAvailable = true
+  endTime     String? // Format: "HH:MM" - only if isAvailable = true
+  reason      String?  @db.Text // Optional reason (vacation, training, etc.)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([instructorId, date])
+  @@index([instructorId])
+  @@index([date])
+  @@map("availability_exceptions")
 }

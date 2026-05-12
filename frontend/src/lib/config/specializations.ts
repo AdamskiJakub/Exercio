@@ -187,3 +187,23 @@ export function findSubcategoryById(subcategoryId: string): Subcategory | undefi
 export function getAllSubcategories(): Subcategory[] {
   return SPECIALIZATION_CATEGORIES.flatMap((cat) => cat.subcategories);
 }
+
+/**
+ * Get localized name for any specialization (category or subcategory)
+ */
+export function getSpecializationName(id: string, locale: string): string {
+  // Check categories first
+  const category = getCategoryById(id);
+  if (category) {
+    return locale === 'pl' ? category.namePl : category.nameEn;
+  }
+  
+  // Check subcategories
+  const subcategory = findSubcategoryById(id);
+  if (subcategory) {
+    return locale === 'pl' ? subcategory.namePl : subcategory.nameEn;
+  }
+  
+  // Fallback
+  return id;
+}

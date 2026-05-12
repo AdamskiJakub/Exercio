@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations, useLocale } from 'next-intl';
-import { InstructorProfile, InstructorListing } from '@/types';
+import { useRouter } from '@/i18n/routing';
+import { InstructorProfile, InstructorListing, User } from '@/types';
 import { useUpdateInstructorProfile } from '@/hooks/useUpdateInstructorProfile';
+import { useUploadProfilePhoto, useUploadGalleryPhotos } from '@/hooks/useFileUpload';
 import { toast } from 'sonner';
 import { instructorProfileSchema, type InstructorProfileFormData } from '@/lib/validations/schemas/instructor-profile';
 import { SPECIALIZATION_CATEGORIES } from '@/lib/config/specializations';
@@ -17,6 +19,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { MediaUpload } from '@/components/instructors/MediaUpload';
+import { ContactSettingsSection } from '@/components/instructors/ContactSettingsSection';
 import {
   Select,
   SelectContent,
@@ -30,12 +34,16 @@ const MAX_GOALS = 4;
 
 interface InstructorProfileFormProps {
   profile?: InstructorProfile | InstructorListing; // Accept both types for flexibility
+  user: Pick<User, 'email' | 'phone'>; // Only require fields this form reads
 }
 
-export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
+export function InstructorProfileForm({ profile, user }: InstructorProfileFormProps) {
   const t = useTranslations('Dashboard.profileForm');
   const locale = useLocale();
+  const router = useRouter();
   const { mutate: updateProfile, isPending } = useUpdateInstructorProfile();
+  const { mutate: uploadPhoto, isPending: isUploadingPhoto } = useUploadProfilePhoto();
+  const { mutate: uploadGallery, isPending: isUploadingGallery } = useUploadGalleryPhotos();
   
   // State for multi-selects
   const [selectedPrimaryCategory, setSelectedPrimaryCategory] = useState<string | undefined>(
@@ -54,24 +62,35 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
     profile?.availability || 'both'
   );
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<InstructorProfileFormData>({
+  const form = useForm<InstructorProfileFormData>({
     resolver: zodResolver(instructorProfileSchema),
     defaultValues: {
       bio: profile?.bio || '',
       tagline: profile?.tagline || '',
       city: profile?.city || '',
       hourlyRate: profile?.hourlyRate ?? undefined,
+      hourlyRateHidden: profile?.hourlyRateHidden || false,
+      packageDealsEnabled: profile?.packageDealsEnabled || false,
+      packageDealsDescription: profile?.packageDealsDescription || '',
       photoUrl: profile?.photoUrl || '',
       languages: profile?.languages?.join(', ') || '',
-      gallery: profile?.gallery?.join(', ') || '',
+      gallery: profile?.gallery || [],
       yearsExperience: profile?.yearsExperience ?? undefined,
+      showPhone: profile?.showPhone || false,
+      showEmail: profile?.showEmail || false,
+      contactMessage: profile?.contactMessage || '',
     },
   });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    control,
+    formState: { errors },
+  } = form;
 
   // Reset form when profile changes
   useEffect(() => {
@@ -81,10 +100,16 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
         tagline: profile.tagline || '',
         city: profile.city || '',
         hourlyRate: profile.hourlyRate ?? undefined,
+        hourlyRateHidden: profile.hourlyRateHidden || false,
+        packageDealsEnabled: profile.packageDealsEnabled || false,
+        packageDealsDescription: profile.packageDealsDescription || '',
         photoUrl: profile.photoUrl || '',
         languages: profile.languages?.join(', ') || '',
-        gallery: profile.gallery?.join(', ') || '',
+        gallery: profile.gallery || [],
         yearsExperience: profile.yearsExperience ?? undefined,
+        showPhone: profile.showPhone || false,
+        showEmail: profile.showEmail || false,
+        contactMessage: profile.contactMessage || '',
       });
     }
   }, [profile, reset]);
@@ -132,21 +157,23 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
       goals: selectedGoals,
       availability: selectedAvailability,
       hourlyRate: data.hourlyRate ?? null,
+      hourlyRateHidden: data.hourlyRateHidden || false,
+      packageDealsEnabled: data.packageDealsEnabled || false,
+      packageDealsDescription: data.packageDealsEnabled ? data.packageDealsDescription : null,
       yearsExperience: data.yearsExperience ?? null,
       languages: typeof data.languages === 'string'
         ? (data.languages as string).split(',').map(s => s.trim()).filter(Boolean)
         : data.languages,
-      gallery: typeof data.gallery === 'string'
-        ? (data.gallery as string).split(',').map(s => s.trim()).filter(Boolean)
-        : data.gallery,
+      gallery: Array.isArray(data.gallery) ? data.gallery : [],
       photoUrl: data.photoUrl && data.photoUrl.trim() !== '' ? data.photoUrl.trim() : null,
     };
 
     updateProfile(
-      { profileId: profile.id, data: formattedData },
+      { profileId: profile.id, data: { ...formattedData, isDraft: true } },
       {
         onSuccess: () => {
-          toast.success(t('updateSuccess'));
+          toast.success(t('draftSaved'));
+          router.push('/dashboard/profile/preview');
         },
         onError: (error) => {
           toast.error(`${t('updateError')}: ${error.message}`);
@@ -156,12 +183,24 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
   };
 
   return ( 
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form id="instructor-profile-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      
+      {/* === BASIC INFO SECTION === */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">👤</span>
+            {t('basicInfoTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('basicInfoSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
       <div className="space-y-2">
-        <label htmlFor="tagline" className="block text-sm font-medium text-slate-200">
+        <label htmlFor="tagline" className="block text-base font-semibold text-slate-200">
           {t('tagline')}
         </label>
-        <p className="text-xs text-slate-400">{t('taglineHint')}</p>
+        <p className="text-sm text-slate-400 mb-2">{t('taglineHint')}</p>
         <input
           {...register('tagline')}
           id="tagline"
@@ -176,7 +215,7 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
 
       {/* Bio */}
       <div className="space-y-2">
-        <label htmlFor="bio" className="block text-sm font-medium text-slate-200">
+        <label htmlFor="bio" className="block text-base font-semibold text-slate-200">
           {t('bio')}
         </label>
         <textarea
@@ -190,10 +229,24 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
           <p className="text-red-400 text-sm">{errors.bio.message}</p>
         )}
       </div>
+        </div>
+      </div>
+
+      {/* === SPECIALIZATION SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">💪</span>
+            {t('specializationTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('specializationSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
 
       {/* Primary Specialization */}
       <div>
-        <label htmlFor="primarySpec" className="block text-sm font-medium text-slate-200 mb-2">
+        <label htmlFor="primarySpec" className="block text-base font-semibold text-slate-200 mb-2">
           {t('primarySpecialization')}
         </label>
         <Select
@@ -344,10 +397,24 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
           })}
         </div>
       </div>
+        </div>
+      </div>
+
+      {/* === LOCATION & PRICING SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">📍</span>
+            {t('locationPricingTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('locationPricingSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
 
       {/* Availability */}
       <div className="space-y-3">
-        <Label className="text-slate-200">
+        <Label className="text-base font-semibold text-slate-200">
           {t('availability')}
         </Label>
         <RadioGroup
@@ -373,7 +440,7 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
       {/* Location & City */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="city" className="text-slate-200">
+          <Label htmlFor="city" className="text-base font-semibold text-slate-200">
             {t('city')}
           </Label>
           <Input
@@ -389,8 +456,8 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="yearsExperience" className="text-slate-200">
-            {t('yearsExperience')} <span className="text-slate-400 text-xs font-normal">{t('hourlyRateOptional')}</span>
+          <Label htmlFor="yearsExperience" className="text-base font-semibold text-slate-200">
+            {t('yearsExperience')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
           </Label>
           <Input
             {...register('yearsExperience', { 
@@ -409,8 +476,11 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
 
       {/* Hourly Rate */}
       <div className="space-y-2">
-        <Label htmlFor="hourlyRate" className="text-slate-200">
-          {t('hourlyRate')} <span className="text-slate-400 text-xs font-normal">{t('hourlyRateOptional')}</span>
+        <Label 
+          htmlFor="hourlyRate" 
+          className={`text-base font-semibold ${watch('hourlyRateHidden') ? 'text-slate-500' : 'text-slate-200'}`}
+        >
+          {t('hourlyRate')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
         </Label>
         <Input
           {...register('hourlyRate', { 
@@ -420,16 +490,96 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
           type="number"
           step="0.01"
           placeholder={t('hourlyRatePlaceholder')}
-          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+          disabled={watch('hourlyRateHidden')}
+          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         {errors.hourlyRate && (
           <p className="text-red-400 text-sm">{errors.hourlyRate.message}</p>
+        )}
+        
+        {/* Hide Hourly Rate Checkbox */}
+        <label className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors border border-slate-700 mt-2">
+          <Controller
+            name="hourlyRateHidden"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => field.onChange(checked === true)}
+                className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+              />
+            )}
+          />
+          <div className="flex flex-col">
+            <span className={`text-sm font-medium select-none ${
+              watch('hourlyRateHidden') 
+                ? 'bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent' 
+                : 'text-slate-200'
+            }`}>
+              {t('hourlyRateHidden')}
+            </span>
+            <span className="text-sm text-slate-400">
+              {t('hourlyRateHiddenHint')}
+            </span>
+          </div>
+        </label>
+      </div>
+
+      {/* Package Deals Checkbox */}
+      <div className="space-y-3">
+        <label className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors border border-slate-700">
+          <Controller
+            name="packageDealsEnabled"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => {
+                  const isChecked = checked === true;
+                  field.onChange(isChecked);
+                  if (!isChecked) {
+                    setValue('packageDealsDescription', '');
+                  }
+                }}
+                className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+              />
+            )}
+          />
+          <span className={`text-base font-medium select-none ${
+            watch('packageDealsEnabled') 
+              ? 'bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent' 
+              : 'text-slate-200'
+          }`}>
+            {t('packageDealsEnabled')}
+          </span>
+        </label>
+        
+        {/* Package Deals Description - pokazuje się tylko gdy checkbox zaznaczony */}
+        {watch('packageDealsEnabled') && (
+          <div className="ml-6 space-y-2">
+            <Label htmlFor="packageDealsDescription" className="text-base font-semibold text-slate-200">
+              {t('packageDealsDescription')}
+            </Label>
+            <Textarea
+              {...register('packageDealsDescription')}
+              id="packageDealsDescription"
+              placeholder={t('packageDealsPlaceholder')}
+              rows={3}
+              className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+            />
+            <p className="text-slate-400 text-sm">
+              {t('packageDealsHint')}
+            </p>
+            {errors.packageDealsDescription && (
+              <p className="text-red-400 text-sm">{errors.packageDealsDescription.message}</p>
+            )}
+          </div>
         )}
       </div>
 
       {/* Languages */}
       <div className="space-y-2">
-        <Label htmlFor="languages" className="text-slate-200">
+        <Label htmlFor="languages" className="text-base font-semibold text-slate-200">
           {t('languages')}
         </Label>
         <Input
@@ -443,51 +593,82 @@ export function InstructorProfileForm({ profile }: InstructorProfileFormProps) {
           <p className="text-red-400 text-sm">{errors.languages.message}</p>
         )}
       </div>
+        </div>
+      </div>
+
+      {/* === CONTACT & MEDIA SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">📸</span>
+            {t('contactMediaTitle')}
+          </h2>
+          <p className="text-sm text-slate-400">{t('contactMediaSubtitle')}</p>
+        </div>
+        
+        <div className="space-y-5">
+
+      {/* Contact Settings Section */}
+      <ContactSettingsSection 
+        form={form}
+        userPhone={user.phone}
+        userEmail={user.email}
+      />
 
       {/* Photo URL */}
-      <div className="space-y-2">
-        <Label htmlFor="photoUrl" className="text-slate-200">
-          {t('photoUrl')}
-        </Label>
-        <Input
-          {...register('photoUrl')}
-          id="photoUrl"
-          type="url"
-          placeholder={t('photoUrlPlaceholder')}
-          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
-        />
-        {errors.photoUrl && (
-          <p className="text-red-400 text-sm">{errors.photoUrl.message}</p>
-        )}
-      </div>
+      <MediaUpload
+        variant="avatar"
+        currentMediaUrl={watch('photoUrl')}
+        onMediaChange={(url) => setValue('photoUrl', url as string)}
+        onUpload={async (file) => {
+          return new Promise<string>((resolve, reject) => {
+            uploadPhoto(file as File, {
+              onSuccess: (url) => {
+                toast.success(t('photoUploadSuccess'));
+                resolve(url);
+              },
+              onError: (error) => {
+                toast.error(t('photoUploadError'));
+                reject(error);
+              }
+            });
+          });
+        }}
+        isUploading={isUploadingPhoto}
+        label={t('photoUrl')}
+      />
+      {errors.photoUrl && (
+        <p className="text-red-400 text-sm">{errors.photoUrl.message}</p>
+      )}
 
       {/* Gallery */}
-      <div className="space-y-2">
-        <Label htmlFor="gallery" className="text-slate-200">
-          {t('gallery')}
-        </Label>
-        <Textarea
-          {...register('gallery')}
-          id="gallery"
-          rows={3}
-          placeholder={t('galleryPlaceholder')}
-          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 resize-none"
-        />
-        {errors.gallery && (
-          <p className="text-red-400 text-sm">{errors.gallery.message}</p>
-        )}
-      </div>
-
-      {/* Submit Button */}
-      <div className="pt-4">
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold"
-          size="lg"
-        >
-          {isPending ? t('saving') : t('saveProfile')}
-        </Button>
+      <MediaUpload
+        variant="gallery"
+        currentMediaUrls={Array.isArray(watch('gallery')) ? watch('gallery') as string[] : []}
+        onMediaChange={(urls) => setValue('gallery', urls as string[])}
+        onUpload={async (files) => {
+          return new Promise<string[]>((resolve, reject) => {
+            uploadGallery(files as File[], {
+              onSuccess: (urls) => {
+                toast.success(t('galleryUploadSuccess'));
+                resolve(urls);
+              },
+              onError: (error) => {
+                toast.error(t('galleryUploadError'));
+                reject(error);
+              }
+            });
+          });
+        }}
+        isUploading={isUploadingGallery}
+        label={t('gallery')}
+        maxFiles={10}
+        acceptVideo={true}
+      />
+      {errors.gallery && (
+        <p className="text-red-400 text-sm">{errors.gallery.message}</p>
+      )}
+        </div>
       </div>
     </form>
   );

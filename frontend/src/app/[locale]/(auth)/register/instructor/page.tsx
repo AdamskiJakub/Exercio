@@ -3,6 +3,9 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useRegisterInstructorForm } from '@/hooks/useRegisterInstructorForm';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 export default function RegisterInstructorPage() {
   const t = useTranslations('auth');
@@ -40,119 +43,125 @@ export default function RegisterInstructorPage() {
           </div>
 
           {/* Form */}
-          <form className="space-y-6" onSubmit={onSubmit}>
+          <form className="space-y-6" onSubmit={onSubmit} noValidate>
             {error && (
               <div className="rounded-lg bg-red-500/10 border border-red-500/50 p-4">
                 <p className="text-sm text-red-400">{error}</p>
               </div>
-          )}
+            )}
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-slate-200">
-                {t('firstName')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                {...register('firstName')}
-                placeholder={t('firstNamePlaceholder')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-slate-100 bg-slate-900/50 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              />
-              {errors.firstName && (
-                <p className="mt-1 text-sm text-red-400">{errors.firstName.message as string}</p>
-              )}
-            </div>
+            <div className="space-y-4">
+              {/* First Name */}
+              <div className="space-y-2">
+                <Label htmlFor="firstName">
+                  {t('firstName')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  {...register('firstName')}
+                  placeholder={t('firstNamePlaceholder')}
+                  aria-invalid={errors.firstName ? 'true' : 'false'}
+                />
+                {errors.firstName && (
+                  <p className="text-sm text-red-500">{errors.firstName.message as string}</p>
+                )}
+              </div>
 
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-slate-200">
-                {t('lastName')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="lastName"
-                type="text"
-                {...register('lastName')}
-                placeholder={t('lastNamePlaceholder')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-slate-100 bg-slate-900/50 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              />
-              {errors.lastName && (
-                <p className="mt-1 text-sm text-red-400">{errors.lastName.message as string}</p>
-              )}
-            </div>
+              {/* Last Name */}
+              <div className="space-y-2">
+                <Label htmlFor="lastName">
+                  {t('lastName')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="lastName"
+                  type="text"
+                  {...register('lastName')}
+                  placeholder={t('lastNamePlaceholder')}
+                  aria-invalid={errors.lastName ? 'true' : 'false'}
+                />
+                {errors.lastName && (
+                  <p className="text-sm text-red-500">{errors.lastName.message as string}</p>
+                )}
+              </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-200">
-                {t('email')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="email"
-                type="email"
-                {...register('email')}
-                placeholder={t('emailPlaceholder')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-slate-100 bg-slate-900/50 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-400">{errors.email.message as string}</p>
-              )}
-            </div>
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">
+                  {t('email')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register('email')}
+                  placeholder={t('emailPlaceholder')}
+                  aria-invalid={errors.email ? 'true' : 'false'}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email.message as string}</p>
+                )}
+              </div>
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-slate-200">
-                {t('phone')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="phone"
-                type="tel"
-                {...register('phone')}
-                placeholder="123456789"
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-slate-100 bg-slate-900/50 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              />
-              <p className="mt-1 text-xs text-gray-500">{t('phoneRequiredForInstructor')}</p>
-              {errors.phone && (
-                <p className="mt-1 text-sm text-red-400">{errors.phone.message as string}</p>
-              )}
-            </div>
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">
+                  {t('phone')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  {...register('phone')}
+                  placeholder="123456789"
+                  aria-invalid={errors.phone ? 'true' : 'false'}
+                />
+                <p className="text-xs text-gray-500">{t('phoneRequiredForInstructor')}</p>
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone.message as string}</p>
+                )}
+              </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-200">
-                {t('password')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="password"
-                type="password"
-                {...register('password')}
-                placeholder={t('passwordHint')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-slate-100 bg-slate-900/50 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              />
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-400">{errors.password.message as string}</p>
-              )}
-            </div>
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  {t('password')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register('password')}
+                  placeholder={t('passwordHint')}
+                  aria-invalid={errors.password ? 'true' : 'false'}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">{errors.password.message as string}</p>
+                )}
+              </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-200">
-                {t('confirmPassword')} <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                {...register('confirmPassword')}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-slate-600 placeholder-slate-500 text-slate-100 bg-slate-900/50 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-400">{errors.confirmPassword.message as string}</p>
-              )}
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">
+                  {t('confirmPassword')} <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  {...register('confirmPassword')}
+                  aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">{errors.confirmPassword.message as string}</p>
+                )}
+              </div>
             </div>
-          </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full gradient-trainly-primary text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl cursor-pointer disabled:cursor-not-allowed"
+              className="w-full bg-linear-to-r from-purple-500 to-purple-600 text-white font-semibold hover:from-purple-600 hover:to-purple-700"
             >
               {isLoading ? t('creatingAccount') : t('createAccount')}
-            </button>
+            </Button>
 
             {/* Footer links */}
             <div className="space-y-2">

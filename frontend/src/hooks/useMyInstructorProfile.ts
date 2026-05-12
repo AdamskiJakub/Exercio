@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import type { InstructorListing } from '@/types';
+import { useAuthStore } from '@/stores/auth-store';
 
 interface InstructorProfileResponse {
   id: string;
@@ -15,12 +16,24 @@ interface InstructorProfileResponse {
   location: string | null;
   city: string | null;
   hourlyRate: number | null;
+  hourlyRateHidden: boolean;
+  packageDealsEnabled: boolean;
+  packageDealsDescription: string | null;
   photoUrl: string | null;
   gallery: string[];
   verified: boolean;
+  isDraft: boolean;
   yearsExperience: number | null;
   availability: string | null;
   languages: string[];
+  showPhone: boolean;
+  showEmail: boolean;
+  contactMessage: string | null;
+  // Booking settings
+  isBookingEnabled: boolean;
+  sessionDuration: number;
+  sessionPrice: number | null;
+  minNoticeHours: number;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -29,6 +42,7 @@ interface InstructorProfileResponse {
     username: string;
     firstName: string | null;
     lastName: string | null;
+    phone: string | null;
     role: string;
   };
 }
@@ -53,14 +67,17 @@ function transformToInstructorListing(profile: InstructorProfileResponse): Instr
       username: profile.user.username,
       firstName: profile.user.firstName,
       lastName: profile.user.lastName,
+      phone: profile.user.phone,
       role: profile.user.role,
     },
   };
 }
 
 export function useMyInstructorProfile(options?: { enabled?: boolean }) {
+  const { user } = useAuthStore();
+  
   return useQuery({
-    queryKey: ['instructor-profile', 'me'],
+    queryKey: ['instructor-profile', 'me', user?.id],
     queryFn: async () => {
       const response = await apiClient.get<InstructorProfileResponse>('/instructor-profiles/me');
       return transformToInstructorListing(response.data);

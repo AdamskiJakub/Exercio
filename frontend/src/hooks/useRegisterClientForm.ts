@@ -18,6 +18,7 @@ export function useRegisterClientForm() {
 
   const form = useForm<RegisterClientFormData>({
     resolver: zodResolver(createRegisterClientSchema(t)),
+    mode: 'onSubmit',
   });
 
   const onSubmit = async (data: RegisterClientFormData) => {
@@ -34,9 +35,9 @@ export function useRegisterClientForm() {
         ...registerData,
         username,
       });
-      const { user, access_token } = response.data;
+      const { user } = response.data;
       
-      setAuth(user, access_token);
+      setAuth(user);
       router.push('/dashboard');
     } catch (err: any) {
       if (err.response?.status === 409) {

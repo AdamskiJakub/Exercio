@@ -15,9 +15,13 @@ interface InstructorProfileResponse {
   location: string | null;
   city: string | null;
   hourlyRate: number | null;
+  hourlyRateHidden: boolean;
+  packageDealsEnabled: boolean;
+  packageDealsDescription: string | null;
   photoUrl: string | null;
   gallery: string[];
   verified: boolean;
+  isDraft: boolean;
   yearsExperience: number | null;
   availability: string | null;
   languages: string[];

@@ -38,3 +38,9 @@ postgres_data/
 
 # Prisma
 prisma/migrations/migration_lock.toml
+
+# Documentation (private - not for GitHub)
+*_DOCUMENTATION.md
+DOCS.md
+NOTES.md
+TODO.md

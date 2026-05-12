@@ -1,48 +1,42 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth-store';
-
-const baseURL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === 'development' ? 'http://localhost:3001' : undefined);
-
-if (!baseURL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not defined');
-}
+import { API_BASE_URL } from './utils/api-url';
 
 export const apiClient = axios.create({
-  baseURL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_BASE_URL,
+  withCredentials: true, 
 });
 
-// Add JWT token to requests
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+apiClient.interceptors.request.use((config) => {
+  config.headers = config.headers || {};
+  
+  const isFormData = typeof FormData !== 'undefined' && config.data instanceof FormData;
 
-// Handle 401 errors (logout on invalid token)
+  if (!config.headers['Content-Type'] && !isFormData) {
+    config.headers['Content-Type'] = 'application/json';
+  }
+  return config;
+});
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+      const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
+                             error.config?.url?.includes('/auth/register');
+      
+      if (!isAuthEndpoint) {
+        useAuthStore.getState().logout();
 
-      if (typeof window !== 'undefined') {
-        setTimeout(() => {
-          if (!useAuthStore.getState().isAuthenticated) {
-            const segments = window.location.pathname.split('/').filter(Boolean);
-            const locale = segments[0] || 'pl';
-            window.location.href = `/${locale}/login`;
-          }
-        }, 100);
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            if (!useAuthStore.getState().isAuthenticated) {
+              const segments = window.location.pathname.split('/').filter(Boolean);
+              const locale = segments[0] || 'pl';
+              window.location.href = `/${locale}/login`;
+            }
+          }, 100);
+        }
       }
     }
     return Promise.reject(error);

@@ -3,8 +3,12 @@ import {
   IsOptional,
   IsArray,
   IsNumber,
+  IsInt,
+  IsBoolean,
   Min,
   ArrayMaxSize,
+  MaxLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateInstructorProfileDto {
@@ -47,6 +51,18 @@ export class UpdateInstructorProfileDto {
   @IsOptional()
   hourlyRate?: number | null;
 
+  @IsBoolean()
+  @IsOptional()
+  hourlyRateHidden?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  packageDealsEnabled?: boolean;
+
+  @IsString()
+  @IsOptional()
+  packageDealsDescription?: string | null;
+
   @IsString()
   @IsOptional()
   photoUrl?: string | null;
@@ -69,4 +85,45 @@ export class UpdateInstructorProfileDto {
   @Min(0)
   @IsOptional()
   yearsExperience?: number | null;
+
+  @IsBoolean()
+  @IsOptional()
+  showPhone?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  showEmail?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  contactMessage?: string | null;
+
+  // Note: isDraft is allowed here for flexibility (e.g., save as draft flow).
+  // The dedicated PATCH /:id/publish endpoint is the primary way to publish,
+  // but this field enables direct draft/publish control if needed.
+  @IsBoolean()
+  @IsOptional()
+  isDraft?: boolean;
+
+  // BOOKING SETTINGS
+  @IsInt()
+  @Min(15)
+  @IsOptional()
+  sessionDuration?: number; // Duration in minutes (30, 60, 90, 120)
+
+  @ValidateIf((o) => o.sessionPrice !== null)
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  sessionPrice?: number | null; // Price per session in PLN
+
+  @IsBoolean()
+  @IsOptional()
+  isBookingEnabled?: boolean; // Whether instructor accepts bookings
+
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  minNoticeHours?: number; // Minimum hours notice before booking
 }

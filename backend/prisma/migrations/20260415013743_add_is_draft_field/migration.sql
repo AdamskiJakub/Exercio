@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "instructor_profiles" ADD COLUMN     "isDraft" BOOLEAN NOT NULL DEFAULT true,
+ALTER COLUMN "gallery" DROP DEFAULT,
+ALTER COLUMN "goals" DROP DEFAULT,
+ALTER COLUMN "languages" DROP DEFAULT,
+ALTER COLUMN "tags" DROP DEFAULT;
