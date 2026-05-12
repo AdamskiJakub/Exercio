@@ -3,6 +3,7 @@ import {
   IsOptional,
   IsArray,
   IsNumber,
+  IsInt,
   IsBoolean,
   Min,
   ArrayMaxSize,
@@ -106,7 +107,7 @@ export class UpdateInstructorProfileDto {
   isDraft?: boolean;
 
   // BOOKING SETTINGS
-  @IsNumber()
+  @IsInt()
   @Min(15)
   @IsOptional()
   sessionDuration?: number; // Duration in minutes (30, 60, 90, 120)
@@ -121,7 +122,7 @@ export class UpdateInstructorProfileDto {
   @IsOptional()
   isBookingEnabled?: boolean; // Whether instructor accepts bookings
 
-  @IsNumber()
+  @IsInt()
   @Min(0)
   @IsOptional()
   minNoticeHours?: number; // Minimum hours notice before booking

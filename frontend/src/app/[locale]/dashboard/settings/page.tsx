@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuthGuard } from '@/hooks/useAuthGuard';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -25,7 +25,9 @@ export default function SettingsPage() {
   const { isChecking, user } = useAuthGuard({
     requireAuth: true,
   });
-  const { data: instructorProfile } = useMyInstructorProfile();
+  const { data: instructorProfile } = useMyInstructorProfile({
+    enabled: user?.role === 'INSTRUCTOR',
+  });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [passwordForm, setPasswordForm] = useState({

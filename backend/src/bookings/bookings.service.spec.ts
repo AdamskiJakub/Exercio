@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('BookingsService', () => {
   let service: BookingsService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     booking: {
@@ -36,7 +35,6 @@ describe('BookingsService', () => {
     }).compile();
 
     service = module.get<BookingsService>(BookingsService);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {
