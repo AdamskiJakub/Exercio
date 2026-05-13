@@ -546,7 +546,17 @@
       "phone": "Phone",
       "email": "Email",
       "sendEmail": "Send Email",
+      "callNow": "Call Now",
       "bookSession": "Book a Session"
+    },
+    "booking": {
+      "ctaTitle": "Ready for Change?",
+      "ctaSubtitle": "Book your first session today!",
+      "bookSessionButton": "Book a Session",
+      "sessionDuration": "Duration",
+      "sessionPrice": "Session Price",
+      "bookingNotEnabled": "Booking Unavailable",
+      "bookingNotEnabledDescription": "This instructor is not currently accepting online bookings. Please contact them directly."
     },
     "profileNotFound": "Profile not found",
     "instructorNotFound": "Instructor Not Found",

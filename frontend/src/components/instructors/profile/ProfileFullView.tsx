@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { InstructorProfile } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play } from 'lucide-react';
@@ -11,10 +10,7 @@ import { getGoalName, getGoalById } from '@/lib/config/goals';
 import { getMediaUrl, isVideoUrl } from '@/lib/utils/media';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ContactSection } from '@/components/instructors/profile/ContactSection';
-
-interface ProfileFullViewProps {
-  profile: InstructorProfile;
-}
+import { ProfileFullViewProps } from './types';
 
 export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const locale = useLocale();

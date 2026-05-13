@@ -2,7 +2,7 @@
 
 import { InstructorProfile } from '@/types';
 import { useTranslations } from 'next-intl';
-import { Phone, Mail, MessageCircle, Send } from 'lucide-react';
+import { Phone, Mail, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface ContactSectionProps {
@@ -12,7 +12,6 @@ interface ContactSectionProps {
 export function ContactSection({ profile }: ContactSectionProps) {
   const t = useTranslations('InstructorProfile');
 
-  // Don't show if no contact info is enabled
   if (!profile.showPhone && !profile.showEmail && !profile.contactMessage) {
     return null;
   }
@@ -86,15 +85,15 @@ export function ContactSection({ profile }: ContactSectionProps) {
             </a>
           )}
           
-          <button
-            className="px-6 py-3 bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg transition-all hover:scale-105 flex items-center justify-center gap-2 font-medium shadow-lg"
-            onClick={() => {
-              // TODO: Open booking modal
-            }}
-          >
-            <Send className="size-5" />
-            {t('contact.bookSession')}
-          </button>
+          {profile.showPhone && userPhone && (
+            <a
+              href={`tel:${userPhone}`}
+              className="px-6 py-3 bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg transition-all hover:scale-105 flex items-center justify-center gap-2 font-medium shadow-lg"
+            >
+              <Phone className="size-5" />
+              {t('contact.callNow')}
+            </a>
+          )}
         </div>
       </CardContent>
     </Card>

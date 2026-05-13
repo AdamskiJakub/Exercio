@@ -546,7 +546,17 @@
       "phone": "Telefon",
       "email": "Email",
       "sendEmail": "Wyślij e-mail",
+      "callNow": "Zadzwoń",
       "bookSession": "Zarezerwuj sesję"
+    },
+    "booking": {
+      "ctaTitle": "Gotowy na zmianę?",
+      "ctaSubtitle": "Zarezerwuj swoją pierwszą sesję już dziś!",
+      "bookSessionButton": "Zarezerwuj sesję",
+      "sessionDuration": "Czas trwania",
+      "sessionPrice": "Cena sesji",
+      "bookingNotEnabled": "Rezerwacje niedostępne",
+      "bookingNotEnabledDescription": "Ten instruktor aktualnie nie przyjmuje rezerwacji online. Skontaktuj się bezpośrednio."
     },
     "profileNotFound": "Nie znaleziono profilu",
     "instructorNotFound": "Instruktor nie został znaleziony",

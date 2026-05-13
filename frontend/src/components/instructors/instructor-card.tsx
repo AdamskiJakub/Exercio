@@ -12,7 +12,7 @@ import { MapPinIcon, VideoIcon, UserIcon, StarIcon } from 'lucide-react';
 import { getMediaUrl } from '@/lib/utils/media';
 import type { InstructorCardProps } from './types';
 
-export function InstructorCard({ instructor }: InstructorCardProps) {
+export function InstructorCard({ instructor, disableLink = false }: InstructorCardProps) {
   const locale = useLocale();
   const t = useTranslations('InstructorsPage.card');
 
@@ -23,9 +23,8 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
     .join('')
     .toUpperCase();
 
-  return (
-    <Link href={`/${locale}/instructors/${instructor.username}`} className="block group">
-      <Card className="bg-slate-900/50 border-slate-800 hover:border-orange-500/50 transition-all duration-300 overflow-hidden">
+  const cardContent = (
+    <Card className="bg-slate-900/50 border-slate-800 hover:border-orange-500/50 transition-all duration-300 overflow-hidden">
         <div className="flex flex-col sm:flex-row gap-6 p-6">
           {/* Avatar Section */}
           <div className="shrink-0">
@@ -159,13 +158,24 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
                 })}
               </div>
 
-              <span className="text-orange-500 hover:text-orange-400 text-sm font-medium transition-colors">
-                {t('viewProfile')} →
-              </span>
+              {!disableLink && (
+                <span className="text-orange-500 hover:text-orange-400 text-sm font-medium transition-colors">
+                  {t('viewProfile')} →
+                </span>
+              )}
             </div>
           </div>
         </div>
       </Card>
+  );
+
+  if (disableLink) {
+    return <div className="block">{cardContent}</div>;
+  }
+
+  return (
+    <Link href={`/${locale}/instructors/${instructor.username}`} className="block group">
+      {cardContent}
     </Link>
   );
 }

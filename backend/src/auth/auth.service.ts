@@ -23,7 +23,7 @@ export class AuthService {
           firstName: dto.firstName,
           lastName: dto.lastName,
           phone: dto.phone,
-          role: 'CLIENT', // Force CLIENT role for public registration
+          role: 'CLIENT',
         },
       });
 
@@ -52,13 +52,11 @@ export class AuthService {
   async registerInstructor(dto: RegisterDto) {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    // Validate phone is provided for instructors
     if (!dto.phone) {
       throw new BadRequestException('Phone number is required for instructors');
     }
 
     try {
-      // Create user and instructor profile in a transaction
       const user = await this.prisma.user.create({
         data: {
           email: dto.email,
@@ -67,7 +65,7 @@ export class AuthService {
           firstName: dto.firstName,
           lastName: dto.lastName,
           phone: dto.phone,
-          role: 'INSTRUCTOR', // Force INSTRUCTOR role
+          role: 'INSTRUCTOR',
           instructorProfile: {
             create: {
               bio: null,
