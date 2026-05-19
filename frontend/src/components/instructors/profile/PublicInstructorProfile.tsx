@@ -32,9 +32,10 @@ export function PublicInstructorProfile({
   };
 
   const shouldShowBookingButton = 
-    profile.isBookingEnabled && 
-    profile.user?.username &&
-    (!isOwnProfile || source === NAV_SOURCE.DASHBOARD);
+    false; // TODO: Enable when /instructors/[username]/book route is implemented
+    // profile.isBookingEnabled && 
+    // profile.user?.username &&
+    // (!isOwnProfile || source === NAV_SOURCE.DASHBOARD);
 
   const handleBookingClick = () => {
     if (!profile.user?.username) {

@@ -66,7 +66,9 @@ export default function InstructorsPage() {
           />
 
           {isLoading && (
-            <LoadingSpinner />
+            <div className="lg:col-span-3">
+              <LoadingSpinner />
+            </div>
           )}
 
           {error && (

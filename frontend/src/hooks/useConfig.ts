@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '@/lib/utils/api-url';
+import { apiClient } from '@/lib/api';
 
 // ============= TYPES =============
 export interface Tag {
@@ -45,13 +45,8 @@ function fetchTags(): Promise<Tag[]> {
         return tagsPromise;
     }
 
-    tagsPromise = fetch(`${API_BASE_URL}/config/tags`)
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error('Failed to fetch tags');
-            }
-            return res.json();
-        })
+    tagsPromise = apiClient.get<Tag[]>('/config/tags')
+        .then((res) => res.data)
         .then((data: Tag[]) => {
             tagsCache = data;
             tagsPromise = null;
@@ -98,13 +93,8 @@ function fetchSpecializations(): Promise<Specialization[]> {
         return specializationsPromise;
     }
 
-    specializationsPromise = fetch(`${API_BASE_URL}/config/specializations`)
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error('Failed to fetch specializations');
-            }
-            return res.json();
-        })
+    specializationsPromise = apiClient.get<Specialization[]>('/config/specializations')
+        .then((res) => res.data)
         .then((data: Specialization[]) => {
             specializationsCache = data;
             specializationsPromise = null;
@@ -151,13 +141,8 @@ function fetchGoals(): Promise<Goal[]> {
         return goalsPromise;
     }
 
-    goalsPromise = fetch(`${API_BASE_URL}/config/goals`)
-        .then((res) => {
-            if (!res.ok) {
-                throw new Error('Failed to fetch goals');
-            }
-            return res.json();
-        })
+    goalsPromise = apiClient.get<Goal[]>('/config/goals')
+        .then((res) => res.data)
         .then((data: Goal[]) => {
             goalsCache = data;
             goalsPromise = null;

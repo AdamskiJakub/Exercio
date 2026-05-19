@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorProfileDto } from './dto/create-instructor-profile.dto';
 import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto';
@@ -16,6 +16,8 @@ interface InstructorFilters {
 
 @Injectable()
 export class InstructorProfilesService {
+  private readonly logger = new Logger(InstructorProfilesService.name);
+
   constructor(
     private prisma: PrismaService,
     private configService: StaticConfigService,
@@ -88,7 +90,7 @@ export class InstructorProfilesService {
       // Ensure at least one valid specialization exists (primary is specializations[0])
       // If all are invalid, log warning but keep profile (UI will handle gracefully)
       if (profile.specializations.length > 0 && validSpecializations.length === 0) {
-        console.warn(`Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`);
+        this.logger.warn(`Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`);
       }
 
       return {
