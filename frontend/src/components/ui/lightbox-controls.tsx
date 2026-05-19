@@ -53,10 +53,10 @@ export function LightboxControls({
               e.stopPropagation();
               onPrevious?.();
             }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20 h-16 w-16"
             aria-label="Previous image"
           >
-            <ChevronLeft className="size-8" />
+            <ChevronLeft className="size-10" />
           </Button>
           <Button
             variant="ghost"
@@ -65,10 +65,10 @@ export function LightboxControls({
               e.stopPropagation();
               onNext?.();
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white hover:bg-white/20 h-16 w-16"
             aria-label="Next image"
           >
-            <ChevronRight className="size-8" />
+            <ChevronRight className="size-10" />
           </Button>
         </>
       )}

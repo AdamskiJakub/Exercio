@@ -103,7 +103,7 @@ export default function PreviewProfilePage() {
           </div>
           
           <div className="bg-slate-900/50 border border-slate-700 rounded-2xl p-6">
-            <InstructorCard instructor={profile} />
+            <InstructorCard instructor={profile} disableLink />
           </div>
         </div>
 

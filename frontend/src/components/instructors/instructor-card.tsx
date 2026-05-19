@@ -5,27 +5,33 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { getCategoryById } from '@/lib/config/specializations';
-import { getCategoryName } from '@/lib/utils/localization';
-import { getTagById, getTagName } from '@/lib/config/tags';
+import {
+  useSpecializations,
+  useTags,
+  getSpecializationName,
+  getTagName,
+} from '@/hooks/useConfig';
 import { MapPinIcon, VideoIcon, UserIcon, StarIcon } from 'lucide-react';
 import { getMediaUrl } from '@/lib/utils/media';
 import type { InstructorCardProps } from './types';
 
-export function InstructorCard({ instructor }: InstructorCardProps) {
+export function InstructorCard({ instructor, disableLink = false }: InstructorCardProps) {
   const locale = useLocale();
   const t = useTranslations('InstructorsPage.card');
 
-  const primaryCategory = getCategoryById(instructor.primarySpecialization);
+  // Use hooks to ensure config loads and triggers re-render
+  const { specializations } = useSpecializations();
+  const { tags } = useTags();
+  
+  const primaryCategory = specializations.find(s => s.id === instructor.primarySpecialization);
   const initials = instructor.fullName
     .split(' ')
     .map((n) => n[0])
     .join('')
     .toUpperCase();
 
-  return (
-    <Link href={`/${locale}/instructors/${instructor.username}`} className="block group">
-      <Card className="bg-slate-900/50 border-slate-800 hover:border-orange-500/50 transition-all duration-300 overflow-hidden">
+  const cardContent = (
+    <Card className="bg-slate-900/50 border-slate-800 hover:border-orange-500/50 transition-all duration-300 overflow-hidden">
         <div className="flex flex-col sm:flex-row gap-6 p-6">
           {/* Avatar Section */}
           <div className="shrink-0">
@@ -59,7 +65,7 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
                 </h3>
                 {primaryCategory && (
                   <p className="text-sm text-slate-400 mt-1">
-                    {primaryCategory.icon} {getCategoryName(primaryCategory, locale)}
+                    {primaryCategory.icon} {getSpecializationName(primaryCategory, locale)}
                   </p>
                 )}
               </div>
@@ -145,7 +151,7 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
               {/* Tags/Skills */}
               <div className="flex flex-wrap gap-2">
                 {instructor.tags?.slice(0, 3).map((tagId) => {
-                  const tag = getTagById(tagId);
+                  const tag = tags.find(t => t.id === tagId);
                   if (!tag) return null;
                   return (
                     <Badge
@@ -159,13 +165,24 @@ export function InstructorCard({ instructor }: InstructorCardProps) {
                 })}
               </div>
 
-              <span className="text-orange-500 hover:text-orange-400 text-sm font-medium transition-colors">
-                {t('viewProfile')} →
-              </span>
+              {!disableLink && (
+                <span className="text-orange-500 hover:text-orange-400 text-sm font-medium transition-colors">
+                  {t('viewProfile')} →
+                </span>
+              )}
             </div>
           </div>
         </div>
       </Card>
+  );
+
+  if (disableLink) {
+    return <div className="block">{cardContent}</div>;
+  }
+
+  return (
+    <Link href={`/${locale}/instructors/${instructor.username}`} className="block group">
+      {cardContent}
     </Link>
   );
 }

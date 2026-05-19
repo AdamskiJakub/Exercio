@@ -9,6 +9,7 @@ import { PublicInstructorProfile } from '@/components/instructors/profile/Public
 import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function InstructorPublicProfilePage() {
   const params = useParams();
@@ -34,13 +35,9 @@ export default function InstructorPublicProfilePage() {
     }
   }, [profile, router]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-slate-300">{t('loadingProfile')}</div>
-      </div>
-    );
-  }
+    if (isLoading) {
+      return <LoadingSpinner />;
+    }
 
   if (error || !profile) {
     return (

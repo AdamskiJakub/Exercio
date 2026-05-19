@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { titleVariants } from '@/lib/animations';
+import { NAV_SOURCE } from '@/components/instructors/profile/types';
 import { 
   Star, 
   Users, 
@@ -128,7 +129,7 @@ export function InstructorDashboard() {
               )}
             </div>
             <Link
-              href={`/instructors/${profile?.user?.username || ''}?from=dashboard` as any}
+              href={`/instructors/${profile?.user?.username || ''}?from=${NAV_SOURCE.DASHBOARD}` as any}
               className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
             >
               <Eye className="w-4 h-4" />

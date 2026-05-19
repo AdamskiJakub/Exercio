@@ -10,6 +10,7 @@ import {
   MaxLength,
   ValidateIf,
 } from 'class-validator';
+import { IsValidConfigId } from '../../common/validators/is-valid-config-id.validator';
 
 export class UpdateInstructorProfileDto {
   @IsString()
@@ -23,18 +24,21 @@ export class UpdateInstructorProfileDto {
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(10)
+  @IsValidConfigId('specialization')
   @IsOptional()
   specializations?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(8)
+  @IsValidConfigId('tag')
   @IsOptional()
   tags?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(4)
+  @IsValidConfigId('goal')
   @IsOptional()
   goals?: string[];
 

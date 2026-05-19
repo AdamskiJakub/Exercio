@@ -10,6 +10,7 @@ import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { StaticConfigModule } from './config/config.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AvailabilityModule } from './availability/availability.module';
     UsersModule,
     BookingsModule,
     AvailabilityModule,
+    StaticConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService],

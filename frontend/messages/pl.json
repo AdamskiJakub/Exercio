@@ -48,7 +48,8 @@
     "editProfile": "Edytuj profil",
     "settings": "Ustawienia",
     "homeAriaLabel": "Trainly - strona główna",
-    "changeLanguage": "Zmień język. Aktualny język"
+    "changeLanguage": "Zmień język. Aktualny język",
+    "loading": "Ładowanie..."
   },
   "auth": {
     "loginSubtitle": "Zaloguj się do swojego konta",
@@ -348,6 +349,9 @@
       "goalsMaxReached": "Osiągnięto limit {max} celów",
       "languages": "Języki (oddzielone przecinkami)",
       "languagesPlaceholder": "np. Angielski, Polski, Niemiecki",
+      "additionalSpecializations": "Dodatkowe specjalizacje",
+      "additionalSpecializationsHint": "Wybierz maksymalnie {max} dodatkowych obszarów specjalizacji",
+      "maximumReached": "Osiągnięto maksymalny limit",
       "contactSettings": {
         "title": "Ustawienia kontaktu",
         "description": "Wybierz, które informacje kontaktowe będą widoczne na Twoim publicznym profilu",
@@ -472,7 +476,8 @@
     "resultsAriaLabel": "Wyniki wyszukiwania",
     "noResults": "Nie znaleziono trenerów",
     "noResultsDescription": "Spróbuj zmienić filtry lub wyszukaj w innym mieście",
-    "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}"
+    "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}",
+    "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później."
   },
   "HowItWorks": {
     "title": "Jak to działa",
@@ -546,11 +551,22 @@
       "phone": "Telefon",
       "email": "Email",
       "sendEmail": "Wyślij e-mail",
+      "callNow": "Zadzwoń",
       "bookSession": "Zarezerwuj sesję"
+    },
+    "booking": {
+      "ctaTitle": "Gotowy na zmianę?",
+      "ctaSubtitle": "Zarezerwuj swoją pierwszą sesję już dziś!",
+      "bookSessionButton": "Zarezerwuj sesję",
+      "sessionDuration": "Czas trwania",
+      "sessionPrice": "Cena sesji",
+      "bookingNotEnabled": "Rezerwacje niedostępne",
+      "bookingNotEnabledDescription": "Ten instruktor aktualnie nie przyjmuje rezerwacji online. Skontaktuj się bezpośrednio."
     },
     "profileNotFound": "Nie znaleziono profilu",
     "instructorNotFound": "Instruktor nie został znaleziony",
     "instructorNotFoundDescription": "Profil instruktora, którego szukasz, nie istnieje.",
+    "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później.",
     "backToInstructors": "Wróć do listy instruktorów",
     "backToDashboard": "Powrót do panelu",
     "backToListing": "Powrót do listy",

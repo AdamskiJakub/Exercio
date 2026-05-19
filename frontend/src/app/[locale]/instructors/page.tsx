@@ -9,10 +9,14 @@ import { useInstructorFilters } from '@/hooks/useInstructorFilters';
 import { useInstructors } from '@/hooks/useInstructors';
 import { applyClientSideFilters } from '@/lib/utils/client-side-filters';
 import { filterAndSortInstructors } from '@/lib/utils/instructor-filters';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useTranslations } from 'next-intl';
 
 export default function InstructorsPage() {
   const { filters, updateFilter, toggleTag, toggleGoal, clearFilters, hasActiveFilters } =
     useInstructorFilters();
+
+  const t = useTranslations('InstructorsPage');
 
   const { data: instructors, isLoading, error } = useInstructors({
     city: filters.city,
@@ -63,9 +67,7 @@ export default function InstructorsPage() {
 
           {isLoading && (
             <div className="lg:col-span-3">
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-              </div>
+              <LoadingSpinner />
             </div>
           )}
 
@@ -73,7 +75,7 @@ export default function InstructorsPage() {
             <div className="lg:col-span-3">
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-6">
                 <p className="text-red-400">
-                  Failed to load instructors. Please try again later.
+                  {t('instructorsFailed')}
                 </p>
               </div>
             </div>

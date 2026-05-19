@@ -9,8 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GOALS, getGoalName } from '@/lib/config/goals';
-import { getAllTagsSorted, getTagName } from '@/lib/config/tags';
+import { useTags, useGoals, getTagName, getGoalName } from '@/hooks/useConfig';
 import type { FiltersSidebarProps } from './types';
 
 export function FiltersSidebar({
@@ -23,11 +22,23 @@ export function FiltersSidebar({
 }: FiltersSidebarProps) {
   const t = useTranslations('InstructorsPage');
   const locale = useLocale();
-  const availableTags = getAllTagsSorted(filters.specialization || undefined);
+  const { tags, loading: tagsLoading } = useTags();
+  const { goals, loading: goalsLoading } = useGoals();
+
+  const availableTags = filters.specialization
+    ? tags.filter((tag) => tag.categories.includes(filters.specialization!))
+    : tags;
+
+  const isLoading = tagsLoading || goalsLoading;
 
   return (
     <aside className="lg:col-span-1" role="region" aria-label={t('filters.ariaLabel')}>
       <div className="sticky top-24 space-y-4">
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          </div>
+        )}
         <div className="flex items-center justify-between pt-0 md:pt-2">
           <h2 className="text-xl font-semibold text-white">{t('filters.title')}</h2>
           {hasActiveFilters && (
@@ -93,7 +104,7 @@ export function FiltersSidebar({
               role="group" 
               aria-labelledby="goals-heading"
             >
-              {GOALS.map((goal) => {
+              {goals.map((goal) => {
                 const isChecked = filters.goals?.includes(goal.id) || false;
                 return (
                   <label

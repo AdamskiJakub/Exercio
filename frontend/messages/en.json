@@ -48,7 +48,8 @@
     "editProfile": "Edit Profile",
     "settings": "Settings",
     "homeAriaLabel": "Trainly - home page",
-    "changeLanguage": "Change language. Current language"
+    "changeLanguage": "Change language. Current language",
+    "loading": "Loading..."
   },
   "auth": {
     "loginSubtitle": "Sign in to your account",
@@ -348,6 +349,9 @@
       "goalsMaxReached": "Maximum {max} goals reached",
       "languages": "Languages (comma-separated)",
       "languagesPlaceholder": "e.g., English, Polish, German",
+      "additionalSpecializations": "Additional Specializations",
+      "additionalSpecializationsHint": "Select up to {max} additional areas of expertise",
+      "maximumReached": "Maximum reached",
       "contactSettings": {
         "title": "Contact Settings",
         "description": "Choose which contact information will be visible on your public profile",
@@ -472,7 +476,8 @@
     "resultsAriaLabel": "Search results",
     "noResults": "No trainers found",
     "noResultsDescription": "Try adjusting your filters or search in a different city",
-    "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}"
+    "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}",
+    "instructorsFailed": "Failed to load instructors. Please try again later."
   },
   "HowItWorks": {
     "title": "How It Works",
@@ -546,7 +551,17 @@
       "phone": "Phone",
       "email": "Email",
       "sendEmail": "Send Email",
+      "callNow": "Call Now",
       "bookSession": "Book a Session"
+    },
+    "booking": {
+      "ctaTitle": "Ready for Change?",
+      "ctaSubtitle": "Book your first session today!",
+      "bookSessionButton": "Book a Session",
+      "sessionDuration": "Duration",
+      "sessionPrice": "Session Price",
+      "bookingNotEnabled": "Booking Unavailable",
+      "bookingNotEnabledDescription": "This instructor is not currently accepting online bookings. Please contact them directly."
     },
     "profileNotFound": "Profile not found",
     "instructorNotFound": "Instructor Not Found",

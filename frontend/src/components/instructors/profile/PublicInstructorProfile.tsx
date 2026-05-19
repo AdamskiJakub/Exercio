@@ -1,16 +1,11 @@
 'use client';
 
-import { InstructorProfile } from '@/types';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { Calendar } from 'lucide-react';
+import { useRouter } from '@/i18n/routing';
 import { ProfileFullView } from './ProfileFullView';
 import { BottomNavBar } from '@/components/ui/bottom-nav-bar';
-
-interface PublicInstructorProfileProps {
-  profile: InstructorProfile;
-  isPreview?: boolean;
-  source?: string | null;
-  isOwnProfile?: boolean;
-}
+import { PublicInstructorProfileProps, NAV_SOURCE } from './types';
 
 export function PublicInstructorProfile({ 
   profile, 
@@ -19,19 +14,38 @@ export function PublicInstructorProfile({
   isOwnProfile = false
 }: PublicInstructorProfileProps) {
   const t = useTranslations('InstructorProfile');
-
+  const locale = useLocale();
+  const router = useRouter();
+  
   const getBackHref = () => {
-    if (isOwnProfile && source === 'dashboard') {
+    if (isOwnProfile && source === NAV_SOURCE.DASHBOARD) {
       return '/dashboard';
     }
     return '/instructors';
   };
 
   const getBackText = () => {
-    if (isOwnProfile && source === 'dashboard') {
+    if (isOwnProfile && source === NAV_SOURCE.DASHBOARD) {
       return t('backToDashboard');
     }
     return t('backToListing');
+  };
+
+  const shouldShowBookingButton = 
+    false; // TODO: Enable when /instructors/[username]/book route is implemented
+    // profile.isBookingEnabled && 
+    // profile.user?.username &&
+    // (!isOwnProfile || source === NAV_SOURCE.DASHBOARD);
+
+  const handleBookingClick = () => {
+    if (!profile.user?.username) {
+      console.error('Cannot navigate to booking: username is missing');
+      return;
+    }
+    // TODO: Add /instructors/[username]/book route to src/i18n/routing.ts
+    // For now, construct the path manually with proper URL encoding
+    const encodedUsername = encodeURIComponent(profile.user.username);
+    router.push(`/${locale}/instructors/${encodedUsername}/book` as any);
   };
 
   return (
@@ -52,6 +66,16 @@ export function PublicInstructorProfile({
         <BottomNavBar
           backText={getBackText()}
           backHref={getBackHref()}
+          actionButton={
+            shouldShowBookingButton
+              ? {
+                  text: t('contact.bookSession'),
+                  icon: <Calendar className="size-5" />,
+                  variant: 'primary',
+                  onClick: handleBookingClick,
+                }
+              : undefined
+          }
         />
       )}
     </>
