@@ -5,13 +5,11 @@ import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { useEffect } from 'react';
 import {
-  getSpecializationById,
+  useSpecializations,
+  useTags,
   getSpecializationName,
-  getTagById,
   getTagName,
-  prefetchConfig,
 } from '@/hooks/useConfig';
 import { MapPinIcon, VideoIcon, UserIcon, StarIcon } from 'lucide-react';
 import { getMediaUrl } from '@/lib/utils/media';
@@ -21,12 +19,11 @@ export function InstructorCard({ instructor, disableLink = false }: InstructorCa
   const locale = useLocale();
   const t = useTranslations('InstructorsPage.card');
 
-  // Ensure config is loaded before rendering
-  useEffect(() => {
-    prefetchConfig();
-  }, []);
-
-  const primaryCategory = getSpecializationById(instructor.primarySpecialization);
+  // Use hooks to ensure config loads and triggers re-render
+  const { specializations } = useSpecializations();
+  const { tags } = useTags();
+  
+  const primaryCategory = specializations.find(s => s.id === instructor.primarySpecialization);
   const initials = instructor.fullName
     .split(' ')
     .map((n) => n[0])
@@ -154,7 +151,7 @@ export function InstructorCard({ instructor, disableLink = false }: InstructorCa
               {/* Tags/Skills */}
               <div className="flex flex-wrap gap-2">
                 {instructor.tags?.slice(0, 3).map((tagId) => {
-                  const tag = getTagById(tagId);
+                  const tag = tags.find(t => t.id === tagId);
                   if (!tag) return null;
                   return (
                     <Badge

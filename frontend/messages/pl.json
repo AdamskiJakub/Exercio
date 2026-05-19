@@ -349,6 +349,9 @@
       "goalsMaxReached": "Osiągnięto limit {max} celów",
       "languages": "Języki (oddzielone przecinkami)",
       "languagesPlaceholder": "np. Angielski, Polski, Niemiecki",
+      "additionalSpecializations": "Dodatkowe specjalizacje",
+      "additionalSpecializationsHint": "Wybierz maksymalnie {max} dodatkowych obszarów specjalizacji",
+      "maximumReached": "Osiągnięto maksymalny limit",
       "contactSettings": {
         "title": "Ustawienia kontaktu",
         "description": "Wybierz, które informacje kontaktowe będą widoczne na Twoim publicznym profilu",
@@ -473,7 +476,8 @@
     "resultsAriaLabel": "Wyniki wyszukiwania",
     "noResults": "Nie znaleziono trenerów",
     "noResultsDescription": "Spróbuj zmienić filtry lub wyszukaj w innym mieście",
-    "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}"
+    "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}",
+    "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później."
   },
   "HowItWorks": {
     "title": "Jak to działa",
@@ -567,8 +571,5 @@
     "backToDashboard": "Powrót do panelu",
     "backToListing": "Powrót do listy",
     "loadingProfile": "Ładowanie profilu..."
-  },
-  "InstructorPage": {
-    "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później."
   }
 }

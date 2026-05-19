@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play } from 'lucide-react';
 import {
-  getSpecializationNameById,
-  getTagNameById,
-  getGoalNameById,
-  getTagById,
-  getGoalById,
-  prefetchConfig,
+  useSpecializations,
+  useTags,
+  useGoals,
+  getSpecializationName,
+  getTagName,
+  getGoalName,
 } from '@/hooks/useConfig';
 import { getMediaUrl, isVideoUrl } from '@/lib/utils/media';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
@@ -23,10 +23,10 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   
-  // Ensure config is loaded before rendering
-  useEffect(() => {
-    prefetchConfig();
-  }, []);
+  // Use hooks to ensure config loads and triggers re-render
+  const { specializations } = useSpecializations();
+  const { tags } = useTags();
+  const { goals } = useGoals();
   
   const fullName = profile.user?.firstName && profile.user?.lastName
     ? `${profile.user.firstName} ${profile.user.lastName}`
@@ -85,7 +85,10 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
             </h1>
             {primarySpecialization && (
               <p className="text-sm text-slate-400 font-medium">
-                {getSpecializationNameById(primarySpecialization, locale)}
+                {(() => {
+                  const spec = specializations.find(s => s.id === primarySpecialization);
+                  return spec ? getSpecializationName(spec, locale) : primarySpecialization;
+                })()}
               </p>
             )}
           </div>
@@ -176,11 +179,14 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
                 {t('additionalSpecializations')}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {additionalSpecializations.map((spec) => (
-                  <Badge key={spec} variant="secondary" className="bg-slate-700 text-slate-200">
-                    {getSpecializationNameById(spec, locale)}
-                  </Badge>
-                ))}
+                {additionalSpecializations.map((specId) => {
+                  const spec = specializations.find(s => s.id === specId);
+                  return spec ? (
+                    <Badge key={specId} variant="secondary" className="bg-slate-700 text-slate-200">
+                      {getSpecializationName(spec, locale)}
+                    </Badge>
+                  ) : null;
+                })}
               </div>
             </div>
           )}
@@ -196,10 +202,10 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               </div>
               <div className="flex flex-wrap gap-2">
                 {profile.goals.map((goalId) => {
-                  const goal = getGoalById(goalId);
+                  const goal = goals.find(g => g.id === goalId);
                   return goal ? (
                     <Badge key={goalId} variant="outline" className="border-orange-500/50 text-orange-400">
-                      {goal.icon} {getGoalNameById(goalId, locale)}
+                      {goal.icon} {getGoalName(goal, locale)}
                     </Badge>
                   ) : null;
                 })}
@@ -276,10 +282,10 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {profile.tags.map((tagId) => {
-                  const tag = getTagById(tagId);
+                  const tag = tags.find(t => t.id === tagId);
                   return tag ? (
                     <Badge key={tagId} variant="outline" className="border-slate-600 text-slate-300 text-xs">
-                      {getTagNameById(tagId, locale)}
+                      {getTagName(tag, locale)}
                     </Badge>
                   ) : null;
                 })}

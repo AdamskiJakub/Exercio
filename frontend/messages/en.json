@@ -349,6 +349,9 @@
       "goalsMaxReached": "Maximum {max} goals reached",
       "languages": "Languages (comma-separated)",
       "languagesPlaceholder": "e.g., English, Polish, German",
+      "additionalSpecializations": "Additional Specializations",
+      "additionalSpecializationsHint": "Select up to {max} additional areas of expertise",
+      "maximumReached": "Maximum reached",
       "contactSettings": {
         "title": "Contact Settings",
         "description": "Choose which contact information will be visible on your public profile",
@@ -473,7 +476,8 @@
     "resultsAriaLabel": "Search results",
     "noResults": "No trainers found",
     "noResultsDescription": "Try adjusting your filters or search in a different city",
-    "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}"
+    "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}",
+    "instructorsFailed": "Failed to load instructors. Please try again later."
   },
   "HowItWorks": {
     "title": "How It Works",
@@ -566,8 +570,5 @@
     "backToDashboard": "Back to Dashboard",
     "backToListing": "Back to Listing",
     "loadingProfile": "Loading profile..."
-  },
-  "InstructorPage": {
-    "instructorsFailed": "Failed to load instructors. Please try again later."
   }
 }

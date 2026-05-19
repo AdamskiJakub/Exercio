@@ -48,7 +48,6 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
   const { specializations, loading: specializationsLoading } = useSpecializations();
   const { goals, loading: goalsLoading } = useGoals();
   
-  const isLoadingConfig = tagsLoading || specializationsLoading || goalsLoading;
   
   // State for multi-selects
   const [selectedPrimaryCategory, setSelectedPrimaryCategory] = useState<string | undefined>(
@@ -292,12 +291,12 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       {selectedPrimaryCategory && (
         <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-5">
           <h3 className="text-base font-semibold text-white mb-2">
-            Additional Specializations
+            {t('additionalSpecializations')}
           </h3>
           <p className="text-xs text-slate-400 mb-3">
-            Select up to {MAX_ADDITIONAL_SPECIALIZATIONS} additional areas of expertise
+            {t('additionalSpecializationsHint', { max: MAX_ADDITIONAL_SPECIALIZATIONS })}
             {selectedSpecializations.length >= MAX_ADDITIONAL_SPECIALIZATIONS && (
-              <span className="text-orange-400 ml-2">(Maximum reached)</span>
+              <span className="text-orange-400 ml-2">({t('maximumReached')})</span>
             )}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -2,7 +2,6 @@
 
 import { useTranslations } from 'next-intl';
 import { Calendar } from 'lucide-react';
-import { useRouter } from '@/i18n/routing';
 import { ProfileFullView } from './ProfileFullView';
 import { BottomNavBar } from '@/components/ui/bottom-nav-bar';
 import { PublicInstructorProfileProps, NAV_SOURCE } from './types';
@@ -14,8 +13,7 @@ export function PublicInstructorProfile({
   isOwnProfile = false
 }: PublicInstructorProfileProps) {
   const t = useTranslations('InstructorProfile');
-  const router = useRouter();
-
+  
   const getBackHref = () => {
     if (isOwnProfile && source === NAV_SOURCE.DASHBOARD) {
       return '/dashboard';
