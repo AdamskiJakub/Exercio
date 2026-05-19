@@ -65,12 +65,44 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
     profile?.availability || 'both'
   );
 
+  // Filter tags to valid IDs once config loads
   useEffect(() => { 
     if (!tagsLoading && tags.length > 0 && profile?.tags) {
       const validTags = profile.tags.filter((tag: string) => tags.some(t => t.id === tag));
       setSelectedTags(validTags);
     }
   }, [tagsLoading, tags, profile?.tags]);
+
+  // Filter specializations to valid IDs once config loads
+  useEffect(() => {
+    if (!specializationsLoading && specializations.length > 0 && profile?.specializations) {
+      const validSpecIds = profile.specializations.filter((specId: string) => 
+        specializations.some(s => s.id === specId)
+      );
+      
+      if (validSpecIds.length > 0) {
+        setSelectedPrimaryCategory(validSpecIds[0]);
+        // Clamp additional specializations to MAX
+        const additional = validSpecIds.slice(1, MAX_ADDITIONAL_SPECIALIZATIONS + 1);
+        setSelectedSpecializations(additional);
+      } else {
+        // No valid specializations - reset to undefined
+        setSelectedPrimaryCategory(undefined);
+        setSelectedSpecializations([]);
+      }
+    }
+  }, [specializationsLoading, specializations, profile?.specializations]);
+
+  // Filter goals to valid IDs once config loads
+  useEffect(() => {
+    if (!goalsLoading && goals.length > 0 && profile?.goals) {
+      const validGoals = profile.goals.filter((goalId: string) => 
+        goals.some(g => g.id === goalId)
+      );
+      // Clamp to MAX_GOALS
+      setSelectedGoals(validGoals.slice(0, MAX_GOALS));
+    }
+  }, [goalsLoading, goals, profile?.goals]);
 
   const form = useForm<InstructorProfileFormData>({
     resolver: zodResolver(instructorProfileSchema),

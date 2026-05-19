@@ -80,14 +80,24 @@ export class InstructorProfilesService {
       },
     });
 
-    const filteredProfiles = profiles.map(profile => ({
-      ...profile,
-      tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
-      specializations: profile.specializations.filter((spec) => 
+    const filteredProfiles = profiles.map(profile => {
+      const validSpecializations = profile.specializations.filter((spec) => 
         this.configService.isValidSpecialization(spec)
-      ),
-      goals: profile.goals.filter((goal) => this.configService.isValidGoal(goal)),
-    }))
+      );
+      
+      // Ensure at least one valid specialization exists (primary is specializations[0])
+      // If all are invalid, log warning but keep profile (UI will handle gracefully)
+      if (profile.specializations.length > 0 && validSpecializations.length === 0) {
+        console.warn(`Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`);
+      }
+
+      return {
+        ...profile,
+        tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
+        specializations: validSpecializations,
+        goals: profile.goals.filter((goal) => this.configService.isValidGoal(goal)),
+      };
+    });
 
     return filteredProfiles;
   }

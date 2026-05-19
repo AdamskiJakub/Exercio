@@ -7,4 +7,4 @@ import { StaticConfigService } from './config.service';
   providers: [StaticConfigService],
   exports: [StaticConfigService],
 })
-export class ConfigModule {}
+export class StaticConfigModule {}

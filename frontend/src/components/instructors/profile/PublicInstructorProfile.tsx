@@ -1,7 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Calendar } from 'lucide-react';
+import { useRouter } from '@/i18n/routing';
 import { ProfileFullView } from './ProfileFullView';
 import { BottomNavBar } from '@/components/ui/bottom-nav-bar';
 import { PublicInstructorProfileProps, NAV_SOURCE } from './types';
@@ -13,6 +14,8 @@ export function PublicInstructorProfile({
   isOwnProfile = false
 }: PublicInstructorProfileProps) {
   const t = useTranslations('InstructorProfile');
+  const locale = useLocale();
+  const router = useRouter();
   
   const getBackHref = () => {
     if (isOwnProfile && source === NAV_SOURCE.DASHBOARD) {
@@ -39,9 +42,9 @@ export function PublicInstructorProfile({
       return;
     }
     // TODO: Add /instructors/[username]/book route to src/i18n/routing.ts
-    // For now, use direct navigation to avoid TypeScript error
-    const locale = window.location.pathname.split('/')[1];
-    window.location.href = `/${locale}/instructors/${profile.user.username}/book`;
+    // For now, construct the path manually with proper URL encoding
+    const encodedUsername = encodeURIComponent(profile.user.username);
+    router.push(`/${locale}/instructors/${encodedUsername}/book` as any);
   };
 
   return (
