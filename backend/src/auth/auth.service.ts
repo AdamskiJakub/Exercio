@@ -119,6 +119,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.password) {
+      throw new UnauthorizedException(
+        `This email is registered via ${user.provider}. Please login with ${user.provider}.`,
+      );
+    }
+
     const passwordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!passwordValid) {
@@ -139,6 +145,96 @@ export class AuthService {
         phone: user.phone,
       },
     };
+  }
+
+  async findOrCreateOAuthUser(oauthUser: {
+    provider: string;
+    providerId: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    avatarUrl?: string;
+  }) {
+    let user = await this.prisma.user.findUnique({
+      where: {
+        provider_providerId: {
+          provider: oauthUser.provider,
+          providerId: oauthUser.providerId,
+        },
+      },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.findUnique({
+        where: { email: oauthUser.email },
+      });
+
+      if (user) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            provider: oauthUser.provider,
+            providerId: oauthUser.providerId,
+            isEmailVerified: true,
+            avatarUrl: user.avatarUrl || oauthUser.avatarUrl,
+            firstName: user.firstName || oauthUser.firstName,
+            lastName: user.lastName || oauthUser.lastName,
+          },
+        });
+      }
+    }
+
+    if (!user) {
+      const username = await this.generateUniqueUsername(oauthUser.email);
+      
+      user = await this.prisma.user.create({
+        data: {
+          email: oauthUser.email,
+          username,
+          password: null,
+          firstName: oauthUser.firstName,
+          lastName: oauthUser.lastName,
+          provider: oauthUser.provider,
+          providerId: oauthUser.providerId,
+          isEmailVerified: true,
+          avatarUrl: oauthUser.avatarUrl,
+          role: 'CLIENT',
+        },
+      });
+    }
+
+    const token = await this.generateToken(user.id, user.email, user.role);
+
+    return {
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        avatarUrl: user.avatarUrl,
+      },
+    };
+  }
+
+  private async generateUniqueUsername(email: string): Promise<string> {
+    const baseUsername = email
+      .split('@')[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-');
+    
+    let username = baseUsername;
+    let counter = 1;
+
+    while (await this.prisma.user.findUnique({ where: { username } })) {
+      username = `${baseUsername}-${counter}`;
+      counter++;
+    }
+
+    return username;
   }
 
   private async generateToken(userId: string, email: string, role: string) {
@@ -162,6 +258,9 @@ export class AuthService {
         firstName: true,
         lastName: true,
         phone: true,
+        avatarUrl: true,
+        provider: true,
+        isEmailVerified: true,
       },
     });
 

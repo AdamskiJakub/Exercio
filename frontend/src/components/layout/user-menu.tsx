@@ -36,16 +36,15 @@ export function UserMenu() {
   const t = useTranslations('Common');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
-  // Fetch instructor profile if user is an instructor (to get photoUrl)
-  // Important: Only fetch when user is INSTRUCTOR, otherwise instructorProfile should be undefined
   const { data: instructorProfile } = useMyInstructorProfile({
     enabled: isAuthenticated && user?.role === 'INSTRUCTOR',
   });
 
-  // Use instructor's photoUrl if available AND user is actually an instructor
   const avatarUrl = (user?.role === 'INSTRUCTOR' && instructorProfile?.photoUrl)
-    ? getMediaUrl(instructorProfile.photoUrl) 
-    : undefined;
+    ? getMediaUrl(instructorProfile.photoUrl)
+    : user?.avatarUrl 
+      ? user.avatarUrl
+      : undefined;
 
   if (!isAuthenticated || !user) {
     return null;

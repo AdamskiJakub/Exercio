@@ -2,6 +2,8 @@ import { Controller, Post, Body, Get, UseGuards, Req, Res, HttpCode, HttpStatus 
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import type { Request, Response } from 'express';
 
 const COOKIE_OPTIONS = {
@@ -50,5 +52,43 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('access_token');
     return { message: 'Logged out successfully' };
+  }
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+    await this.handleOAuthCallback(req, res);
+  }
+
+  @Get('facebook')
+  @UseGuards(FacebookAuthGuard)
+  async facebookAuth() {}
+
+  @Get('facebook/callback')
+  @UseGuards(FacebookAuthGuard)
+  async facebookAuthCallback(@Req() req: Request, @Res() res: Response) {
+    await this.handleOAuthCallback(req, res);
+  }
+
+  private async handleOAuthCallback(req: Request, res: Response) {
+    const oauthUser = req.user as any;
+    
+    const { access_token } = await this.authService.findOrCreateOAuthUser({
+      provider: oauthUser.provider,
+      providerId: oauthUser.providerId,
+      email: oauthUser.email,
+      firstName: oauthUser.firstName,
+      lastName: oauthUser.lastName,
+      avatarUrl: oauthUser.avatarUrl,
+    });
+
+    res.cookie('access_token', access_token, COOKIE_OPTIONS);
+    
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/callback?success=true`);
   }
 }

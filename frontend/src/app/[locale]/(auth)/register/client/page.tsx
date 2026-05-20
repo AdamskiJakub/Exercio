@@ -6,6 +6,7 @@ import { useRegisterClientForm } from '@/hooks/useRegisterClientForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 
 export default function RegisterClientPage() {
   const t = useTranslations('auth');
@@ -149,16 +150,22 @@ export default function RegisterClientPage() {
             >
               {isLoading ? t('creatingAccount') : t('createAccount')}
             </Button>
-
-            <div className="text-center">
-              <Link 
-                href="/register/instructor"
-                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
-              >
-                {t('areYouInstructor')}
-              </Link>
-            </div>
           </form>
+
+          {/* Social Login Buttons - BELOW FORM */}
+          <div className="mt-6">
+            <SocialLoginButtons />
+          </div>
+
+          {/* Footer link - BELOW OAUTH BUTTONS */}
+          <div className="text-center mt-6">
+            <Link 
+              href="/register/instructor"
+              className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              {t('areYouInstructor')}
+            </Link>
+          </div>
         </div>
       </div>
     </div>
