@@ -117,6 +117,7 @@
     "phoneRequiredForInstructor": "Required for instructors (clients can contact you)",
     "bio": "About Me",
     "bioRequired": "Bio must be at least 10 characters",
+    "completingAuth": "Completing authentication...",
     "bioPlaceholder": "Tell us about your experience, specializations and training approach...",
     "optional": "optional",
     "specializations": "Specializations",

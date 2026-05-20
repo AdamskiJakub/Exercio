@@ -120,8 +120,9 @@ export class AuthService {
     }
 
     if (!user.password) {
+      const loginProvider = user.provider || 'social login';
       throw new UnauthorizedException(
-        `This email is registered via ${user.provider}. Please login with ${user.provider}.`,
+      `This email is registered via ${loginProvider}. Please login with ${loginProvider}.`,
       );
     }
 
@@ -187,20 +188,42 @@ export class AuthService {
     if (!user) {
       const username = await this.generateUniqueUsername(oauthUser.email);
       
-      user = await this.prisma.user.create({
-        data: {
-          email: oauthUser.email,
-          username,
-          password: null,
-          firstName: oauthUser.firstName,
-          lastName: oauthUser.lastName,
-          provider: oauthUser.provider,
-          providerId: oauthUser.providerId,
-          isEmailVerified: true,
-          avatarUrl: oauthUser.avatarUrl,
-          role: 'CLIENT',
-        },
-      });
+      try {
+        user = await this.prisma.user.create({
+          data: {
+            email: oauthUser.email,
+            username,
+            password: null,
+            firstName: oauthUser.firstName,
+            lastName: oauthUser.lastName,
+            provider: oauthUser.provider,
+            providerId: oauthUser.providerId,
+            isEmailVerified: true,
+            avatarUrl: oauthUser.avatarUrl,
+            role: 'CLIENT',
+          },
+        });
+      } catch (error) {
+        if (error.code === 'P2002') {
+          const retryUsername = `${username}-${Date.now()}`;
+          user = await this.prisma.user.create({
+            data: {
+              email: oauthUser.email,
+              username: retryUsername,
+              password: null,
+              firstName: oauthUser.firstName,
+              lastName: oauthUser.lastName,
+              provider: oauthUser.provider,
+              providerId: oauthUser.providerId,
+              isEmailVerified: true,
+              avatarUrl: oauthUser.avatarUrl,
+              role: 'CLIENT',
+            },
+          });
+        } else {
+          throw error;
+        }
+      }
     }
 
     const token = await this.generateToken(user.id, user.email, user.role);

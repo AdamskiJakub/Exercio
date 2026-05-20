@@ -5,10 +5,25 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import { useContainer } from 'class-validator';
+import session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
  
+  // Configure session middleware for OAuth state management
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        httpOnly: true,
+        maxAge: 3600000, // 1 hour
+      },
+    }),
+  );
+
   // Enable cookie parsing
   app.use(cookieParser());
 

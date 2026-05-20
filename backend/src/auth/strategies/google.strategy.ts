@@ -18,6 +18,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret,
       callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'http://localhost:3001/auth/google/callback',
       scope: ['email', 'profile'],
+      state: true,
     });
   }
 
@@ -28,14 +29,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     const { id, name, emails, photos } = profile;
+
+    if(!emails || !emails[0] || !emails[0].value) {
+      return done(new Error('Google account does not have an email associated'));
+    }
     
     const user = {
       provider: 'google',
       providerId: id,
       email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
-      avatarUrl: photos[0]?.value,
+      firstName: name?.givenName || null,
+      lastName: name?.familyName || null,
+      avatarUrl: photos[0]?.value || null,
       accessToken,
     };
     

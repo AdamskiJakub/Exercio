@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const t = useTranslations('auth');
   
   useEffect(() => {
     const success = searchParams.get('success');
@@ -22,10 +25,10 @@ export default function AuthCallbackPage() {
         })
         .catch((error) => {
           console.error('OAuth callback error:', error);
-          router.push('/login?error=oauth_failed');
+          router.push({ pathname: '/login', query: { error: 'oauth_failed' } });
         });
     } else {
-      router.push('/login?error=oauth_cancelled');
+      router.push({ pathname: '/login', query: { error: 'oauth_cancelled' } });
     }
   }, [searchParams, router, setAuth]);
 
@@ -33,7 +36,7 @@ export default function AuthCallbackPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-900">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4" />
-        <p className="text-slate-300 text-lg">Completing authentication...</p>
+        <p className="text-slate-300 text-lg">{t('completingAuth')}</p>
       </div>
     </div>
   );

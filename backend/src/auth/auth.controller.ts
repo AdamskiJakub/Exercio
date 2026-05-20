@@ -89,6 +89,7 @@ export class AuthController {
     res.cookie('access_token', access_token, COOKIE_OPTIONS);
     
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/callback?success=true`);
+    const locale = req.query.locale || 'pl';
+    res.redirect(`${frontendUrl}/${locale}/auth/callback?success=true`);
   }
 }

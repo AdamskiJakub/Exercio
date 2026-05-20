@@ -19,6 +19,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       callbackURL: configService.get<string>('FACEBOOK_CALLBACK_URL') || 'http://localhost:3001/auth/facebook/callback',
       scope: ['email', 'public_profile'],
       profileFields: ['id', 'emails', 'name', 'picture.type(large)'],
+      state: true,
     });
   }
 
@@ -29,14 +30,18 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     done: (error: any, user?: any) => void,
   ): Promise<any> {
     const { id, name, emails, photos } = profile;
+
+    if(!emails || !emails[0] || !emails[0].value) {
+      return done(new Error('No email found in Facebook profile. Please grant email permission.'), null);
+    }
     
     const user = {
       provider: 'facebook',
       providerId: id,
       email: emails?.[0]?.value,
-      firstName: name?.givenName,
-      lastName: name?.familyName,
-      avatarUrl: photos?.[0]?.value,
+      firstName: name?.givenName || null,
+      lastName: name?.familyName || null,
+      avatarUrl: photos?.[0]?.value || null,
       accessToken,
     };
     

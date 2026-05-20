@@ -26,7 +26,7 @@ model User {
   phone     String?
   
   // OAuth fields
-  provider        String?  @default("local") // "local" | "google" | "facebook" | "apple"
+  provider        String  @default("local") // "local" | "google" | "facebook" | "apple"
   providerId      String?  // OAuth provider user ID
   isEmailVerified Boolean  @default(false)   // Auto-true for OAuth
   avatarUrl       String?  // Profile picture from OAuth provider

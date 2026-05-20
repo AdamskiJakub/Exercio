@@ -117,6 +117,7 @@
     "phoneRequiredForInstructor": "Wymagane dla instruktorów (klienci mogą Cię kontaktować)",
     "bio": "O mnie",
     "bioRequired": "Opis musi mieć minimum 10 znaków",
+    "completingAuth": "Finalizowanie logowania...",
     "bioPlaceholder": "Opowiedz o swoim doświadczeniu, specjalizacjach i podejściu do treningu...",
     "optional": "opcjonalnie",
     "specializations": "Specjalizacje",
