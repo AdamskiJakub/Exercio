@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PAYMENT_METHODS } from '@/constants/payment';
 
 // Helper to validate comma-separated languages
 const commaSeparatedStrings = z.string().refine(
@@ -45,7 +46,12 @@ export const instructorProfileSchema = z.object({
   showEmail: z.boolean().optional(),
   contactMessage: z.string().max(500).optional(),
   // Payment settings
-  paymentMethods: z.array(z.string()).optional(),
+  paymentMethods: z.array(z.enum([
+    PAYMENT_METHODS.CASH,
+    PAYMENT_METHODS.CARD,
+    PAYMENT_METHODS.BLIK,
+    PAYMENT_METHODS.TRANSFER,
+  ])).max(10).optional(),
   paymentInfo: z.string().max(500).optional().nullable(),
 });
 

@@ -1,3 +1,5 @@
+import type { PaymentMethod } from '@/constants/payment';
+
 export enum UserRole {
   CLIENT = 'CLIENT',
   INSTRUCTOR = 'INSTRUCTOR',
@@ -58,7 +60,7 @@ export interface InstructorProfile {
   isBookingEnabled?: boolean;
   minNoticeHours?: number;
   // Payment information
-  paymentMethods?: string[];
+  paymentMethods?: PaymentMethod[];
   paymentInfo?: string | null;
   createdAt: string;
   updatedAt: string;

@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsInt,
   IsBoolean,
+  IsIn,
   Min,
   ArrayMaxSize,
   MaxLength,
@@ -134,6 +135,8 @@ export class UpdateInstructorProfileDto {
   // PAYMENT INFORMATION (informational only, no payment processing)
   @IsArray()
   @IsString({ each: true })
+  @IsIn(['cash', 'card', 'blik', 'transfer'], { each: true })
+  @ArrayMaxSize(10)
   @IsOptional()
   paymentMethods?: string[]; // ["cash", "card", "blik", "transfer"]
 
