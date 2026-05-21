@@ -11,6 +11,12 @@ export class GoogleAuthGuard extends AuthGuard('google') {
       typeof rawLocale === 'string' && supportedLocales.includes(rawLocale as typeof supportedLocales[number])
         ? rawLocale
         : 'pl';
+    
+    // Persist locale in session for OAuth callback
+    if (request.session) {
+      request.session.oauth_locale = locale;
+    }
+    
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
 
     return {

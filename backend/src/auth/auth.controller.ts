@@ -76,25 +76,24 @@ export class AuthController {
 
   private async handleOAuthCallback(req: Request, res: Response) {
     const oauthUser = req.user as any;
-    
-    const { access_token } = await this.authService.findOrCreateOAuthUser({
-      provider: oauthUser.provider,
-      providerId: oauthUser.providerId,
-      email: oauthUser.email,
-      firstName: oauthUser.firstName,
-      lastName: oauthUser.lastName,
-      avatarUrl: oauthUser.avatarUrl,
-    });
-
-    res.cookie('access_token', access_token, COOKIE_OPTIONS);
-
+    const locale = req.session?.oauth_locale || 'pl';
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const supportedLocales = ['pl', 'en'] as const;
-    const rawLocale = req.query.locale;
-    const locale =
-      typeof rawLocale === 'string' && supportedLocales.includes(rawLocale as typeof supportedLocales[number])
-        ? rawLocale
-        : 'pl';
-    res.redirect(`${frontendUrl}/${locale}/auth/callback?success=true`);
+    
+    try {
+      const { access_token } = await this.authService.findOrCreateOAuthUser({
+        provider: oauthUser.provider,
+        providerId: oauthUser.providerId,
+        email: oauthUser.email,
+        firstName: oauthUser.firstName,
+        lastName: oauthUser.lastName,
+        avatarUrl: oauthUser.avatarUrl,
+      });
+
+      res.cookie('access_token', access_token, COOKIE_OPTIONS);
+      res.redirect(`${frontendUrl}/${locale}/auth/callback?success=true`);
+    } catch (error) {
+      const errorMessage = error?.message || 'oauth_failed';
+      res.redirect(`${frontendUrl}/${locale}/login?error=${encodeURIComponent(errorMessage)}`);
+    }
   }
 }

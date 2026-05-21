@@ -16,6 +16,11 @@ async function bootstrap() {
   }
 
   // Configure session middleware for OAuth state management
+  // NOTE: Using in-memory store for development. For production, configure a persistent store:
+  // - Redis: connect-redis (recommended for multi-instance deployments)
+  // - PostgreSQL: connect-pg-simple
+  // - MongoDB: connect-mongo
+  // See: https://www.npmjs.com/package/express-session#compatible-session-stores
   app.use(
     session({
       secret: process.env.SESSION_SECRET,
