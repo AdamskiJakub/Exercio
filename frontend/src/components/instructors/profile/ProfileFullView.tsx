@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play } from 'lucide-react';
+import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play, CreditCard, Banknote, Smartphone, Building2 } from 'lucide-react';
 import {
   useSpecializations,
   useTags,
@@ -16,10 +16,12 @@ import { getMediaUrl, isVideoUrl } from '@/lib/utils/media';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ContactSection } from '@/components/instructors/profile/ContactSection';
 import { ProfileFullViewProps } from './types';
+import { PAYMENT_METHODS } from '@/constants/payment';
 
 export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const locale = useLocale();
   const t = useTranslations('InstructorProfile');
+  const tCommon = useTranslations('Common.paymentMethods');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   
@@ -27,6 +29,14 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const { specializations } = useSpecializations();
   const { tags } = useTags();
   const { goals } = useGoals();
+
+  // Payment method icons mapping
+  const paymentMethodIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+    [PAYMENT_METHODS.CASH]: Banknote,
+    [PAYMENT_METHODS.CARD]: CreditCard,
+    [PAYMENT_METHODS.BLIK]: Smartphone,
+    [PAYMENT_METHODS.TRANSFER]: Building2,
+  };
   
   const fullName = profile.user?.firstName && profile.user?.lastName
     ? `${profile.user.firstName} ${profile.user.lastName}`
@@ -242,19 +252,16 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
           {!profile.hourlyRateHidden && profile.hourlyRate !== null && profile.hourlyRate !== undefined ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
-                {t('hourlyRate')}
+                {t('pricing')}
               </p>
               <p className="text-4xl font-bold text-orange-500">
-                {profile.hourlyRate} zł
-              </p>
-              <p className="text-xs text-slate-400 mt-2">
-                {t('perHour')}
+                {profile.hourlyRate} zł <span className="text-2xl text-orange-400">{t('perSession')}</span>
               </p>
             </div>
           ) : profile.hourlyRateHidden ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
-                {t('hourlyRate')}
+                {t('pricing')}
               </p>
               <p className="text-xl font-bold text-orange-500">
                 {t('contactForPricing')}
@@ -271,6 +278,31 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
                 {profile.packageDealsDescription}
               </p>
+            </div>
+          )}
+
+          {/* Payment Methods */}
+          {profile.paymentMethods && profile.paymentMethods.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
+                {t('paymentMethods')}
+              </h3>
+              <div className="space-y-2">
+                {profile.paymentMethods.map((method) => {
+                  const Icon = paymentMethodIcons[method];
+                  return Icon ? (
+                    <div key={method} className="flex items-center gap-2 text-slate-300 text-sm">
+                      <Icon className="size-4 text-orange-500" />
+                      <span>{tCommon(method as any)}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+              {profile.paymentInfo && (
+                <p className="mt-3 text-xs text-slate-400 italic border-l-2 border-slate-600 pl-3">
+                  {profile.paymentInfo}
+                </p>
+              )}
             </div>
           )}
 

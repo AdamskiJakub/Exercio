@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MediaUpload } from '@/components/instructors/MediaUpload';
 import { ContactSettingsSection } from '@/components/instructors/ContactSettingsSection';
+import { PaymentSettingsSection } from '@/components/instructors/PaymentSettingsSection';
 import {
   Select,
   SelectContent,
@@ -121,6 +122,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       showPhone: profile?.showPhone || false,
       showEmail: profile?.showEmail || false,
       contactMessage: profile?.contactMessage || '',
+      paymentMethods: profile?.paymentMethods || [],
+      paymentInfo: profile?.paymentInfo || '',
     },
   });
 
@@ -152,6 +155,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         showPhone: profile.showPhone || false,
         showEmail: profile.showEmail || false,
         contactMessage: profile.contactMessage || '',
+        paymentMethods: profile.paymentMethods || [],
+        paymentInfo: profile.paymentInfo || '',
       });
     }
   }, [profile, reset]);
@@ -670,6 +675,9 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         userPhone={user.phone}
         userEmail={user.email}
       />
+
+      {/* Payment Settings Section */}
+      <PaymentSettingsSection form={form} />
 
       {/* Photo URL */}
       <MediaUpload

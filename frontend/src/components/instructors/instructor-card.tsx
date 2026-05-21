@@ -74,9 +74,8 @@ export function InstructorCard({ instructor, disableLink = false }: InstructorCa
               {instructor.hourlyRate !== null && instructor.hourlyRate !== undefined && (
                 <div className="text-right">
                   <p className="text-2xl font-bold text-orange-500">
-                    {instructor.hourlyRate} zł
+                    {instructor.hourlyRate} zł <span className="text-base text-orange-400 font-normal">{t('perSession')}</span>
                   </p>
-                  <p className="text-xs text-slate-400">{t('perHour')}</p>
                 </div>
               )}
             </div>
