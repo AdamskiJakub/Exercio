@@ -5,10 +5,16 @@ import { AuthGuard } from '@nestjs/passport';
 export class FacebookAuthGuard extends AuthGuard('facebook') {
   getAuthenticateOptions(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
-    const locale = request.query.locale || 'pl';
+    const supportedLocales = ['pl', 'en'] as const;
+    const rawLocale = request.query.locale;
+    const locale =
+      typeof rawLocale === 'string' && supportedLocales.includes(rawLocale as typeof supportedLocales[number])
+        ? rawLocale
+        : 'pl';
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    
+
     return {
+      scope: ['email', 'public_profile'], // OAuth scopes must be set here, not in strategy
       failureRedirect: `${frontendUrl}/${locale}/login?error=oauth_failed`,
       session: false,
     };

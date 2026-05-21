@@ -87,9 +87,14 @@ export class AuthController {
     });
 
     res.cookie('access_token', access_token, COOKIE_OPTIONS);
-    
+
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const locale = req.query.locale || 'pl';
+    const supportedLocales = ['pl', 'en'] as const;
+    const rawLocale = req.query.locale;
+    const locale =
+      typeof rawLocale === 'string' && supportedLocales.includes(rawLocale as typeof supportedLocales[number])
+        ? rawLocale
+        : 'pl';
     res.redirect(`${frontendUrl}/${locale}/auth/callback?success=true`);
   }
 }

@@ -10,15 +10,21 @@ import session from 'express-session';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
  
+  // Validate required environment variables
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required');
+  }
+
   // Configure session middleware for OAuth state management
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
         secure: process.env.NODE_ENV === 'production', // HTTPS only in production
         httpOnly: true,
+        sameSite: 'lax', // CSRF protection
         maxAge: 3600000, // 1 hour
       },
     }),

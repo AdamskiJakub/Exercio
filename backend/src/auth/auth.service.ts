@@ -119,11 +119,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Prevent OAuth users from logging in with password
+    // Users with provider other than 'local' must use OAuth
+    if (user.provider !== 'local') {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
     if (!user.password) {
-      const loginProvider = user.provider || 'social login';
-      throw new UnauthorizedException(
-      `This email is registered via ${loginProvider}. Please login with ${loginProvider}.`,
-      );
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const passwordValid = await bcrypt.compare(dto.password, user.password);
@@ -171,17 +174,28 @@ export class AuthService {
       });
 
       if (user) {
-        user = await this.prisma.user.update({
-          where: { id: user.id },
-          data: {
-            provider: oauthUser.provider,
-            providerId: oauthUser.providerId,
-            isEmailVerified: true,
-            avatarUrl: user.avatarUrl || oauthUser.avatarUrl,
-            firstName: user.firstName || oauthUser.firstName,
-            lastName: user.lastName || oauthUser.lastName,
-          },
-        });
+        // Prevent provider flipping - enforce single provider per account
+        if (user.provider && user.provider !== 'local' && user.provider !== oauthUser.provider) {
+          throw new UnauthorizedException(
+            `This email is already registered with ${user.provider}. Please use ${user.provider} to login.`,
+          );
+        }
+
+        // For local accounts: just update profile data, keep provider='local'
+        // For OAuth accounts: this shouldn't happen (caught by compound unique above)
+        // This allows users with local accounts to also login via OAuth
+        if (user.provider === 'local') {
+          user = await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+              // DO NOT change provider - keep 'local'
+              isEmailVerified: true,
+              avatarUrl: user.avatarUrl || oauthUser.avatarUrl,
+              firstName: user.firstName || oauthUser.firstName,
+              lastName: user.lastName || oauthUser.lastName,
+            },
+          });
+        }
       }
     }
 
