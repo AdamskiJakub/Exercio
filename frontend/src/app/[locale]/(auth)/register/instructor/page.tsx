@@ -6,7 +6,6 @@ import { useRegisterInstructorForm } from '@/hooks/useRegisterInstructorForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 
 export default function RegisterInstructorPage() {
   const t = useTranslations('auth');
