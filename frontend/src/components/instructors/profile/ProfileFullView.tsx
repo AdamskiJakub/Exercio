@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, type ComponentType } from 'react';
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play, CreditCard, Banknote, Smartphone, Building2 } from 'lucide-react';
+import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play } from 'lucide-react';
 import {
   useSpecializations,
   useTags,
@@ -16,7 +16,7 @@ import { getMediaUrl, isVideoUrl } from '@/lib/utils/media';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ContactSection } from '@/components/instructors/profile/ContactSection';
 import { ProfileFullViewProps } from './types';
-import { PAYMENT_METHODS } from '@/constants/payment';
+import { PAYMENT_METHOD_ICONS } from '@/constants/payment';
 
 export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const locale = useLocale();
@@ -29,14 +29,6 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const { specializations } = useSpecializations();
   const { tags } = useTags();
   const { goals } = useGoals();
-
-  // Payment method icons mapping
-  const paymentMethodIcons: Record<string, ComponentType<{ className?: string }>> = {
-    [PAYMENT_METHODS.CASH]: Banknote,
-    [PAYMENT_METHODS.CARD]: CreditCard,
-    [PAYMENT_METHODS.BLIK]: Smartphone,
-    [PAYMENT_METHODS.TRANSFER]: Building2,
-  };
   
   const fullName = profile.user?.firstName && profile.user?.lastName
     ? `${profile.user.firstName} ${profile.user.lastName}`
@@ -289,12 +281,11 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               </h3>
               <div className="space-y-2">
                 {profile.paymentMethods.map((method) => {
-                  const Icon = paymentMethodIcons[method];
-                  const methodKey = method as keyof typeof PAYMENT_METHODS;
+                  const Icon = PAYMENT_METHOD_ICONS[method];
                   return Icon ? (
                     <div key={method} className="flex items-center gap-2 text-slate-300 text-sm">
                       <Icon className="size-4 text-orange-500" />
-                      <span>{tCommon(methodKey)}</span>
+                      <span>{tCommon(method)}</span>
                     </div>
                   ) : null;
                 })}

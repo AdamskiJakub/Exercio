@@ -1,25 +1,17 @@
 'use client';
 
-import { type ComponentType } from 'react';
 import { UseFormReturn, Controller } from 'react-hook-form';
 import { InstructorProfileFormData } from '@/lib/validations/schemas/instructor-profile';
 import { useTranslations } from 'next-intl';
-import { CreditCard, Banknote, Smartphone, Building2 } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { PAYMENT_METHODS, PAYMENT_METHOD_OPTIONS, type PaymentMethod } from '@/constants/payment';
+import { PAYMENT_METHOD_OPTIONS, PAYMENT_METHOD_ICONS, type PaymentMethod } from '@/constants/payment';
 
 interface PaymentSettingsSectionProps {
   form: UseFormReturn<InstructorProfileFormData>;
 }
-
-const PAYMENT_METHOD_ICONS: Record<string, ComponentType<{ className?: string }>> = {
-  [PAYMENT_METHODS.CASH]: Banknote,
-  [PAYMENT_METHODS.CARD]: CreditCard,
-  [PAYMENT_METHODS.BLIK]: Smartphone,
-  [PAYMENT_METHODS.TRANSFER]: Building2,
-};
 
 export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
   const t = useTranslations('Dashboard.profileForm.paymentSettings');
