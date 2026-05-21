@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsInt,
   IsBoolean,
+  IsIn,
   Min,
   ArrayMaxSize,
   MaxLength,
@@ -130,4 +131,17 @@ export class UpdateInstructorProfileDto {
   @Min(0)
   @IsOptional()
   minNoticeHours?: number; // Minimum hours notice before booking
+
+  // PAYMENT INFORMATION (informational only, no payment processing)
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(['cash', 'card', 'blik', 'transfer'], { each: true })
+  @ArrayMaxSize(10)
+  @IsOptional()
+  paymentMethods?: string[]; // ["cash", "card", "blik", "transfer"]
+
+  @IsString()
+  @MaxLength(500)
+  @IsOptional()
+  paymentInfo?: string | null; // Additional payment instructions
 }

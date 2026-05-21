@@ -16,10 +16,12 @@ import { getMediaUrl, isVideoUrl } from '@/lib/utils/media';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ContactSection } from '@/components/instructors/profile/ContactSection';
 import { ProfileFullViewProps } from './types';
+import { PAYMENT_METHOD_ICONS } from '@/constants/payment';
 
 export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const locale = useLocale();
   const t = useTranslations('InstructorProfile');
+  const tCommon = useTranslations('Common.paymentMethods');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   
@@ -239,22 +241,25 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
         {/* RIGHT COLUMN: Price & Tags */}
         <div className="lg:col-span-3 space-y-6">
           {/* Price Card */}
-          {!profile.hourlyRateHidden && profile.hourlyRate !== null && profile.hourlyRate !== undefined ? (
+          {!profile.hourlyRateHidden && (profile.sessionPrice || profile.hourlyRate) ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
-                {t('hourlyRate')}
+                {t('pricing')}
               </p>
-              <p className="text-4xl font-bold text-orange-500">
-                {profile.hourlyRate} zł
-              </p>
-              <p className="text-xs text-slate-400 mt-2">
-                {t('perHour')}
-              </p>
+              {profile.sessionPrice && profile.sessionDuration ? (
+                <p className="text-4xl font-bold text-orange-500">
+                  {profile.sessionPrice} zł <span className="text-xl text-orange-400">/ {profile.sessionDuration} min</span>
+                </p>
+              ) : profile.hourlyRate ? (
+                <p className="text-4xl font-bold text-orange-500">
+                  {profile.hourlyRate} zł <span className="text-xl text-orange-400">{t('perHour')}</span>
+                </p>
+              ) : null}
             </div>
           ) : profile.hourlyRateHidden ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
-                {t('hourlyRate')}
+                {t('pricing')}
               </p>
               <p className="text-xl font-bold text-orange-500">
                 {t('contactForPricing')}
@@ -271,6 +276,31 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               <p className="text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
                 {profile.packageDealsDescription}
               </p>
+            </div>
+          )}
+
+          {/* Payment Methods */}
+          {profile.paymentMethods && profile.paymentMethods.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
+                {t('paymentMethods')}
+              </h3>
+              <div className="space-y-2">
+                {profile.paymentMethods.map((method) => {
+                  const Icon = PAYMENT_METHOD_ICONS[method];
+                  return Icon ? (
+                    <div key={method} className="flex items-center gap-2 text-slate-300 text-sm">
+                      <Icon className="size-4 text-orange-500" />
+                      <span>{tCommon(method)}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+              {profile.paymentInfo && (
+                <p className="mt-3 text-xs text-slate-400 italic border-l-2 border-slate-600 pl-3">
+                  {profile.paymentInfo}
+                </p>
+              )}
             </div>
           )}
 

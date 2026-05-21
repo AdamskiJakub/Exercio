@@ -49,7 +49,13 @@
     "settings": "Settings",
     "homeAriaLabel": "Trainly - home page",
     "changeLanguage": "Change language. Current language",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "paymentMethods": {
+      "cash": "Cash",
+      "card": "Card",
+      "blik": "BLIK",
+      "transfer": "Bank Transfer"
+    }
   },
   "auth": {
     "loginSubtitle": "Sign in to your account",
@@ -369,6 +375,14 @@
         "messagePlaceholder": "e.g., Best contact via WhatsApp or SMS after 6 PM",
         "messageHint": "Optional message about your preferred contact method (visible to all visitors to your profile)"
       },
+      "paymentSettings": {
+        "title": "Payment Information",
+        "description": "Specify which payment methods you accept. This information will be visible to clients.",
+        "additionalInfo": "Additional payment information",
+        "additionalInfoPlaceholder": "e.g., Payment after session, possibility of bank transfer in advance",
+        "additionalInfoHint": "Additional payment instructions (optional)",
+        "optional": "optional"
+      },
       "optional": "(optional)",
       "photoUrl": "Profile Photo",
       "photoUrlPlaceholder": "Upload your profile photo",
@@ -432,6 +446,7 @@
     "searchPlaceholder": "Search...",
     "card": {
       "perHour": "per hour",
+      "perSession": "/ session",
       "viewProfile": "View Profile",
       "verified": "Verified",
       "yearsExp": "{count}+ years exp.",
@@ -537,9 +552,11 @@
     "publishing": "Publishing...",
     "verified": "Verified",
     "yearsExperience": "{count} years of experience",
-    "perHour": "PLN/hour",
+    "perHour": "/ hour",
+    "pricing": "Pricing",
     "hourlyRate": "Hourly Rate",
     "contactForPricing": "Contact for pricing",
+    "paymentMethods": "Payment Methods",
     "availabilityOnline": "Online",
     "availabilityInPerson": "In-person meetings",
     "availabilityBoth": "Online and in-person",

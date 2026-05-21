@@ -71,12 +71,17 @@ export function InstructorCard({ instructor, disableLink = false }: InstructorCa
               </div>
 
               {/* Price */}
-              {instructor.hourlyRate !== null && instructor.hourlyRate !== undefined && (
+              {!instructor.hourlyRateHidden && (instructor.sessionPrice || instructor.hourlyRate) && (
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-orange-500">
-                    {instructor.hourlyRate} zł
-                  </p>
-                  <p className="text-xs text-slate-400">{t('perHour')}</p>
+                  {instructor.sessionPrice && instructor.sessionDuration ? (
+                    <p className="text-2xl font-bold text-orange-500">
+                      {instructor.sessionPrice} zł <span className="text-base text-orange-400 font-normal">/ {instructor.sessionDuration} min</span>
+                    </p>
+                  ) : instructor.hourlyRate ? (
+                    <p className="text-2xl font-bold text-orange-500">
+                      {instructor.hourlyRate} zł <span className="text-base text-orange-400 font-normal">{t('perHour')}</span>
+                    </p>
+                  ) : null}
                 </div>
               )}
             </div>
