@@ -247,7 +247,7 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
                 {t('pricing')}
               </p>
               <p className="text-4xl font-bold text-orange-500">
-                {profile.hourlyRate} zł <span className="text-2xl text-orange-400">{t('perSession')}</span>
+                {profile.hourlyRate} zł <span className="text-xl text-orange-400">{t('perHour')}</span>
               </p>
             </div>
           ) : profile.hourlyRateHidden ? (
