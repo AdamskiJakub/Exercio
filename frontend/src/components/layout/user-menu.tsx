@@ -43,7 +43,7 @@ export function UserMenu() {
   const avatarUrl = (user?.role === 'INSTRUCTOR' && instructorProfile?.photoUrl)
     ? getMediaUrl(instructorProfile.photoUrl)
     : user?.avatarUrl 
-      ? user.avatarUrl
+      ? getMediaUrl(user.avatarUrl)
       : undefined;
 
   if (!isAuthenticated || !user) {

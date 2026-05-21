@@ -10,6 +10,14 @@ import session from 'express-session';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
  
+  // Trust proxy in production (required for secure cookies behind reverse proxy)
+  // Without this, Express will see req.protocol='http' even when user connects via HTTPS
+  // This breaks secure cookies and OAuth sessions won't persist
+  // Enable when deploying behind Nginx/Cloudflare/etc.
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+  }
+
   // Validate required environment variables
   if (!process.env.SESSION_SECRET) {
     throw new Error('SESSION_SECRET environment variable is required');

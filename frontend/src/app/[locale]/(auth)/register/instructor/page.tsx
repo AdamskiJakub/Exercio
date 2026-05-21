@@ -165,12 +165,7 @@ export default function RegisterInstructorPage() {
             </Button>
           </form>
 
-          {/* Social Login Buttons - BELOW FORM */}
-          <div className="mt-6">
-            <SocialLoginButtons />
-          </div>
-
-          {/* Footer links - BELOW OAUTH BUTTONS */}
+          {/* Footer links */}
           <div className="space-y-2 mt-6">
             <div className="text-center">
               <Link 
