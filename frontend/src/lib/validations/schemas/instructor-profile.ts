@@ -41,8 +41,6 @@ export const instructorProfileSchema = z.object({
   bio: z.string().max(1000).optional(),
   tagline: z.string().max(200).optional(),
   city: z.string().max(100).optional(),
-  hourlyRate: z.number().min(0).optional().nullable(),
-  hourlyRateHidden: z.boolean().optional(),
   packageDealsEnabled: z.boolean().optional(),
   packageDealsDescription: z.string().max(500).optional(),
   // photoUrl can be null/undefined (use nullable + optional for flexibility)

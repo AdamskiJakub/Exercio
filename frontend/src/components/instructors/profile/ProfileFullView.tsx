@@ -241,14 +241,20 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
         {/* RIGHT COLUMN: Price & Tags */}
         <div className="lg:col-span-3 space-y-6">
           {/* Price Card */}
-          {!profile.hourlyRateHidden && profile.hourlyRate !== null && profile.hourlyRate !== undefined ? (
+          {!profile.hourlyRateHidden && (profile.sessionPrice || profile.hourlyRate) ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
                 {t('pricing')}
               </p>
-              <p className="text-4xl font-bold text-orange-500">
-                {profile.hourlyRate} zł <span className="text-xl text-orange-400">{t('perHour')}</span>
-              </p>
+              {profile.sessionPrice && profile.sessionDuration ? (
+                <p className="text-4xl font-bold text-orange-500">
+                  {profile.sessionPrice} zł <span className="text-xl text-orange-400">/ {profile.sessionDuration} min</span>
+                </p>
+              ) : profile.hourlyRate ? (
+                <p className="text-4xl font-bold text-orange-500">
+                  {profile.hourlyRate} zł <span className="text-xl text-orange-400">{t('perHour')}</span>
+                </p>
+              ) : null}
             </div>
           ) : profile.hourlyRateHidden ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">

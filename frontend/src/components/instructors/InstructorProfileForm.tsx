@@ -111,8 +111,6 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       bio: profile?.bio || '',
       tagline: profile?.tagline || '',
       city: profile?.city || '',
-      hourlyRate: profile?.hourlyRate ?? undefined,
-      hourlyRateHidden: profile?.hourlyRateHidden || false,
       packageDealsEnabled: profile?.packageDealsEnabled || false,
       packageDealsDescription: profile?.packageDealsDescription || '',
       photoUrl: profile?.photoUrl || '',
@@ -144,8 +142,6 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         bio: profile.bio || '',
         tagline: profile.tagline || '',
         city: profile.city || '',
-        hourlyRate: profile.hourlyRate ?? undefined,
-        hourlyRateHidden: profile.hourlyRateHidden || false,
         packageDealsEnabled: profile.packageDealsEnabled || false,
         packageDealsDescription: profile.packageDealsDescription || '',
         photoUrl: profile.photoUrl || '',
@@ -203,8 +199,6 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       tags: selectedTags,
       goals: selectedGoals,
       availability: selectedAvailability,
-      hourlyRate: data.hourlyRate ?? null,
-      hourlyRateHidden: data.hourlyRateHidden || false,
       packageDealsEnabled: data.packageDealsEnabled || false,
       packageDealsDescription: data.packageDealsEnabled ? data.packageDealsDescription : null,
       yearsExperience: data.yearsExperience ?? null,
@@ -533,57 +527,6 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
             <p className="text-red-400 text-sm">{errors.yearsExperience.message}</p>
           )}
         </div>
-      </div>
-
-      {/* Hourly Rate */}
-      <div className="space-y-2">
-        <Label 
-          htmlFor="hourlyRate" 
-          className={`text-base font-semibold ${watch('hourlyRateHidden') ? 'text-slate-500' : 'text-slate-200'}`}
-        >
-          {t('hourlyRate')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
-        </Label>
-        <Input
-          {...register('hourlyRate', { 
-            setValueAs: (v) => v === '' || v === null || v === undefined ? undefined : Number(v)
-          })}
-          id="hourlyRate"
-          type="number"
-          step="0.01"
-          placeholder={t('hourlyRatePlaceholder')}
-          disabled={watch('hourlyRateHidden')}
-          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        {errors.hourlyRate && (
-          <p className="text-red-400 text-sm">{errors.hourlyRate.message}</p>
-        )}
-        
-        {/* Hide Hourly Rate Checkbox */}
-        <label className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors border border-slate-700 mt-2">
-          <Controller
-            name="hourlyRateHidden"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={(checked) => field.onChange(checked === true)}
-                className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-              />
-            )}
-          />
-          <div className="flex flex-col">
-            <span className={`text-sm font-medium select-none ${
-              watch('hourlyRateHidden') 
-                ? 'bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent' 
-                : 'text-slate-200'
-            }`}>
-              {t('hourlyRateHidden')}
-            </span>
-            <span className="text-sm text-slate-400">
-              {t('hourlyRateHiddenHint')}
-            </span>
-          </div>
-        </label>
       </div>
 
       {/* Package Deals Checkbox */}
