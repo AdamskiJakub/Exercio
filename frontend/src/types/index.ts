@@ -57,6 +57,9 @@ export interface InstructorProfile {
   sessionPrice?: number | null;
   isBookingEnabled?: boolean;
   minNoticeHours?: number;
+  // Payment information
+  paymentMethods?: string[];
+  paymentInfo?: string | null;
   createdAt: string;
   updatedAt: string;
   averageRating?: number;

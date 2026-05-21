@@ -75,6 +75,10 @@ model InstructorProfile {
   isBookingEnabled Boolean @default(false) // Whether instructor accepts bookings
   minNoticeHours   Int     @default(48) // Minimum hours notice before booking (default 48h)
 
+  // PAYMENT INFORMATION (informational only, no payment processing)
+  paymentMethods String[] @default([]) // ["cash", "card", "blik", "transfer"]
+  paymentInfo    String?  @db.Text // Additional payment instructions
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

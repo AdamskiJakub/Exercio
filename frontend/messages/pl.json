@@ -49,7 +49,13 @@
     "settings": "Ustawienia",
     "homeAriaLabel": "Trainly - strona główna",
     "changeLanguage": "Zmień język. Aktualny język",
-    "loading": "Ładowanie..."
+    "loading": "Ładowanie...",
+    "paymentMethods": {
+      "cash": "Gotówka",
+      "card": "Karta płatnicza",
+      "blik": "BLIK",
+      "transfer": "Przelew"
+    }
   },
   "auth": {
     "loginSubtitle": "Zaloguj się do swojego konta",
@@ -368,6 +374,14 @@
         "messageLabel": "Dodatkowa wiadomość kontaktowa",
         "messagePlaceholder": "np. Najlepszy kontakt przez WhatsApp lub SMS po 18:00",
         "messageHint": "Opcjonalna wiadomość o preferowanym sposobie kontaktu (widoczna dla wszystkich odwiedzających Twój profil)"
+      },
+      "paymentSettings": {
+        "title": "Informacje o płatności",
+        "description": "Określ jakie formy płatności akceptujesz. Te informacje będą widoczne dla klientów.",
+        "additionalInfo": "Dodatkowe informacje o płatności",
+        "additionalInfoPlaceholder": "np. Płatność po sesji, możliwość płatności przelewem z góry",
+        "additionalInfoHint": "Dodatkowe instrukcje dotyczące płatności (opcjonalne)",
+        "optional": "opcjonalnie"
       },
       "optional": "(opcjonalnie)",
       "photoUrl": "Zdjęcie profilowe",

@@ -44,6 +44,9 @@ export const instructorProfileSchema = z.object({
   showPhone: z.boolean().optional(),
   showEmail: z.boolean().optional(),
   contactMessage: z.string().max(500).optional(),
+  // Payment settings
+  paymentMethods: z.array(z.string()).optional(),
+  paymentInfo: z.string().max(500).optional().nullable(),
 });
 
 export type InstructorProfileFormData = z.infer<typeof instructorProfileSchema>;
