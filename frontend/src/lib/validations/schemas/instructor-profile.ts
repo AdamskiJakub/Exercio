@@ -1,6 +1,14 @@
 import { z } from 'zod';
 import { PAYMENT_METHODS } from '@/constants/payment';
 
+// Payment methods enum for zod validation
+const paymentMethodsEnum = [
+  PAYMENT_METHODS.CASH,
+  PAYMENT_METHODS.CARD,
+  PAYMENT_METHODS.BLIK,
+  PAYMENT_METHODS.TRANSFER,
+] as const;
+
 // Helper to validate comma-separated languages
 const commaSeparatedStrings = z.string().refine(
   (val) => {
@@ -46,12 +54,7 @@ export const instructorProfileSchema = z.object({
   showEmail: z.boolean().optional(),
   contactMessage: z.string().max(500).optional(),
   // Payment settings
-  paymentMethods: z.array(z.enum([
-    PAYMENT_METHODS.CASH,
-    PAYMENT_METHODS.CARD,
-    PAYMENT_METHODS.BLIK,
-    PAYMENT_METHODS.TRANSFER,
-  ])).max(10).optional(),
+  paymentMethods: z.array(z.enum(paymentMethodsEnum)).max(10).optional(),
   paymentInfo: z.string().max(500).optional().nullable(),
 });
 

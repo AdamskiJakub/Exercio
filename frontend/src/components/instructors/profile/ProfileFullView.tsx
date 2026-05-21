@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play, CreditCard, Banknote, Smartphone, Building2 } from 'lucide-react';
@@ -31,7 +31,7 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const { goals } = useGoals();
 
   // Payment method icons mapping
-  const paymentMethodIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  const paymentMethodIcons: Record<string, ComponentType<{ className?: string }>> = {
     [PAYMENT_METHODS.CASH]: Banknote,
     [PAYMENT_METHODS.CARD]: CreditCard,
     [PAYMENT_METHODS.BLIK]: Smartphone,
@@ -290,10 +290,11 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               <div className="space-y-2">
                 {profile.paymentMethods.map((method) => {
                   const Icon = paymentMethodIcons[method];
+                  const methodKey = method as keyof typeof PAYMENT_METHODS;
                   return Icon ? (
                     <div key={method} className="flex items-center gap-2 text-slate-300 text-sm">
                       <Icon className="size-4 text-orange-500" />
-                      <span>{tCommon(method as any)}</span>
+                      <span>{tCommon(methodKey)}</span>
                     </div>
                   ) : null;
                 })}

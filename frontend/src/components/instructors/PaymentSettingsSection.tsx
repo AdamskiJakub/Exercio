@@ -1,5 +1,6 @@
 'use client';
 
+import { type ComponentType } from 'react';
 import { UseFormReturn, Controller } from 'react-hook-form';
 import { InstructorProfileFormData } from '@/lib/validations/schemas/instructor-profile';
 import { useTranslations } from 'next-intl';
@@ -7,13 +8,13 @@ import { CreditCard, Banknote, Smartphone, Building2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { PAYMENT_METHODS, PAYMENT_METHOD_OPTIONS } from '@/constants/payment';
+import { PAYMENT_METHODS, PAYMENT_METHOD_OPTIONS, type PaymentMethod } from '@/constants/payment';
 
 interface PaymentSettingsSectionProps {
   form: UseFormReturn<InstructorProfileFormData>;
 }
 
-const PAYMENT_METHOD_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const PAYMENT_METHOD_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   [PAYMENT_METHODS.CASH]: Banknote,
   [PAYMENT_METHODS.CARD]: CreditCard,
   [PAYMENT_METHODS.BLIK]: Smartphone,
@@ -24,12 +25,12 @@ export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
   const t = useTranslations('Dashboard.profileForm.paymentSettings');
   const tCommon = useTranslations('Common.paymentMethods');
 
-  const paymentMethods = (form.watch('paymentMethods') as string[]) || [];
+  const paymentMethods = (form.watch('paymentMethods') as PaymentMethod[]) || [];
 
-  const togglePaymentMethod = (method: string) => {
-    const current = (form.getValues('paymentMethods') as string[]) || [];
+  const togglePaymentMethod = (method: PaymentMethod) => {
+    const current = (form.getValues('paymentMethods') as PaymentMethod[]) || [];
     if (current.includes(method)) {
-      form.setValue('paymentMethods', current.filter((m: string) => m !== method));
+      form.setValue('paymentMethods', current.filter((m) => m !== method));
     } else {
       form.setValue('paymentMethods', [...current, method]);
     }
