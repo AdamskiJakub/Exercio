@@ -119,6 +119,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Prevent OAuth users from logging in with password
+    // Users with provider other than 'local' must use OAuth
+    if (user.provider !== 'local') {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
     const passwordValid = await bcrypt.compare(dto.password, user.password);
 
     if (!passwordValid) {
@@ -139,6 +149,129 @@ export class AuthService {
         phone: user.phone,
       },
     };
+  }
+
+  async findOrCreateOAuthUser(oauthUser: {
+    provider: string;
+    providerId: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    avatarUrl?: string;
+  }) {
+    let user = await this.prisma.user.findUnique({
+      where: {
+        provider_providerId: {
+          provider: oauthUser.provider,
+          providerId: oauthUser.providerId,
+        },
+      },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.findUnique({
+        where: { email: oauthUser.email },
+      });
+
+      if (user) {
+        // Prevent provider flipping - enforce single provider per account
+        if (user.provider && user.provider !== 'local' && user.provider !== oauthUser.provider) {
+          throw new UnauthorizedException(
+            `This email is already registered with ${user.provider}. Please use ${user.provider} to login.`,
+          );
+        }
+
+        // For local accounts: just update profile data, keep provider='local'
+        // For OAuth accounts: this shouldn't happen (caught by compound unique above)
+        // This allows users with local accounts to also login via OAuth
+        if (user.provider === 'local') {
+          user = await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+              // DO NOT change provider - keep 'local'
+              isEmailVerified: true,
+              avatarUrl: user.avatarUrl || oauthUser.avatarUrl,
+              firstName: user.firstName || oauthUser.firstName,
+              lastName: user.lastName || oauthUser.lastName,
+            },
+          });
+        }
+      }
+    }
+
+    if (!user) {
+      const username = await this.generateUniqueUsername(oauthUser.email);
+      
+      try {
+        user = await this.prisma.user.create({
+          data: {
+            email: oauthUser.email,
+            username,
+            password: null,
+            firstName: oauthUser.firstName,
+            lastName: oauthUser.lastName,
+            provider: oauthUser.provider,
+            providerId: oauthUser.providerId,
+            isEmailVerified: true,
+            avatarUrl: oauthUser.avatarUrl,
+            role: 'CLIENT',
+          },
+        });
+      } catch (error) {
+        if (error.code === 'P2002') {
+          const retryUsername = `${username}-${Date.now()}`;
+          user = await this.prisma.user.create({
+            data: {
+              email: oauthUser.email,
+              username: retryUsername,
+              password: null,
+              firstName: oauthUser.firstName,
+              lastName: oauthUser.lastName,
+              provider: oauthUser.provider,
+              providerId: oauthUser.providerId,
+              isEmailVerified: true,
+              avatarUrl: oauthUser.avatarUrl,
+              role: 'CLIENT',
+            },
+          });
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    const token = await this.generateToken(user.id, user.email, user.role);
+
+    return {
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        avatarUrl: user.avatarUrl,
+      },
+    };
+  }
+
+  private async generateUniqueUsername(email: string): Promise<string> {
+    const baseUsername = email
+      .split('@')[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-');
+    
+    let username = baseUsername;
+    let counter = 1;
+
+    while (await this.prisma.user.findUnique({ where: { username } })) {
+      username = `${baseUsername}-${counter}`;
+      counter++;
+    }
+
+    return username;
   }
 
   private async generateToken(userId: string, email: string, role: string) {
@@ -162,6 +295,9 @@ export class AuthService {
         firstName: true,
         lastName: true,
         phone: true,
+        avatarUrl: true,
+        provider: true,
+        isEmailVerified: true,
       },
     });
 

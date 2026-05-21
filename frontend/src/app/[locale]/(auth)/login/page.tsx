@@ -7,6 +7,7 @@ import { DumbbellIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -86,6 +87,11 @@ export default function LoginPage() {
               {isLoading ? t('loggingIn') : t('login')}
             </Button>
           </form>
+
+          {/* Social Login Buttons - MOVED TO BOTTOM */}
+          <div className="mt-6">
+            <SocialLoginButtons />
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-slate-300 text-base">

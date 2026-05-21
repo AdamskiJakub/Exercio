@@ -162,28 +162,28 @@ export default function RegisterInstructorPage() {
             >
               {isLoading ? t('creatingAccount') : t('createAccount')}
             </Button>
-
-            {/* Footer links */}
-            <div className="space-y-2">
-              <div className="text-center">
-                <Link 
-                  href="/register/client"
-                  className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
-                >
-                  {t('registerAsClientInstead')}
-                </Link>
-              </div>
-
-              <div className="text-center">
-                <Link 
-                  href="/register"
-                  className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
-                >
-                  ← {t('backToRoleSelection')}
-                </Link>
-              </div>
-            </div>
           </form>
+
+          {/* Footer links */}
+          <div className="space-y-2 mt-6">
+            <div className="text-center">
+              <Link 
+                href="/register/client"
+                className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
+              >
+                {t('registerAsClientInstead')}
+              </Link>
+            </div>
+
+            <div className="text-center">
+              <Link 
+                href="/register"
+                className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                ← {t('backToRoleSelection')}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

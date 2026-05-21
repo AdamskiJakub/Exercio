@@ -11,6 +11,9 @@ export interface AuthUser {
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
+  avatarUrl?: string | null; // Profile picture (from OAuth or upload)
+  provider?: string | null; // "local" | "google" | "facebook" | "apple"
+  isEmailVerified?: boolean; // Email verification status
 }
 
 interface AuthState {
