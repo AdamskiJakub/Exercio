@@ -16,13 +16,13 @@ export class BookingsService {
    * Get available time slots for an instructor in a date range
    */
   async getAvailableSlots(
-    instructorId: string,
+    instructorProfileId: string,
     startDate: Date,
     endDate: Date,
   ) {
     // Validate instructor exists and has booking enabled
     const profile = await this.prisma.instructorProfile.findUnique({
-      where: { id: instructorId },
+      where: { id: instructorProfileId },
       include: {
         weeklyAvailability: true,
         availabilityExceptions: {
@@ -46,9 +46,10 @@ export class BookingsService {
 
     // Get existing bookings that overlap with this range
     // A booking overlaps if: startTime < endDate AND endTime > startDate
+    // NOTE: booking.instructorId is User.id, not InstructorProfile.id
     const existingBookings = await this.prisma.booking.findMany({
       where: {
-        instructorId,
+        instructorId: profile.userId, // Use userId, not instructorProfileId
         startTime: {
           lt: endDate, // Booking starts before our range ends
         },
@@ -91,7 +92,7 @@ export class BookingsService {
     exceptions: any[],
     existingBookings: any[],
   ) {
-    const slots: { startTime: Date; endTime: Date; isShortNotice: boolean }[] =
+    const slots: { startTime: Date; endTime: Date; isShortNotice: boolean; isException?: boolean }[] =
       [];
     const currentDate = new Date(startDate);
     const now = new Date();
@@ -120,6 +121,7 @@ export class BookingsService {
 
       let dayStartTime: string | null = null;
       let dayEndTime: string | null = null;
+      let isException = false;
 
       if (exception) {
         // Exception overrides weekly template
@@ -131,6 +133,7 @@ export class BookingsService {
         }
         dayStartTime = exception.startTime;
         dayEndTime = exception.endTime;
+        isException = true;
       } else {
         // Use weekly template
         const weeklySlot = weeklyAvailability.find(
@@ -190,6 +193,7 @@ export class BookingsService {
               startTime: new Date(slotStart),
               endTime: new Date(slotEnd),
               isShortNotice: slotStart < minNoticeDate,
+              isException,
             });
           }
         }
@@ -256,9 +260,10 @@ export class BookingsService {
     }
 
     // Check if slot is already booked (double-check for race conditions)
+    // NOTE: booking.instructorId is User.id, not InstructorProfile.id
     const existingBooking = await this.prisma.booking.findFirst({
       where: {
-        instructorId: dto.instructorId,
+        instructorId: profile.userId, // Use userId, not instructorProfileId
         startTime: {
           lt: endTime,
         },
@@ -282,10 +287,11 @@ export class BookingsService {
     const isShortNotice = startTime < minNoticeDate;
 
     // Create booking with snapshots
+    // NOTE: instructorId in the booking table is the User.id, NOT InstructorProfile.id
     const booking = await this.prisma.booking.create({
       data: {
         clientId: userId,
-        instructorId: dto.instructorId,
+        instructorId: profile.userId, // Use userId from instructor profile
         startTime,
         endTime,
         duration: profile.sessionDuration,
@@ -303,14 +309,127 @@ export class BookingsService {
             lastName: true,
           },
         },
-        instructor: {
+        instructorUser: {
           select: {
             id: true,
-            user: {
+            email: true,
+            firstName: true,
+            lastName: true,
+            instructorProfile: {
               select: {
-                email: true,
-                firstName: true,
-                lastName: true,
+                id: true,
+                sessionDuration: true,
+                sessionPrice: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return booking;
+  }
+
+  /**
+   * Create a guest booking (without authenticated user)
+   */
+  async createGuestBooking(dto: CreateBookingDto) {
+    // Get instructor profile
+    const profile = await this.prisma.instructorProfile.findUnique({
+      where: { id: dto.instructorId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Instructor not found');
+    }
+
+    if (!profile.isBookingEnabled) {
+      throw new BadRequestException('Instructor does not accept bookings');
+    }
+
+    const startTime = new Date(dto.startTime);
+    const endTime = new Date(
+      startTime.getTime() + profile.sessionDuration * 60 * 1000,
+    );
+    const now = new Date();
+
+    // Check if time is in the past
+    if (startTime <= now) {
+      throw new BadRequestException('Cannot book time slot in the past');
+    }
+
+    // Validate slot is within instructor's availability
+    const availableSlots = await this.getAvailableSlots(
+      dto.instructorId,
+      startTime,
+      endTime,
+    );
+
+    const slotExists = availableSlots.some(slot => 
+      slot.startTime.getTime() === startTime.getTime() &&
+      slot.endTime.getTime() === endTime.getTime()
+    );
+
+    if (!slotExists) {
+      throw new BadRequestException('Time slot is not available. Please choose from available slots.');
+    }
+
+    // Check if slot is already booked
+    // NOTE: booking.instructorId is User.id, not InstructorProfile.id
+    const existingBooking = await this.prisma.booking.findFirst({
+      where: {
+        instructorId: profile.userId, // Use userId, not instructorProfileId
+        startTime: {
+          lt: endTime,
+        },
+        endTime: {
+          gt: startTime,
+        },
+        status: {
+          in: ['PENDING', 'CONFIRMED'],
+        },
+      },
+    });
+
+    if (existingBooking) {
+      throw new BadRequestException('Time slot is already booked');
+    }
+
+    // Check if within notice period
+    const minNoticeDate = new Date(
+      now.getTime() + profile.minNoticeHours * 60 * 60 * 1000,
+    );
+    const isShortNotice = startTime < minNoticeDate;
+
+    // Create guest booking (clientId will be null)
+    // NOTE: instructorId in the booking table is the User.id, NOT InstructorProfile.id
+    const booking = await this.prisma.booking.create({
+      data: {
+        clientId: null, // Guest booking has no client ID
+        instructorId: profile.userId, // Use userId from instructor profile
+        startTime,
+        endTime,
+        duration: profile.sessionDuration,
+        price: profile.sessionPrice,
+        isShortNotice,
+        notes: dto.notes,
+        status: 'PENDING',
+        guestName: dto.guestName,
+        guestEmail: dto.guestEmail,
+        guestPhone: dto.guestPhone,
+      },
+      include: {
+        instructorUser: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            instructorProfile: {
+              select: {
+                id: true,
+                sessionDuration: true,
+                sessionPrice: true,
               },
             },
           },
@@ -325,10 +444,11 @@ export class BookingsService {
    * Get bookings for a user (as client or instructor)
    */
   async getMyBookings(userId: string, role: 'client' | 'instructor') {
+    // NOTE: booking.instructorId is User.id, not InstructorProfile.id
     const where =
       role === 'client'
         ? { clientId: userId }
-        : { instructor: { userId } }; // Query via instructor profile's userId
+        : { instructorId: userId }; // For instructors, use userId directly
 
     const bookings = await this.prisma.booking.findMany({
       where,
@@ -341,14 +461,17 @@ export class BookingsService {
             lastName: true,
           },
         },
-        instructor: {
+        instructorUser: {
           select: {
             id: true,
-            user: {
+            email: true,
+            firstName: true,
+            lastName: true,
+            instructorProfile: {
               select: {
-                email: true,
-                firstName: true,
-                lastName: true,
+                id: true,
+                sessionDuration: true,
+                sessionPrice: true,
               },
             },
           },
@@ -377,15 +500,17 @@ export class BookingsService {
             lastName: true,
           },
         },
-        instructor: {
+        instructorUser: {
           select: {
             id: true,
-            userId: true,
-            user: {
+            email: true,
+            firstName: true,
+            lastName: true,
+            instructorProfile: {
               select: {
-                email: true,
-                firstName: true,
-                lastName: true,
+                id: true,
+                sessionDuration: true,
+                sessionPrice: true,
               },
             },
           },
@@ -400,7 +525,7 @@ export class BookingsService {
     // Check if user has access to this booking
     if (
       booking.clientId !== userId &&
-      booking.instructor.userId !== userId
+      booking.instructorId !== userId // instructorId is User.id
     ) {
       throw new ForbiddenException('You do not have access to this booking');
     }
@@ -414,16 +539,13 @@ export class BookingsService {
   async confirmBooking(bookingId: string, userId: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
-      include: {
-        instructor: true,
-      },
     });
 
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
 
-    if (booking.instructor.userId !== userId) {
+    if (booking.instructorId !== userId) {
       throw new ForbiddenException('Only the instructor can confirm bookings');
     }
 
@@ -443,16 +565,13 @@ export class BookingsService {
   async completeBooking(bookingId: string, userId: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
-      include: {
-        instructor: true,
-      },
     });
 
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
 
-    if (booking.instructor.userId !== userId) {
+    if (booking.instructorId !== userId) {
       throw new ForbiddenException('Only the instructor can complete bookings');
     }
 
@@ -476,9 +595,6 @@ export class BookingsService {
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
-      include: {
-        instructor: true,
-      },
     });
 
     if (!booking) {
@@ -487,7 +603,7 @@ export class BookingsService {
 
     // Verify user has permission
     const isClient = booking.clientId === userId;
-    const isInstructor = booking.instructor.userId === userId;
+    const isInstructor = booking.instructorId === userId;
 
     if (!isClient && !isInstructor) {
       throw new ForbiddenException('You do not have access to this booking');

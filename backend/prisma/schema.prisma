@@ -83,7 +83,7 @@ model InstructorProfile {
   updatedAt DateTime @updatedAt
 
   services               Service[]
-  bookings               Booking[]
+  // Note: Bookings relation removed - access via user.bookingsAsInstructor instead
   weeklyAvailability     Availability[]          @relation("WeeklyAvailability")
   availabilityExceptions AvailabilityException[] @relation("AvailabilityExceptions")
 
@@ -117,11 +117,11 @@ enum BookingStatus {
 
 model Booking {
   id             String            @id @default(uuid())
-  clientId       String? // NOW OPTIONAL: Null if manual block by instructor
+  clientId       String? // NOW OPTIONAL: Null if manual block by instructor or guest booking
   client         User?             @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
-  instructorId   String
+  instructorId   String // This is User.id, NOT InstructorProfile.id
   instructorUser User              @relation("InstructorBookings", fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_user_fkey")
-  instructor     InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_profile_fkey")
+  // Note: No direct relation to InstructorProfile - access via instructorUser.instructorProfile
   serviceId      String? // NOW OPTIONAL: deprecated, will use sessionDuration/Price from profile
   service        Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
 
@@ -138,6 +138,11 @@ model Booking {
   isShortNotice Boolean       @default(false) // True if booked less than minNoticeHours
   isManualBlock Boolean       @default(false) // True if instructor manually blocked this slot
   notes         String?       @db.Text
+
+  // Guest booking fields (for non-authenticated users)
+  guestName  String? // Guest full name
+  guestEmail String? // Guest email
+  guestPhone String? // Guest phone number
 
   // Cancellation info
   cancelledAt        DateTime?

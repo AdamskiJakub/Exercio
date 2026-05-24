@@ -61,6 +61,14 @@ export const routing = defineRouting({
       pl: '/instruktorzy',
       en: '/instructors',
     },
+    '/instructors/[username]': {
+      pl: '/instruktorzy/[username]',
+      en: '/instructors/[username]',
+    },
+    '/instructors/[username]/book': {
+      pl: '/instruktorzy/[username]/rezerwacja',
+      en: '/instructors/[username]/book',
+    },
     '/how-it-works': {
       pl: '/jak-to-dziala',
       en: '/how-it-works',

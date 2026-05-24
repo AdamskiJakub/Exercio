@@ -150,13 +150,15 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
             <div
               key={day.toISOString()}
               onClick={() => handleDayClick(day, hasSlots)}
-              className={`aspect-square border rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-y-auto transition-all ${
-                hasSlots
-                  ? hasException 
-                    ? 'bg-purple-500/10 border-purple-500/30 cursor-pointer hover:bg-purple-500/20' 
-                    : 'bg-green-500/10 border-green-500/30 cursor-pointer hover:bg-green-500/20'
-                  : 'bg-slate-800/50 border-slate-700'
-              } ${isToday ? 'ring-1 sm:ring-2 ring-orange-500' : ''} ${hasException && hasSlots ? 'ring-1 ring-purple-400' : ''}`}
+              className={`aspect-square rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-y-auto transition-all ${
+                isToday 
+                  ? 'border-2 border-orange-500 bg-orange-500/5'
+                  : hasSlots
+                    ? hasException 
+                      ? 'border-2 border-purple-500/50 bg-purple-500/10 cursor-pointer hover:bg-purple-500/20' 
+                      : 'border border-green-500/30 bg-green-500/10 cursor-pointer hover:bg-green-500/20'
+                    : 'border border-slate-700 bg-slate-800/50'
+              }`}
             >
               <div className={`text-[10px] sm:text-xs font-medium mb-0.5 sm:mb-1 text-center ${
                 hasSlots 

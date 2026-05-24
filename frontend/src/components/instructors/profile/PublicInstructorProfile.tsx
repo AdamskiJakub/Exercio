@@ -32,20 +32,18 @@ export function PublicInstructorProfile({
   };
 
   const shouldShowBookingButton = 
-    false; // TODO: Enable when /instructors/[username]/book route is implemented
-    // profile.isBookingEnabled && 
-    // profile.user?.username &&
-    // (!isOwnProfile || source === NAV_SOURCE.DASHBOARD);
+    profile.user?.username &&
+    !isOwnProfile; // Show booking button for all instructors (except own profile)
 
   const handleBookingClick = () => {
     if (!profile.user?.username) {
       console.error('Cannot navigate to booking: username is missing');
       return;
     }
-    // TODO: Add /instructors/[username]/book route to src/i18n/routing.ts
-    // For now, construct the path manually with proper URL encoding
-    const encodedUsername = encodeURIComponent(profile.user.username);
-    router.push(`/${locale}/instructors/${encodedUsername}/book` as any);
+    router.push({
+      pathname: '/instructors/[username]/book',
+      params: { username: profile.user.username }
+    });
   };
 
   return (

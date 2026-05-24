@@ -12,6 +12,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
@@ -52,16 +53,29 @@ export class BookingsController {
 
   /**
    * POST /bookings
-   * Create a new booking (client only)
+   * Create a new booking (authenticated clients or guest users)
    */
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @UseGuards(OptionalJwtAuthGuard)
   async createBooking(@Request() req, @Body() dto: CreateBookingDto) {
-    // Enforce CLIENT role only
-    if (req.user.role !== 'CLIENT') {
-      throw new ForbiddenException('Only clients can create bookings');
+    // Check if user is authenticated
+    const isAuthenticated = req.user && req.user.id;
+    
+    if (isAuthenticated) {
+      // Authenticated user - must be CLIENT role
+      if (req.user.role !== 'CLIENT') {
+        throw new ForbiddenException('Only clients can create bookings');
+      }
+      return this.bookingsService.createBooking(req.user.id, dto);
+    } else {
+      // Guest booking - require guest contact info
+      if (!dto.guestName || !dto.guestEmail || !dto.guestPhone) {
+        throw new BadRequestException(
+          'Guest bookings require name, email, and phone number',
+        );
+      }
+      return this.bookingsService.createGuestBooking(dto);
     }
-    return this.bookingsService.createBooking(req.user.id, dto);
   }
 
   /**

@@ -25,6 +25,9 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
     ],
+    // Allow localhost/127.0.0.1 for development
+    dangerouslyAllowSVG: true,
+    unoptimized: process.env.NODE_ENV === 'development',
   },
 };
 

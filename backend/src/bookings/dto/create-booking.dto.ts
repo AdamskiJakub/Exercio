@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsDateString, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateBookingDto {
   @IsUUID()
@@ -12,4 +12,17 @@ export class CreateBookingDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  // Guest booking fields (for non-authenticated users)
+  @IsString()
+  @IsOptional()
+  guestName?: string;
+
+  @IsEmail()
+  @IsOptional()
+  guestEmail?: string;
+
+  @IsString()
+  @IsOptional()
+  guestPhone?: string;
 }

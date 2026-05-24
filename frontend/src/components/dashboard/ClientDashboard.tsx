@@ -3,6 +3,7 @@
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
+import { useMyBookings } from '@/hooks/useMyBookings';
 import { motion } from 'framer-motion';
 import { titleVariants } from '@/lib/animations';
 import { 
@@ -18,15 +19,33 @@ import {
 import { StatsCard } from './StatsCard';
 import { DashboardCard } from './DashboardCard';
 import { EmptyStateCard } from './EmptyStateCard';
+import { BookingsList } from '@/components/bookings/BookingsList';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export function ClientDashboard() {
   const t = useTranslations('Dashboard.client');
   const { user } = useAuthStore();
+  const { data: bookings, isLoading: bookingsLoading } = useMyBookings('client');
+
+  // Filter upcoming bookings (pending or confirmed, in the future)
+  const now = new Date();
+  const upcomingBookings = bookings?.filter(booking => 
+    (booking.status === 'PENDING' || booking.status === 'CONFIRMED') &&
+    new Date(booking.startTime) > now
+  ) || [];
+
+  const completedBookings = bookings?.filter(booking => 
+    booking.status === 'COMPLETED'
+  ) || [];
+
+  const pastBookings = bookings?.filter(booking => 
+    booking.status === 'COMPLETED' || booking.status === 'CANCELLED'
+  ) || [];
 
   // Placeholder stats - will be real data when we add bookings
   const stats = {
-    upcomingBookings: 0,
-    completedSessions: 0,
+    upcomingBookings: upcomingBookings.length,
+    completedSessions: completedBookings.length,
     favoriteTrainers: 0,
   };
 
@@ -109,11 +128,19 @@ export function ClientDashboard() {
           title={t('upcomingSessions')}
           delay={3}
         >
-          <EmptyStateCard
-            icon={Calendar}
-            title={t('noUpcomingSessions')}
-            description={t('sessionsComingSoon')}
-          />
+          {bookingsLoading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner />
+            </div>
+          ) : upcomingBookings.length > 0 ? (
+            <BookingsList bookings={upcomingBookings} role="client" />
+          ) : (
+            <EmptyStateCard
+              icon={Calendar}
+              title={t('noUpcomingSessions')}
+              description={t('sessionsComingSoon')}
+            />
+          )}
         </DashboardCard>
 
         {/* Reviews to Give */}
@@ -175,11 +202,19 @@ export function ClientDashboard() {
         title={t('bookingHistory')}
         delay={7}
       >
-        <EmptyStateCard
-          icon={FileText}
-          title={t('noHistory')}
-          description={t('historyDescription')}
-        />
+        {bookingsLoading ? (
+          <div className="flex justify-center py-8">
+            <LoadingSpinner />
+          </div>
+        ) : pastBookings.length > 0 ? (
+          <BookingsList bookings={pastBookings} role="client" />
+        ) : (
+          <EmptyStateCard
+            icon={FileText}
+            title={t('noHistory')}
+            description={t('historyDescription')}
+          />
+        )}
       </DashboardCard>
     </div>
   );
