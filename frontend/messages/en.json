@@ -304,6 +304,8 @@
       "moreSlots": "more",
       "moreSlotsTooltip": "{count} more available slots",
       "availableLabel": "Available",
+      "bookedLabel": "Booked",
+      "cancelledLabel": "Cancelled",
       "unavailableLabel": "Unavailable",
       "todayLabel": "Today",
       "confirmDelete": "Are you sure you want to delete this exception?",

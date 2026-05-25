@@ -304,6 +304,8 @@
       "moreSlots": "więcej",
       "moreSlotsTooltip": "Jeszcze {count} dostępnych slotów",
       "availableLabel": "Dostępne",
+      "bookedLabel": "Zajęte",
+      "cancelledLabel": "Anulowane",
       "unavailableLabel": "Niedostępny",
       "todayLabel": "Dzisiaj",
       "confirmDelete": "Czy na pewno chcesz usunąć ten wyjątek?",

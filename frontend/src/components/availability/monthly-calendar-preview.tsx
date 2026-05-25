@@ -5,18 +5,15 @@ import { useTranslations, useLocale } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
-import type { MonthlyCalendarPreviewProps } from '@/types/availability';
 import { DayDetailsModal } from '@/components/booking/DayDetailsModal';
-import { useAuthStore } from '@/stores/auth-store';
 import { useAvailableSlots } from '@/hooks/useAvailableSlots';
 import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
 import type { DaySlots } from '@/types/booking';
 
-export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, exceptions = [] }: MonthlyCalendarPreviewProps) {
+export function MonthlyCalendarPreview() {
   const t = useTranslations('Dashboard.availability');
   const locale = useLocale();
   const dateLocale = locale === 'pl' ? pl : enUS;
-  const { user } = useAuthStore();
   const { data: instructorProfile } = useMyInstructorProfile();
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -178,6 +175,7 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
         {daysInMonth.map((day) => {
           const { slots, hasException } = getActualDaySlots(day);
           const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+          const isPast = day < new Date() && !isToday;
           const hasSlots = slots.length > 0;
           const hasBookedSlots = slots.some(s => s.isBooked);
           const hasCancelledSlots = slots.some(s => s.isCancelled);
@@ -185,9 +183,11 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
           return (
             <div
               key={day.toISOString()}
-              onClick={() => handleDayClick(day, hasSlots)}
+              onClick={() => !isPast && handleDayClick(day, hasSlots)}
               className={`aspect-square rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-y-auto transition-all ${
-                isToday 
+                isPast
+                  ? 'border border-slate-700 bg-slate-800/30 opacity-50 cursor-not-allowed'
+                  : isToday 
                   ? 'border-2 border-orange-500 bg-orange-500/5'
                   : hasSlots
                     ? hasException 
@@ -201,7 +201,9 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
               }`}
             >
               <div className={`text-[10px] sm:text-xs font-medium mb-0.5 sm:mb-1 text-center ${
-                hasSlots 
+                isPast
+                  ? 'text-slate-600'
+                  : hasSlots 
                   ? hasException 
                     ? 'text-purple-400' 
                     : hasBookedSlots 
@@ -214,7 +216,11 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
                 {format(day, 'd')}
               </div>
               
-              {hasSlots ? (
+              {isPast ? (
+                <div className="text-[9px] sm:text-[10px] text-slate-600 text-center mt-1">
+                  —
+                </div>
+              ) : hasSlots ? (
                 <div className="space-y-0.5 max-h-16 sm:max-h-20 overflow-hidden">
                   {slots.slice(0, 3).map((slot, idx) => (
                     <div
@@ -258,11 +264,11 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500/20 border border-red-500/30 rounded"></div>
-          <span>Zajęte</span>
+          <span>{t('bookedLabel')}</span>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500/20 border border-yellow-500/30 rounded"></div>
-          <span>Anulowane</span>
+          <span>{t('cancelledLabel')}</span>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-purple-500/20 border border-purple-500/30 rounded ring-1 ring-purple-400"></div>

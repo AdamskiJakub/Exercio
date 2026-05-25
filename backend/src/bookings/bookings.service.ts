@@ -49,6 +49,9 @@ export class BookingsService {
     // A booking overlaps if: startTime < endDate AND endTime > startDate
     // NOTE: booking.instructorId is User.id, not InstructorProfile.id
     
+    // Check if requesting user is the instructor (for PII access control)
+    const isInstructor = requestingUserId === profile.userId;
+    
     // Get PENDING and CONFIRMED bookings - these block slots
     const existingBookings = await this.prisma.booking.findMany({
       where: {
@@ -68,25 +71,25 @@ export class BookingsService {
         startTime: true,
         endTime: true,
         status: true,
-        notes: true,
-        guestName: true,
-        guestEmail: true,
-        cancellationReason: true,
-        cancelledBy: true,
-        client: {
+        // Only include PII if requester is the instructor
+        notes: isInstructor,
+        guestName: isInstructor,
+        guestEmail: isInstructor,
+        cancellationReason: isInstructor,
+        cancelledBy: isInstructor,
+        client: isInstructor ? {
           select: {
             id: true,
             firstName: true,
             lastName: true,
             email: true,
           },
-        },
+        } : false,
       },
     });
 
     // Get CANCELLED bookings separately - for display only, don't block slots
     // Only show unacknowledged cancellations TO INSTRUCTOR (not to clients)
-    const isInstructor = requestingUserId === profile.userId;
     const cancelledBookings = isInstructor ? await this.prisma.booking.findMany({
       where: {
         instructorId: profile.userId,
@@ -791,14 +794,14 @@ export class BookingsService {
    */
   async createManualBlock(
     userId: string,
-    instructorId: string,
+    instructorProfileId: string,
     startTime: Date,
     endTime: Date,
     notes?: string,
   ) {
     // Verify user is the instructor
     const profile = await this.prisma.instructorProfile.findUnique({
-      where: { id: instructorId },
+      where: { id: instructorProfileId },
     });
 
     if (!profile || profile.userId !== userId) {
@@ -816,10 +819,10 @@ export class BookingsService {
       throw new BadRequestException('Duration must be positive');
     }
 
-    // Check for overlapping bookings
+    // Check for overlapping bookings (using profile.userId not instructorProfileId)
     const existingBooking = await this.prisma.booking.findFirst({
       where: {
-        instructorId,
+        instructorId: profile.userId, // Use userId for booking.instructorId
         startTime: {
           lt: endTime,
         },
@@ -838,7 +841,7 @@ export class BookingsService {
 
     return this.prisma.booking.create({
       data: {
-        instructorId,
+        instructorId: profile.userId, // Use userId, not instructorProfileId
         clientId: null, // No client for manual blocks
         startTime,
         endTime,
