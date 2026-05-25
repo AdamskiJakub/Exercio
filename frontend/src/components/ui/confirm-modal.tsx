@@ -45,8 +45,8 @@ export function ConfirmModal({
     : 'bg-orange-500 hover:bg-orange-600 text-white';
 
   const headerClass = variant === 'danger'
-    ? 'bg-gradient-to-r from-red-500 to-rose-500 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl'
-    : 'bg-gradient-to-r from-orange-500 to-red-500 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl';
+    ? 'bg-gradient-to-r from-red-500 to-rose-500 -mx-4 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl'
+    : 'bg-gradient-to-r from-orange-500 to-red-500 -mx-4 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl';
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

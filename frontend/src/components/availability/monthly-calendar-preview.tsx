@@ -45,57 +45,30 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
   const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  const generateTimeSlots = (day: Date): { slots: string[], hasException: boolean } => {
-    const dateStr = format(day, 'yyyy-MM-dd');
-    const dayOfWeek = getDay(day);
-    
-    // Compare using date-only strings to avoid timezone issues
-    const exception = exceptions.find(e => {
-      const exceptionDateOnly = e.date.split('T')[0];
-      return exceptionDateOnly === dateStr;
-    });
-    
-    if (exception) {
-      if (!exception.isAvailable || !exception.startTime || !exception.endTime) {
-        return { slots: [], hasException: true };
-      }
-      
-      const slots: string[] = [];
-      const [startHour, startMin] = exception.startTime.split(':').map(Number);
-      const [endHour, endMin] = exception.endTime.split(':').map(Number);
-      
-      let currentTime = startHour * 60 + startMin;
-      const endTime = endHour * 60 + endMin;
-
-      while (currentTime + sessionDuration <= endTime) {
-        const hour = Math.floor(currentTime / 60);
-        const min = currentTime % 60;
-        slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
-        currentTime += sessionDuration;
-      }
-      
-      return { slots, hasException: true };
-    }
-    
-    const adjustedDayOfWeek = dayOfWeek === 0 ? 0 : dayOfWeek;
-    const daySchedule = schedule.find(d => d.dayOfWeek === adjustedDayOfWeek);
-    if (!daySchedule || !daySchedule.isAvailable) return { slots: [], hasException: false };
-
-    const slots: string[] = [];
-    const [startHour, startMin] = daySchedule.startTime.split(':').map(Number);
-    const [endHour, endMin] = daySchedule.endTime.split(':').map(Number);
-    
-    let currentTime = startHour * 60 + startMin;
-    const endTime = endHour * 60 + endMin;
-
-    while (currentTime + sessionDuration <= endTime) {
-      const hour = Math.floor(currentTime / 60);
-      const min = currentTime % 60;
-      slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
-      currentTime += sessionDuration;
+  // Get actual slots from backend (includes booking status)
+  const getActualDaySlots = (day: Date): { slots: Array<{ time: string; available: boolean; isBooked: boolean; isCancelled: boolean; isException: boolean }>, hasException: boolean } => {
+    if (!slotsQuery.data) {
+      return { slots: [], hasException: false };
     }
 
-    return { slots, hasException: false };
+    const dateKey = format(day, 'yyyy-MM-dd');
+    const daySlots = slotsQuery.data
+      .filter(slot => {
+        const slotDate = format(new Date(slot.startTime), 'yyyy-MM-dd');
+        return slotDate === dateKey;
+      })
+      .map(slot => ({
+        time: format(new Date(slot.startTime), 'HH:mm'),
+        available: slot.available,
+        isBooked: !!slot.booking && slot.booking.status !== 'CANCELLED',
+        isCancelled: !!slot.booking && slot.booking.status === 'CANCELLED',
+        isException: slot.isException || false,
+      }));
+
+    return {
+      slots: daySlots,
+      hasException: daySlots.some(s => s.isException),
+    };
   };
 
   const handleDayClick = (day: Date, hasSlots: boolean) => {
@@ -203,9 +176,11 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
 
         {/* Calendar Days */}
         {daysInMonth.map((day) => {
-          const { slots, hasException } = generateTimeSlots(day);
+          const { slots, hasException } = getActualDaySlots(day);
           const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
           const hasSlots = slots.length > 0;
+          const hasBookedSlots = slots.some(s => s.isBooked);
+          const hasCancelledSlots = slots.some(s => s.isCancelled);
 
           return (
             <div
@@ -217,13 +192,23 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
                   : hasSlots
                     ? hasException 
                       ? 'border-2 border-purple-500/50 bg-purple-500/10 cursor-pointer hover:bg-purple-500/20' 
+                      : hasBookedSlots
+                      ? 'border border-red-500/30 bg-red-500/10 cursor-pointer hover:bg-red-500/20'
+                      : hasCancelledSlots
+                      ? 'border border-yellow-500/30 bg-yellow-500/10 cursor-pointer hover:bg-yellow-500/20'
                       : 'border border-green-500/30 bg-green-500/10 cursor-pointer hover:bg-green-500/20'
                     : 'border border-slate-700 bg-slate-800/50'
               }`}
             >
               <div className={`text-[10px] sm:text-xs font-medium mb-0.5 sm:mb-1 text-center ${
                 hasSlots 
-                  ? hasException ? 'text-purple-400' : 'text-green-400' 
+                  ? hasException 
+                    ? 'text-purple-400' 
+                    : hasBookedSlots 
+                    ? 'text-red-400'
+                    : hasCancelledSlots
+                    ? 'text-yellow-400'
+                    : 'text-green-400' 
                   : 'text-slate-500'
               }`}>
                 {format(day, 'd')}
@@ -235,12 +220,16 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
                     <div
                       key={idx}
                       className={`text-[8px] sm:text-[9px] rounded px-0.5 sm:px-1 py-0.5 text-center font-medium truncate ${
-                        hasException
+                        slot.isBooked
+                          ? 'bg-red-500/20 text-red-300'
+                          : slot.isCancelled
+                          ? 'bg-yellow-500/20 text-yellow-300'
+                          : slot.isException
                           ? 'bg-purple-500/20 text-purple-300'
                           : 'bg-green-500/20 text-green-300'
                       }`}
                     >
-                      {slot}
+                      {slot.time}
                     </div>
                   ))}
                   {slots.length > 3 && (
@@ -266,6 +255,14 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
           <span>{t('availableLabel')}</span>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500/20 border border-red-500/30 rounded"></div>
+          <span>Zajęte</span>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500/20 border border-yellow-500/30 rounded"></div>
+          <span>Anulowane</span>
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-purple-500/20 border border-purple-500/30 rounded ring-1 ring-purple-400"></div>

@@ -31,6 +31,7 @@ export function DayDetailsModal({
   const t = useTranslations('Booking');
   const updateNotes = useUpdateBookingNotes();
   const cancelBooking = useCancelBooking();
+  const acknowledgeCancellation = useAcknowledgeCancellation();
   const { user } = useAuthStore();
 
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
@@ -100,6 +101,19 @@ export function DayDetailsModal({
   const handleCancelBooking = (bookingId: string, time: string, clientName?: string) => {
     setBookingToCancel({ id: bookingId, time, clientName });
     setCancelModalOpen(true);
+  };
+
+  const handleAcknowledge = async (bookingId: string) => {
+    try {
+      await acknowledgeCancellation.mutateAsync(bookingId);
+      
+      // Trigger callback to refresh data
+      if (onNotesUpdated) {
+        onNotesUpdated();
+      }
+    } catch (error) {
+      console.error('Failed to acknowledge cancellation:', error);
+    }
   };
 
   const handleConfirmCancel = async (reason: string) => {
@@ -227,6 +241,19 @@ export function DayDetailsModal({
                             <p className="text-sm text-slate-300 whitespace-pre-wrap">
                               {slot.booking.cancellationReason}
                             </p>
+                          </div>
+                        )}
+
+                        {/* Acknowledge Cancellation Button - for instructors only */}
+                        {slot.booking.status === 'CANCELLED' && user?.role === 'INSTRUCTOR' && (
+                          <div className="mt-4">
+                            <Button
+                              onClick={() => handleAcknowledge(slot.booking!.id)}
+                              disabled={acknowledgeCancellation.isPending}
+                              className="w-full bg-green-500 hover:bg-green-600 text-white cursor-pointer"
+                            >
+                              {acknowledgeCancellation.isPending ? t('acknowledging') || 'Potwierdzam...' : t('acknowledgeButton') || 'OK - Rozumiem'}
+                            </Button>
                           </div>
                         )}
 

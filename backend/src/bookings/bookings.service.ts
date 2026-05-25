@@ -85,8 +85,9 @@ export class BookingsService {
     });
 
     // Get CANCELLED bookings separately - for display only, don't block slots
-    // Only show unacknowledged cancellations
-    const cancelledBookings = await this.prisma.booking.findMany({
+    // Only show unacknowledged cancellations TO INSTRUCTOR (not to clients)
+    const isInstructor = requestingUserId === profile.userId;
+    const cancelledBookings = isInstructor ? await this.prisma.booking.findMany({
       where: {
         instructorId: profile.userId,
         startTime: {
@@ -117,7 +118,7 @@ export class BookingsService {
           },
         },
       },
-    });
+    }) : []; // Return empty array for non-instructors (clients)
 
     // Generate slots
     const slots = this.generateTimeSlots(
@@ -170,20 +171,20 @@ export class BookingsService {
     );
 
     while (currentDate <= endDate) {
-      // Use UTC methods to avoid timezone shifts
-      const dayOfWeek = currentDate.getUTCDay(); // 0 = Sunday, 1 = Monday, etc.
+      // Use local time to match instructor's timezone
+      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
       
-      // Get date string in YYYY-MM-DD format using UTC
-      const year = currentDate.getUTCFullYear();
-      const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(currentDate.getUTCDate()).padStart(2, '0');
+      // Get date string in YYYY-MM-DD format using local time
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
 
       // Check for exception for this specific date
       const exception = exceptions.find((ex) => {
-        const exYear = ex.date.getUTCFullYear();
-        const exMonth = String(ex.date.getUTCMonth() + 1).padStart(2, '0');
-        const exDay = String(ex.date.getUTCDate()).padStart(2, '0');
+        const exYear = ex.date.getFullYear();
+        const exMonth = String(ex.date.getMonth() + 1).padStart(2, '0');
+        const exDay = String(ex.date.getDate()).padStart(2, '0');
         const exDateStr = `${exYear}-${exMonth}-${exDay}`;
         return exDateStr === dateStr;
       });
@@ -196,8 +197,8 @@ export class BookingsService {
         // Exception overrides weekly template
         if (!exception.isAvailable) {
           // Completely unavailable this day
-          currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-          currentDate.setUTCHours(0, 0, 0, 0);
+          currentDate.setDate(currentDate.getDate() + 1);
+          currentDate.setHours(0, 0, 0, 0);
           continue;
         }
         dayStartTime = exception.startTime;
@@ -211,8 +212,8 @@ export class BookingsService {
 
         if (!weeklySlot) {
           // No availability for this day of week
-          currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-          currentDate.setUTCHours(0, 0, 0, 0);
+          currentDate.setDate(currentDate.getDate() + 1);
+          currentDate.setHours(0, 0, 0, 0);
           continue;
         }
 
@@ -222,8 +223,8 @@ export class BookingsService {
 
       // Skip if no valid time range
       if (!dayStartTime || !dayEndTime) {
-        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-        currentDate.setUTCHours(0, 0, 0, 0);
+        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate.setHours(0, 0, 0, 0);
         continue;
       }
 
@@ -231,11 +232,13 @@ export class BookingsService {
       const [startHour, startMinute] = dayStartTime.split(':').map(Number);
       const [endHour, endMinute] = dayEndTime.split(':').map(Number);
 
+      // IMPORTANT: Use local time, not UTC
+      // This ensures that 15:00 in the instructor's timezone stays as 15:00
       let slotStart = new Date(currentDate);
-      slotStart.setUTCHours(startHour, startMinute, 0, 0);
+      slotStart.setHours(startHour, startMinute, 0, 0);
 
       const dayEnd = new Date(currentDate);
-      dayEnd.setUTCHours(endHour, endMinute, 0, 0);
+      dayEnd.setHours(endHour, endMinute, 0, 0);
 
       while (slotStart < dayEnd) {
         const slotEnd = new Date(
@@ -330,9 +333,9 @@ export class BookingsService {
         slotStart = new Date(slotStart.getTime() + sessionDuration * 60 * 1000);
       }
 
-      // Move to next day (using UTC methods for consistency)
-      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-      currentDate.setUTCHours(0, 0, 0, 0);
+      // Move to next day (using local time methods)
+      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setHours(0, 0, 0, 0);
     }
 
     return slots;

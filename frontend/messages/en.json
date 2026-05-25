@@ -695,6 +695,9 @@
     "clearHistoryError": "Failed to clear booking history",
     "cancellationAcknowledged": "Cancellation acknowledged",
     "acknowledgeError": "Failed to acknowledge cancellation",
+    "acknowledgeButton": "OK - I Understand",
+    "acknowledging": "Acknowledging...",
+    "historyCleared": "Booking history cleared",
     "rejectModal": {
       "title": "Reject booking",
       "description": "Provide a reason for rejecting this booking. The client will receive a notification with this reason.",

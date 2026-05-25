@@ -696,6 +696,9 @@
     "clearHistoryError": "Nie udało się usunąć historii rezerwacji",
     "cancellationAcknowledged": "Potwierdzono anulowanie",
     "acknowledgeError": "Nie udało się potwierdzić anulowania",
+    "acknowledgeButton": "OK - Rozumiem",
+    "acknowledging": "Potwierdzam...",
+    "historyCleared": "Historia rezerwacji została wyczyszczona",
     "rejectModal": {
       "title": "Odrzuć rezerwację",
       "description": "Podaj powód odrzucenia rezerwacji. Klient otrzyma powiadomienie z tym powodem.",
