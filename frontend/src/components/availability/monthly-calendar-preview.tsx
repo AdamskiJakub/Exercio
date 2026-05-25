@@ -8,6 +8,7 @@ import { pl, enUS } from 'date-fns/locale';
 import { DayDetailsModal } from '@/components/booking/DayDetailsModal';
 import { useAvailableSlots } from '@/hooks/useAvailableSlots';
 import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import type { DaySlots } from '@/types/booking';
 
 export function MonthlyCalendarPreview() {
@@ -154,6 +155,16 @@ export function MonthlyCalendarPreview() {
           </button>
         </div>
       </div>
+
+      {/* Loading State */}
+      {slotsQuery.isLoading && <LoadingSpinner />}
+
+      {/* Error State */}
+      {slotsQuery.isError && (
+        <div className="text-center py-20 text-red-400">
+          {t('calendarLoadError') || 'Błąd ładowania kalendarza'}
+        </div>
+      )}
 
       {/* Calendar Grid */}
       {!slotsQuery.isLoading && !slotsQuery.isError && (

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Booking } from '@/hooks/useMyBookings';
 import { format } from 'date-fns';
-import { pl } from 'date-fns/locale';
+import { pl, enUS } from 'date-fns/locale';
 import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Check, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useConfirmBooking, useCompleteBooking } from '@/hooks/useBookingActions';
@@ -21,6 +21,8 @@ interface BookingsListProps {
 
 export function BookingsList({ bookings, role }: BookingsListProps) {
   const t = useTranslations('Booking');
+  const locale = useLocale();
+  const dateLocale = locale === 'pl' ? pl : enUS;
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [completeModalOpen, setCompleteModalOpen] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -157,7 +159,7 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
                     <div className="flex items-center gap-1.5">
                       <Calendar className="w-4 h-4" />
                       <span>
-                        {format(new Date(booking.startTime), 'EEEE, d MMMM yyyy', { locale: pl })}
+                        {format(new Date(booking.startTime), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
