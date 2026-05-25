@@ -102,8 +102,6 @@ export default async function BookingPage({ params }: BookingPageProps) {
         {/* Booking Calendar */}
         <BookingCalendar 
           instructorId={profile.id}
-          sessionDuration={profile.sessionDuration || 60}
-          minNoticeHours={profile.minNoticeHours || 0}
           instructorProfile={profile}
         />
       </div>

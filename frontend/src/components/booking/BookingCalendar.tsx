@@ -7,33 +7,18 @@ import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { BookingConfirmModal } from './BookingConfirmModal';
+import { useAvailableSlots } from '@/hooks/useAvailableSlots';
 import { BookingLegend } from './BookingLegend';
 import { useCreateBooking } from '@/hooks/useCreateBooking';
+import type { DaySlots, TimeSlot } from '@/types/booking';
 
 interface BookingCalendarProps {
   instructorId: string;
-  sessionDuration: number;
-  minNoticeHours: number;
   instructorProfile: any; // We'll type this properly later
 }
 
-interface TimeSlot {
-  time: string;
-  available: boolean;
-  datetime: Date;
-  isException?: boolean;
-}
-
-interface DaySlots {
-  date: Date;
-  slots: TimeSlot[];
-  hasException?: boolean;
-}
-
 export function BookingCalendar({ 
-  instructorId, 
-  sessionDuration,
-  minNoticeHours,
+  instructorId,
   instructorProfile
 }: BookingCalendarProps) {
   const t = useTranslations('Booking');
@@ -43,15 +28,20 @@ export function BookingCalendar({
   );
   const [weekSlots, setWeekSlots] = useState<DaySlots[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time: string } | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time: string; datetime: Date } | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   // Generate 7 days from currentWeekStart
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
+  // Available slots query
+  const startDateKey = format(weekDays[0], 'yyyy-MM-dd');
+  const endDateKey = format(weekDays[6], 'yyyy-MM-dd');
+  const slotsQuery = useAvailableSlots(instructorId, startDateKey, endDateKey);
+
   useEffect(() => {
-    fetchAvailableSlots();
-  }, [currentWeekStart, instructorId]);
+    processQueryData();
+  }, [slotsQuery.data, currentWeekStart, instructorId]);
 
   // Reset focus when modal closes
   useEffect(() => {
@@ -61,69 +51,43 @@ export function BookingCalendar({
   }, [showModal]);
 
   async function fetchAvailableSlots() {
-    setLoading(true);
-    try {
-      // Fetch availability for the entire week at once
-      const startDate = format(weekDays[0], 'yyyy-MM-dd');
-      const endDate = format(weekDays[6], 'yyyy-MM-dd');
-      
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/bookings/available-slots?instructorId=${instructorId}&startDate=${startDate}&endDate=${endDate}`
-      );
-      
-      if (!response.ok) {
-        console.error('Failed to fetch slots:', response.status, response.statusText);
-        setWeekSlots(weekDays.map(date => ({ date, slots: [] })));
-        setLoading(false);
-        return;
-      }
+    // deprecated: processing is handled by processQueryData
+  }
 
-      const data = await response.json();
-      console.log('API Response:', data);
-      
-      // Group slots by date
-      const slotsByDate = new Map<string, TimeSlot[]>();
-      const exceptionDates = new Set<string>();
-      
-      data.forEach((slot: any) => {
-        const dateKey = slot.date || format(parseISO(slot.startTime), 'yyyy-MM-dd');
-        if (!slotsByDate.has(dateKey)) {
-          slotsByDate.set(dateKey, []);
-        }
-        
-        if (slot.isException) {
-          exceptionDates.add(dateKey);
-        }
-        
-        const timeSlot: TimeSlot = {
-          time: slot.time || format(parseISO(slot.startTime), 'HH:mm'),
-          available: slot.available !== false, // Default to true if not specified
-          datetime: parseISO(slot.startTime || `${dateKey}T${slot.time}`),
-          isException: slot.isException || false,
-        };
-        
-        console.log('Processing slot:', { dateKey, timeSlot });
-        
-        slotsByDate.get(dateKey)!.push(timeSlot);
-      });
-      
-      // Map to week days
-      const results = weekDays.map(date => {
-        const dateKey = format(date, 'yyyy-MM-dd');
-        return {
-          date,
-          slots: slotsByDate.get(dateKey) || [],
-          hasException: exceptionDates.has(dateKey),
-        };
-      });
-      
-      setWeekSlots(results);
-    } catch (error) {
-      console.error('Failed to fetch available slots:', error);
-      setWeekSlots(weekDays.map(date => ({ date, slots: [] })));
-    } finally {
-      setLoading(false);
-    }
+  function processQueryData() {
+    setLoading(slotsQuery.isLoading);
+
+    const data = slotsQuery.data || [];
+
+    const slotsByDate = new Map<string, TimeSlot[]>();
+    const exceptionDates = new Set<string>();
+
+    data.forEach((slot) => {
+      const dateKey = format(parseISO(slot.startTime), 'yyyy-MM-dd');
+      if (!slotsByDate.has(dateKey)) slotsByDate.set(dateKey, []);
+      if (slot.isException) exceptionDates.add(dateKey);
+
+      const timeSlot: TimeSlot = {
+        time: format(parseISO(slot.startTime), 'HH:mm'),
+        available: slot.available,
+        datetime: parseISO(slot.startTime),
+        isException: slot.isException || false,
+        booking: slot.booking,
+      };
+
+      slotsByDate.get(dateKey)!.push(timeSlot);
+    });
+
+    const results = weekDays.map(date => {
+      const dateKey = format(date, 'yyyy-MM-dd');
+      return {
+        date,
+        slots: slotsByDate.get(dateKey) || [],
+        hasException: exceptionDates.has(dateKey),
+      };
+    });
+
+    setWeekSlots(results);
   }
 
   function handlePreviousWeek() {
@@ -135,16 +99,36 @@ export function BookingCalendar({
   }
 
   function handleSlotClick(date: Date, time: string) {
-    setSelectedSlot({ date, time });
+    console.log('=== SLOT CLICK DEBUG ===');
+    console.log('Date:', date);
+    console.log('Time:', time);
+    
+    // Find the actual slot to get the datetime
+    const daySlots = weekSlots.find(d => isSameDay(d.date, date));
+    const slot = daySlots?.slots.find(s => s.time === time);
+    
+    if (!slot) {
+      console.error('Slot not found!');
+      return;
+    }
+    
+    console.log('Slot datetime (UTC):', slot.datetime);
+    
+    setSelectedSlot({ date, time, datetime: slot.datetime });
     setShowModal(true);
   }
 
   function handleConfirmBooking(guestData?: { name: string; email: string; phone: string }) {
     if (!selectedSlot) return;
 
-    // Construct ISO datetime string for booking
-    const dateStr = format(selectedSlot.date, 'yyyy-MM-dd');
-    const startTime = `${dateStr}T${selectedSlot.time}:00.000Z`;
+    // IMPORTANT: slot.datetime is already in UTC from backend
+    // We need to use it directly, not construct from date + time string
+    const startTime = selectedSlot.datetime.toISOString();
+
+    console.log('=== BOOKING CONFIRMATION DEBUG ===');
+    console.log('Selected slot datetime (UTC):', selectedSlot.datetime);
+    console.log('Start time being sent:', startTime);
+    console.log('Instructor ID:', instructorId);
 
     createBooking.mutate({
       instructorId,
@@ -247,23 +231,42 @@ export function BookingCalendar({
                   ) : dayData.slots.length === 0 ? (
                     <p className="text-xs text-slate-500 text-center pt-4">{t('noSlots')}</p>
                   ) : (
-                    dayData.slots.map((slot, slotIndex) => (
-                      <button
-                        key={slotIndex}
-                        onClick={() => slot.available && handleSlotClick(dayData.date, slot.time)}
-                        disabled={!slot.available}
-                        className={`w-full px-2 py-2 rounded-lg text-xs font-medium transition-all ${
-                          slot.available
-                            ? slot.isException
-                              ? 'bg-purple-500/20 border border-purple-500/50 text-purple-300 hover:bg-purple-500/30 cursor-pointer'
-                              : 'bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30 cursor-pointer'
-                            : 'bg-slate-700/30 border border-slate-600 text-slate-500 cursor-not-allowed'
-                        }`}
-                      >
-                        <Clock className="size-3 inline mr-1" />
-                        {slot.time}
-                      </button>
-                    ))
+                    dayData.slots.map((slot, slotIndex) => {
+                      // Determine slot color based on status
+                      const isCancelled = slot.booking?.status === 'CANCELLED';
+                      const isBooked = slot.booking && !isCancelled;
+                      
+                      const slotColor = isBooked
+                        ? 'bg-red-500/20 border border-red-500/50 text-red-300 cursor-not-allowed'
+                        : isCancelled
+                        ? 'bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/30 cursor-pointer'
+                        : slot.available
+                        ? slot.isException
+                          ? 'bg-purple-500/20 border border-purple-500/50 text-purple-300 hover:bg-purple-500/30 cursor-pointer'
+                          : 'bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30 cursor-pointer'
+                        : 'bg-slate-700/30 border border-slate-600 text-slate-500 cursor-not-allowed';
+                      
+                      const isClickable = slot.available && !isBooked;
+                      
+                      return (
+                        <button
+                          key={slotIndex}
+                          onClick={() => isClickable && handleSlotClick(dayData.date, slot.time)}
+                          disabled={!isClickable}
+                          className={`w-full px-2 py-2 rounded-lg text-xs font-medium transition-all ${slotColor}`}
+                          title={
+                            isBooked 
+                              ? `Zajęte - ${slot.booking!.clientName}` 
+                              : isCancelled
+                              ? `Anulowane - ${slot.booking!.clientName}`
+                              : undefined
+                          }
+                        >
+                          <Clock className="size-3 inline mr-1" />
+                          {slot.time}
+                        </button>
+                      );
+                    })
                   )}
                 </div>
               </div>

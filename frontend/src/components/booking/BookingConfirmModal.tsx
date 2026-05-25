@@ -69,7 +69,7 @@ export function BookingConfirmModal({
         aria-describedby="booking-modal-description"
       >
         {/* Header */}
-        <div className="relative bg-linear-to-r from-orange-500 to-red-500 p-6 shrink-0">
+        <div className="relative bg-linear-to-r from-orange-500 to-red-500 p-6 shrink-0 rounded-t-2xl">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors"

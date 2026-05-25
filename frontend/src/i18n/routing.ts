@@ -53,9 +53,9 @@ export const routing = defineRouting({
       pl: '/panel/ustawienia',
       en: '/dashboard/settings',
     },
-    '/dashboard/availability': {
-      pl: '/panel/dostepnosc',
-      en: '/dashboard/availability',
+    '/dashboard/calendar': {
+      pl: '/panel/kalendarz',
+      en: '/dashboard/calendar',
     },
     '/instructors': {
       pl: '/instruktorzy',

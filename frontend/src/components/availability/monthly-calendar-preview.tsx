@@ -1,25 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import type { MonthlyCalendarPreviewProps } from '@/types/availability';
+import { DayDetailsModal } from '@/components/booking/DayDetailsModal';
+import { useAuthStore } from '@/stores/auth-store';
+import { useAvailableSlots } from '@/hooks/useAvailableSlots';
+import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
+import type { DaySlots } from '@/types/booking';
 
 export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, exceptions = [] }: MonthlyCalendarPreviewProps) {
   const t = useTranslations('Dashboard.availability');
   const locale = useLocale();
   const dateLocale = locale === 'pl' ? pl : enUS;
+  const { user } = useAuthStore();
+  const { data: instructorProfile } = useMyInstructorProfile();
   
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDayData, setSelectedDayData] = useState<DaySlots | null>(null);
 
+  // Fetch slots for the entire month
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
+  const startDateKey = format(monthStart, 'yyyy-MM-dd');
+  const endDateKey = format(monthEnd, 'yyyy-MM-dd');
+  
+  const slotsQuery = useAvailableSlots(
+    instructorProfile?.id || '', 
+    startDateKey, 
+    endDateKey
+  );
+
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   // Get first day of month (0 = Sunday, 1 = Monday, etc.)
@@ -83,16 +99,61 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
   };
 
   const handleDayClick = (day: Date, hasSlots: boolean) => {
-    if (!hasSlots) return; // Don't open modal for unavailable days
+    if (!hasSlots || !slotsQuery.data) return;
+    
+    // Filter slots for this specific day
+    const dateKey = format(day, 'yyyy-MM-dd');
+    const daySlots = slotsQuery.data
+      .filter(slot => {
+        const slotDate = format(new Date(slot.startTime), 'yyyy-MM-dd');
+        return slotDate === dateKey;
+      })
+      .map(slot => ({
+        time: format(new Date(slot.startTime), 'HH:mm'),
+        available: slot.available,
+        datetime: new Date(slot.startTime),
+        isException: slot.isException || false,
+        booking: slot.booking,
+      }));
+
+    setSelectedDayData({
+      date: day,
+      slots: daySlots,
+      hasException: daySlots.some(s => s.isException),
+    });
     setSelectedDay(day);
     setIsModalOpen(true);
   };
 
-  const getSelectedDayData = () => {
-    if (!selectedDay) return null;
-    const { slots, hasException } = generateTimeSlots(selectedDay);
-    return { slots, hasException };
+  const handleNotesUpdated = () => {
+    // Refetch slots data after notes update
+    slotsQuery.refetch();
   };
+
+  // Update selectedDayData when slots data changes
+  useEffect(() => {
+    if (selectedDay && slotsQuery.data && isModalOpen) {
+      const dateKey = format(selectedDay, 'yyyy-MM-dd');
+      const daySlots = slotsQuery.data
+        .filter(slot => {
+          const slotDate = format(new Date(slot.startTime), 'yyyy-MM-dd');
+          return slotDate === dateKey;
+        })
+        .map(slot => ({
+          time: format(new Date(slot.startTime), 'HH:mm'),
+          available: slot.available,
+          datetime: new Date(slot.startTime),
+          isException: slot.isException || false,
+          booking: slot.booking,
+        }));
+
+      setSelectedDayData({
+        date: selectedDay,
+        slots: daySlots,
+        hasException: daySlots.some(s => s.isException),
+      });
+    }
+  }, [slotsQuery.data, selectedDay, isModalOpen]);
 
   return (
     <div className="bg-slate-900/50 rounded-lg border border-slate-700 p-3 sm:p-4">
@@ -221,74 +282,18 @@ export function MonthlyCalendarPreview({ schedule, sessionDuration = 60, excepti
       </div>
 
       {/* Day Details Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-slate-800 border-2 border-slate-600 text-white max-w-md mx-4 px-5 sm:px-6">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-white flex items-center justify-between">
-              <span>
-                {selectedDay && format(selectedDay, 'EEEE, d MMMM yyyy', { locale: dateLocale })}
-              </span>
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-4 mt-4">
-            {selectedDay && (() => {
-              const dayData = getSelectedDayData();
-              if (!dayData) return null;
-              
-              const { slots, hasException } = dayData;
-              
-              if (slots.length === 0) {
-                return (
-                  <div className="text-center py-8">
-                    <p className="text-slate-400 text-base">{t('dayOff')}</p>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="space-y-3">
-                  {hasException && (
-                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3">
-                      <p className="text-purple-300 text-sm font-medium">{t('exceptions')}</p>
-                    </div>
-                  )}
-                  
-                  <div className="text-sm text-slate-400 mb-2">
-                    {t('availableSlots')}: <span className="text-white font-semibold">{slots.length}</span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1">
-                    {slots.map((slot, idx) => (
-                      <div
-                        key={idx}
-                        className={`text-center py-2.5 px-3 rounded-lg font-medium ${
-                          hasException
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                            : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                        }`}
-                      >
-                        {slot}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-2 text-xs text-slate-500">
-                    {t('sessionDuration')}: {sessionDuration} {t('minutes')}
-                  </div>
-                </div>
-              );
-            })()}
-
-            <Button
-              onClick={() => setIsModalOpen(false)}
-              className="w-full bg-slate-700 hover:bg-slate-600 text-white h-11"
-            >
-              {t('close')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {selectedDayData && (
+        <DayDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedDay(null);
+            setSelectedDayData(null);
+          }}
+          dayData={selectedDayData}
+          onNotesUpdated={handleNotesUpdated}
+        />
+      )}
     </div>
   );
 }

@@ -14,16 +14,20 @@ export function BookingLegend() {
           <span className="text-slate-300">{t('availableLabel')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="size-4 bg-slate-700 border border-slate-600 rounded"></div>
-          <span className="text-slate-300">{t('unavailableLabel')}</span>
+          <div className="size-4 bg-red-500/20 border border-red-500 rounded"></div>
+          <span className="text-slate-300">{t('bookedLabel')}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="size-4 bg-purple-500/20 border-2 border-purple-500 rounded"></div>
           <span className="text-slate-300">{t('exceptionLabel')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="size-4 bg-orange-500 border-2 border-orange-500 rounded"></div>
-          <span className="text-slate-300">{t('selectedLabel')}</span>
+          <div className="size-4 bg-slate-700 border border-slate-600 rounded"></div>
+          <span className="text-slate-300">{t('unavailableLabel')}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="size-4 border-2 border-orange-500 rounded"></div>
+          <span className="text-slate-300">{t('todayLabel')}</span>
         </div>
       </div>
     </div>

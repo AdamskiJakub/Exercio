@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -27,8 +28,9 @@ export class BookingsController {
    * GET /bookings/available-slots
    * Get available time slots for an instructor
    */
+  @UseGuards(OptionalJwtAuthGuard)
   @Get('available-slots')
-  async getAvailableSlots(@Query() query: GetAvailableSlotsDto) {
+  async getAvailableSlots(@Query() query: GetAvailableSlotsDto, @Request() req) {
     const startDate = new Date(query.startDate);
     const endDate = new Date(query.endDate);
 
@@ -48,6 +50,7 @@ export class BookingsController {
       query.instructorId,
       startDate,
       endDate,
+      req.user?.id, // Pass requesting user ID to check if instructor
     );
   }
 
@@ -134,6 +137,16 @@ export class BookingsController {
   }
 
   /**
+   * DELETE /bookings/history
+   * Clear completed/cancelled bookings for current client
+   */
+  @UseGuards(JwtAuthGuard)
+  @Delete('history')
+  async clearHistory(@Request() req) {
+    return this.bookingsService.clearUserHistory(req.user.id);
+  }
+
+  /**
    * POST /bookings/manual-block
    * Create a manual time block (instructor only)
    */
@@ -149,6 +162,40 @@ export class BookingsController {
       new Date(body.startTime),
       new Date(body.endTime),
       body.notes,
+    );
+  }
+
+  /**
+   * PATCH /bookings/:id/notes
+   * Update booking notes (instructor only)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/notes')
+  async updateNotes(
+    @Request() req,
+    @Param('id') bookingId: string,
+    @Body('notes') notes: string,
+  ) {
+    return this.bookingsService.updateBookingNotes(
+      req.user.id,
+      bookingId,
+      notes,
+    );
+  }
+
+  /**
+   * PATCH /bookings/:id/acknowledge
+   * Acknowledge a cancelled booking (instructor only)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/acknowledge')
+  async acknowledgeCancellation(
+    @Request() req,
+    @Param('id') bookingId: string,
+  ) {
+    return this.bookingsService.acknowledgeCancellation(
+      req.user.id,
+      bookingId,
     );
   }
 }

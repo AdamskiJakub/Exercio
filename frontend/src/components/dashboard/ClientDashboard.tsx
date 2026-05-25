@@ -21,11 +21,16 @@ import { DashboardCard } from './DashboardCard';
 import { EmptyStateCard } from './EmptyStateCard';
 import { BookingsList } from '@/components/bookings/BookingsList';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useClearHistory } from '@/hooks/useClearHistory';
+import { useState } from 'react';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 
 export function ClientDashboard() {
   const t = useTranslations('Dashboard.client');
   const { user } = useAuthStore();
   const { data: bookings, isLoading: bookingsLoading } = useMyBookings('client');
+  const clearHistory = useClearHistory();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Filter upcoming bookings (pending or confirmed, in the future)
   const now = new Date();
@@ -207,7 +212,17 @@ export function ClientDashboard() {
             <LoadingSpinner />
           </div>
         ) : pastBookings.length > 0 ? (
-          <BookingsList bookings={pastBookings} role="client" />
+          <>
+            <div className="flex justify-end mb-4">
+              <button
+                className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm"
+                onClick={() => setConfirmOpen(true)}
+              >
+                {t('clearHistory')}
+              </button>
+            </div>
+            <BookingsList bookings={pastBookings} role="client" />
+          </>
         ) : (
           <EmptyStateCard
             icon={FileText}
@@ -215,6 +230,19 @@ export function ClientDashboard() {
             description={t('historyDescription')}
           />
         )}
+
+        <ConfirmModal
+          isOpen={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={async () => {
+            await clearHistory.mutateAsync();
+            setConfirmOpen(false);
+          }}
+          title={t('clearHistory')}
+          description={t('clearHistoryDescription')}
+          confirmText={t('clear')}
+          cancelText={t('cancel')}
+        />
       </DashboardCard>
     </div>
   );

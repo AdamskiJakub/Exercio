@@ -44,14 +44,18 @@ export function ConfirmModal({
     ? 'bg-red-500 hover:bg-red-600 text-white'
     : 'bg-orange-500 hover:bg-orange-600 text-white';
 
+  const headerClass = variant === 'danger'
+    ? 'bg-gradient-to-r from-red-500 to-rose-500 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl'
+    : 'bg-gradient-to-r from-orange-500 to-red-500 -mx-6 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl';
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-125 bg-slate-800 border-slate-700" aria-describedby={description ? undefined : 'dialog-description'}>
-        <DialogHeader>
+        <DialogHeader className={headerClass}>
           <DialogTitle className="text-xl text-white">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-slate-400" id="dialog-description">
+          <DialogDescription className="text-white/80" id="dialog-description">
             {description || ' '}
           </DialogDescription>
         </DialogHeader>

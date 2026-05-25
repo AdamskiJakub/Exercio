@@ -148,6 +148,7 @@ model Booking {
   cancelledAt        DateTime?
   cancelledBy        String? // "client" or "instructor"
   cancellationReason String?   @db.Text
+  acknowledgedAt     DateTime? // When instructor acknowledged the cancellation
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

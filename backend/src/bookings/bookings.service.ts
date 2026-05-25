@@ -19,6 +19,7 @@ export class BookingsService {
     instructorProfileId: string,
     startDate: Date,
     endDate: Date,
+    requestingUserId?: string,
   ) {
     // Validate instructor exists and has booking enabled
     const profile = await this.prisma.instructorProfile.findUnique({
@@ -47,6 +48,8 @@ export class BookingsService {
     // Get existing bookings that overlap with this range
     // A booking overlaps if: startTime < endDate AND endTime > startDate
     // NOTE: booking.instructorId is User.id, not InstructorProfile.id
+    
+    // Get PENDING and CONFIRMED bookings - these block slots
     const existingBookings = await this.prisma.booking.findMany({
       where: {
         instructorId: profile.userId, // Use userId, not instructorProfileId
@@ -61,8 +64,58 @@ export class BookingsService {
         },
       },
       select: {
+        id: true,
         startTime: true,
         endTime: true,
+        status: true,
+        notes: true,
+        guestName: true,
+        guestEmail: true,
+        cancellationReason: true,
+        cancelledBy: true,
+        client: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Get CANCELLED bookings separately - for display only, don't block slots
+    // Only show unacknowledged cancellations
+    const cancelledBookings = await this.prisma.booking.findMany({
+      where: {
+        instructorId: profile.userId,
+        startTime: {
+          lt: endDate,
+        },
+        endTime: {
+          gt: startDate,
+        },
+        status: 'CANCELLED',
+        acknowledgedAt: null, // Only unacknowledged cancellations
+      },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        status: true,
+        notes: true,
+        guestName: true,
+        guestEmail: true,
+        cancellationReason: true,
+        cancelledBy: true,
+        client: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -75,6 +128,7 @@ export class BookingsService {
       profile.weeklyAvailability,
       profile.availabilityExceptions,
       existingBookings,
+      cancelledBookings,
     );
 
     return slots;
@@ -91,9 +145,24 @@ export class BookingsService {
     weeklyAvailability: any[],
     exceptions: any[],
     existingBookings: any[],
+    cancelledBookings: any[],
   ) {
-    const slots: { startTime: Date; endTime: Date; isShortNotice: boolean; isException?: boolean }[] =
-      [];
+    const slots: Array<{
+      startTime: Date;
+      endTime: Date;
+      isShortNotice: boolean;
+      isException?: boolean;
+      available: boolean;
+      booking?: {
+        id: string;
+        status: string;
+        notes?: string;
+        clientName: string;
+        clientEmail?: string;
+        cancellationReason?: string;
+        cancelledBy?: string;
+      };
+    }> = [];
     const currentDate = new Date(startDate);
     const now = new Date();
     const minNoticeDate = new Date(
@@ -180,20 +249,79 @@ export class BookingsService {
 
         // Check if slot is not in the past
         if (slotStart > now) {
-          // Check if slot is not already booked
-          const isBooked = existingBookings.some((booking) => {
+          // Check if slot is already booked (PENDING or CONFIRMED)
+          const bookedSession = existingBookings.find((booking) => {
             const bookingStart = new Date(booking.startTime);
             const bookingEnd = new Date(booking.endTime);
             // Check for overlap
             return slotStart < bookingEnd && slotEnd > bookingStart;
           });
 
-          if (!isBooked) {
+          // Check if there's a cancelled booking for this slot
+          const cancelledSession = cancelledBookings.find((booking) => {
+            const bookingStart = new Date(booking.startTime);
+            const bookingEnd = new Date(booking.endTime);
+            return slotStart < bookingEnd && slotEnd > bookingStart;
+          });
+
+          if (bookedSession) {
+            // Slot is booked (PENDING/CONFIRMED) - not available
+            const clientName = bookedSession.guestName || 
+              (bookedSession.client 
+                ? `${bookedSession.client.firstName || ''} ${bookedSession.client.lastName || ''}`.trim()
+                : 'Unknown Client');
+            
+            const clientEmail = bookedSession.guestEmail || bookedSession.client?.email;
+
             slots.push({
               startTime: new Date(slotStart),
               endTime: new Date(slotEnd),
               isShortNotice: slotStart < minNoticeDate,
               isException,
+              available: false,
+              booking: {
+                id: bookedSession.id,
+                status: bookedSession.status,
+                notes: bookedSession.notes || undefined,
+                clientName,
+                clientEmail,
+                cancellationReason: bookedSession.cancellationReason || undefined,
+                cancelledBy: bookedSession.cancelledBy || undefined,
+              },
+            });
+          } else if (cancelledSession) {
+            // Slot has a cancelled booking - show as available but with booking info
+            const clientName = cancelledSession.guestName || 
+              (cancelledSession.client 
+                ? `${cancelledSession.client.firstName || ''} ${cancelledSession.client.lastName || ''}`.trim()
+                : 'Unknown Client');
+            
+            const clientEmail = cancelledSession.guestEmail || cancelledSession.client?.email;
+
+            slots.push({
+              startTime: new Date(slotStart),
+              endTime: new Date(slotEnd),
+              isShortNotice: slotStart < minNoticeDate,
+              isException,
+              available: true,
+              booking: {
+                id: cancelledSession.id,
+                status: cancelledSession.status,
+                notes: cancelledSession.notes || undefined,
+                clientName,
+                clientEmail,
+                cancellationReason: cancelledSession.cancellationReason || undefined,
+                cancelledBy: cancelledSession.cancelledBy || undefined,
+              },
+            });
+          } else {
+            // Slot is available with no booking
+            slots.push({
+              startTime: new Date(slotStart),
+              endTime: new Date(slotEnd),
+              isShortNotice: slotStart < minNoticeDate,
+              isException,
+              available: true,
             });
           }
         }
@@ -638,6 +766,24 @@ export class BookingsService {
   }
 
   /**
+   * DELETE bookings/history
+   * Remove completed or cancelled bookings for the requesting client
+   */
+  async clearUserHistory(userId: string) {
+    // Only delete bookings that belong to the client
+    const result = await this.prisma.booking.deleteMany({
+      where: {
+        clientId: userId,
+        status: {
+          in: ['COMPLETED', 'CANCELLED'],
+        },
+      },
+    });
+
+    return { deleted: result.count };
+  }
+
+  /**
    * Create manual block (instructor only)
    */
   async createManualBlock(
@@ -698,6 +844,64 @@ export class BookingsService {
         notes,
         status: 'CONFIRMED', // Manual blocks are automatically confirmed
       },
+    });
+  }
+
+  /**
+   * Update booking notes (instructor only)
+   */
+  async updateBookingNotes(userId: string, bookingId: string, notes: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: {
+        instructorUser: {
+          include: {
+            instructorProfile: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Verify user is the instructor
+    if (booking.instructorId !== userId) {
+      throw new ForbiddenException('Only the instructor can update notes');
+    }
+
+    return this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { notes },
+    });
+  }
+
+  /**
+   * Acknowledge cancellation (instructor only)
+   */
+  async acknowledgeCancellation(userId: string, bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Verify user is the instructor
+    if (booking.instructorId !== userId) {
+      throw new ForbiddenException('Only the instructor can acknowledge cancellations');
+    }
+
+    // Verify booking is cancelled
+    if (booking.status !== 'CANCELLED') {
+      throw new BadRequestException('Only cancelled bookings can be acknowledged');
+    }
+
+    return this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { acknowledgedAt: new Date() },
     });
   }
 }

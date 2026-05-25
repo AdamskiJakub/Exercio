@@ -26,7 +26,10 @@ export function useConfirmBooking() {
       return response.data;
     },
     onSuccess: () => {
+      // invalidate general bookings and instructor-specific lists and available slots
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings', 'my', 'instructor'] });
+      queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
       toast.success(t('bookingConfirmed') || 'Booking confirmed successfully');
     },
     onError: (error: any) => {
@@ -49,6 +52,8 @@ export function useRejectBooking() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings', 'my', 'instructor'] });
+      queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
       toast.success(t('bookingRejected') || 'Booking rejected');
     },
     onError: (error: any) => {
@@ -68,6 +73,8 @@ export function useCompleteBooking() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings', 'my', 'instructor'] });
+      queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
       toast.success(t('bookingCompleted') || 'Booking marked as completed');
     },
     onError: (error: any) => {
