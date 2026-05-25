@@ -156,32 +156,35 @@ export function MonthlyCalendarPreview() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 overflow-hidden">{/* Day Headers */}
-        {(locale === 'pl' 
-          ? ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
-          : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        ).map((day) => (
-          <div key={day} className="text-center text-[10px] sm:text-xs font-medium text-slate-400 py-1.5 sm:py-2">
-            {day}
-          </div>
-        ))}
+      {!slotsQuery.isLoading && !slotsQuery.isError && (
+        <>
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 overflow-hidden">
+            {/* Day Headers */}
+            {(locale === 'pl' 
+              ? ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
+              : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+            ).map((day) => (
+              <div key={day} className="text-center text-[10px] sm:text-xs font-medium text-slate-400 py-1.5 sm:py-2">
+                {day}
+              </div>
+            ))}
 
-        {/* Empty cells for padding */}
-        {Array.from({ length: paddingDays }).map((_, i) => (
-          <div key={`empty-${i}`} className="aspect-square" />
-        ))}
+            {/* Empty cells for padding */}
+            {Array.from({ length: paddingDays }).map((_, i) => (
+              <div key={`empty-${i}`} className="aspect-square" />
+            ))}
 
-        {/* Calendar Days */}
-        {daysInMonth.map((day) => {
-          const { slots, hasException } = getActualDaySlots(day);
-          const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-          const isPast = day < new Date() && !isToday;
-          const hasSlots = slots.length > 0;
-          const hasBookedSlots = slots.some(s => s.isBooked);
-          const hasCancelledSlots = slots.some(s => s.isCancelled);
+            {/* Calendar Days */}
+            {daysInMonth.map((day) => {
+              const { slots, hasException } = getActualDaySlots(day);
+              const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+              const isPast = day < new Date() && !isToday;
+              const hasSlots = slots.length > 0;
+              const hasBookedSlots = slots.some(s => s.isBooked);
+              const hasCancelledSlots = slots.some(s => s.isCancelled);
 
-          return (
-            <div
+              return (
+                <div
               key={day.toISOString()}
               onClick={() => !isPast && handleDayClick(day, hasSlots)}
               className={`aspect-square rounded-md sm:rounded-lg p-0.5 sm:p-1 overflow-y-auto transition-all ${
@@ -252,37 +255,39 @@ export function MonthlyCalendarPreview() {
                   —
                 </div>
               )}
-            </div>
-          );
-        })}
-      </div>
+                </div>
+              );
+            })}
+          </div>
 
-      <div className="mt-2 sm:mt-3 text-[10px] sm:text-xs text-slate-400 flex items-center gap-2 sm:gap-4 flex-wrap">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
-          <span>{t('availableLabel')}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500/20 border border-red-500/30 rounded"></div>
-          <span>{t('bookedLabel')}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500/20 border border-yellow-500/30 rounded"></div>
-          <span>{t('cancelledLabel')}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-purple-500/20 border border-purple-500/30 rounded ring-1 ring-purple-400"></div>
-          <span>{t('exceptions')}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-800/50 border border-slate-700 rounded"></div>
-          <span>{t('unavailableLabel')}</span>
-        </div>
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 ring-1 sm:ring-2 ring-orange-500 rounded"></div>
-          <span>{t('todayLabel')}</span>
-        </div>
-      </div>
+          <div className="mt-2 sm:mt-3 text-[10px] sm:text-xs text-slate-400 flex items-center gap-2 sm:gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500/20 border border-green-500/30 rounded"></div>
+              <span>{t('availableLabel')}</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500/20 border border-red-500/30 rounded"></div>
+              <span>{t('bookedLabel')}</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500/20 border border-yellow-500/30 rounded"></div>
+              <span>{t('cancelledLabel')}</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-purple-500/20 border border-purple-500/30 rounded ring-1 ring-purple-400"></div>
+              <span>{t('exceptions')}</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-800/50 border border-slate-700 rounded"></div>
+              <span>{t('unavailableLabel')}</span>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 ring-1 sm:ring-2 ring-orange-500 rounded"></div>
+              <span>{t('todayLabel')}</span>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Day Details Modal */}
       {selectedDayData && (

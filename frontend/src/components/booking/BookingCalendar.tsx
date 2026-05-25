@@ -99,10 +99,6 @@ export function BookingCalendar({
   }
 
   function handleSlotClick(date: Date, time: string) {
-    console.log('=== SLOT CLICK DEBUG ===');
-    console.log('Date:', date);
-    console.log('Time:', time);
-    
     // Find the actual slot to get the datetime
     const daySlots = weekSlots.find(d => isSameDay(d.date, date));
     const slot = daySlots?.slots.find(s => s.time === time);
@@ -111,8 +107,6 @@ export function BookingCalendar({
       console.error('Slot not found!');
       return;
     }
-    
-    console.log('Slot datetime (UTC):', slot.datetime);
     
     setSelectedSlot({ date, time, datetime: slot.datetime });
     setShowModal(true);
@@ -124,11 +118,6 @@ export function BookingCalendar({
     // IMPORTANT: slot.datetime is already in UTC from backend
     // We need to use it directly, not construct from date + time string
     const startTime = selectedSlot.datetime.toISOString();
-
-    console.log('=== BOOKING CONFIRMATION DEBUG ===');
-    console.log('Selected slot datetime (UTC):', selectedSlot.datetime);
-    console.log('Start time being sent:', startTime);
-    console.log('Instructor ID:', instructorId);
 
     createBooking.mutate({
       instructorId,

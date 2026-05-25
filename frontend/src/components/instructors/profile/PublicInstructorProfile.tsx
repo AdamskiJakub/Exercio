@@ -33,6 +33,7 @@ export function PublicInstructorProfile({
 
   const shouldShowBookingButton = 
     profile.user?.username &&
+    profile.isBookingEnabled && // Only show if instructor enables bookings
     !isOwnProfile; // Show booking button for all instructors (except own profile)
 
   const handleBookingClick = () => {

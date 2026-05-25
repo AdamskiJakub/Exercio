@@ -24,7 +24,7 @@ export interface Booking {
   clientId: string | null;
   startTime: string;
   endTime: string;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
   notes: string | null;
   guestName: string | null;
   guestEmail: string | null;
