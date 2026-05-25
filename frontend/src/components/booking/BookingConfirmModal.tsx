@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { pl } from 'date-fns/locale';
+import { pl, enUS } from 'date-fns/locale';
 import { X, Calendar, Clock, DollarSign } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useClickOutside, useEscapeKey } from '@/lib/hooks';
 import { useAuthStore } from '@/stores/auth-store';
@@ -38,6 +38,8 @@ export function BookingConfirmModal({
   instructorProfile,
 }: BookingConfirmModalProps) {
   const t = useTranslations('Booking');
+  const locale = useLocale();
+  const dateLocale = locale === 'pl' ? pl : enUS;
   const { isAuthenticated } = useAuthStore();
   const modalRef = useClickOutside<HTMLDivElement>(onClose, isOpen);
   useEscapeKey(onClose, isOpen);
@@ -99,7 +101,7 @@ export function BookingConfirmModal({
               <Calendar className="size-5 text-orange-500" />
               <div>
                 <p className="text-sm text-slate-400">{t('date')}</p>
-                <p className="font-medium">{format(selectedDate, 'd MMMM yyyy', { locale: pl })}</p>
+                <p className="font-medium">{format(selectedDate, 'd MMMM yyyy', { locale: dateLocale })}</p>
               </div>
             </div>
 

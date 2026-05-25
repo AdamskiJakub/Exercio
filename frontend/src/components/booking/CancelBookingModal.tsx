@@ -39,7 +39,7 @@ export function CancelBookingModal({
   const handleConfirm = () => {
     // For instructors, reason is required
     if (userRole === 'instructor' && !reason.trim()) {
-      setError(t('reasonRequired'));
+      setError(t('rejectModal.reasonRequired'));
       return;
     }
     onConfirm(reason);

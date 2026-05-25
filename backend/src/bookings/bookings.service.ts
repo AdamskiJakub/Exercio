@@ -141,7 +141,7 @@ export class BookingsService {
   /**
    * Core slot generation algorithm
    */
-  private generateTimeSlots(
+   private generateTimeSlots(
     startDate: Date,
     endDate: Date,
     sessionDuration: number,
@@ -167,29 +167,36 @@ export class BookingsService {
         cancelledBy?: string;
       };
     }> = [];
+    
+    // Force dates to absolute midnight UTC to prevent server drifting
     const currentDate = new Date(startDate);
+    currentDate.setUTCHours(0, 0, 0, 0);
+
+    const endDateTime = new Date(endDate);
+    endDateTime.setUTCHours(23, 59, 59, 999);
+
     const now = new Date();
     const minNoticeDate = new Date(
       now.getTime() + minNoticeHours * 60 * 60 * 1000,
     );
 
-    while (currentDate <= endDate) {
-      // Use local time to match instructor's timezone
-      const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    while (currentDate <= endDateTime) {
+      // Get day of week in UTC (0 = Sunday, 1 = Monday, etc.)
+      const dayOfWeek = currentDate.getUTCDay(); 
       
-      // Get date string in YYYY-MM-DD format using local time
-      const year = currentDate.getFullYear();
-      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-      const day = String(currentDate.getDate()).padStart(2, '0');
+      // Get date string in YYYY-MM-DD format using UTC
+      const year = currentDate.getUTCFullYear();
+      const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getUTCDate()).padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
 
-      // Check for exception for this specific date
+      // Check for exception using UTC methods
       const exception = exceptions.find((ex) => {
-        const exYear = ex.date.getFullYear();
-        const exMonth = String(ex.date.getMonth() + 1).padStart(2, '0');
-        const exDay = String(ex.date.getDate()).padStart(2, '0');
-        const exDateStr = `${exYear}-${exMonth}-${exDay}`;
-        return exDateStr === dateStr;
+        const exDate = new Date(ex.date);
+        const exYear = exDate.getUTCFullYear();
+        const exMonth = String(exDate.getUTCMonth() + 1).padStart(2, '0');
+        const exDay = String(exDate.getUTCDate()).padStart(2, '0');
+        return `${exYear}-${exMonth}-${exDay}` === dateStr;
       });
 
       let dayStartTime: string | null = null;
@@ -197,26 +204,20 @@ export class BookingsService {
       let isException = false;
 
       if (exception) {
-        // Exception overrides weekly template
         if (!exception.isAvailable) {
-          // Completely unavailable this day
-          currentDate.setDate(currentDate.getDate() + 1);
-          currentDate.setHours(0, 0, 0, 0);
+          currentDate.setUTCDate(currentDate.getUTCDate() + 1);
           continue;
         }
         dayStartTime = exception.startTime;
         dayEndTime = exception.endTime;
         isException = true;
       } else {
-        // Use weekly template
         const weeklySlot = weeklyAvailability.find(
           (slot) => slot.dayOfWeek === dayOfWeek && slot.isActive,
         );
 
         if (!weeklySlot) {
-          // No availability for this day of week
-          currentDate.setDate(currentDate.getDate() + 1);
-          currentDate.setHours(0, 0, 0, 0);
+          currentDate.setUTCDate(currentDate.getUTCDate() + 1);
           continue;
         }
 
@@ -224,46 +225,38 @@ export class BookingsService {
         dayEndTime = weeklySlot.endTime;
       }
 
-      // Skip if no valid time range
       if (!dayStartTime || !dayEndTime) {
-        currentDate.setDate(currentDate.getDate() + 1);
-        currentDate.setHours(0, 0, 0, 0);
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
         continue;
       }
 
-      // Generate slots for this day
       const [startHour, startMinute] = dayStartTime.split(':').map(Number);
       const [endHour, endMinute] = dayEndTime.split(':').map(Number);
 
-      // IMPORTANT: Use local time, not UTC
-      // This ensures that 15:00 in the instructor's timezone stays as 15:00
-      let slotStart = new Date(currentDate);
-      slotStart.setHours(startHour, startMinute, 0, 0);
+      // Build daily bounds in pure UTC time
+      const slotStart = new Date(currentDate);
+      slotStart.setUTCHours(startHour, startMinute, 0, 0);
 
       const dayEnd = new Date(currentDate);
-      dayEnd.setHours(endHour, endMinute, 0, 0);
+      dayEnd.setUTCHours(endHour, endMinute, 0, 0);
 
       while (slotStart < dayEnd) {
         const slotEnd = new Date(
           slotStart.getTime() + sessionDuration * 60 * 1000,
         );
 
-        // Check if slot end time doesn't exceed day end time
         if (slotEnd > dayEnd) {
           break;
         }
 
-        // Check if slot is not in the past
         if (slotStart > now) {
-          // Check if slot is already booked (PENDING or CONFIRMED)
+          // Compare reservation ranges using universal timestamps
           const bookedSession = existingBookings.find((booking) => {
             const bookingStart = new Date(booking.startTime);
             const bookingEnd = new Date(booking.endTime);
-            // Check for overlap
             return slotStart < bookingEnd && slotEnd > bookingStart;
           });
 
-          // Check if there's a cancelled booking for this slot
           const cancelledSession = cancelledBookings.find((booking) => {
             const bookingStart = new Date(booking.startTime);
             const bookingEnd = new Date(booking.endTime);
@@ -271,7 +264,6 @@ export class BookingsService {
           });
 
           if (bookedSession) {
-            // Slot is booked (PENDING/CONFIRMED) - not available
             const clientName = bookedSession.guestName || 
               (bookedSession.client 
                 ? `${bookedSession.client.firstName || ''} ${bookedSession.client.lastName || ''}`.trim()
@@ -296,7 +288,6 @@ export class BookingsService {
               },
             });
           } else if (cancelledSession) {
-            // Slot has a cancelled booking - show as available but with booking info
             const clientName = cancelledSession.guestName || 
               (cancelledSession.client 
                 ? `${cancelledSession.client.firstName || ''} ${cancelledSession.client.lastName || ''}`.trim()
@@ -321,7 +312,6 @@ export class BookingsService {
               },
             });
           } else {
-            // Slot is available with no booking
             slots.push({
               startTime: new Date(slotStart),
               endTime: new Date(slotEnd),
@@ -331,14 +321,13 @@ export class BookingsService {
             });
           }
         }
-
-        // Move to next slot
-        slotStart = new Date(slotStart.getTime() + sessionDuration * 60 * 1000);
+        
+        // Advance slot using absolute Unix Timestamp
+        slotStart.setTime(slotStart.getTime() + sessionDuration * 60 * 1000);
       }
 
-      // Move to next day (using local time methods)
-      currentDate.setDate(currentDate.getDate() + 1);
-      currentDate.setHours(0, 0, 0, 0);
+      // Move to the next day using UTC methods
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
 
     return slots;
@@ -581,7 +570,7 @@ export class BookingsService {
     // NOTE: booking.instructorId is User.id, not InstructorProfile.id
     const where =
       role === 'client'
-        ? { clientId: userId }
+        ? { clientId: userId, hiddenFromClient: false }
         : { instructorId: userId }; // For instructors, use userId directly
 
     const bookings = await this.prisma.booking.findMany({
@@ -775,14 +764,18 @@ export class BookingsService {
    * DELETE bookings/history
    * Remove completed or cancelled bookings for the requesting client
    */
-  async clearUserHistory(userId: string) {
-    // Only delete bookings that belong to the client
-    const result = await this.prisma.booking.deleteMany({
+    async clearUserHistory(userId: string) {
+    // We update the flag (soft-delete) instead of hard-deleting to preserve reviews
+    const result = await this.prisma.booking.updateMany({
       where: {
         clientId: userId,
+        hiddenFromClient: false, // Only update columns that are not already hidden
         status: {
           in: ['COMPLETED', 'CANCELLED'],
         },
+      },
+      data: {
+        hiddenFromClient: true, // Hide them from the client's view
       },
     });
 

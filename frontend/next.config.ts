@@ -25,9 +25,28 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
     ],
-    // Allow localhost/127.0.0.1 for development
     dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    contentDispositionType: 'attachment',
     unoptimized: process.env.NODE_ENV === 'development',
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/uploads/:path*(svg|SVG)',
+        headers: [
+          {
+            key: 'Content-Disposition',
+            value: 'inline',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; sandbox;",
+          },
+        ],
+      },
+    ];
   },
 };
 

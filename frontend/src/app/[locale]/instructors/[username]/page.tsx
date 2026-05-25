@@ -20,6 +20,7 @@ export default function InstructorPublicProfilePage() {
   const source = searchParams.get('from');
   const { user, isAuthenticated } = useAuthStore();
   const t = useTranslations('Booking');
+  const tProfile = useTranslations('InstructorProfile');
 
   const { data: profile, isLoading, error } = useQuery<InstructorProfile>({
     queryKey: ['instructor', username],
@@ -44,13 +45,13 @@ export default function InstructorPublicProfilePage() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-white">{t('instructorNotFound')}</h1>
-          <p className="text-slate-400">{t('instructorNotFoundDescription')}</p>
+          <h1 className="text-3xl font-bold text-white">{tProfile('instructorNotFound')}</h1>
+          <p className="text-slate-400">{tProfile('instructorNotFoundDescription')}</p>
           <button
             onClick={() => router.push('/instructors')}
             className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors"
           >
-            {t('backToInstructors')}
+            {tProfile('backToInstructors')}
           </button>
         </div>
       </div>

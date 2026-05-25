@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { format, addDays, startOfWeek, isSameDay, parseISO } from 'date-fns';
-import { pl } from 'date-fns/locale';
+import { pl, enUS } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { BookingConfirmModal } from './BookingConfirmModal';
 import { useAvailableSlots } from '@/hooks/useAvailableSlots';
@@ -22,9 +22,11 @@ export function BookingCalendar({
   instructorProfile
 }: BookingCalendarProps) {
   const t = useTranslations('Booking');
+  const locale = useLocale();
+  const dateLocale = locale === 'pl' ? pl : enUS;
   const createBooking = useCreateBooking();
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
-    startOfWeek(new Date(), { weekStartsOn: 1 }) // Poniedziałek
+    startOfWeek(new Date(), { weekStartsOn: 1 })
   );
   const [weekSlots, setWeekSlots] = useState<DaySlots[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,7 +166,7 @@ export function BookingCalendar({
         </Button>
         
         <h2 className="text-xl font-semibold text-white">
-          {format(currentWeekStart, 'd MMMM', { locale: pl })} - {format(addDays(currentWeekStart, 6), 'd MMMM yyyy', { locale: pl })}
+          {format(currentWeekStart, 'd MMMM', { locale: dateLocale })} - {format(addDays(currentWeekStart, 6), 'd MMMM yyyy', { locale: dateLocale })}
         </h2>
         
         <Button
@@ -208,7 +210,7 @@ export function BookingCalendar({
                     : 'bg-slate-800/50'
                 }`}>
                   <p className="text-xs text-slate-400 uppercase mb-1">
-                    {format(dayData.date, 'EEE', { locale: pl })}
+                    {format(dayData.date, 'EEE', { locale: dateLocale })}
                   </p>
                   <p className="text-lg font-bold">{format(dayData.date, 'd')}</p>
                 </div>

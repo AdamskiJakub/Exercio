@@ -117,6 +117,7 @@ enum BookingStatus {
 
 model Booking {
   id             String            @id @default(uuid())
+  hiddenFromClient   Boolean        @default(false)
   clientId       String? // NOW OPTIONAL: Null if manual block by instructor or guest booking
   client         User?             @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
   instructorId   String // This is User.id, NOT InstructorProfile.id
