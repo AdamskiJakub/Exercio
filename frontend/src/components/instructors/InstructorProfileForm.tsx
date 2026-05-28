@@ -110,6 +110,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
     defaultValues: {
       bio: profile?.bio || '',
       tagline: profile?.tagline || '',
+      location: profile?.location || '',
       city: profile?.city || '',
       packageDealsEnabled: profile?.packageDealsEnabled || false,
       packageDealsDescription: profile?.packageDealsDescription || '',
@@ -141,6 +142,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       reset({
         bio: profile.bio || '',
         tagline: profile.tagline || '',
+        location: profile.location || '',
         city: profile.city || '',
         packageDealsEnabled: profile.packageDealsEnabled || false,
         packageDealsDescription: profile.packageDealsDescription || '',
@@ -493,39 +495,58 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       </div>
 
       {/* Location & City */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="city" className="text-base font-semibold text-slate-200">
-            {t('city')}
+          <Label htmlFor="location" className="text-base font-semibold text-slate-200">
+            {t('location')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
           </Label>
           <Input
-            {...register('city')}
-            id="city"
+            {...register('location')}
+            id="location"
             type="text"
-            placeholder={t('cityPlaceholder')}
+            placeholder={t('locationPlaceholder')}
             className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
           />
-          {errors.city && (
-            <p className="text-red-400 text-sm">{errors.city.message}</p>
+          {errors.location && (
+            <p className="text-red-400 text-sm">{errors.location.message}</p>
           )}
+          <p className="text-xs text-slate-400">{t('locationHint')}</p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="yearsExperience" className="text-base font-semibold text-slate-200">
-            {t('yearsExperience')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
-          </Label>
-          <Input
-            {...register('yearsExperience', { 
-              setValueAs: (v) => v === '' || v === null || v === undefined ? undefined : Number(v)
-            })}
-            id="yearsExperience"
-            type="number"
-            placeholder={t('yearsExperiencePlaceholder')}
-            className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
-          />
-          {errors.yearsExperience && (
-            <p className="text-red-400 text-sm">{errors.yearsExperience.message}</p>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="city" className="text-base font-semibold text-slate-200">
+              {t('city')}
+            </Label>
+            <Input
+              {...register('city')}
+              id="city"
+              type="text"
+              placeholder={t('cityPlaceholder')}
+              className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+            />
+            {errors.city && (
+              <p className="text-red-400 text-sm">{errors.city.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="yearsExperience" className="text-base font-semibold text-slate-200">
+              {t('yearsExperience')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
+            </Label>
+            <Input
+              {...register('yearsExperience', { 
+                setValueAs: (v) => v === '' || v === null || v === undefined ? undefined : Number(v)
+              })}
+              id="yearsExperience"
+              type="number"
+              placeholder={t('yearsExperiencePlaceholder')}
+              className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+            />
+            {errors.yearsExperience && (
+              <p className="text-red-400 text-sm">{errors.yearsExperience.message}</p>
+            )}
+          </div>
         </div>
       </div>
 

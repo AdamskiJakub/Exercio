@@ -12,10 +12,12 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { CreateManualBookingDto } from './dto/create-manual-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { CreateManualBlockDto } from './dto/create-manual-block.dto';
 import { GetAvailableSlotsDto } from './dto/get-available-slots.dto';
@@ -57,9 +59,11 @@ export class BookingsController {
   /**
    * POST /bookings
    * Create a new booking (authenticated clients or guest users)
+   * Rate limited to 3 bookings per 10 minutes for anonymous users
    */
   @Post()
   @UseGuards(OptionalJwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 requests per 10 minutes for guests
   async createBooking(@Request() req, @Body() dto: CreateBookingDto) {
     // Check if user is authenticated
     const isAuthenticated = req.user && req.user.id;
@@ -144,6 +148,19 @@ export class BookingsController {
   @Delete('history')
   async clearHistory(@Request() req) {
     return this.bookingsService.clearUserHistory(req.user.id);
+  }
+
+  /**
+   * POST /bookings/manual
+   * Create a manual booking as instructor (e.g., phone booking)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('manual')
+  async createManualBooking(
+    @Request() req,
+    @Body() dto: CreateManualBookingDto,
+  ) {
+    return this.bookingsService.createManualBooking(req.user.id, dto);
   }
 
   /**

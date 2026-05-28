@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { CreateManualBookingDto } from './dto/create-manual-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 
 @Injectable()
@@ -537,6 +538,97 @@ export class BookingsService {
         isShortNotice,
         notes: dto.notes,
         status: 'PENDING',
+        guestName: dto.guestName,
+        guestEmail: dto.guestEmail,
+        guestPhone: dto.guestPhone,
+      },
+      include: {
+        instructorUser: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            instructorProfile: {
+              select: {
+                id: true,
+                sessionDuration: true,
+                sessionPrice: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return booking;
+  }
+
+  /**
+   * Create a manual booking by instructor (e.g., phone booking)
+   * Instructor can create bookings on their own calendar
+   */
+  async createManualBooking(userId: string, dto: CreateManualBookingDto) {
+    // Get instructor profile for this user
+    const profile = await this.prisma.instructorProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new ForbiddenException('Only instructors can create manual bookings');
+    }
+
+    const startTime = new Date(dto.startTime);
+    const endTime = new Date(
+      startTime.getTime() + profile.sessionDuration * 60 * 1000,
+    );
+    const now = new Date();
+
+    // Allow instructors to create bookings in the past (for retroactive bookings)
+    // but show a warning if it's too far in the past
+    if (startTime <= now) {
+      // Just log, don't throw - instructors might need to add past bookings
+      console.warn(`Instructor ${userId} creating booking in the past: ${startTime}`);
+    }
+
+    // Check if slot is already booked
+    const existingBooking = await this.prisma.booking.findFirst({
+      where: {
+        instructorId: userId,
+        startTime: {
+          lt: endTime,
+        },
+        endTime: {
+          gt: startTime,
+        },
+        status: {
+          in: ['PENDING', 'CONFIRMED'],
+        },
+      },
+    });
+
+    if (existingBooking) {
+      throw new BadRequestException('Time slot is already booked');
+    }
+
+    // Check if within notice period
+    const minNoticeDate = new Date(
+      now.getTime() + profile.minNoticeHours * 60 * 60 * 1000,
+    );
+    const isShortNotice = startTime < minNoticeDate;
+
+    // Create manual booking (auto-confirmed since instructor creates it)
+    const booking = await this.prisma.booking.create({
+      data: {
+        clientId: null, // Manual booking has no client ID
+        instructorId: userId,
+        startTime,
+        endTime,
+        duration: profile.sessionDuration,
+        price: profile.sessionPrice,
+        isShortNotice,
+        notes: dto.notes,
+        status: 'CONFIRMED', // Auto-confirm manual bookings
         guestName: dto.guestName,
         guestEmail: dto.guestEmail,
         guestPhone: dto.guestPhone,

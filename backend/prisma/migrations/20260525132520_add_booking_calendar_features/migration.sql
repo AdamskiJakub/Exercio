@@ -15,6 +15,7 @@ ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "cancelledAt" TIMESTAMP(3);
 ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "cancelledBy" TEXT;
 ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "cancellationReason" TEXT;
 ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "acknowledgedAt" TIMESTAMP(3);
+ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "hiddenFromClient" BOOLEAN NOT NULL DEFAULT false;
 
 -- 3. Alter column nullability in bookings table
 ALTER TABLE "bookings" ALTER COLUMN "clientId" DROP NOT NULL;
@@ -22,6 +23,7 @@ ALTER TABLE "bookings" ALTER COLUMN "serviceId" DROP NOT NULL;
 ALTER TABLE "bookings" ALTER COLUMN "date" DROP NOT NULL;
 
 -- 4. COPILOT FIX: Migrate instructorId relation from profiles to users
+ALTER TABLE "bookings" DROP CONSTRAINT IF EXISTS "bookings_instructor_profile_fkey";
 ALTER TABLE "bookings" DROP CONSTRAINT IF EXISTS "bookings_instructorId_fkey";
 
 UPDATE "bookings" AS b
@@ -60,10 +62,11 @@ CREATE TABLE IF NOT EXISTS "availability" (
 CREATE TABLE IF NOT EXISTS "availability_exceptions" (
     "id" TEXT NOT NULL,
     "instructorId" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
+    "date" DATE NOT NULL,
     "isAvailable" BOOLEAN NOT NULL DEFAULT false,
     "startTime" TEXT,
     "endTime" TEXT,
+    "reason" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

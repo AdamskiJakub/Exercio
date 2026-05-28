@@ -247,9 +247,9 @@ export function BookingCalendar({
                           className={`w-full px-2 py-2 rounded-lg text-xs font-medium transition-all ${slotColor}`}
                           title={
                             isBooked 
-                              ? `Zajęte - ${slot.booking!.clientName}` 
+                              ? t('bookedSlotTitle', { clientName: slot.booking!.clientName })
                               : isCancelled
-                              ? `Anulowane - ${slot.booking!.clientName}`
+                              ? t('cancelledSlotTitle', { clientName: slot.booking!.clientName })
                               : undefined
                           }
                         >

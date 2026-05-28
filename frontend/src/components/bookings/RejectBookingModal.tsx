@@ -87,7 +87,7 @@ export function RejectBookingModal({
 
         <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
           <p className="text-sm text-blue-400">
-            <span className="font-medium">{clientName}</span> otrzyma powiadomienie z powodem odrzucenia.
+            {t('clientNotification', { clientName })}
           </p>
         </div>
       </div>

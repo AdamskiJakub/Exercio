@@ -337,6 +337,7 @@
       "cityPlaceholder": "e.g., Warsaw",
       "location": "Full Location",
       "locationPlaceholder": "e.g., Warsaw, Mazovia, Poland",
+      "locationHint": "Where do you conduct your sessions? (e.g., gym name, area, address)",
       "hourlyRate": "Hourly Rate (PLN)",
       "hourlyRatePlaceholder": "e.g., 150",
       "hourlyRateOptional": "(optional)",
@@ -635,7 +636,9 @@
       "phone": "Phone Number",
       "phonePlaceholder": "+48 123 456 789",
       "phoneRequired": "Phone number is required",
-      "phoneInvalid": "Invalid phone number (9 digits, optionally with +48)"
+      "phoneInvalid": "Invalid phone number (9 digits, optionally with +48)",
+      "guestPhoneLabel": "Client phone number *",
+      "guestPhonePlaceholder": "+48 123 456 789"
     },
     "legend": {
       "title": "Legend",
@@ -648,6 +651,9 @@
     "instructorRole": "Instructor",
     "specialistRole": "Specialist",
     "profileTitle": "Profile",
+    "bookedSlotTitle": "Booked - {clientName}",
+    "cancelledSlotTitle": "Cancelled - {clientName}",
+    "addManualBooking": "Add manual booking",
     "confirmed": "Confirmed",
     "pending": "Pending",
     "cancelled": "Cancelled",
@@ -674,6 +680,8 @@
     "saving": "Saving...",
     "noNotesYet": "No notes yet",
     "notesPlaceholder": "Add notes to session...",
+    "notesManualLabel": "Notes (optional)",
+    "notesManualPlaceholder": "Additional information about the booking...",
     "dayDetails": "Day details",
     "slotAvailable": "Available slot",
     "slotBooked": "Booked",
@@ -707,7 +715,8 @@
       "reasonPlaceholder": "E.g., Not available at this time, schedule conflict...",
       "reasonRequired": "Reason is required",
       "cancel": "Cancel",
-      "confirm": "Reject booking"
+      "confirm": "Reject booking",
+      "clientNotification": "{clientName} will receive a notification with the rejection reason."
     },
     "completeModal": {
       "title": "Complete session",

@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
-import { pl } from 'date-fns/locale';
-import { X, Clock, User, Mail, FileText, XCircle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { pl, enUS } from 'date-fns/locale';
+import { X, Clock, User, Mail, FileText, XCircle, Plus } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { useClickOutside, useEscapeKey } from '@/lib/hooks';
 import { useUpdateBookingNotes } from '@/hooks/useUpdateBookingNotes';
 import { useCancelBooking } from '@/hooks/useCancelBooking';
 import { useAcknowledgeCancellation } from '@/hooks/useAcknowledgeCancellation';
 import { CancelBookingModal } from './CancelBookingModal';
+import { ManualBookingModal } from './ManualBookingModal';
 import { useAuthStore } from '@/stores/auth-store';
 import type { DaySlots } from '@/types/booking';
 
@@ -29,6 +30,8 @@ export function DayDetailsModal({
   onNotesUpdated,
 }: DayDetailsModalProps) {
   const t = useTranslations('Booking');
+  const locale = useLocale();
+  const dateLocale = locale === 'pl' ? pl : enUS;
   const updateNotes = useUpdateBookingNotes();
   const cancelBooking = useCancelBooking();
   const acknowledgeCancellation = useAcknowledgeCancellation();
@@ -43,10 +46,15 @@ export function DayDetailsModal({
     time: string;
     clientName?: string;
   } | null>(null);
+  const [manualBookingModalOpen, setManualBookingModalOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{
+    time: string;
+    startTime: Date;
+  } | null>(null);
 
   // Only enable click outside when cancel modal is NOT open
-  const modalRef = useClickOutside<HTMLDivElement>(onClose, isOpen && !cancelModalOpen);
-  useEscapeKey(onClose, isOpen && !cancelModalOpen);
+  const modalRef = useClickOutside<HTMLDivElement>(onClose, isOpen && !cancelModalOpen && !manualBookingModalOpen);
+  useEscapeKey(onClose, isOpen && !cancelModalOpen && !manualBookingModalOpen);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -116,6 +124,21 @@ export function DayDetailsModal({
     }
   };
 
+  const handleCreateManualBooking = (slotTime: string, startTime: Date) => {
+    setSelectedSlot({ time: slotTime, startTime });
+    setManualBookingModalOpen(true);
+  };
+
+  const handleManualBookingClose = () => {
+    setManualBookingModalOpen(false);
+    setSelectedSlot(null);
+    
+    // Trigger callback to refresh data
+    if (onNotesUpdated) {
+      onNotesUpdated();
+    }
+  };
+
   const handleConfirmCancel = async (reason: string) => {
     if (!bookingToCancel) return;
 
@@ -159,7 +182,7 @@ export function DayDetailsModal({
             {t('dayDetails')}
           </h2>
           <p className="text-white/80 mt-1">
-            {format(dayData.date, 'EEEE, d MMMM yyyy', { locale: pl })}
+            {format(dayData.date, 'EEEE, d MMMM yyyy', { locale: dateLocale })}
           </p>
         </div>
 
@@ -204,6 +227,20 @@ export function DayDetailsModal({
                         {slot.booking ? t('slotBooked') : slot.available ? t('slotAvailable') : t('legend.unavailableLabel')}
                       </span>
                     </div>
+
+                    {/* Manual Booking Button - for available slots, instructor only */}
+                    {!slot.booking && slot.available && user?.role === 'INSTRUCTOR' && (
+                      <div className="mt-3">
+                        <Button
+                          onClick={() => handleCreateManualBooking(slot.time, slot.datetime)}
+                          size="sm"
+                          className="w-full bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white cursor-pointer"
+                        >
+                          <Plus className="size-4 mr-2" />
+                          {t('addManualBooking')}
+                        </Button>
+                      </div>
+                    )}
 
                     {/* Booking Details */}
                     {slot.booking && (
@@ -365,11 +402,22 @@ export function DayDetailsModal({
           onConfirm={handleConfirmCancel}
           bookingDetails={{
             time: bookingToCancel.time,
-            date: format(dayData.date, 'd MMMM yyyy', { locale: pl }),
+            date: format(dayData.date, 'd MMMM yyyy', { locale: dateLocale }),
             clientName: bookingToCancel.clientName,
           }}
           isLoading={cancelBooking.isPending}
           userRole={user?.role === 'CLIENT' ? 'client' : 'instructor'}
+        />
+      )}
+
+      {/* Manual Booking Modal */}
+      {selectedSlot && (
+        <ManualBookingModal
+          isOpen={manualBookingModalOpen}
+          onClose={handleManualBookingClose}
+          slotTime={selectedSlot.startTime.toISOString()}
+          displayTime={selectedSlot.time}
+          displayDate={format(dayData.date, 'd MMMM yyyy', { locale: dateLocale })}
         />
       )}
     </div>

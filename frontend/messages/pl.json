@@ -337,6 +337,7 @@
       "cityPlaceholder": "np. Warszawa",
       "location": "Pełna lokalizacja",
       "locationPlaceholder": "np. Warszawa, Mazowieckie, Polska",
+      "locationHint": "Gdzie prowadzisz zajęcia? (np. nazwa siłowni, dzielnica, adres)",
       "hourlyRate": "Stawka godzinowa (PLN)",
       "hourlyRatePlaceholder": "np. 150",
       "hourlyRateOptional": "(opcjonalnie)",
@@ -636,7 +637,9 @@
       "phone": "Numer telefonu",
       "phonePlaceholder": "+48 123 456 789",
       "phoneRequired": "Numer telefonu jest wymagany",
-      "phoneInvalid": "Nieprawidłowy numer telefonu (9 cyfr, opcjonalnie z +48)"
+      "phoneInvalid": "Nieprawidłowy numer telefonu (9 cyfr, opcjonalnie z +48)",
+      "guestPhoneLabel": "Telefon klienta *",
+      "guestPhonePlaceholder": "+48 123 456 789"
     },
     "legend": {
       "title": "Legenda",
@@ -658,6 +661,9 @@
     "cancellationReason": "Powód anulowania",
     "acceptBooking": "Akceptuj",
     "rejectBooking": "Odrzuć",
+    "bookedSlotTitle": "Zajęte - {clientName}",
+    "cancelledSlotTitle": "Anulowane - {clientName}",
+    "addManualBooking": "Dodaj rezerwację manualną",
     "completeBooking": "Ukończ",
     "cancelBooking": "Anuluj",
     "cancelSession": "Anuluj sesję",
@@ -675,6 +681,8 @@
     "saving": "Zapisywanie...",
     "noNotesYet": "Brak notatek",
     "notesPlaceholder": "Dodaj notatki do sesji...",
+    "notesManualLabel": "Notatki (opcjonalnie)",
+    "notesManualPlaceholder": "Dodatkowe informacje o rezerwacji...",
     "dayDetails": "Szczegóły dnia",
     "slotAvailable": "Wolny slot",
     "slotBooked": "Zajęte",
@@ -708,7 +716,8 @@
       "reasonPlaceholder": "Np. Nie mogę w tym terminie, jestem niedostępny...",
       "reasonRequired": "Powód jest wymagany",
       "cancel": "Anuluj",
-      "confirm": "Odrzuć rezerwację"
+      "confirm": "Odrzuć rezerwację",
+      "clientNotification": "{clientName} otrzyma powiadomienie z powodem odrzucenia."
     },
     "completeModal": {
       "title": "Ukończ sesję",

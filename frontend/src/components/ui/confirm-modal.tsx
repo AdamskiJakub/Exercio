@@ -18,6 +18,7 @@ interface ConfirmModalProps {
   confirmText: string;
   cancelText: string;
   isLoading?: boolean;
+  loadingText?: string;
   variant?: 'default' | 'danger';
   children?: React.ReactNode;
 }
@@ -31,6 +32,7 @@ export function ConfirmModal({
   confirmText,
   cancelText,
   isLoading = false,
+  loadingText,
   variant = 'default',
   children,
 }: ConfirmModalProps) {
@@ -80,7 +82,7 @@ export function ConfirmModal({
             disabled={isLoading}
             className={confirmButtonClass}
           >
-            {isLoading ? 'Przetwarzanie...' : confirmText}
+            {isLoading ? (loadingText || 'Processing...') : confirmText}
           </Button>
         </div>
       </DialogContent>

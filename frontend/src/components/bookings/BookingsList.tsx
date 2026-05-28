@@ -306,7 +306,7 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
           onConfirm={handleCancelConfirm}
           bookingDetails={{
             time: format(new Date(selectedBooking.startTime), 'HH:mm'),
-            date: format(new Date(selectedBooking.startTime), 'd MMMM yyyy', { locale: pl }),
+            date: format(new Date(selectedBooking.startTime), 'd MMMM yyyy', { locale: dateLocale }),
             clientName: role === 'client' 
               ? undefined 
               : (selectedBooking.client?.firstName 

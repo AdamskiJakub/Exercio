@@ -40,6 +40,7 @@ const uploadPathOrUrl = z.string().refine(
 export const instructorProfileSchema = z.object({
   bio: z.string().max(1000).optional(),
   tagline: z.string().max(200).optional(),
+  location: z.string().max(200).optional(),
   city: z.string().max(100).optional(),
   packageDealsEnabled: z.boolean().optional(),
   packageDealsDescription: z.string().max(500).optional(),
