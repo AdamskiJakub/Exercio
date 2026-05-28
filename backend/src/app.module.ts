@@ -20,9 +20,11 @@ import { StaticConfigModule } from './config/config.module';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    // Global rate limit: 100 req/min allows normal browsing/polling
+    // Stricter limits on write operations (e.g., booking creation: 3/10min)
     ThrottlerModule.forRoot([{
-      ttl: 60000, // 60 seconds
-      limit: 10, // 10 requests per minute globally
+      ttl: 60000,
+      limit: 100,
     }]),
     PrismaModule,
     AuthModule,

@@ -131,7 +131,7 @@ export function ManualBookingModal({
           <div>
             <label htmlFor="guestEmail" className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
               <Mail className="size-4" />
-              Email klienta *
+              {t('guestEmailLabel')}
             </label>
             <input
               id="guestEmail"
@@ -139,7 +139,7 @@ export function ManualBookingModal({
               required
               value={formData.guestEmail}
               onChange={(e) => handleChange('guestEmail', e.target.value)}
-              placeholder="jan.kowalski@example.com"
+              placeholder={t('guestEmailPlaceholder')}
               className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none"
             />
           </div>
@@ -186,14 +186,14 @@ export function ManualBookingModal({
               disabled={createManualBooking.isPending}
               className="flex-1 cursor-pointer"
             >
-              Anuluj
+              {t('cancelButton')}
             </Button>
             <Button
               type="submit"
               disabled={createManualBooking.isPending}
               className="flex-1 bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white cursor-pointer"
             >
-              {createManualBooking.isPending ? 'Tworzenie...' : 'Utwórz rezerwację'}
+              {createManualBooking.isPending ? t('creatingBooking') : t('createBookingButton')}
             </Button>
           </div>
         </form>

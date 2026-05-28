@@ -17,12 +17,22 @@ ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "cancellationReason" TEXT;
 ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "acknowledgedAt" TIMESTAMP(3);
 ALTER TABLE "bookings" ADD COLUMN IF NOT EXISTS "hiddenFromClient" BOOLEAN NOT NULL DEFAULT false;
 
--- 3. Alter column nullability in bookings table
+-- 3. Backfill new time fields from existing bookings (COPILOT FIX: backfill before relying on startTime/endTime)
+-- Assume default 60-minute session for existing bookings
+UPDATE "bookings"
+SET 
+  "startTime" = "date",
+  "endTime" = "date" + INTERVAL '60 minutes',
+  "duration" = 60
+WHERE "date" IS NOT NULL
+  AND "startTime" IS NULL;
+
+-- 4. Alter column nullability in bookings table
 ALTER TABLE "bookings" ALTER COLUMN "clientId" DROP NOT NULL;
 ALTER TABLE "bookings" ALTER COLUMN "serviceId" DROP NOT NULL;
 ALTER TABLE "bookings" ALTER COLUMN "date" DROP NOT NULL;
 
--- 4. COPILOT FIX: Migrate instructorId relation from profiles to users
+-- 5. COPILOT FIX: Migrate instructorId relation from profiles to users
 ALTER TABLE "bookings" DROP CONSTRAINT IF EXISTS "bookings_instructor_profile_fkey";
 ALTER TABLE "bookings" DROP CONSTRAINT IF EXISTS "bookings_instructorId_fkey";
 
@@ -35,16 +45,16 @@ ALTER TABLE "bookings"
 ADD CONSTRAINT "bookings_instructorId_fkey"
 FOREIGN KEY ("instructorId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
--- 5. Create indexes for performance
+-- 6. Create indexes for performance
 CREATE INDEX IF NOT EXISTS "bookings_startTime_idx" ON "bookings"("startTime");
 
--- 6. Add new columns to instructor_profiles table
+-- 7. Add new columns to instructor_profiles table
 ALTER TABLE "instructor_profiles" ADD COLUMN IF NOT EXISTS "isBookingEnabled" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "instructor_profiles" ADD COLUMN IF NOT EXISTS "sessionDuration" INTEGER NOT NULL DEFAULT 60;
 ALTER TABLE "instructor_profiles" ADD COLUMN IF NOT EXISTS "sessionPrice" DOUBLE PRECISION NOT NULL DEFAULT 0;
 ALTER TABLE "instructor_profiles" ADD COLUMN IF NOT EXISTS "minNoticeHours" INTEGER NOT NULL DEFAULT 24;
 
--- 7. CreateTable: availability (weekly schedule)
+-- 8. CreateTable: availability (weekly schedule)
 CREATE TABLE IF NOT EXISTS "availability" (
     "id" TEXT NOT NULL,
     "instructorId" TEXT NOT NULL,
@@ -58,7 +68,7 @@ CREATE TABLE IF NOT EXISTS "availability" (
     CONSTRAINT "availability_pkey" PRIMARY KEY ("id")
 );
 
--- 8. CreateTable: availability_exceptions (special dates / time off)
+-- 9. CreateTable: availability_exceptions (special dates / time off)
 CREATE TABLE IF NOT EXISTS "availability_exceptions" (
     "id" TEXT NOT NULL,
     "instructorId" TEXT NOT NULL,
@@ -73,7 +83,7 @@ CREATE TABLE IF NOT EXISTS "availability_exceptions" (
     CONSTRAINT "availability_exceptions_pkey" PRIMARY KEY ("id")
 );
 
--- 9. Create indexes for availability and exceptions
+-- 10. Create indexes for availability and exceptions
 CREATE INDEX IF NOT EXISTS "availability_instructorId_idx" ON "availability"("instructorId");
 CREATE UNIQUE INDEX IF NOT EXISTS "availability_instructorId_dayOfWeek_key" ON "availability"("instructorId", "dayOfWeek");
 
@@ -81,6 +91,6 @@ CREATE INDEX IF NOT EXISTS "availability_exceptions_instructorId_idx" ON "availa
 CREATE INDEX IF NOT EXISTS "availability_exceptions_date_idx" ON "availability_exceptions"("date");
 CREATE UNIQUE INDEX IF NOT EXISTS "availability_exceptions_instructorId_date_key" ON "availability_exceptions"("instructorId", "date");
 
--- 10. Add foreign keys for availability tables
+-- 11. Add foreign keys for availability tables
 ALTER TABLE "availability" ADD CONSTRAINT "availability_instructorId_fkey" FOREIGN KEY ("instructorId") REFERENCES "instructor_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "availability_exceptions" ADD CONSTRAINT "availability_exceptions_instructorId_fkey" FOREIGN KEY ("instructorId") REFERENCES "instructor_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;

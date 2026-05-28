@@ -10,6 +10,7 @@ import { useClickOutside, useEscapeKey } from '@/lib/hooks';
 import { useAuthStore } from '@/stores/auth-store';
 import { InstructorInfoCard } from './InstructorInfoCard';
 import { GuestBookingForm } from './GuestBookingForm';
+import type { InstructorProfile } from '@/types';
 
 interface BookingConfirmModalProps {
   isOpen: boolean;
@@ -17,16 +18,7 @@ interface BookingConfirmModalProps {
   onConfirm: (guestData?: { name: string; email: string; phone: string }) => void;
   selectedDate: Date;
   selectedTime: string;
-  instructorProfile: {
-    photoUrl?: string;
-    user?: {
-      firstName?: string;
-      lastName?: string;
-      username: string;
-    };
-    sessionPrice?: number;
-    sessionDuration: number;
-  };
+  instructorProfile: InstructorProfile;
 }
 
 export function BookingConfirmModal({
@@ -125,7 +117,7 @@ export function BookingConfirmModal({
           {/* Duration Info */}
           <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
             <p className="text-sm text-orange-400">
-              {t('sessionDuration')}: <span className="font-semibold">{instructorProfile.sessionDuration} min</span>
+              {t('sessionDuration')}: <span className="font-semibold">{instructorProfile.sessionDuration || 60} min</span>
             </p>
           </div>
 

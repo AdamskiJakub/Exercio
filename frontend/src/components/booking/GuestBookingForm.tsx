@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Mail, Phone, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { z } from 'zod';
 import { createGuestBookingSchema } from '@/lib/validations/schemas/guest-booking';
 
 interface GuestFormData {
@@ -33,8 +34,11 @@ export function GuestBookingForm({ onDataChange }: GuestBookingFormProps) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
       return true;
     } catch (error: any) {
-      const errorMessage = error.errors?.[0]?.message || t(`${name}Required`);
-      setErrors((prev) => ({ ...prev, [name]: errorMessage }));
+      // COPILOT FIX: Zod v4 uses error.issues, not error.errors
+      const errorMessage = error instanceof z.ZodError 
+        ? error.issues?.[0]?.message 
+        : undefined;
+      setErrors((prev) => ({ ...prev, [name]: errorMessage || t(`${name}Required`) }));
       return false;
     }
   };

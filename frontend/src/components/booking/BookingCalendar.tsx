@@ -11,10 +11,11 @@ import { useAvailableSlots } from '@/hooks/useAvailableSlots';
 import { BookingLegend } from './BookingLegend';
 import { useCreateBooking } from '@/hooks/useCreateBooking';
 import type { DaySlots, TimeSlot } from '@/types/booking';
+import type { InstructorProfile } from '@/types';
 
 interface BookingCalendarProps {
   instructorId: string;
-  instructorProfile: any; // We'll type this properly later
+  instructorProfile: InstructorProfile;
 }
 
 export function BookingCalendar({ 
@@ -41,9 +42,10 @@ export function BookingCalendar({
   const endDateKey = format(weekDays[6], 'yyyy-MM-dd');
   const slotsQuery = useAvailableSlots(instructorId, startDateKey, endDateKey);
 
+  // COPILOT FIX: Include query status in dependencies to handle loading/error states
   useEffect(() => {
     processQueryData();
-  }, [slotsQuery.data, currentWeekStart, instructorId]);
+  }, [slotsQuery.data, slotsQuery.isLoading, slotsQuery.isError, currentWeekStart, instructorId]);
 
   // Reset focus when modal closes
   useEffect(() => {
