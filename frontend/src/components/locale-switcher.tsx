@@ -19,6 +19,7 @@ export function LocaleSwitcher() {
 
   const onSelectChange = (nextLocale: Locale) => {
     startTransition(() => {
+      // @ts-expect-error - pathname may include dynamic segments not in routing config
       router.replace(pathname, { locale: nextLocale });
     });
   };

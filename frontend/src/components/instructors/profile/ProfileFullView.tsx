@@ -109,10 +109,20 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
             )}
 
             {/* Location */}
-            {profile.city && (
-              <div className="flex items-center gap-2 text-slate-300 justify-center">
-                <MapPin className="size-4" />
-                <span>{profile.city}</span>
+            {(profile.location || profile.city) && (
+              <div className="flex flex-col items-center gap-1 text-slate-300 justify-center">
+                {profile.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="size-4" />
+                    <span>{profile.location}</span>
+                  </div>
+                )}
+                {profile.city && !profile.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="size-4" />
+                    <span>{profile.city}</span>
+                  </div>
+                )}
               </div>
             )}
 

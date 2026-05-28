@@ -2,19 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { cardVariants } from '@/lib/animations';
-import { LucideIcon } from 'lucide-react';
-import { ReactNode } from 'react';
-
-interface DashboardCardProps {
-  icon?: LucideIcon;
-  iconColor?: string;
-  iconBgColor?: string;
-  title: string;
-  children: ReactNode;
-  delay?: number;
-  className?: string;
-  hoverable?: boolean;
-}
+import { DashboardCardProps } from '@/types/dashboard';
 
 export function DashboardCard({
   icon: Icon,

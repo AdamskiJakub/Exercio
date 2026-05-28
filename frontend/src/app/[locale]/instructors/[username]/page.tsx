@@ -10,6 +10,7 @@ import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/stores/auth-store';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { getFullName } from '@/lib/utils/user';
 
 export default function InstructorPublicProfilePage() {
   const params = useParams();
@@ -18,7 +19,8 @@ export default function InstructorPublicProfilePage() {
   const username = params?.username as string;
   const source = searchParams.get('from');
   const { user, isAuthenticated } = useAuthStore();
-  const t = useTranslations('InstructorProfile');
+  const t = useTranslations('Booking');
+  const tProfile = useTranslations('InstructorProfile');
 
   const { data: profile, isLoading, error } = useQuery<InstructorProfile>({
     queryKey: ['instructor', username],
@@ -43,13 +45,13 @@ export default function InstructorPublicProfilePage() {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-white">{t('instructorNotFound')}</h1>
-          <p className="text-slate-400">{t('instructorNotFoundDescription')}</p>
+          <h1 className="text-3xl font-bold text-white">{tProfile('instructorNotFound')}</h1>
+          <p className="text-slate-400">{tProfile('instructorNotFoundDescription')}</p>
           <button
             onClick={() => router.push('/instructors')}
             className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors"
           >
-            {t('backToInstructors')}
+            {tProfile('backToInstructors')}
           </button>
         </div>
       </div>
@@ -57,10 +59,23 @@ export default function InstructorPublicProfilePage() {
   }
 
   const isOwnProfile = isAuthenticated && user?.role === 'INSTRUCTOR' && profile.user?.id === user.id;
+  const fullName = getFullName(profile.user, 'Instructor');
+  const roleLabel = profile.user?.role === 'INSTRUCTOR' ? t('instructorRole') : t('specialistRole');
 
   return (
     <div className="min-h-screen bg-slate-950 pb-32">
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
+      {/* Page Title */}
+      <div className="container mx-auto px-4 pt-12 pb-8 max-w-6xl">
+        <h1 className="text-3xl md:text-4xl font-bold text-center">
+          <span className="bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+            {t('profileTitle')} {roleLabel}
+          </span>
+          {' '}
+          <span className="text-white">{fullName}</span>
+        </h1>
+      </div>
+
+      <div className="container mx-auto px-4 pb-4 max-w-6xl">
         <PublicInstructorProfile 
           profile={profile} 
           isPreview={false} 

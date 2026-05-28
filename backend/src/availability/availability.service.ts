@@ -271,6 +271,30 @@ export class AvailabilityService {
 
     await this.verifyInstructorOwnership(userId, exception.instructorId);
 
+    // If date is being changed, check for conflicts
+    if (dto.date) {
+      const newDate = new Date(dto.date);
+      const existingDate = exception.date;
+      
+      // Only check for conflicts if date actually changes
+      if (newDate.getTime() !== existingDate.getTime()) {
+        const conflict = await this.prisma.availabilityException.findUnique({
+          where: {
+            instructorId_date: {
+              instructorId: exception.instructorId,
+              date: newDate,
+            },
+          },
+        });
+
+        if (conflict) {
+          throw new BadRequestException(
+            `Exception for date ${dto.date} already exists.`,
+          );
+        }
+      }
+    }
+
     // Validate time range if provided
     if (dto.startTime || dto.endTime) {
       const startTime = dto.startTime || exception.startTime;
@@ -280,9 +304,17 @@ export class AvailabilityService {
       }
     }
 
+    // Prepare update data
+    const updateData: any = {};
+    if (dto.date) updateData.date = new Date(dto.date);
+    if (dto.isAvailable !== undefined) updateData.isAvailable = dto.isAvailable;
+    if (dto.startTime !== undefined) updateData.startTime = dto.startTime;
+    if (dto.endTime !== undefined) updateData.endTime = dto.endTime;
+    if (dto.reason !== undefined) updateData.reason = dto.reason;
+
     return this.prisma.availabilityException.update({
       where: { id: exceptionId },
-      data: dto,
+      data: updateData,
     });
   }
 

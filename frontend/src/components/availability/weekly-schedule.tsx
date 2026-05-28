@@ -162,11 +162,7 @@ export function WeeklySchedule() {
   return (
     <div className="space-y-6">
       {/* Monthly Calendar Preview */}
-      <MonthlyCalendarPreview 
-        schedule={schedule} 
-        sessionDuration={instructorProfile?.sessionDuration || 60}
-        exceptions={exceptions}
-      />
+      <MonthlyCalendarPreview />
 
       {DAYS_OF_WEEK.map((dayOfWeek) => {
         const daySchedule = schedule.find((d) => d.dayOfWeek === dayOfWeek) || {
