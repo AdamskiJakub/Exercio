@@ -37,8 +37,9 @@ export function useRegisterInstructorForm() {
       });
       const { user } = response.data;
       
-      setAuth(user);
-      router.push('/dashboard');
+      // Redirect to email verification with email in query param
+      const locale = window.location.pathname.split('/')[1];
+      window.location.href = `/${locale}/verify-email?email=${encodeURIComponent(registerData.email)}`;
     } catch (err: any) {
       if (err.response?.status === 409) {
         const conflictMessage = err.response?.data?.message;

@@ -2,23 +2,20 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import { AuthHeader } from '@/components/ui/auth-header';
 
 export default function RegisterPage() {
   const t = useTranslations('auth');
 
   return (
-    <div className="py-16 px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center py-16 px-4">
       <div className="max-w-4xl w-full mx-auto space-y-10">
         
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white mb-3">
-            {t('registerAs')}
-          </h1>
-          <p className="text-lg text-slate-300">
-            {t('chooseRoleDescription')}
-          </p>
-        </div>
+        <AuthHeader
+          title={t('registerAs')}
+          subtitle={t('chooseRoleDescription')}
+        />
 
         <div className="grid md:grid-cols-2 gap-6">
           <Link href="/register/client" aria-label={t('registerAsClient')}>

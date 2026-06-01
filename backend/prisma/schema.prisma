@@ -216,3 +216,17 @@ model AvailabilityException {
   @@index([date])
   @@map("availability_exceptions")
 }
+
+// Verification codes for email verification and password reset
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  code      String // 6-digit code
+  type      String // "email_verification" | "password_reset"
+  expiresAt DateTime // Code expires after 10 minutes
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, type, used])
+  @@map("verification_codes")
+}

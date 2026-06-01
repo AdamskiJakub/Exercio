@@ -7,10 +7,12 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { FacebookStrategy } from './strategies/facebook.strategy';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     PassportModule,
+    EmailModule,
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => {
         const secret = configService.get<string>('JWT_SECRET');

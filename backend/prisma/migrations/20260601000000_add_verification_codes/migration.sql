@@ -1,0 +1,15 @@
+-- CreateTable: verification_codes
+CREATE TABLE IF NOT EXISTS "verification_codes" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "used" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "verification_codes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX IF NOT EXISTS "verification_codes_email_type_used_idx" ON "verification_codes"("email", "type", "used");
