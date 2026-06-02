@@ -1,7 +1,9 @@
 import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { RegisterDto, LoginDto } from './dto';
+import { randomInt } from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -9,9 +11,10 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, language: 'pl' | 'en' = 'pl') {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     try {
@@ -24,13 +27,15 @@ export class AuthService {
           lastName: dto.lastName,
           phone: dto.phone,
           role: 'CLIENT',
+          isEmailVerified: false, // New users are not verified
         },
       });
 
-      const token = await this.generateToken(user.id, user.email, user.role);
+      // Send verification code instead of returning token
+      await this.sendVerificationCode(dto.email, language);
 
       return {
-        access_token: token,
+        message: 'Registration successful. Please check your email for verification code.',
         user: {
           id: user.id,
           email: user.email,
@@ -39,6 +44,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
+          isEmailVerified: user.isEmailVerified,
         },
       };
     } catch (error) {
@@ -49,7 +55,7 @@ export class AuthService {
     }
   }
 
-  async registerInstructor(dto: RegisterDto) {
+  async registerInstructor(dto: RegisterDto, language: 'pl' | 'en' = 'pl') {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     if (!dto.phone) {
@@ -66,6 +72,7 @@ export class AuthService {
           lastName: dto.lastName,
           phone: dto.phone,
           role: 'INSTRUCTOR',
+          isEmailVerified: false, // New users are not verified
           instructorProfile: {
             create: {
               bio: null,
@@ -88,10 +95,11 @@ export class AuthService {
         },
       });
 
-      const token = await this.generateToken(user.id, user.email, user.role);
+      // Send verification code instead of returning token
+      await this.sendVerificationCode(dto.email, language);
 
       return {
-        access_token: token,
+        message: 'Registration successful. Please check your email for verification code.',
         user: {
           id: user.id,
           email: user.email,
@@ -100,6 +108,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
+          isEmailVerified: user.isEmailVerified,
         },
       };
     } catch (error) {
@@ -147,6 +156,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
       },
     };
   }
@@ -306,5 +316,203 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  // ============================================
+  // EMAIL VERIFICATION & PASSWORD RESET METHODS
+  // ============================================
+
+  /**
+   * Generate a 6-digit verification code
+   */
+  private generateVerificationCode(): string {
+    return randomInt(0, 1_000_000).toString().padStart(6, '0');
+  }
+
+  /**
+   * Send verification code after registration
+   */
+  async sendVerificationCode(email: string, language: 'pl' | 'en' = 'pl') {
+  const user = await this.prisma.user.findUnique({ where: { email } });
+
+  if (!user || user.isEmailVerified) {
+    return { message: 'Verification code sent successfully' };
+  }
+
+  const code = this.generateVerificationCode();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await this.prisma.verificationCode.deleteMany({
+    where: {
+      email,
+      type: 'email_verification',
+      used: false,
+    },
+  });
+
+  await this.prisma.verificationCode.create({
+    data: {
+      email,
+      code,
+      type: 'email_verification',
+      expiresAt,
+    },
+  });
+
+  await this.emailService.sendVerificationCode(email, code, language);
+
+  return { message: 'Verification code sent successfully' };
+}
+
+  /**
+   * Verify email with 6-digit code
+   */
+  async verifyEmail(email: string, code: string) {
+    const verificationCode = await this.prisma.verificationCode.findFirst({
+      where: {
+        email,
+        code,
+        type: 'email_verification',
+        used: false,
+        expiresAt: {
+          gte: new Date(),
+        },
+      },
+    });
+
+    if (!verificationCode) {
+      throw new BadRequestException('Invalid or expired verification code');
+    }
+
+    // Mark code as used
+    await this.prisma.verificationCode.update({
+      where: { id: verificationCode.id },
+      data: { used: true },
+    });
+
+    // Update user's email verification status
+    const user = await this.prisma.user.update({
+      where: { email },
+      data: { isEmailVerified: true },
+    });
+
+    // Generate token for auto-login
+    const token = await this.generateToken(user.id, user.email, user.role);
+
+    return {
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
+      },
+    };
+  }
+
+  /**
+   * Request password reset - send 6-digit code
+   */
+  async requestPasswordReset(email: string, language: 'pl' | 'en' = 'pl') {
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    // Don't reveal if user exists or not (security)
+    if (!user) {
+      return { message: 'If an account with that email exists, a password reset code has been sent' };
+    }
+
+    // OAuth users can't reset password
+    if (user.provider !== 'local') {
+      throw new BadRequestException('Password reset is not available for OAuth accounts');
+    }
+
+    const code = this.generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Delete any existing unused codes for this email
+    await this.prisma.verificationCode.deleteMany({
+      where: {
+        email,
+        type: 'password_reset',
+        used: false,
+      },
+    });
+
+    // Create new reset code
+    await this.prisma.verificationCode.create({
+      data: {
+        email,
+        code,
+        type: 'password_reset',
+        expiresAt,
+      },
+    });
+
+    // Send email
+    await this.emailService.sendPasswordResetCode(email, code, language);
+
+    return { message: 'If an account with that email exists, a password reset code has been sent' };
+  }
+
+  /**
+   * Reset password with 6-digit code
+   * Email is extracted from the code - no need to pass it separately
+   */
+  async resetPassword(email: string, code: string, newPassword: string) {
+    // Find the verification code - email is stored in the code record
+    const verificationCode = await this.prisma.verificationCode.findFirst({
+      where: {
+        code,
+        email,
+        type: 'password_reset',
+        used: false,
+        expiresAt: {
+          gte: new Date(),
+        },
+      },
+    });
+
+    if (!verificationCode) {
+      throw new BadRequestException('Invalid or expired reset code');
+    }
+
+    // Mark code as used
+    await this.prisma.verificationCode.update({
+      where: { id: verificationCode.id },
+      data: { used: true },
+    });
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user's password
+    const user = await this.prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+
+    // Generate token for auto-login
+    const token = await this.generateToken(user.id, user.email, user.role);
+
+    return {
+      access_token: token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
+      },
+    };
   }
 }

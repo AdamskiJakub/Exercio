@@ -2,10 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
+import { Dumbbell } from 'lucide-react';
 import { useRegisterInstructorForm } from '@/hooks/useRegisterInstructorForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { AuthHeader } from '@/components/ui/auth-header';
 
 export default function RegisterInstructorPage() {
   const t = useTranslations('auth');
@@ -13,35 +15,16 @@ export default function RegisterInstructorPage() {
   const { register, formState: { errors } } = form;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center py-16 px-4">
       <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/">
-            <h1 className="text-4xl font-bold text-gradient-trainly mb-2 cursor-pointer hover:opacity-90 transition-opacity">
-              Trainly
-            </h1>
-          </Link>
-        </div>
+        <AuthHeader
+          title={`${t('createAccount')} - ${t('instructorRole')}`}
+          subtitle={t('instructorRoleDesc')}
+          icon={<Dumbbell className="w-10 h-10 text-purple-500" />}
+        />
 
         {/* Card */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl space-y-6">
-          {/* Header */}
-          <div>
-            <div className="flex items-center justify-center mb-4">
-              <div className="text-5xl">💪</div>
-            </div>
-            <h2 className="text-center text-3xl font-extrabold text-white">
-              {t('createAccount')} - {t('instructorRole')}
-            </h2>
-            <p className="mt-2 text-center text-sm text-slate-400">
-              {t('haveAccount')}{' '}
-              <Link href="/login" className="font-medium text-purple-400 hover:text-purple-300 transition-colors">
-                {t('loginLink')}
-              </Link>
-            </p>
-          </div>
-
           {/* Form */}
           <form className="space-y-6" onSubmit={onSubmit} noValidate>
             {error && (
@@ -165,24 +148,27 @@ export default function RegisterInstructorPage() {
           </form>
 
           {/* Footer links */}
-          <div className="space-y-2 mt-6">
-            <div className="text-center">
-              <Link 
-                href="/register/client"
-                className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
-              >
-                {t('registerAsClientInstead')}
-              </Link>
-            </div>
+          <div className="space-y-3 mt-6 text-center">
+            <Link 
+              href="/register/client"
+              className="text-sm text-orange-400 hover:text-orange-300 transition-colors block"
+            >
+              {t('registerAsClientInstead')}
+            </Link>
 
-            <div className="text-center">
-              <Link 
-                href="/register"
-                className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
-              >
-                ← {t('backToRoleSelection')}
+            <Link 
+              href="/register"
+              className="text-sm text-slate-400 hover:text-slate-200 transition-colors block"
+            >
+              ← {t('backToRoleSelection')}
+            </Link>
+
+            <p className="text-sm text-slate-400">
+              {t('haveAccount')}{' '}
+              <Link href="/login" className="font-medium text-purple-400 hover:text-purple-300 transition-colors">
+                {t('loginLink')}
               </Link>
-            </div>
+            </p>
           </div>
         </div>
       </div>

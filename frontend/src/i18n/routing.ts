@@ -33,6 +33,22 @@ export const routing = defineRouting({
       pl: '/rejestracja/instruktor',
       en: '/register/instructor',
     },
+    '/forgot-password': {
+      pl: '/zapomnialem-hasla',
+      en: '/forgot-password',
+    },
+    '/reset-password': {
+      pl: '/resetowanie-hasla',
+      en: '/reset-password',
+    },
+    '/verify-email': {
+      pl: '/weryfikacja-email',
+      en: '/verify-email',
+    },
+    '/auth/callback': {
+      pl: '/auth/callback',
+      en: '/auth/callback',
+    },
     '/dashboard': {
       pl: '/panel',
       en: '/dashboard',

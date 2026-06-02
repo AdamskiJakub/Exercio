@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Res, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Res, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto';
+import { RegisterDto, LoginDto, VerifyEmailDto, RequestPasswordResetDto, ResetPasswordDto, ResendVerificationDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
@@ -19,18 +19,16 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-    const { user, access_token } = await this.authService.register(dto);
-    res.cookie('access_token', access_token, COOKIE_OPTIONS);
-    return { user };
+  async register(@Body() dto: RegisterDto, @Query('lang') lang?: string) {
+    const language = (lang === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return await this.authService.register(dto, language);
   }
 
   @Post('register-instructor')
   @HttpCode(HttpStatus.CREATED)
-  async registerInstructor(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-    const { user, access_token } = await this.authService.registerInstructor(dto);
-    res.cookie('access_token', access_token, COOKIE_OPTIONS);
-    return { user };
+  async registerInstructor(@Body() dto: RegisterDto, @Query('lang') lang?: string) {
+    const language = (lang === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return await this.authService.registerInstructor(dto, language);
   }
 
   @Post('login')
@@ -95,5 +93,43 @@ export class AuthController {
       const errorMessage = error?.message || 'oauth_failed';
       res.redirect(`${frontendUrl}/${locale}/login?error=${encodeURIComponent(errorMessage)}`);
     }
+  }
+
+  // ============================================
+  // EMAIL VERIFICATION & PASSWORD RESET
+  // ============================================
+
+  @Post('send-verification')
+  @HttpCode(HttpStatus.OK)
+  async sendVerification(
+    @Body() dto: ResendVerificationDto,
+    @Query('lang') lang?: string,
+  ) {
+    const language = (lang === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return this.authService.sendVerificationCode(dto.email, language);
+  }
+
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+    async verifyEmail(@Body() dto: VerifyEmailDto) {
+    const { user } = await this.authService.verifyEmail(dto.email, dto.code);
+    return { user };
+  }
+
+  @Post('request-password-reset')
+  @HttpCode(HttpStatus.OK)
+  async requestPasswordReset(
+    @Body() dto: RequestPasswordResetDto,
+    @Query('lang') lang?: string,
+  ) {
+    const language = (lang === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return this.authService.requestPasswordReset(dto.email, language);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+   async resetPassword(@Body() dto: ResetPasswordDto) {
+     const { user } = await this.authService.resetPassword(dto.email, dto.code, dto.newPassword);
+    return { user };
   }
 }

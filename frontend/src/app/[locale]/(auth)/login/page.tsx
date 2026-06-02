@@ -3,11 +3,11 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { useLoginForm } from '@/hooks/useLoginForm';
-import { DumbbellIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
+import { AuthHeader } from '@/components/ui/auth-header';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -17,18 +17,10 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center py-16 px-4">
       <div className="w-full max-w-md">
-        {/* Logo/Title */}
-        <div className="text-center mb-10">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4" aria-label="Trainly home">
-            <DumbbellIcon className="w-10 h-10 text-orange-500" aria-hidden="true" />
-            <h1 className="text-5xl font-bold bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent cursor-pointer hover:opacity-90 transition-opacity">
-              Trainly
-            </h1>
-          </Link>
-          <p className="text-xl text-slate-200 font-medium mt-2">
-            {t('loginSubtitle')}
-          </p>
-        </div>
+        <AuthHeader
+          title={t('login')}
+          subtitle={t('loginSubtitle')}
+        />
 
         {/* Form Card */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl">
@@ -54,7 +46,15 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password">{t('password')}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t('password')}</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-orange-500 hover:text-orange-400 font-medium transition-colors"
+                >
+                  {t('forgotPassword')}
+                </Link>
+              </div>
               <Input
                 {...register('password', {
                   onChange: clearServerError,
