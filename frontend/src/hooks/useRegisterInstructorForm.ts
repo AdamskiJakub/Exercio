@@ -11,8 +11,6 @@ import { generateUsernameFromEmail } from '@/lib/utils/username-generator';
 
 export function useRegisterInstructorForm() {
   const t = useTranslations('auth');
-  const router = useRouter();
-  const setAuth = useAuthStore((state) => state.setAuth);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,15 +28,14 @@ export function useRegisterInstructorForm() {
       
       // Auto-generate username from email with proper validation
       const username = generateUsernameFromEmail(registerData.email);
+
+      const locale = window.location.pathname.split('/')[1];
       
-      const response = await apiClient.post('/auth/register-instructor', {
+      await apiClient.post(`/auth/register-instructor?lang=${locale}`, {
         ...registerData,
         username,
       });
-      const { user } = response.data;
-      
-      // Redirect to email verification with email in query param
-      const locale = window.location.pathname.split('/')[1];
+
       window.location.href = `/${locale}/verify-email?email=${encodeURIComponent(registerData.email)}`;
     } catch (err: any) {
       if (err.response?.status === 409) {

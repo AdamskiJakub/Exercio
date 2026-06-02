@@ -36,7 +36,7 @@ export function ForgotPasswordForm() {
             />
             {errors.email && (
               <p className="text-sm text-red-500">
-                {t('emailRequired')}
+                {errors.email.message}
               </p>
             )}
           </div>

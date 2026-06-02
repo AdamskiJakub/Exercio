@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
-import { verifyEmailSchema, type VerifyEmailFormData } from '@/lib/validations/verify-email';
+import { toast } from 'sonner';
+import { createVerifyEmailSchema, type VerifyEmailFormData } from '@/lib/validations/verify-email';
 
 export function useVerifyEmailForm(initialEmail?: string) {
   const t = useTranslations('auth');
@@ -18,7 +19,7 @@ export function useVerifyEmailForm(initialEmail?: string) {
   const [isResending, setIsResending] = useState(false);
 
   const form = useForm<VerifyEmailFormData>({
-    resolver: zodResolver(verifyEmailSchema),
+    resolver: zodResolver(createVerifyEmailSchema(t)),
     mode: 'onSubmit',
     defaultValues: {
       email: initialEmail || '',
@@ -50,7 +51,6 @@ export function useVerifyEmailForm(initialEmail?: string) {
       }
 
       setSuccess(true);
-      // Redirect to login after successful verification
       setTimeout(() => {
         router.push('/login');
       }, 2000);
@@ -84,9 +84,7 @@ export function useVerifyEmailForm(initialEmail?: string) {
         throw new Error('Failed to resend code');
       }
 
-      // Show success message briefly
-      setError(null);
-      alert(t('codeSent'));
+      toast.success(t('codeResent'));
     } catch (err) {
       setError(t('resendFailed'));
     } finally {

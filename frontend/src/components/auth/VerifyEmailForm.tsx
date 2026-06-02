@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,7 @@ export function VerifyEmailForm({ initialEmail }: VerifyEmailFormProps) {
             />
             {errors.email && (
               <p className="text-sm text-red-500">
-                {t('emailRequired')}
+                {errors.email.message}
               </p>
             )}
           </div>
@@ -59,7 +59,7 @@ export function VerifyEmailForm({ initialEmail }: VerifyEmailFormProps) {
             />
             {errors.code && (
               <p className="text-sm text-red-500">
-                {t('codeInvalid')}
+                {errors.code.message}
               </p>
             )}
             <div className="text-center mt-2">
@@ -69,7 +69,7 @@ export function VerifyEmailForm({ initialEmail }: VerifyEmailFormProps) {
                 disabled={isResending}
                 className="text-sm text-orange-500 hover:text-orange-400 disabled:opacity-50"
               >
-                {isResending ? t('sendingCode') : t('resendCode')}
+                {isResending ? t('resendingCode') : t('resendCode')}
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { RegisterDto, LoginDto } from './dto';
+import { randomInt } from 'crypto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, language: 'pl' | 'en' = 'pl') {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     try {
@@ -31,7 +32,7 @@ export class AuthService {
       });
 
       // Send verification code instead of returning token
-      await this.sendVerificationCode(dto.email, 'en'); // Default to English, frontend will handle language
+      await this.sendVerificationCode(dto.email, language);
 
       return {
         message: 'Registration successful. Please check your email for verification code.',
@@ -43,7 +44,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
-          emailVerified: user.isEmailVerified,
+          isEmailVerified: user.isEmailVerified,
         },
       };
     } catch (error) {
@@ -54,7 +55,7 @@ export class AuthService {
     }
   }
 
-  async registerInstructor(dto: RegisterDto) {
+  async registerInstructor(dto: RegisterDto, language: 'pl' | 'en' = 'pl') {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     if (!dto.phone) {
@@ -95,7 +96,7 @@ export class AuthService {
       });
 
       // Send verification code instead of returning token
-      await this.sendVerificationCode(dto.email, 'en');
+      await this.sendVerificationCode(dto.email, language);
 
       return {
         message: 'Registration successful. Please check your email for verification code.',
@@ -107,7 +108,7 @@ export class AuthService {
           firstName: user.firstName,
           lastName: user.lastName,
           phone: user.phone,
-          emailVerified: user.isEmailVerified,
+          isEmailVerified: user.isEmailVerified,
         },
       };
     } catch (error) {
@@ -155,6 +156,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
       },
     };
   }
@@ -324,40 +326,43 @@ export class AuthService {
    * Generate a 6-digit verification code
    */
   private generateVerificationCode(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    return randomInt(0, 1_000_000).toString().padStart(6, '0');
   }
 
   /**
    * Send verification code after registration
    */
   async sendVerificationCode(email: string, language: 'pl' | 'en' = 'pl') {
-    const code = this.generateVerificationCode();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const user = await this.prisma.user.findUnique({ where: { email } });
 
-    // Delete any existing unused codes for this email
-    await this.prisma.verificationCode.deleteMany({
-      where: {
-        email,
-        type: 'email_verification',
-        used: false,
-      },
-    });
-
-    // Create new verification code
-    await this.prisma.verificationCode.create({
-      data: {
-        email,
-        code,
-        type: 'email_verification',
-        expiresAt,
-      },
-    });
-
-    // Send email
-    await this.emailService.sendVerificationCode(email, code, language);
-
+  if (!user || user.isEmailVerified) {
     return { message: 'Verification code sent successfully' };
   }
+
+  const code = this.generateVerificationCode();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await this.prisma.verificationCode.deleteMany({
+    where: {
+      email,
+      type: 'email_verification',
+      used: false,
+    },
+  });
+
+  await this.prisma.verificationCode.create({
+    data: {
+      email,
+      code,
+      type: 'email_verification',
+      expiresAt,
+    },
+  });
+
+  await this.emailService.sendVerificationCode(email, code, language);
+
+  return { message: 'Verification code sent successfully' };
+}
 
   /**
    * Verify email with 6-digit code
@@ -460,11 +465,12 @@ export class AuthService {
    * Reset password with 6-digit code
    * Email is extracted from the code - no need to pass it separately
    */
-  async resetPassword(code: string, newPassword: string) {
+  async resetPassword(email: string, code: string, newPassword: string) {
     // Find the verification code - email is stored in the code record
     const verificationCode = await this.prisma.verificationCode.findFirst({
       where: {
         code,
+        email,
         type: 'password_reset',
         used: false,
         expiresAt: {
@@ -476,9 +482,6 @@ export class AuthService {
     if (!verificationCode) {
       throw new BadRequestException('Invalid or expired reset code');
     }
-
-    // Extract email from the verification code
-    const email = verificationCode.email;
 
     // Mark code as used
     await this.prisma.verificationCode.update({
@@ -508,6 +511,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
       },
     };
   }

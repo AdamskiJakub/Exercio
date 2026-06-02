@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { usePasswordResetStore } from '@/stores/password-reset-store';
-import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validations/forgot-password';
+import { createForgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validations/forgot-password';
 
 export function useForgotPasswordForm() {
   const t = useTranslations('auth');
@@ -19,7 +19,7 @@ export function useForgotPasswordForm() {
   const [success, setSuccess] = useState(false);
 
   const form = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
+    resolver: zodResolver(createForgotPasswordSchema(t)),
     mode: 'onSubmit',
   });
 
@@ -50,7 +50,7 @@ export function useForgotPasswordForm() {
         router.push('/reset-password');
       }, 2000);
     } catch (err) {
-      setError(t('passwordResetFailed'));
+      setError(t('resendFailed'));
     } finally {
       setIsLoading(false);
     }

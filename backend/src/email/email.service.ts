@@ -4,28 +4,43 @@ import { Resend } from 'resend';
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private resend: Resend;
+  private resend: Resend | null = null;
 
   constructor() {
     const apiKey = process.env.RESEND_API_KEY;
-    
+
     if (!apiKey) {
-      this.logger.warn('RESEND_API_KEY not found. Email sending will be disabled.');
+      this.logger.warn(
+        'RESEND_API_KEY not found. Email sending will be disabled.',
+      );
+      return;
     }
-    
+
     this.resend = new Resend(apiKey);
   }
 
-  async sendVerificationCode(email: string, code: string, language: 'pl' | 'en' = 'pl') {
+  async sendVerificationCode(
+    email: string,
+    code: string,
+    language: 'pl' | 'en' = 'pl',
+  ) {
+    if (!this.resend) {
+      this.logger.warn(
+        `Email sending disabled; not sending verification code to ${email}`,
+      );
+      return null;
+    }
+
     try {
-      const subject = language === 'pl' 
-        ? 'Kod weryfikacyjny - Trainly' 
-        : 'Verification Code - Trainly';
-      
+      const subject =
+        language === 'pl'
+          ? 'Kod weryfikacyjny - Trainly'
+          : 'Verification Code - Trainly';
+
       const html = this.getVerificationEmailTemplate(code, language);
 
       const result = await this.resend.emails.send({
-        from: 'Trainly <onboarding@resend.dev>', // Zmienisz na swoją domenę później
+        from: 'Trainly <onboarding@resend.dev>',
         to: email,
         subject,
         html,
@@ -34,21 +49,36 @@ export class EmailService {
       this.logger.log(`Verification code sent to ${email}`);
       return result;
     } catch (error) {
-      this.logger.error(`Failed to send verification code to ${email}:`, error);
+      this.logger.error(
+        `Failed to send verification code to ${email}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async sendPasswordResetCode(email: string, code: string, language: 'pl' | 'en' = 'pl') {
+  async sendPasswordResetCode(
+    email: string,
+    code: string,
+    language: 'pl' | 'en' = 'pl',
+  ) {
+    if (!this.resend) {
+      this.logger.warn(
+        `Email sending disabled; not sending password reset code to ${email}`,
+      );
+      return null;
+    }
+
     try {
-      const subject = language === 'pl' 
-        ? 'Resetowanie hasła - Trainly' 
-        : 'Password Reset - Trainly';
-      
+      const subject =
+        language === 'pl'
+          ? 'Resetowanie hasła - Trainly'
+          : 'Password Reset - Trainly';
+
       const html = this.getPasswordResetEmailTemplate(code, language);
 
       const result = await this.resend.emails.send({
-        from: 'Trainly <onboarding@resend.dev>', // Zmienisz na swoją domenę później
+        from: 'Trainly <onboarding@resend.dev>',
         to: email,
         subject,
         html,
@@ -57,7 +87,10 @@ export class EmailService {
       this.logger.log(`Password reset code sent to ${email}`);
       return result;
     } catch (error) {
-      this.logger.error(`Failed to send password reset code to ${email}:`, error);
+      this.logger.error(
+        `Failed to send password reset code to ${email}:`,
+        error,
+      );
       throw error;
     }
   }

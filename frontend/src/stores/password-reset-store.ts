@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface PasswordResetState {
   email: string | null;
@@ -21,18 +21,8 @@ export const usePasswordResetStore = create<PasswordResetState>()(
     }),
     {
       name: 'password-reset-storage',
-      // Use sessionStorage instead of localStorage
-      // This way the email is cleared when browser closes
-      storage: {
-        getItem: (name) => {
-          const str = sessionStorage.getItem(name);
-          return str ? JSON.parse(str) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => sessionStorage.removeItem(name),
-      },
+      // 2. Bezpieczne i oficjalne użycie sessionStorage przez Zustand
+      storage: createJSONStorage(() => sessionStorage), 
     }
   )
 );

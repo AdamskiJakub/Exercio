@@ -1,8 +1,10 @@
 import { z } from 'zod';
+import { createEmailSchema } from './schemas/auth-base';
 
-export const verifyEmailSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  code: z.string().length(6, 'Code must be 6 digits'),
-});
+export const createVerifyEmailSchema = (t: (key: string) => string) =>
+  z.object({
+    email: createEmailSchema(t),
+    code: z.string().regex(/^\d{6}$/, { message: t('codeInvalid') }),
+  });
 
-export type VerifyEmailFormData = z.infer<typeof verifyEmailSchema>;
+export type VerifyEmailFormData = z.infer<ReturnType<typeof createVerifyEmailSchema>>;

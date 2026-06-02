@@ -54,7 +54,7 @@ export function ResetPasswordForm() {
             />
             {errors.code && (
               <p className="text-sm text-red-500">
-                {t('codeInvalid')}
+                {errors.code.message}
               </p>
             )}
           </div>

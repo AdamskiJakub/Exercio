@@ -1,5 +1,5 @@
 -- CreateTable: verification_codes
-CREATE TABLE IF NOT EXISTS "verification_codes" (
+CREATE TABLE  "verification_codes" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS "verification_codes" (
 );
 
 -- CreateIndex
-CREATE INDEX IF NOT EXISTS "verification_codes_email_type_used_idx" ON "verification_codes"("email", "type", "used");
+CREATE INDEX  "verification_codes_email_type_used_idx" ON "verification_codes"("email", "type", "used");

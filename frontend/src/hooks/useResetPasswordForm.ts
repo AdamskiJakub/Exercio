@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { usePasswordResetStore } from '@/stores/password-reset-store';
-import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/validations/reset-password';
+import { createResetPasswordSchema, type ResetPasswordFormData } from '@/lib/validations/reset-password';
 
 export function useResetPasswordForm() {
   const t = useTranslations('auth');
@@ -26,7 +26,7 @@ export function useResetPasswordForm() {
   }, [email, router]);
 
   const form = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+    resolver: zodResolver(createResetPasswordSchema(t)),
     mode: 'onSubmit',
   });
 
@@ -41,6 +41,7 @@ export function useResetPasswordForm() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            email,
             code: data.code,
             newPassword: data.newPassword,
           }),
@@ -57,7 +58,9 @@ export function useResetPasswordForm() {
       
       setSuccess(true);
       // Redirect to login immediately after successful reset
-      router.push('/login');
+     setTimeout(() => {
+        router.push('/login');
+      }, 2000); 
     } catch (err) {
       setError(err instanceof Error ? err.message : t('resetPasswordFailed'));
     } finally {

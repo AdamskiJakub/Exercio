@@ -19,14 +19,16 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterDto) {
-    return await this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Query('lang') lang?: string) {
+    const language = (lang === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return await this.authService.register(dto, language);
   }
 
   @Post('register-instructor')
   @HttpCode(HttpStatus.CREATED)
-  async registerInstructor(@Body() dto: RegisterDto) {
-    return await this.authService.registerInstructor(dto);
+  async registerInstructor(@Body() dto: RegisterDto, @Query('lang') lang?: string) {
+    const language = (lang === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return await this.authService.registerInstructor(dto, language);
   }
 
   @Post('login')
@@ -109,12 +111,8 @@ export class AuthController {
 
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
-  async verifyEmail(
-    @Body() dto: VerifyEmailDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { user, access_token } = await this.authService.verifyEmail(dto.email, dto.code);
-    res.cookie('access_token', access_token, COOKIE_OPTIONS);
+    async verifyEmail(@Body() dto: VerifyEmailDto) {
+    const { user } = await this.authService.verifyEmail(dto.email, dto.code);
     return { user };
   }
 
@@ -130,15 +128,8 @@ export class AuthController {
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
-  async resetPassword(
-    @Body() dto: ResetPasswordDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const { user, access_token } = await this.authService.resetPassword(
-      dto.code,
-      dto.newPassword,
-    );
-    res.cookie('access_token', access_token, COOKIE_OPTIONS);
+   async resetPassword(@Body() dto: ResetPasswordDto) {
+     const { user } = await this.authService.resetPassword(dto.email, dto.code, dto.newPassword);
     return { user };
   }
 }

@@ -1,12 +1,16 @@
 import { z } from 'zod';
+import { createConfirmPasswordSchema, createStrongPasswordSchema } from './schemas/auth-base';
 
-export const resetPasswordSchema = z.object({
-  code: z.string().length(6, 'Code must be 6 digits'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+export const createResetPasswordSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      code: z.string().regex(/^\d{6}$/, { message: t('codeInvalid') }),
+      newPassword: createStrongPasswordSchema(t),
+      confirmPassword: createConfirmPasswordSchema(t),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: t('passwordMatch'),
+      path: ['confirmPassword'],
+    });
 
-export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+export type ResetPasswordFormData = z.infer<ReturnType<typeof createResetPasswordSchema>>;
