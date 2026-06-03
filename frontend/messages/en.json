@@ -300,6 +300,7 @@
       "title": "Availability",
       "subtitle": "Manage your availability and working hours",
       "weeklySchedule": "Weekly Schedule",
+      "exceptionDay": "Exceptional day",
       "weeklyScheduleDescription": "Set your standard working hours for each day of the week",
       "exceptions": "Exceptions",
       "exceptionsDescription": "Add special dates with custom hours or days off",
@@ -347,6 +348,7 @@
       "cancelledLabel": "Cancelled",
       "unavailableLabel": "Unavailable",
       "todayLabel": "Today",
+      "noSlots": "No available slots",
       "confirmDelete": "Are you sure you want to delete this exception?",
       "confirmDeleteTitle": "Confirm deletion",
       "backToDashboard": "Back to dashboard",
@@ -354,6 +356,7 @@
       "sessionDuration": "Session duration",
       "minutes": "min",
       "close": "Close",
+      "calendarLoadError": "Error loading calendar",
       "selectMedia": "Select Files"
     },
     "profileForm": {
@@ -646,6 +649,8 @@
     "sessionDuration": "Session Duration",
     "sessionPrice": "Session Price",
     "minNotice": "Minimum Notice",
+    "cancellationPolicy": "You can cancel free of charge up to {hours} hours before the session.",
+    "cancellationPolicyHint": "Free cancellation up to {hours} hours before the session",
     "days": "days",
     "sameDay": "Same day",
     "bookingNotEnabled": "Booking Unavailable",
@@ -773,5 +778,19 @@
       "confirm": "Complete session",
       "cancel": "Cancel"
     }
+  },
+    "CancelBooking": {
+    "title": "Cancel Session",
+    "description": "Are you sure you want to cancel this session? The instructor will be notified.",
+    "reasonLabel": "Cancellation reason",
+    "reasonPlaceholder": "E.g. sudden change of plans, illness...",
+    "optional": "optional",
+    "confirmButton": "Cancel Session",
+    "success": "Session Cancelled",
+    "successDescription": "Your session has been cancelled. The instructor has been notified.",
+    "errorTitle": "Error",
+    "error": "Failed to cancel the session. Please try again later.",
+    "invalidLink": "Invalid Link",
+    "invalidLinkDescription": "The cancellation link is invalid or has expired."
   }
 }

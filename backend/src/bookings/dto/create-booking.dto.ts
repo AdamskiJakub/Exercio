@@ -1,4 +1,5 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDateString, IsEmail, IsNotEmpty, IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateBookingDto {
   @IsUUID()
@@ -25,4 +26,9 @@ export class CreateBookingDto {
   @IsString()
   @IsOptional()
   guestPhone?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  timezoneOffset?: number;
 }

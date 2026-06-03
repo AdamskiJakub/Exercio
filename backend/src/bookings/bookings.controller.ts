@@ -21,6 +21,7 @@ import { CreateManualBookingDto } from './dto/create-manual-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { CreateManualBlockDto } from './dto/create-manual-block.dto';
 import { GetAvailableSlotsDto } from './dto/get-available-slots.dto';
+import { CancelGuestBookingDto } from './dto/cancel-guest-booking.dto';
 
 @Controller('bookings')
 export class BookingsController {
@@ -31,30 +32,31 @@ export class BookingsController {
    * Get available time slots for an instructor
    */
   @UseGuards(OptionalJwtAuthGuard)
-  @Get('available-slots')
-  async getAvailableSlots(@Query() query: GetAvailableSlotsDto, @Request() req) {
-    const startDate = new Date(query.startDate);
-    const endDate = new Date(query.endDate);
+@Get('available-slots')
+async getAvailableSlots(@Query() query: GetAvailableSlotsDto, @Request() req) {
+  const startDate = new Date(query.startDate);
+  const endDate = new Date(query.endDate);
 
-    // Validate end date is after start date
-    if (endDate <= startDate) {
-      throw new BadRequestException('End date must be after start date');
-    }
-
-    // Validate date range (max 30 days)
-    const daysDiff =
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-    if (daysDiff > 30) {
-      throw new BadRequestException('Date range cannot exceed 30 days');
-    }
-
-    return this.bookingsService.getAvailableSlots(
-      query.instructorId,
-      startDate,
-      endDate,
-      req.user?.id, // Pass requesting user ID to check if instructor
-    );
+  if (endDate <= startDate) {
+    throw new BadRequestException('End date must be after start date');
   }
+
+  const daysDiff =
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+  if (daysDiff > 30) {
+    throw new BadRequestException('Date range cannot exceed 30 days');
+  }
+
+  const timezoneOffset = query.timezoneOffset ?? 0;
+
+  return this.bookingsService.getAvailableSlots(
+    query.instructorId,
+    startDate,
+    endDate,
+    req.user?.id,
+    timezoneOffset ?? 0,
+  );
+}
 
   /**
    * POST /bookings
@@ -63,7 +65,6 @@ export class BookingsController {
    */
   @Post()
   @UseGuards(OptionalJwtAuthGuard)
-  @Throttle({ default: { limit: 3, ttl: 600000 } }) // 3 requests per 10 minutes for guests
   async createBooking(@Request() req, @Body() dto: CreateBookingDto) {
     // Check if user is authenticated
     const isAuthenticated = req.user && req.user.id;
@@ -83,6 +84,21 @@ export class BookingsController {
       }
       return this.bookingsService.createGuestBooking(dto);
     }
+  }
+
+    /**
+   * POST /bookings/guest-cancel
+   * Cancel a booking via cancellation token (no auth required)
+   */
+  @Post('guest-cancel')
+  @Throttle({ default: { limit: 5, ttl: 600000 } }) // 5 requests per 10 min
+  async guestCancelBooking(@Body() dto: CancelGuestBookingDto) {
+    const language = (dto.language === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return this.bookingsService.cancelGuestBooking(
+      dto.bookingId,
+      dto.token,
+      dto.cancellationReason,
+    );
   }
 
   /**
@@ -137,7 +153,8 @@ export class BookingsController {
     @Param('id') id: string,
     @Body() dto: CancelBookingDto,
   ) {
-    return this.bookingsService.cancelBooking(id, req.user.id, dto);
+    const language = (dto.language === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return this.bookingsService.cancelBooking(id, req.user.id, dto, language);
   }
 
   /**

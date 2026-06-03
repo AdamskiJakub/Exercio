@@ -8,4 +8,8 @@ export class CancelBookingDto {
   @IsString()
   @IsOptional()
   cancellationReason?: string;
+
+  @IsIn(['pl', 'en'])
+  @IsOptional()
+  language?: 'pl' | 'en';
 }

@@ -121,6 +121,15 @@ export function BookingConfirmModal({
             </p>
           </div>
 
+          {/* Cancellation Policy Hint */}
+          {(instructorProfile.minNoticeHours ?? 0) > 0 && (
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+              <p className="text-sm text-blue-400">
+                {t('cancellationPolicy', { hours: instructorProfile.minNoticeHours ?? 0 })}
+              </p>
+            </div>
+          )}
+
           {/* Guest Contact Form - Only for non-authenticated users */}
           {!isAuthenticated && (
             <GuestBookingForm 

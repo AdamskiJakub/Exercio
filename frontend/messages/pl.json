@@ -300,6 +300,7 @@
       "title": "Dostępność",
       "subtitle": "Zarządzaj swoją dostępnością i godzinami pracy",
       "weeklySchedule": "Tygodniowy Harmonogram",
+      "exceptionDay": "Wyjątkowy dzień",
       "weeklyScheduleDescription": "Ustaw swoje standardowe godziny pracy dla każdego dnia tygodnia",
       "exceptions": "Wyjątki",
       "exceptionsDescription": "Dodaj specjalne daty z niestandardowymi godzinami lub dniami wolnymi",
@@ -347,6 +348,7 @@
       "cancelledLabel": "Anulowane",
       "unavailableLabel": "Niedostępny",
       "todayLabel": "Dzisiaj",
+      "noSlots": "Brak wolnych terminów",
       "confirmDelete": "Czy na pewno chcesz usunąć ten wyjątek?",
       "confirmDeleteTitle": "Potwierdź usunięcie",
       "backToDashboard": "Powrót do panelu",
@@ -354,6 +356,7 @@
       "sessionDuration": "Czas trwania sesji",
       "minutes": "min",
       "close": "Zamknij",
+      "calendarLoadError": "Błąd ładowania kalendarza",
       "selectMedia": "Wybierz pliki"
     },
     "profileForm": {
@@ -647,6 +650,8 @@
     "sessionDuration": "Długość sesji",
     "sessionPrice": "Cena sesji",
     "minNotice": "Minimalny czas wyprzedzenia",
+    "cancellationPolicy": "Możesz anulować bezpłatnie do {hours} godz. przed sesją.",
+    "cancellationPolicyHint": "Bezpłatne anulowanie możliwe do {hours} godzin przed sesją",
     "days": "dni",
     "sameDay": "Tego samego dnia",
     "bookingNotEnabled": "Rezerwacje niedostępne",
@@ -774,7 +779,23 @@
       "confirm": "Ukończ sesję",
       "cancel": "Anuluj"
     }
+  },
+  "CancelBooking": {
+    "title": "Anulowanie sesji",
+    "description": "Czy na pewno chcesz anulować tę sesję? Instruktor zostanie o tym powiadomiony.",
+    "reasonLabel": "Powód anulowania",
+    "reasonPlaceholder": "Np. nagła zmiana planów, choroba...",
+    "optional": "opcjonalnie",
+    "confirmButton": "Anuluj sesję",
+    "success": "Sesja anulowana",
+    "successDescription": "Twoja sesja została anulowana. Instruktor został powiadomiony.",
+    "errorTitle": "Błąd",
+    "error": "Nie udało się anulować sesji. Spróbuj ponownie później.",
+    "invalidLink": "Nieprawidłowy link",
+    "invalidLinkDescription": "Link do anulowania jest nieprawidłowy lub wygasł."
   }
 }
+
+
 
 

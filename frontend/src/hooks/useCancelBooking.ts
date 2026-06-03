@@ -17,9 +17,11 @@ export function useCancelBooking() {
 
   return useMutation({
     mutationFn: async ({ bookingId, cancelledBy, cancellationReason }: CancelBookingParams) => {
+      const lang = document.documentElement.lang || 'pl';
       const response = await apiClient.patch(`/bookings/${bookingId}/cancel`, {
         cancelledBy,
         cancellationReason,
+        language: lang
       });
       return response.data;
     },

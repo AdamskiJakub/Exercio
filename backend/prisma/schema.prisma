@@ -151,6 +151,9 @@ model Booking {
   cancellationReason String?   @db.Text
   acknowledgedAt     DateTime? // When instructor acknowledged the cancellation
 
+  // Guest cancellation token
+  cancellationToken String? @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

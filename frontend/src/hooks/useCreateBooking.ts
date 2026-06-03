@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 interface CreateBookingDto {
   instructorId: string;
   startTime: string; // ISO string
+  timezoneOffset?: number;
   // Optional guest data for non-authenticated users
   guestName?: string;
   guestEmail?: string;
@@ -32,34 +33,33 @@ export function useCreateBooking() {
 
   return useMutation({
     mutationFn: async (data: CreateBookingDto) => {
+      const payload = {
+        ...data,
+        timezoneOffset: data.timezoneOffset ?? new Date().getTimezoneOffset(),
+      };
       const response = await apiClient.post<CreateBookingResponse>(
         '/bookings',
-        data
+        payload
       );
       return response.data;
     },
     onSuccess: (data) => {
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
       queryClient.invalidateQueries({ queryKey: ['my-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['bookings', 'my', 'instructor'] });
       queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
       
-      // Show success message
       toast.success(t('bookingSuccess') || 'Rezerwacja została wysłana!', {
         description: t('bookingSuccessDescription') || 'Instruktor otrzymał powiadomienie. Oczekuj na potwierdzenie.',
       });
 
-      // Redirect only if user is authenticated
       if (isAuthenticated) {
         router.push('/dashboard');
       }
-      // For guests, stay on the page or show confirmation message
     },
     onError: (error: any) => {
       const backendMessage = error.response?.data?.message || '';
       
-      // Translate common backend errors
       let errorMessage = backendMessage;
       if (backendMessage.includes('already booked')) {
         errorMessage = t('slotAlreadyBooked');

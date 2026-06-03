@@ -1,15 +1,18 @@
-import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class GetAvailableSlotsDto {
-  @IsUUID()
-  @IsNotEmpty()
+  @IsString()
   instructorId: string;
 
-  @IsDateString()
-  @IsNotEmpty()
-  startDate: string; // ISO 8601 format - beginning of date range
+  @IsString()
+  startDate: string;
 
-  @IsDateString()
-  @IsNotEmpty()
-  endDate: string; // ISO 8601 format - end of date range (max 30 days from startDate)
+  @IsString()
+  endDate: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  timezoneOffset?: number;
 }
