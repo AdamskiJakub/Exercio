@@ -152,7 +152,8 @@ model Booking {
   acknowledgedAt     DateTime? // When instructor acknowledged the cancellation
 
   // Guest cancellation token
-  cancellationToken String? @unique
+  cancellationToken String? @unique // PostgreSQL treats each NULL as distinct – OK for sparse unique columns
+  cancellationTokenExpiresAt DateTime? // Expires 7 days after generation; cleaned by scheduled job
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -54,13 +54,13 @@ export class BookingsService {
     // Get existing bookings that overlap with this range
     // A booking overlaps if: startTime < endDate AND endTime > startDate
     // NOTE: booking.instructorId is User.id, not InstructorProfile.id
-    
+
     // Check if requesting user is the instructor (for PII access control)
     const isInstructor = requestingUserId === profile.userId;
 
     const endDateTime = new Date(endDate);
     endDateTime.setUTCHours(23, 59, 59, 999);
-    
+
     // Get PENDING and CONFIRMED bookings - these block slots
     const existingBookings = await this.prisma.booking.findMany({
       where: {
@@ -86,51 +86,55 @@ export class BookingsService {
         guestEmail: isInstructor,
         cancellationReason: isInstructor,
         cancelledBy: isInstructor,
-        client: isInstructor ? {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        } : false,
+        client: isInstructor
+          ? {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            }
+          : false,
       },
     });
 
     // Get CANCELLED bookings separately - for display only, don't block slots
     // Only show unacknowledged cancellations TO INSTRUCTOR (not to clients)
-    const cancelledBookings = isInstructor ? await this.prisma.booking.findMany({
-      where: {
-        instructorId: profile.userId,
-        startTime: {
-          lt: endDateTime,
-        },
-        endTime: {
-          gt: startDate,
-        },
-        status: 'CANCELLED',
-        acknowledgedAt: null, // Only unacknowledged cancellations
-      },
-      select: {
-        id: true,
-        startTime: true,
-        endTime: true,
-        status: true,
-        notes: true,
-        guestName: true,
-        guestEmail: true,
-        cancellationReason: true,
-        cancelledBy: true,
-        client: {
+    const cancelledBookings = isInstructor
+      ? await this.prisma.booking.findMany({
+          where: {
+            instructorId: profile.userId,
+            startTime: {
+              lt: endDateTime,
+            },
+            endTime: {
+              gt: startDate,
+            },
+            status: 'CANCELLED',
+            acknowledgedAt: null, // Only unacknowledged cancellations
+          },
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
+            startTime: true,
+            endTime: true,
+            status: true,
+            notes: true,
+            guestName: true,
+            guestEmail: true,
+            cancellationReason: true,
+            cancelledBy: true,
+            client: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
           },
-        },
-      },
-    }) : []; // Return empty array for non-instructors (clients)
+        })
+      : []; // Return empty array for non-instructors (clients)
 
     // Generate slots
     const slots = this.generateTimeSlots(
@@ -142,7 +146,7 @@ export class BookingsService {
       profile.availabilityExceptions,
       existingBookings,
       cancelledBookings,
-      timezoneOffset
+      timezoneOffset,
     );
 
     return slots;
@@ -151,7 +155,7 @@ export class BookingsService {
   /**
    * Core slot generation algorithm
    */
-   private generateTimeSlots(
+  private generateTimeSlots(
     startDate: Date,
     endDate: Date,
     sessionDuration: number,
@@ -178,7 +182,7 @@ export class BookingsService {
         cancelledBy?: string;
       };
     }> = [];
-    
+
     // Force dates to absolute midnight UTC to prevent server drifting
     const currentDate = new Date(startDate);
     currentDate.setUTCHours(0, 0, 0, 0);
@@ -193,8 +197,8 @@ export class BookingsService {
 
     while (currentDate <= endDateTime) {
       // Get day of week in UTC (0 = Sunday, 1 = Monday, etc.)
-      const dayOfWeek = currentDate.getUTCDay(); 
-      
+      const dayOfWeek = currentDate.getUTCDay();
+
       // Get date string in YYYY-MM-DD format using UTC
       const year = currentDate.getUTCFullYear();
       const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
@@ -295,12 +299,14 @@ export class BookingsService {
           });
 
           if (bookedSession) {
-            const clientName = bookedSession.guestName || 
-              (bookedSession.client 
+            const clientName =
+              bookedSession.guestName ||
+              (bookedSession.client
                 ? `${bookedSession.client.firstName || ''} ${bookedSession.client.lastName || ''}`.trim()
                 : 'Unknown Client');
-            
-            const clientEmail = bookedSession.guestEmail || bookedSession.client?.email;
+
+            const clientEmail =
+              bookedSession.guestEmail || bookedSession.client?.email;
 
             slots.push({
               startTime: new Date(slotStart),
@@ -314,17 +320,20 @@ export class BookingsService {
                 notes: bookedSession.notes || undefined,
                 clientName,
                 clientEmail,
-                cancellationReason: bookedSession.cancellationReason || undefined,
+                cancellationReason:
+                  bookedSession.cancellationReason || undefined,
                 cancelledBy: bookedSession.cancelledBy || undefined,
               },
             });
           } else if (cancelledSession) {
-            const clientName = cancelledSession.guestName || 
-              (cancelledSession.client 
+            const clientName =
+              cancelledSession.guestName ||
+              (cancelledSession.client
                 ? `${cancelledSession.client.firstName || ''} ${cancelledSession.client.lastName || ''}`.trim()
                 : 'Unknown Client');
-            
-            const clientEmail = cancelledSession.guestEmail || cancelledSession.client?.email;
+
+            const clientEmail =
+              cancelledSession.guestEmail || cancelledSession.client?.email;
 
             slots.push({
               startTime: new Date(slotStart),
@@ -338,7 +347,8 @@ export class BookingsService {
                 notes: cancelledSession.notes || undefined,
                 clientName,
                 clientEmail,
-                cancellationReason: cancelledSession.cancellationReason || undefined,
+                cancellationReason:
+                  cancelledSession.cancellationReason || undefined,
                 cancelledBy: cancelledSession.cancelledBy || undefined,
               },
             });
@@ -352,7 +362,7 @@ export class BookingsService {
             });
           }
         }
-        
+
         // Advance slot using absolute Unix Timestamp
         slotStart.setTime(slotStart.getTime() + sessionDuration * 60 * 1000);
       }
@@ -367,7 +377,11 @@ export class BookingsService {
   /**
    * Create a new booking
    */
-  async createBooking(userId: string, dto: CreateBookingDto, language: 'pl' | 'en' = 'pl') {
+  async createBooking(
+    userId: string,
+    dto: CreateBookingDto,
+    language: 'pl' | 'en' = 'pl',
+  ) {
     // Get instructor profile
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: dto.instructorId },
@@ -405,19 +419,20 @@ export class BookingsService {
       startTime,
       endTime,
       undefined,
-      timezoneOffset
+      timezoneOffset,
     );
 
-    const slotExists = availableSlots.some(slot => 
-      slot.startTime.getTime() === startTime.getTime() &&
-      slot.endTime.getTime() === endTime.getTime()
+    const slotExists = availableSlots.some(
+      (slot) =>
+        slot.startTime.getTime() === startTime.getTime() &&
+        slot.endTime.getTime() === endTime.getTime(),
     );
 
     if (!slotExists) {
       throw new BadRequestException(
         language === 'pl'
           ? 'Termin jest niedostępny. Wybierz z dostępnych slotów.'
-          : 'Time slot is not available. Please choose from available slots.'
+          : 'Time slot is not available. Please choose from available slots.',
       );
     }
 
@@ -489,7 +504,7 @@ export class BookingsService {
       },
     });
 
-        // Format date/time for email
+    // Format date/time for email
     const bookingDate = startTime.toLocaleDateString(
       language === 'pl' ? 'pl-PL' : 'en-GB',
       { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
@@ -514,7 +529,9 @@ export class BookingsService {
         duration: booking.duration!,
         price: booking.price ?? undefined,
       })
-      .catch((err) => console.error('Failed to send booking confirmation:', err));
+      .catch((err) =>
+        console.error('Failed to send booking confirmation:', err),
+      );
 
     // Send notification to instructor
     const clientName =
@@ -532,7 +549,9 @@ export class BookingsService {
           duration: booking.duration!,
           price: booking.price ?? undefined,
         })
-        .catch((err) => console.error('Failed to send instructor notification:', err));
+        .catch((err) =>
+          console.error('Failed to send instructor notification:', err),
+        );
     }
 
     return booking;
@@ -541,7 +560,10 @@ export class BookingsService {
   /**
    * Create a guest booking (without authenticated user)
    */
-  async createGuestBooking(dto: CreateBookingDto, language: 'pl' | 'en' = 'pl') {
+  async createGuestBooking(
+    dto: CreateBookingDto,
+    language: 'pl' | 'en' = 'pl',
+  ) {
     // Get instructor profile
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: dto.instructorId },
@@ -574,19 +596,20 @@ export class BookingsService {
       startTime,
       endTime,
       undefined,
-      timezoneOffset
+      timezoneOffset,
     );
 
-    const slotExists = availableSlots.some(slot => 
-      slot.startTime.getTime() === startTime.getTime() &&
-      slot.endTime.getTime() === endTime.getTime()
+    const slotExists = availableSlots.some(
+      (slot) =>
+        slot.startTime.getTime() === startTime.getTime() &&
+        slot.endTime.getTime() === endTime.getTime(),
     );
 
     if (!slotExists) {
       throw new BadRequestException(
         language === 'pl'
           ? 'Termin jest niedostępny. Wybierz z dostępnych slotów.'
-          : 'Time slot is not available. Please choose from available slots.'
+          : 'Time slot is not available. Please choose from available slots.',
       );
     }
 
@@ -632,6 +655,9 @@ export class BookingsService {
         guestEmail: dto.guestEmail,
         guestPhone: dto.guestPhone,
         cancellationToken: crypto.randomUUID(),
+        cancellationTokenExpiresAt: new Date(
+          Date.now() + 7 * 24 * 60 * 60 * 1000,
+        ), // 7-day expiry
       },
       include: {
         instructorUser: {
@@ -652,7 +678,7 @@ export class BookingsService {
       },
     });
 
-        // Format date/time for email
+    // Format date/time for email
     const bookingDate = startTime.toLocaleDateString(
       language === 'pl' ? 'pl-PL' : 'en-GB',
       { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
@@ -677,7 +703,9 @@ export class BookingsService {
         bookingId: booking.id,
         cancellationToken: booking.cancellationToken!,
       })
-      .catch((err) => console.error('Failed to send guest booking confirmation:', err));
+      .catch((err) =>
+        console.error('Failed to send guest booking confirmation:', err),
+      );
     // Send notification to instructor
     const clientName = dto.guestName || 'Guest';
     const instructorEmail = booking.instructorUser?.email;
@@ -690,7 +718,9 @@ export class BookingsService {
           duration: booking.duration!,
           price: booking.price ?? undefined,
         })
-        .catch((err) => console.error('Failed to send instructor notification:', err));
+        .catch((err) =>
+          console.error('Failed to send instructor notification:', err),
+        );
     }
 
     return booking;
@@ -707,7 +737,9 @@ export class BookingsService {
     });
 
     if (!profile) {
-      throw new ForbiddenException('Only instructors can create manual bookings');
+      throw new ForbiddenException(
+        'Only instructors can create manual bookings',
+      );
     }
 
     const startTime = new Date(dto.startTime);
@@ -720,7 +752,9 @@ export class BookingsService {
     // but show a warning if it's too far in the past
     if (startTime <= now) {
       // Just log, don't throw - instructors might need to add past bookings
-      console.warn(`Instructor ${userId} creating booking in the past: ${startTime}`);
+      console.warn(
+        `Instructor ${userId} creating booking in the past: ${startTime}`,
+      );
     }
 
     // Check if slot is already booked
@@ -787,10 +821,14 @@ export class BookingsService {
     // Send emails for manual bookings
     const locale = 'pl'; // Default to Polish, can be extended
     const bookingDate = startTime.toLocaleDateString('pl-PL', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
     const bookingTime = startTime.toLocaleTimeString('pl-PL', {
-      hour: '2-digit', minute: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
     const instructorName =
@@ -808,7 +846,12 @@ export class BookingsService {
           duration: booking.duration!,
           price: booking.price ?? undefined,
         })
-        .catch((err) => console.error('Failed to send manual booking confirmation to guest:', err));
+        .catch((err) =>
+          console.error(
+            'Failed to send manual booking confirmation to guest:',
+            err,
+          ),
+        );
     }
 
     // Send notification to instructor (self-notification for records)
@@ -823,7 +866,9 @@ export class BookingsService {
           price: booking.price ?? undefined,
           isManual: true,
         })
-        .catch((err) => console.error('Failed to send instructor notification:', err));
+        .catch((err) =>
+          console.error('Failed to send instructor notification:', err),
+        );
     }
 
     return booking;
@@ -1005,7 +1050,9 @@ export class BookingsService {
     }
 
     if (dto.cancelledBy === 'instructor' && !isInstructor) {
-      throw new ForbiddenException('You are not the instructor of this booking');
+      throw new ForbiddenException(
+        'You are not the instructor of this booking',
+      );
     }
 
     const now = new Date();
@@ -1036,36 +1083,49 @@ export class BookingsService {
       throw new BadRequestException('Cannot cancel completed booking');
     }
 
-        const updatedBooking = await this.prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        status: 'CANCELLED',
-        cancelledAt: new Date(),
-        cancelledBy: dto.cancelledBy,
-        cancellationReason: dto.cancellationReason,
-        ...(dto.cancelledBy === 'client'
-          ? { cancellationToken: null }
-          : {}),
-      },
-      include: {
-        client: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
+    // Use transaction with status check to prevent race conditions
+    const updatedBooking = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.booking.update({
+        where: {
+          id: bookingId,
+          status: { in: ['PENDING', 'CONFIRMED'] },
+        },
+        data: {
+          status: 'CANCELLED',
+          cancelledAt: new Date(),
+          cancelledBy: dto.cancelledBy,
+          cancellationReason: dto.cancellationReason,
+          ...(dto.cancelledBy === 'client'
+            ? { cancellationToken: null, cancellationTokenExpiresAt: null }
+            : {}),
+        },
+        include: {
+          client: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+          instructorUser: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
         },
-        instructorUser: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
+      });
+      return result;
     });
+
+    if (!updatedBooking) {
+      throw new BadRequestException(
+        'Booking could not be cancelled. It may have been cancelled already.',
+      );
+    }
 
     // Format date/time for emails
     if (updatedBooking.startTime) {
@@ -1082,13 +1142,17 @@ export class BookingsService {
       });
 
       const instructorName =
-        [updatedBooking.instructorUser?.firstName, updatedBooking.instructorUser?.lastName]
+        [
+          updatedBooking.instructorUser?.firstName,
+          updatedBooking.instructorUser?.lastName,
+        ]
           .filter(Boolean)
           .join(' ') || 'Instructor';
 
       if (dto.cancelledBy === 'instructor') {
         // Notify client (guest or registered)
-        const clientEmail = updatedBooking.guestEmail || updatedBooking.client?.email;
+        const clientEmail =
+          updatedBooking.guestEmail || updatedBooking.client?.email;
         if (clientEmail) {
           this.emailService
             .sendCancellationByInstructor(clientEmail, {
@@ -1097,7 +1161,9 @@ export class BookingsService {
               time: bookingTime,
               reason: dto.cancellationReason,
             })
-            .catch((err) => console.error('Failed to send cancellation email:', err));
+            .catch((err) =>
+              console.error('Failed to send cancellation email:', err),
+            );
         }
       } else {
         // Notify instructor that client cancelled
@@ -1117,7 +1183,9 @@ export class BookingsService {
               time: bookingTime,
               reason: dto.cancellationReason,
             })
-            .catch((err) => console.error('Failed to send cancellation email:', err));
+            .catch((err) =>
+              console.error('Failed to send cancellation email:', err),
+            );
         }
       }
     }
@@ -1125,7 +1193,7 @@ export class BookingsService {
     return updatedBooking;
   }
 
-    /**
+  /**
    * Cancel a booking as a guest (via cancellation token link)
    */
   async cancelGuestBooking(
@@ -1145,6 +1213,18 @@ export class BookingsService {
     // Validate the cancellation token
     if (!booking.cancellationToken || booking.cancellationToken !== token) {
       throw new BadRequestException('Invalid or expired cancellation link');
+    }
+
+    // Check if the cancellation token has expired (7 days from generation)
+    if (
+      booking.cancellationTokenExpiresAt &&
+      new Date() > booking.cancellationTokenExpiresAt
+    ) {
+      throw new BadRequestException(
+        language === 'pl'
+          ? 'Link do anulowania wygasł. Skontaktuj się z instruktorem.'
+          : 'Cancellation link has expired. Please contact the instructor.',
+      );
     }
 
     // Check cancellation deadline (minNoticeHours from instructor profile)
@@ -1176,26 +1256,49 @@ export class BookingsService {
       throw new BadRequestException('Cannot cancel completed booking');
     }
 
-    const updatedBooking = await this.prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        status: 'CANCELLED',
-        cancelledAt: new Date(),
-        cancelledBy: 'client',
-        cancellationReason: cancellationReason || null,
-        cancellationToken: null, // Clear token
-      },
-      include: {
-        instructorUser: {
-          select: {
-            id: true,
-            email: true,
-            firstName: true,
-            lastName: true,
+    // Only allow token-based cancellation for PENDING or CONFIRMED bookings
+    if (booking.status !== 'PENDING' && booking.status !== 'CONFIRMED') {
+      throw new BadRequestException(
+        'Cancellation is not allowed for this booking',
+      );
+    }
+
+    // Use $transaction with status check to prevent race conditions:
+    // If two cancellation requests arrive simultaneously, only one succeeds
+    // because the WHERE clause checks status at update time
+    const updatedBooking = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.booking.update({
+        where: {
+          id: bookingId,
+          status: { in: ['PENDING', 'CONFIRMED'] },
+        },
+        data: {
+          status: 'CANCELLED',
+          cancelledAt: new Date(),
+          cancelledBy: 'client',
+          cancellationReason: cancellationReason || null,
+          cancellationToken: null,
+          cancellationTokenExpiresAt: null,
+        },
+        include: {
+          instructorUser: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
         },
-      },
+      });
+      return result;
     });
+
+    if (!updatedBooking) {
+      throw new BadRequestException(
+        'Booking could not be cancelled. It may have been cancelled already.',
+      );
+    }
 
     // Send notification to instructor
     if (updatedBooking.startTime && updatedBooking.instructorUser?.email) {
@@ -1220,7 +1323,9 @@ export class BookingsService {
           time: bookingTime,
           reason: cancellationReason,
         })
-        .catch((err) => console.error('Failed to send cancellation email:', err));
+        .catch((err) =>
+          console.error('Failed to send cancellation email:', err),
+        );
     }
 
     return { success: true, message: 'Booking cancelled successfully' };
@@ -1230,7 +1335,7 @@ export class BookingsService {
    * DELETE bookings/history
    * Remove completed or cancelled bookings for the requesting client
    */
-    async clearUserHistory(userId: string) {
+  async clearUserHistory(userId: string) {
     // We update the flag (soft-delete) instead of hard-deleting to preserve reviews
     const result = await this.prisma.booking.updateMany({
       where: {
@@ -1272,7 +1377,9 @@ export class BookingsService {
       throw new BadRequestException('End time must be after start time');
     }
 
-    const duration = Math.floor((endTime.getTime() - startTime.getTime()) / (60 * 1000));
+    const duration = Math.floor(
+      (endTime.getTime() - startTime.getTime()) / (60 * 1000),
+    );
 
     if (duration <= 0) {
       throw new BadRequestException('Duration must be positive');
@@ -1343,6 +1450,25 @@ export class BookingsService {
   }
 
   /**
+   * Scheduled cleanup: nullify expired cancellation tokens.
+   * Run via cron job (e.g., every hour).
+   * Prevents indefinite accumulation of unused tokens in the database.
+   */
+  async cleanupExpiredCancellationTokens() {
+    const result = await this.prisma.booking.updateMany({
+      where: {
+        cancellationToken: { not: null },
+        cancellationTokenExpiresAt: { lt: new Date() },
+      },
+      data: {
+        cancellationToken: null,
+        cancellationTokenExpiresAt: null,
+      },
+    });
+    return { cleaned: result.count };
+  }
+
+  /**
    * Acknowledge cancellation (instructor only)
    */
   async acknowledgeCancellation(userId: string, bookingId: string) {
@@ -1356,12 +1482,16 @@ export class BookingsService {
 
     // Verify user is the instructor
     if (booking.instructorId !== userId) {
-      throw new ForbiddenException('Only the instructor can acknowledge cancellations');
+      throw new ForbiddenException(
+        'Only the instructor can acknowledge cancellations',
+      );
     }
 
     // Verify booking is cancelled
     if (booking.status !== 'CANCELLED') {
-      throw new BadRequestException('Only cancelled bookings can be acknowledged');
+      throw new BadRequestException(
+        'Only cancelled bookings can be acknowledged',
+      );
     }
 
     return this.prisma.booking.update({
