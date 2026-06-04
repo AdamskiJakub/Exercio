@@ -11,14 +11,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useHomeSearch } from '@/hooks/useHomeSearch';
-import { SPECIALIZATION_CATEGORIES } from '@/lib/config/specializations';
-import { getCategoryName } from '@/lib/utils/localization';
+import { useSpecializations, getSpecializationName } from '@/hooks/useConfig';
 
 export function HeroSearchBar() {
   const t = useTranslations('HomePage');
+  const tCommon = useTranslations('Common');
   const locale = useLocale();
   const { city, setCity, specialization, search, setSearch, setSpecialization, handleSearch } =
     useHomeSearch();
+  const { specializations, loading } = useSpecializations();
 
   return (
     <form onSubmit={handleSearch} className="space-y-4">
@@ -45,25 +46,25 @@ export function HeroSearchBar() {
         </div>
 
         <div className="flex-1">
-          <Select value={specialization} onValueChange={setSpecialization}>
+          <Select value={specialization} onValueChange={setSpecialization} disabled={loading}>
             <SelectTrigger
               className="h-14 text-lg bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4"
               aria-label={t('hero.specializationLabel')}
             >
-              <SelectValue placeholder={t('hero.specializationPlaceholder')} />
+              <SelectValue placeholder={loading ? tCommon('loading') : t('hero.specializationPlaceholder')} />
             </SelectTrigger>
             <SelectContent
               position="popper"
               className="bg-slate-900 border-slate-700 w-(--radix-select-trigger-width)"
               sideOffset={8}
             >
-              {SPECIALIZATION_CATEGORIES.map((category) => (
+              {specializations.map((category) => (
                 <SelectItem
                   key={category.id}
                   value={category.id}
                   className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 cursor-pointer py-3"
                 >
-                  {category.icon} {getCategoryName(category, locale)}
+                  {category.icon} {getSpecializationName(category, locale)}
                 </SelectItem>
               ))}
             </SelectContent>

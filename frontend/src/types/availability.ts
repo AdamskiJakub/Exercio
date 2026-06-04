@@ -14,7 +14,5 @@ export interface AvailabilityException {
 }
 
 export interface MonthlyCalendarPreviewProps {
-  schedule: DaySchedule[];
-  sessionDuration: number;
-  exceptions?: AvailabilityException[];
+  // No props needed - component fetches data internally
 }

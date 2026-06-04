@@ -6,6 +6,8 @@ import { useRegisterClientForm } from '@/hooks/useRegisterClientForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
+import { AuthHeader } from '@/components/ui/auth-header';
 
 export default function RegisterClientPage() {
   const t = useTranslations('auth');
@@ -13,28 +15,14 @@ export default function RegisterClientPage() {
   const { register, formState: { errors } } = form;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex items-center justify-center py-16 px-4">
       <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link href="/">
-            <h1 className="text-4xl font-bold text-gradient-trainly mb-2 cursor-pointer hover:opacity-90 transition-opacity">
-              Trainly
-            </h1>
-          </Link>
-        </div>
+        <AuthHeader
+          title={`${t('createAccount')} - ${t('clientRole')}`}
+          subtitle={t('clientRoleDesc')}
+        />
 
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl space-y-6">
-          <div>
-            <h2 className="text-center text-3xl font-extrabold text-white">
-              {t('createAccount')} - {t('clientRole')}
-            </h2>
-            <p className="mt-2 text-center text-sm text-slate-400">
-              {t('haveAccount')}{' '}
-              <Link href="/login" className="font-medium text-orange-500 hover:text-orange-400 transition-colors">
-                {t('loginLink')}
-              </Link>
-            </p>
-          </div>
 
           {/* Form */}
           <form className="space-y-6" onSubmit={onSubmit} noValidate>
@@ -149,16 +137,28 @@ export default function RegisterClientPage() {
             >
               {isLoading ? t('creatingAccount') : t('createAccount')}
             </Button>
-
-            <div className="text-center">
-              <Link 
-                href="/register/instructor"
-                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
-              >
-                {t('areYouInstructor')}
-              </Link>
-            </div>
           </form>
+
+          {/* Social Login Buttons - BELOW FORM */}
+          <div className="mt-6">
+            <SocialLoginButtons />
+          </div>
+
+          {/* Footer links - BELOW OAUTH BUTTONS */}
+          <div className="text-center mt-6 space-y-3">
+            <Link 
+              href="/register/instructor"
+              className="text-sm text-purple-400 hover:text-purple-300 transition-colors block"
+            >
+              {t('areYouInstructor')}
+            </Link>
+            <p className="text-sm text-slate-400">
+              {t('haveAccount')}{' '}
+              <Link href="/login" className="font-medium text-orange-500 hover:text-orange-400 transition-colors">
+                {t('loginLink')}
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

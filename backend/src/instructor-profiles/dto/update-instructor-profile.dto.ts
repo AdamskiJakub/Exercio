@@ -5,11 +5,13 @@ import {
   IsNumber,
   IsInt,
   IsBoolean,
+  IsIn,
   Min,
   ArrayMaxSize,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
+import { IsValidConfigId } from '../../common/validators/is-valid-config-id.validator';
 
 export class UpdateInstructorProfileDto {
   @IsString()
@@ -23,18 +25,21 @@ export class UpdateInstructorProfileDto {
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(10)
+  @IsValidConfigId('specialization')
   @IsOptional()
   specializations?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(8)
+  @IsValidConfigId('tag')
   @IsOptional()
   tags?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @ArrayMaxSize(4)
+  @IsValidConfigId('goal')
   @IsOptional()
   goals?: string[];
 
@@ -126,4 +131,17 @@ export class UpdateInstructorProfileDto {
   @Min(0)
   @IsOptional()
   minNoticeHours?: number; // Minimum hours notice before booking
+
+  // PAYMENT INFORMATION (informational only, no payment processing)
+  @IsArray()
+  @IsString({ each: true })
+  @IsIn(['cash', 'card', 'blik', 'transfer'], { each: true })
+  @ArrayMaxSize(10)
+  @IsOptional()
+  paymentMethods?: string[]; // ["cash", "card", "blik", "transfer"]
+
+  @IsString()
+  @MaxLength(500)
+  @IsOptional()
+  paymentInfo?: string | null; // Additional payment instructions
 }

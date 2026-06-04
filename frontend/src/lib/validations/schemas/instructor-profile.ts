@@ -1,4 +1,13 @@
 import { z } from 'zod';
+import { PAYMENT_METHODS } from '@/constants/payment';
+
+// Payment methods enum for zod validation
+const paymentMethodsEnum = [
+  PAYMENT_METHODS.CASH,
+  PAYMENT_METHODS.CARD,
+  PAYMENT_METHODS.BLIK,
+  PAYMENT_METHODS.TRANSFER,
+] as const;
 
 // Helper to validate comma-separated languages
 const commaSeparatedStrings = z.string().refine(
@@ -31,9 +40,8 @@ const uploadPathOrUrl = z.string().refine(
 export const instructorProfileSchema = z.object({
   bio: z.string().max(1000).optional(),
   tagline: z.string().max(200).optional(),
+  location: z.string().max(200).optional(),
   city: z.string().max(100).optional(),
-  hourlyRate: z.number().min(0).optional().nullable(),
-  hourlyRateHidden: z.boolean().optional(),
   packageDealsEnabled: z.boolean().optional(),
   packageDealsDescription: z.string().max(500).optional(),
   // photoUrl can be null/undefined (use nullable + optional for flexibility)
@@ -44,6 +52,9 @@ export const instructorProfileSchema = z.object({
   showPhone: z.boolean().optional(),
   showEmail: z.boolean().optional(),
   contactMessage: z.string().max(500).optional(),
+  // Payment settings
+  paymentMethods: z.array(z.enum(paymentMethodsEnum)).max(10).optional(),
+  paymentInfo: z.string().max(500).optional().nullable(),
 });
 
 export type InstructorProfileFormData = z.infer<typeof instructorProfileSchema>;

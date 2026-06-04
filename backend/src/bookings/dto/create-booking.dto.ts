@@ -1,4 +1,5 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDateString, IsEmail, IsNotEmpty, IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateBookingDto {
   @IsUUID()
@@ -12,4 +13,22 @@ export class CreateBookingDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  // Guest booking fields (for non-authenticated users)
+  @IsString()
+  @IsOptional()
+  guestName?: string;
+
+  @IsEmail()
+  @IsOptional()
+  guestEmail?: string;
+
+  @IsString()
+  @IsOptional()
+  guestPhone?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  timezoneOffset?: number;
 }

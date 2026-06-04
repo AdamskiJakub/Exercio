@@ -1,11 +1,13 @@
 'use client';
 
 import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
+import { useMyBookings } from '@/hooks/useMyBookings';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Link } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 import { titleVariants } from '@/lib/animations';
+import { NAV_SOURCE } from '@/components/instructors/profile/types';
 import { 
   Star, 
   Users, 
@@ -16,20 +18,31 @@ import {
   CheckCircle,
   Clock,
   FileText,
-  Settings
+  Settings,
+  Bell
 } from 'lucide-react';
 import { getMediaUrl } from '@/lib/utils/media';
 import { StatsCard } from './StatsCard';
 import { DashboardCard } from './DashboardCard';
 import { EmptyStateCard } from './EmptyStateCard';
+import { PendingBookingsCount } from '@/components/bookings/PendingBookingsCount';
+import { BookingsList } from '@/components/bookings/BookingsList';
 
 export function InstructorDashboard() {
   const t = useTranslations('Dashboard.instructor');
   const { data: profile, isLoading } = useMyInstructorProfile();
+  const { data: bookings, isLoading: bookingsLoading } = useMyBookings('instructor');
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
+
+  // Filter upcoming bookings (pending or confirmed, in the future)
+  const now = new Date();
+  const upcomingBookings = bookings?.filter(booking => 
+    (booking.status === 'PENDING' || booking.status === 'CONFIRMED') &&
+    new Date(booking.startTime) > now
+  ) || [];
 
   const stats = {
     averageRating: profile?.averageRating || 0,
@@ -95,11 +108,11 @@ export function InstructorDashboard() {
             {t('accountSettings')}
           </Link>
           <Link
-            href="/dashboard/availability"
+            href="/dashboard/calendar"
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
           >
             <Clock className="w-5 h-5" />
-            {t('availability')}
+            {t('calendar')}
           </Link>
         </motion.div>
       </div>
@@ -128,7 +141,7 @@ export function InstructorDashboard() {
               )}
             </div>
             <Link
-              href={`/instructors/${profile?.user?.username || ''}?from=dashboard` as any}
+              href={`/instructors/${profile?.user?.username || ''}?from=${NAV_SOURCE.DASHBOARD}` as any}
               className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
             >
               <Eye className="w-4 h-4" />
@@ -178,20 +191,33 @@ export function InstructorDashboard() {
         />
       </div>
 
-      {/* Quick Actions */}
+      {/* Upcoming Bookings & Reviews - Swapped Order */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <DashboardCard
           icon={Calendar}
           iconColor="text-orange-500"
           iconBgColor="bg-orange-500/10"
-          title={t('upcomingBookings')}
+          title={
+            <div className="flex items-center justify-between w-full">
+              <span>{t('upcomingBookings')}</span>
+              <PendingBookingsCount />
+            </div>
+          }
           delay={5}
         >
-          <EmptyStateCard
-            icon={FileText}
-            title={t('noUpcomingBookings')}
-            description={t('bookingsComingSoon')}
-          />
+          {bookingsLoading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner />
+            </div>
+          ) : upcomingBookings.length > 0 ? (
+            <BookingsList bookings={upcomingBookings} role="instructor" />
+          ) : (
+            <EmptyStateCard
+              icon={FileText}
+              title={t('noUpcomingBookings')}
+              description={t('bookingsComingSoon')}
+            />
+          )}
         </DashboardCard>
 
         <DashboardCard

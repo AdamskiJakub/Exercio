@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Portal } from './portal';
 import { LightboxControls } from './lightbox-controls';
 import { LightboxMedia } from './lightbox-media';
+import { useEscapeKey } from '@/lib/hooks';
 
 interface ImageLightboxProps {
   images: string[];
@@ -15,9 +16,12 @@ interface ImageLightboxProps {
 export function ImageLightbox({ images, initialIndex, isOpen, onClose }: ImageLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
+  // Reset to initialIndex when lightbox opens
   useEffect(() => {
-    setCurrentIndex(initialIndex);
-  }, [initialIndex]);
+    if (isOpen) {
+      setCurrentIndex(initialIndex);
+    }
+  }, [isOpen, initialIndex]);
 
   const handlePrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -27,11 +31,16 @@ export function ImageLightbox({ images, initialIndex, isOpen, onClose }: ImageLi
     setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
   }, [images.length]);
 
+  // Use shared hooks for Escape key
+  useEscapeKey(() => {
+    if (isOpen) onClose();
+  }, isOpen);
+
+  // Handle arrow keys
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowLeft') handlePrevious();
       if (e.key === 'ArrowRight') handleNext();
     };
@@ -43,7 +52,7 @@ export function ImageLightbox({ images, initialIndex, isOpen, onClose }: ImageLi
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [isOpen, onClose, handlePrevious, handleNext]);
+  }, [isOpen, handlePrevious, handleNext]);
 
   // Early return AFTER all hooks
   if (!isOpen || images.length === 0) return null;

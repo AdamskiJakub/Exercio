@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsValidConfigId } from '../../common/validators/is-valid-config-id.validator';
 
 export class CreateInstructorProfileDto {
   // userId is derived from JWT token in controller, not from request body
@@ -10,6 +11,7 @@ export class CreateInstructorProfileDto {
 
   @IsArray()
   @IsString({ each: true })
+  @IsValidConfigId('specialization')
   @IsOptional()
   specializations?: string[];
 

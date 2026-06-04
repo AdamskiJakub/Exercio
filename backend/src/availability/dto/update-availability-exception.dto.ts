@@ -1,4 +1,5 @@
 import {
+  IsDateString,
   IsBoolean,
   IsString,
   Matches,
@@ -7,6 +8,10 @@ import {
 } from 'class-validator';
 
 export class UpdateAvailabilityExceptionDto {
+  @IsDateString()
+  @IsOptional()
+  date?: string; // ISO 8601 date format
+
   @IsBoolean()
   @IsOptional()
   isAvailable?: boolean;

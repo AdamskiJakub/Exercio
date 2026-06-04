@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -11,12 +12,16 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { CreateManualBookingDto } from './dto/create-manual-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
 import { CreateManualBlockDto } from './dto/create-manual-block.dto';
 import { GetAvailableSlotsDto } from './dto/get-available-slots.dto';
+import { CancelGuestBookingDto } from './dto/cancel-guest-booking.dto';
 
 @Controller('bookings')
 export class BookingsController {
@@ -26,42 +31,74 @@ export class BookingsController {
    * GET /bookings/available-slots
    * Get available time slots for an instructor
    */
-  @Get('available-slots')
-  async getAvailableSlots(@Query() query: GetAvailableSlotsDto) {
-    const startDate = new Date(query.startDate);
-    const endDate = new Date(query.endDate);
+  @UseGuards(OptionalJwtAuthGuard)
+@Get('available-slots')
+async getAvailableSlots(@Query() query: GetAvailableSlotsDto, @Request() req) {
+  const startDate = new Date(query.startDate);
+  const endDate = new Date(query.endDate);
 
-    // Validate end date is after start date
-    if (endDate <= startDate) {
-      throw new BadRequestException('End date must be after start date');
-    }
-
-    // Validate date range (max 30 days)
-    const daysDiff =
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-    if (daysDiff > 30) {
-      throw new BadRequestException('Date range cannot exceed 30 days');
-    }
-
-    return this.bookingsService.getAvailableSlots(
-      query.instructorId,
-      startDate,
-      endDate,
-    );
+  if (endDate <= startDate) {
+    throw new BadRequestException('End date must be after start date');
   }
+
+  const daysDiff =
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+  if (daysDiff > 30) {
+    throw new BadRequestException('Date range cannot exceed 30 days');
+  }
+
+  const timezoneOffset = query.timezoneOffset ?? 0;
+
+  return this.bookingsService.getAvailableSlots(
+    query.instructorId,
+    startDate,
+    endDate,
+    req.user?.id,
+    timezoneOffset ?? 0,
+  );
+}
 
   /**
    * POST /bookings
-   * Create a new booking (client only)
+   * Create a new booking (authenticated clients or guest users)
+   * Rate limited to 3 bookings per 10 minutes for anonymous users
    */
-  @UseGuards(JwtAuthGuard)
   @Post()
+  @UseGuards(OptionalJwtAuthGuard)
   async createBooking(@Request() req, @Body() dto: CreateBookingDto) {
-    // Enforce CLIENT role only
-    if (req.user.role !== 'CLIENT') {
-      throw new ForbiddenException('Only clients can create bookings');
+    // Check if user is authenticated
+    const isAuthenticated = req.user && req.user.id;
+    
+    if (isAuthenticated) {
+      // Authenticated user - must be CLIENT role
+      if (req.user.role !== 'CLIENT') {
+        throw new ForbiddenException('Only clients can create bookings');
+      }
+      return this.bookingsService.createBooking(req.user.id, dto);
+    } else {
+      // Guest booking - require guest contact info
+      if (!dto.guestName || !dto.guestEmail || !dto.guestPhone) {
+        throw new BadRequestException(
+          'Guest bookings require name, email, and phone number',
+        );
+      }
+      return this.bookingsService.createGuestBooking(dto);
     }
-    return this.bookingsService.createBooking(req.user.id, dto);
+  }
+
+    /**
+   * POST /bookings/guest-cancel
+   * Cancel a booking via cancellation token (no auth required)
+   */
+  @Post('guest-cancel')
+  @Throttle({ default: { limit: 5, ttl: 600000 } }) // 5 requests per 10 min
+  async guestCancelBooking(@Body() dto: CancelGuestBookingDto) {
+    const language = (dto.language === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return this.bookingsService.cancelGuestBooking(
+      dto.bookingId,
+      dto.token,
+      dto.cancellationReason,
+    );
   }
 
   /**
@@ -116,7 +153,31 @@ export class BookingsController {
     @Param('id') id: string,
     @Body() dto: CancelBookingDto,
   ) {
-    return this.bookingsService.cancelBooking(id, req.user.id, dto);
+    const language = (dto.language === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    return this.bookingsService.cancelBooking(id, req.user.id, dto, language);
+  }
+
+  /**
+   * DELETE /bookings/history
+   * Clear completed/cancelled bookings for current client
+   */
+  @UseGuards(JwtAuthGuard)
+  @Delete('history')
+  async clearHistory(@Request() req) {
+    return this.bookingsService.clearUserHistory(req.user.id);
+  }
+
+  /**
+   * POST /bookings/manual
+   * Create a manual booking as instructor (e.g., phone booking)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Post('manual')
+  async createManualBooking(
+    @Request() req,
+    @Body() dto: CreateManualBookingDto,
+  ) {
+    return this.bookingsService.createManualBooking(req.user.id, dto);
   }
 
   /**
@@ -135,6 +196,40 @@ export class BookingsController {
       new Date(body.startTime),
       new Date(body.endTime),
       body.notes,
+    );
+  }
+
+  /**
+   * PATCH /bookings/:id/notes
+   * Update booking notes (instructor only)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/notes')
+  async updateNotes(
+    @Request() req,
+    @Param('id') bookingId: string,
+    @Body('notes') notes: string,
+  ) {
+    return this.bookingsService.updateBookingNotes(
+      req.user.id,
+      bookingId,
+      notes,
+    );
+  }
+
+  /**
+   * PATCH /bookings/:id/acknowledge
+   * Acknowledge a cancelled booking (instructor only)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/acknowledge')
+  async acknowledgeCancellation(
+    @Request() req,
+    @Param('id') bookingId: string,
+  ) {
+    return this.bookingsService.acknowledgeCancellation(
+      req.user.id,
+      bookingId,
     );
   }
 }

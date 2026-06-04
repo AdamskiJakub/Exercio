@@ -26,12 +26,14 @@ import { format } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { useLocale } from 'next-intl';
 import type { AvailabilityException } from '@/types/availability';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function ExceptionsList() {
   const t = useTranslations('Dashboard.availability');
   const locale = useLocale();
   const dateLocale = locale === 'pl' ? pl : enUS;
-  
+  const queryClient = useQueryClient();
+
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -156,7 +158,9 @@ export function ExceptionsList() {
       
       // Refresh exceptions list
       await fetchExceptions();
-      
+
+      queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
+
       window.dispatchEvent(new CustomEvent('exceptionsUpdated'));
     } catch (error) {
       console.error('Error saving exception:', error);
@@ -170,6 +174,7 @@ export function ExceptionsList() {
 
       toast.success(t('deleteSuccess'));
       fetchExceptions();
+      queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
       setIsDeleteDialogOpen(false);
       setExceptionToDelete(null);
       

@@ -1,26 +1,34 @@
 'use client';
 
 import { useState } from 'react';
-import { InstructorProfile } from '@/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Globe, Star, Clock, Award, Target, Languages as LanguagesIcon, Play } from 'lucide-react';
-import { getSpecializationName } from '@/lib/config/specializations';
-import { getTagName, getTagById } from '@/lib/config/tags';
-import { getGoalName, getGoalById } from '@/lib/config/goals';
+import {
+  useSpecializations,
+  useTags,
+  useGoals,
+  getSpecializationName,
+  getTagName,
+  getGoalName,
+} from '@/hooks/useConfig';
 import { getMediaUrl, isVideoUrl } from '@/lib/utils/media';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ContactSection } from '@/components/instructors/profile/ContactSection';
-
-interface ProfileFullViewProps {
-  profile: InstructorProfile;
-}
+import { ProfileFullViewProps } from './types';
+import { PAYMENT_METHOD_ICONS } from '@/constants/payment';
 
 export function ProfileFullView({ profile }: ProfileFullViewProps) {
   const locale = useLocale();
   const t = useTranslations('InstructorProfile');
+  const tCommon = useTranslations('Common.paymentMethods');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  
+  // Use hooks to ensure config loads and triggers re-render
+  const { specializations } = useSpecializations();
+  const { tags } = useTags();
+  const { goals } = useGoals();
   
   const fullName = profile.user?.firstName && profile.user?.lastName
     ? `${profile.user.firstName} ${profile.user.lastName}`
@@ -79,7 +87,10 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
             </h1>
             {primarySpecialization && (
               <p className="text-sm text-slate-400 font-medium">
-                {getSpecializationName(primarySpecialization, locale)}
+                {(() => {
+                  const spec = specializations.find(s => s.id === primarySpecialization);
+                  return spec ? getSpecializationName(spec, locale) : primarySpecialization;
+                })()}
               </p>
             )}
           </div>
@@ -98,10 +109,20 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
             )}
 
             {/* Location */}
-            {profile.city && (
-              <div className="flex items-center gap-2 text-slate-300 justify-center">
-                <MapPin className="size-4" />
-                <span>{profile.city}</span>
+            {(profile.location || profile.city) && (
+              <div className="flex flex-col items-center gap-1 text-slate-300 justify-center">
+                {profile.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="size-4" />
+                    <span>{profile.location}</span>
+                  </div>
+                )}
+                {profile.city && !profile.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="size-4" />
+                    <span>{profile.city}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -170,11 +191,14 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
                 {t('additionalSpecializations')}
               </h3>
               <div className="flex flex-wrap gap-2">
-                {additionalSpecializations.map((spec) => (
-                  <Badge key={spec} variant="secondary" className="bg-slate-700 text-slate-200">
-                    {getSpecializationName(spec, locale)}
-                  </Badge>
-                ))}
+                {additionalSpecializations.map((specId) => {
+                  const spec = specializations.find(s => s.id === specId);
+                  return spec ? (
+                    <Badge key={specId} variant="secondary" className="bg-slate-700 text-slate-200">
+                      {getSpecializationName(spec, locale)}
+                    </Badge>
+                  ) : null;
+                })}
               </div>
             </div>
           )}
@@ -190,7 +214,7 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               </div>
               <div className="flex flex-wrap gap-2">
                 {profile.goals.map((goalId) => {
-                  const goal = getGoalById(goalId);
+                  const goal = goals.find(g => g.id === goalId);
                   return goal ? (
                     <Badge key={goalId} variant="outline" className="border-orange-500/50 text-orange-400">
                       {goal.icon} {getGoalName(goal, locale)}
@@ -227,22 +251,25 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
         {/* RIGHT COLUMN: Price & Tags */}
         <div className="lg:col-span-3 space-y-6">
           {/* Price Card */}
-          {!profile.hourlyRateHidden && profile.hourlyRate !== null && profile.hourlyRate !== undefined ? (
+          {!profile.hourlyRateHidden && (profile.sessionPrice || profile.hourlyRate) ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
-                {t('hourlyRate')}
+                {t('pricing')}
               </p>
-              <p className="text-4xl font-bold text-orange-500">
-                {profile.hourlyRate} zł
-              </p>
-              <p className="text-xs text-slate-400 mt-2">
-                {t('perHour')}
-              </p>
+              {profile.sessionPrice && profile.sessionDuration ? (
+                <p className="text-4xl font-bold text-orange-500">
+                  {profile.sessionPrice} zł <span className="text-xl text-orange-400">/ {profile.sessionDuration} min</span>
+                </p>
+              ) : profile.hourlyRate ? (
+                <p className="text-4xl font-bold text-orange-500">
+                  {profile.hourlyRate} zł <span className="text-xl text-orange-400">{t('perHour')}</span>
+                </p>
+              ) : null}
             </div>
           ) : profile.hourlyRateHidden ? (
             <div className="bg-orange-500/10 border-2 border-orange-500/50 rounded-xl p-6 text-center">
               <p className="text-sm text-orange-400 mb-2 font-semibold uppercase tracking-wide">
-                {t('hourlyRate')}
+                {t('pricing')}
               </p>
               <p className="text-xl font-bold text-orange-500">
                 {t('contactForPricing')}
@@ -262,6 +289,31 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
             </div>
           )}
 
+          {/* Payment Methods */}
+          {profile.paymentMethods && profile.paymentMethods.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-slate-400 mb-3 uppercase tracking-wide">
+                {t('paymentMethods')}
+              </h3>
+              <div className="space-y-2">
+                {profile.paymentMethods.map((method) => {
+                  const Icon = PAYMENT_METHOD_ICONS[method];
+                  return Icon ? (
+                    <div key={method} className="flex items-center gap-2 text-slate-300 text-sm">
+                      <Icon className="size-4 text-orange-500" />
+                      <span>{tCommon(method)}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+              {profile.paymentInfo && (
+                <p className="mt-3 text-xs text-slate-400 italic border-l-2 border-slate-600 pl-3">
+                  {profile.paymentInfo}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Tags */}
           {profile.tags && profile.tags.length > 0 && (
             <div>
@@ -270,7 +322,7 @@ export function ProfileFullView({ profile }: ProfileFullViewProps) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {profile.tags.map((tagId) => {
-                  const tag = getTagById(tagId);
+                  const tag = tags.find(t => t.id === tagId);
                   return tag ? (
                     <Badge key={tagId} variant="outline" className="border-slate-600 text-slate-300 text-xs">
                       {getTagName(tag, locale)}

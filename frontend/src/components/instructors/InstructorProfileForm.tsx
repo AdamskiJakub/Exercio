@@ -10,17 +10,15 @@ import { useUpdateInstructorProfile } from '@/hooks/useUpdateInstructorProfile';
 import { useUploadProfilePhoto, useUploadGalleryPhotos } from '@/hooks/useFileUpload';
 import { toast } from 'sonner';
 import { instructorProfileSchema, type InstructorProfileFormData } from '@/lib/validations/schemas/instructor-profile';
-import { SPECIALIZATION_CATEGORIES } from '@/lib/config/specializations';
-import { getAllTagsSorted, getTagName } from '@/lib/config/tags';
-import { GOALS, getGoalName } from '@/lib/config/goals';
+import { useTags, useSpecializations, useGoals, getTagName, getGoalName } from '@/hooks/useConfig';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { MediaUpload } from '@/components/instructors/MediaUpload';
 import { ContactSettingsSection } from '@/components/instructors/ContactSettingsSection';
+import { PaymentSettingsSection } from '@/components/instructors/PaymentSettingsSection';
 import {
   Select,
   SelectContent,
@@ -31,19 +29,26 @@ import {
 
 const MAX_TAGS = 8;
 const MAX_GOALS = 4;
+const MAX_ADDITIONAL_SPECIALIZATIONS = 2;
 
 interface InstructorProfileFormProps {
-  profile?: InstructorProfile | InstructorListing; // Accept both types for flexibility
-  user: Pick<User, 'email' | 'phone'>; // Only require fields this form reads
+  profile?: InstructorProfile | InstructorListing;
+  user: Pick<User, 'email' | 'phone'>;
 }
 
 export function InstructorProfileForm({ profile, user }: InstructorProfileFormProps) {
   const t = useTranslations('Dashboard.profileForm');
+  const tCommon = useTranslations('Common');
   const locale = useLocale();
   const router = useRouter();
-  const { mutate: updateProfile, isPending } = useUpdateInstructorProfile();
+  const { mutate: updateProfile } = useUpdateInstructorProfile();
   const { mutate: uploadPhoto, isPending: isUploadingPhoto } = useUploadProfilePhoto();
   const { mutate: uploadGallery, isPending: isUploadingGallery } = useUploadGalleryPhotos();
+
+  const { tags, loading: tagsLoading } = useTags();
+  const { specializations, loading: specializationsLoading } = useSpecializations();
+  const { goals, loading: goalsLoading } = useGoals();
+  
   
   // State for multi-selects
   const [selectedPrimaryCategory, setSelectedPrimaryCategory] = useState<string | undefined>(
@@ -52,9 +57,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
   const [selectedSpecializations, setSelectedSpecializations] = useState<string[]>(
     profile?.specializations?.slice(1) || [] // Exclude primary to avoid duplication
   );
-  const [selectedTags, setSelectedTags] = useState<string[]>(
-    profile?.tags?.filter((tag: string) => getAllTagsSorted().some(t => t.id === tag)) || []
-  );
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const [selectedGoals, setSelectedGoals] = useState<string[]>(
     profile?.goals || []
   );
@@ -62,14 +66,52 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
     profile?.availability || 'both'
   );
 
+  // Filter tags to valid IDs once config loads
+  useEffect(() => { 
+    if (!tagsLoading && tags.length > 0 && profile?.tags) {
+      const validTags = profile.tags.filter((tag: string) => tags.some(t => t.id === tag));
+      setSelectedTags(validTags);
+    }
+  }, [tagsLoading, tags, profile?.tags]);
+
+  // Filter specializations to valid IDs once config loads
+  useEffect(() => {
+    if (!specializationsLoading && specializations.length > 0 && profile?.specializations) {
+      const validSpecIds = profile.specializations.filter((specId: string) => 
+        specializations.some(s => s.id === specId)
+      );
+      
+      if (validSpecIds.length > 0) {
+        setSelectedPrimaryCategory(validSpecIds[0]);
+        // Clamp additional specializations to MAX
+        const additional = validSpecIds.slice(1, MAX_ADDITIONAL_SPECIALIZATIONS + 1);
+        setSelectedSpecializations(additional);
+      } else {
+        // No valid specializations - reset to undefined
+        setSelectedPrimaryCategory(undefined);
+        setSelectedSpecializations([]);
+      }
+    }
+  }, [specializationsLoading, specializations, profile?.specializations]);
+
+  // Filter goals to valid IDs once config loads
+  useEffect(() => {
+    if (!goalsLoading && goals.length > 0 && profile?.goals) {
+      const validGoals = profile.goals.filter((goalId: string) => 
+        goals.some(g => g.id === goalId)
+      );
+      // Clamp to MAX_GOALS
+      setSelectedGoals(validGoals.slice(0, MAX_GOALS));
+    }
+  }, [goalsLoading, goals, profile?.goals]);
+
   const form = useForm<InstructorProfileFormData>({
     resolver: zodResolver(instructorProfileSchema),
     defaultValues: {
       bio: profile?.bio || '',
       tagline: profile?.tagline || '',
+      location: profile?.location || '',
       city: profile?.city || '',
-      hourlyRate: profile?.hourlyRate ?? undefined,
-      hourlyRateHidden: profile?.hourlyRateHidden || false,
       packageDealsEnabled: profile?.packageDealsEnabled || false,
       packageDealsDescription: profile?.packageDealsDescription || '',
       photoUrl: profile?.photoUrl || '',
@@ -79,6 +121,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       showPhone: profile?.showPhone || false,
       showEmail: profile?.showEmail || false,
       contactMessage: profile?.contactMessage || '',
+      paymentMethods: profile?.paymentMethods || [],
+      paymentInfo: profile?.paymentInfo || '',
     },
   });
 
@@ -98,9 +142,8 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       reset({
         bio: profile.bio || '',
         tagline: profile.tagline || '',
+        location: profile.location || '',
         city: profile.city || '',
-        hourlyRate: profile.hourlyRate ?? undefined,
-        hourlyRateHidden: profile.hourlyRateHidden || false,
         packageDealsEnabled: profile.packageDealsEnabled || false,
         packageDealsDescription: profile.packageDealsDescription || '',
         photoUrl: profile.photoUrl || '',
@@ -110,22 +153,24 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         showPhone: profile.showPhone || false,
         showEmail: profile.showEmail || false,
         contactMessage: profile.contactMessage || '',
+        paymentMethods: profile.paymentMethods || [],
+        paymentInfo: profile.paymentInfo || '',
       });
     }
   }, [profile, reset]);
 
   // Get available tags based on primary category
-  const availableTags = getAllTagsSorted(selectedPrimaryCategory);
-  
-  // Get subcategories for selected primary category
-  const selectedCategory = SPECIALIZATION_CATEGORIES.find(c => c.id === selectedPrimaryCategory);
-  const subcategories = selectedCategory?.subcategories || [];
+  const availableTags = selectedPrimaryCategory
+  ? tags.filter(tag => tag.categories.includes(selectedPrimaryCategory))
+  : tags;
 
   // Toggle functions
   const toggleSpecialization = (id: string) => {
-    setSelectedSpecializations(prev =>
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
-    );
+    if (selectedSpecializations.includes(id)) {
+      setSelectedSpecializations(prev => prev.filter(s => s !== id));
+    } else if (selectedSpecializations.length < MAX_ADDITIONAL_SPECIALIZATIONS) {
+      setSelectedSpecializations(prev => [...prev, id]);
+    }
   };
 
   const toggleTag = (id: string) => {
@@ -156,8 +201,6 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       tags: selectedTags,
       goals: selectedGoals,
       availability: selectedAvailability,
-      hourlyRate: data.hourlyRate ?? null,
-      hourlyRateHidden: data.hourlyRateHidden || false,
       packageDealsEnabled: data.packageDealsEnabled || false,
       packageDealsDescription: data.packageDealsEnabled ? data.packageDealsDescription : null,
       yearsExperience: data.yearsExperience ?? null,
@@ -256,12 +299,15 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
             setSelectedSpecializations([]); // Reset subcategories when changing primary
             setSelectedTags([]); // Reset tags when changing primary
           }}
+          disabled={specializationsLoading}
         >
           <SelectTrigger className="w-full bg-slate-900/50 border-slate-600 text-slate-100">
-            <SelectValue placeholder={t('primarySpecializationPlaceholder')} />
+            <SelectValue 
+              placeholder={specializationsLoading ? tCommon('loading') : t('primarySpecializationPlaceholder')} 
+            />
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-700">
-            {SPECIALIZATION_CATEGORIES.map((category) => (
+            {specializations.map((category) => (
               <SelectItem
                 key={category.id}
                 value={category.id}
@@ -274,38 +320,49 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         </Select>
       </div>
 
-      {/* Additional Specializations (Subcategories) */}
-      {subcategories.length > 0 && (
+      {/* Additional Specializations */}
+      {selectedPrimaryCategory && (
         <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-5">
-          <h3 className="text-base font-semibold text-white mb-3">
-            {t('specializations')}
+          <h3 className="text-base font-semibold text-white mb-2">
+            {t('additionalSpecializations')}
           </h3>
-          <p className="text-xs text-slate-400 mb-3">{t('specializationsHint')}</p>
+          <p className="text-xs text-slate-400 mb-3">
+            {t('additionalSpecializationsHint', { max: MAX_ADDITIONAL_SPECIALIZATIONS })}
+            {selectedSpecializations.length >= MAX_ADDITIONAL_SPECIALIZATIONS && (
+              <span className="text-orange-400 ml-2">({t('maximumReached')})</span>
+            )}
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {subcategories.map((sub) => {
-              const isChecked = selectedSpecializations.includes(sub.id);
-              return (
-                <label
-                  key={sub.id}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors group"
-                >
-                  <Checkbox
-                    checked={isChecked}
-                    onCheckedChange={() => toggleSpecialization(sub.id)}
-                    className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                  />
-                  <span
-                    className={`text-sm select-none transition-colors ${
-                      isChecked
-                        ? 'font-semibold bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent'
-                        : 'text-slate-300 group-hover:text-white'
+            {specializations
+              .filter(spec => spec.id !== selectedPrimaryCategory)
+              .map((spec) => {
+                const isChecked = selectedSpecializations.includes(spec.id);
+                const isDisabled = !isChecked && selectedSpecializations.length >= MAX_ADDITIONAL_SPECIALIZATIONS;
+                return (
+                  <label
+                    key={spec.id}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors group ${
+                      isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-800/50'
                     }`}
                   >
-                    {locale === 'pl' ? sub.namePl : sub.nameEn}
-                  </span>
-                </label>
-              );
-            })}
+                    <Checkbox
+                      checked={isChecked}
+                      disabled={isDisabled}
+                      onCheckedChange={() => toggleSpecialization(spec.id)}
+                      className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                    />
+                    <span
+                      className={`text-sm select-none transition-colors ${
+                        isChecked
+                          ? 'font-semibold bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent'
+                          : 'text-slate-300 group-hover:text-white'
+                      }`}
+                    >
+                      {spec.icon} {locale === 'pl' ? spec.namePl : spec.nameEn}
+                    </span>
+                  </label>
+                );
+              })}
           </div>
         </div>
       )}
@@ -367,7 +424,7 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
           )}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {GOALS.map((goal) => {
+          {goals.map((goal) => {
             const isChecked = selectedGoals.includes(goal.id);
             const isDisabled = !isChecked && selectedGoals.length >= MAX_GOALS;
             return (
@@ -438,91 +495,59 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
       </div>
 
       {/* Location & City */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="city" className="text-base font-semibold text-slate-200">
-            {t('city')}
+          <Label htmlFor="location" className="text-base font-semibold text-slate-200">
+            {t('location')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
           </Label>
           <Input
-            {...register('city')}
-            id="city"
+            {...register('location')}
+            id="location"
             type="text"
-            placeholder={t('cityPlaceholder')}
+            placeholder={t('locationPlaceholder')}
             className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
           />
-          {errors.city && (
-            <p className="text-red-400 text-sm">{errors.city.message}</p>
+          {errors.location && (
+            <p className="text-red-400 text-sm">{errors.location.message}</p>
           )}
+          <p className="text-xs text-slate-400">{t('locationHint')}</p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="yearsExperience" className="text-base font-semibold text-slate-200">
-            {t('yearsExperience')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
-          </Label>
-          <Input
-            {...register('yearsExperience', { 
-              setValueAs: (v) => v === '' || v === null || v === undefined ? undefined : Number(v)
-            })}
-            id="yearsExperience"
-            type="number"
-            placeholder={t('yearsExperiencePlaceholder')}
-            className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
-          />
-          {errors.yearsExperience && (
-            <p className="text-red-400 text-sm">{errors.yearsExperience.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Hourly Rate */}
-      <div className="space-y-2">
-        <Label 
-          htmlFor="hourlyRate" 
-          className={`text-base font-semibold ${watch('hourlyRateHidden') ? 'text-slate-500' : 'text-slate-200'}`}
-        >
-          {t('hourlyRate')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
-        </Label>
-        <Input
-          {...register('hourlyRate', { 
-            setValueAs: (v) => v === '' || v === null || v === undefined ? undefined : Number(v)
-          })}
-          id="hourlyRate"
-          type="number"
-          step="0.01"
-          placeholder={t('hourlyRatePlaceholder')}
-          disabled={watch('hourlyRateHidden')}
-          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        {errors.hourlyRate && (
-          <p className="text-red-400 text-sm">{errors.hourlyRate.message}</p>
-        )}
-        
-        {/* Hide Hourly Rate Checkbox */}
-        <label className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors border border-slate-700 mt-2">
-          <Controller
-            name="hourlyRateHidden"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={(checked) => field.onChange(checked === true)}
-                className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-              />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="city" className="text-base font-semibold text-slate-200">
+              {t('city')}
+            </Label>
+            <Input
+              {...register('city')}
+              id="city"
+              type="text"
+              placeholder={t('cityPlaceholder')}
+              className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+            />
+            {errors.city && (
+              <p className="text-red-400 text-sm">{errors.city.message}</p>
             )}
-          />
-          <div className="flex flex-col">
-            <span className={`text-sm font-medium select-none ${
-              watch('hourlyRateHidden') 
-                ? 'bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent' 
-                : 'text-slate-200'
-            }`}>
-              {t('hourlyRateHidden')}
-            </span>
-            <span className="text-sm text-slate-400">
-              {t('hourlyRateHiddenHint')}
-            </span>
           </div>
-        </label>
+
+          <div className="space-y-2">
+            <Label htmlFor="yearsExperience" className="text-base font-semibold text-slate-200">
+              {t('yearsExperience')} <span className="text-slate-400 text-sm font-normal">{t('hourlyRateOptional')}</span>
+            </Label>
+            <Input
+              {...register('yearsExperience', { 
+                setValueAs: (v) => v === '' || v === null || v === undefined ? undefined : Number(v)
+              })}
+              id="yearsExperience"
+              type="number"
+              placeholder={t('yearsExperiencePlaceholder')}
+              className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+            />
+            {errors.yearsExperience && (
+              <p className="text-red-400 text-sm">{errors.yearsExperience.message}</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Package Deals Checkbox */}
@@ -614,6 +639,9 @@ export function InstructorProfileForm({ profile, user }: InstructorProfileFormPr
         userPhone={user.phone}
         userEmail={user.email}
       />
+
+      {/* Payment Settings Section */}
+      <PaymentSettingsSection form={form} />
 
       {/* Photo URL */}
       <MediaUpload

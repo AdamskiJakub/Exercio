@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto, UpdatePasswordDto } from './dto';
 import * as bcrypt from 'bcrypt';
@@ -50,14 +50,18 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // Verify current password
+    if (!user.password) {
+      throw new BadRequestException(
+        `Cannot change password for OAuth users. You logged in via ${user.provider || 'social login'}.`,
+      );
+    }
+
     const passwordValid = await bcrypt.compare(dto.currentPassword, user.password);
 
     if (!passwordValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
 
     await this.prisma.user.update({

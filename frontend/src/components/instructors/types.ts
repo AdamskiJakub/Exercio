@@ -3,6 +3,7 @@ import type { InstructorFilters } from '@/types/filters';
 
 export interface InstructorCardProps {
   instructor: InstructorListing;
+  disableLink?: boolean;
 }
 
 export interface InstructorSearchBarProps {
