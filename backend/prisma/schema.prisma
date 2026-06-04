@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,83 +6,66 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
-  CLIENT
-  INSTRUCTOR
-  ADMIN
-}
-
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String? // bcrypt hashed - optional for OAuth users
-  username  String   @unique
-  role      UserRole @default(CLIENT)
-  firstName String?
-  lastName  String?
-  phone     String?
-  
-  // OAuth fields
-  provider        String  @default("local") // "local" | "google" | "facebook" | "apple"
-  providerId      String?  // OAuth provider user ID
-  isEmailVerified Boolean  @default(false)   // Auto-true for OAuth
-  avatarUrl       String?  // Profile picture from OAuth provider
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id                   String             @id @default(uuid())
+  email                String             @unique
+  password             String?            // bcrypt hashed - optional for OAuth users
+  username             String             @unique
+  role                 UserRole           @default(CLIENT)
+  firstName            String?
+  lastName             String?
+  phone                String?
+  provider             String             @default("local") // "local" | "google" | "facebook" | "apple"
+  providerId           String?            // OAuth provider user ID
+  isEmailVerified      Boolean            @default(false)   // Auto-true for OAuth
+  avatarUrl            String?            // Profile picture from OAuth provider
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
   instructorProfile    InstructorProfile?
   bookingsAsClient     Booking[]          @relation("ClientBookings")
   bookingsAsInstructor Booking[]          @relation("InstructorBookings")
   reviews              Review[]
 
-  @@unique([provider, providerId]) // Unique combination of provider + providerId
+  @@unique([provider, providerId])
   @@map("users")
 }
 
 model InstructorProfile {
-  id                      String   @id @default(uuid())
-  userId                  String   @unique
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bio                     String?  @db.Text
-  tagline                 String? // Short description shown on card
-  specializations         String[] // ["personal-training", "yoga-mobility"]
-  tags                    String[] // Global tags: ["hiit", "strength-training", "bachata"]
-  goals                   String[] // ["weight_loss", "muscle_gain", "flexibility"]
-  location                String? // Full address
-  city                    String? // For filtering
+  id                      String                  @id @default(uuid())
+  userId                  String                  @unique
+  bio                     String?
+  specializations         String[]
+  location                String?
+  city                    String?
   hourlyRate              Float?
-  hourlyRateHidden        Boolean  @default(false) // Hide rate, show "Contact for pricing"
-  packageDealsEnabled     Boolean  @default(false)
-  packageDealsDescription String?  @db.Text
   photoUrl                String?
-  gallery                 String[] // Array of photo URLs
-  verified                Boolean  @default(false)
-  isDraft                 Boolean  @default(true) // Profile is draft until published
+  verified                Boolean                 @default(false)
   yearsExperience         Int?
-  availability            String? // "online" | "in-person" | "both"
-  languages               String[] // ["pl", "en"]
-  showPhone               Boolean  @default(false) // Show phone number on public profile
-  showEmail               Boolean  @default(false) // Show email on public profile
-  contactMessage          String?  @db.Text // Optional custom contact message
-
-  // BOOKING SETTINGS
-  sessionDuration  Int     @default(60) // Duration in minutes (30, 60, 90, 120)
-  sessionPrice     Float? // Price per session in PLN
-  isBookingEnabled Boolean @default(false) // Whether instructor accepts bookings
-  minNoticeHours   Int     @default(48) // Minimum hours notice before booking (default 48h)
-
-  // PAYMENT INFORMATION (informational only, no payment processing)
-  paymentMethods String[] @default([]) // ["cash", "card", "blik", "transfer"]
-  paymentInfo    String?  @db.Text // Additional payment instructions
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  services               Service[]
-  // Note: Bookings relation removed - access via user.bookingsAsInstructor instead
-  weeklyAvailability     Availability[]          @relation("WeeklyAvailability")
-  availabilityExceptions AvailabilityException[] @relation("AvailabilityExceptions")
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  availability            String?
+  gallery                 String[]
+  goals                   String[]
+  languages               String[]
+  tagline                 String?
+  tags                    String[]
+  isDraft                 Boolean                 @default(true)
+  packageDealsDescription String?
+  packageDealsEnabled     Boolean                 @default(false)
+  hourlyRateHidden        Boolean                 @default(false)
+  contactMessage          String?
+  showEmail               Boolean                 @default(false)
+  showPhone               Boolean                 @default(false)
+  isBookingEnabled        Boolean                 @default(false)
+  minNoticeHours          Int                     @default(48)
+  sessionDuration         Int                     @default(60)
+  sessionPrice            Float?
+  paymentInfo             String?
+  paymentMethods          String[]                @default([])
+  weeklyAvailability      Availability[]          @relation("WeeklyAvailability")
+  availabilityExceptions  AvailabilityException[] @relation("AvailabilityExceptions")
+  user                    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services                Service[]
 
   @@map("instructor_profiles")
 }
@@ -93,127 +73,105 @@ model InstructorProfile {
 model Service {
   id           String            @id @default(uuid())
   instructorId String
-  instructor   InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
   name         String
-  description  String?           @db.Text
-  price        Float // Price per session
-  duration     Int // Duration in minutes
+  description  String?
+  price        Float
+  duration     Int
   isActive     Boolean           @default(true)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
-
-  bookings Booking[]
+  bookings     Booking[]
+  instructor   InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
 
   @@map("services")
 }
 
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-  EXPIRED // NEW: Instructor didn't confirm in time
-}
-
 model Booking {
-  id             String            @id @default(uuid())
-  hiddenFromClient   Boolean        @default(false)
-  clientId       String? // NOW OPTIONAL: Null if manual block by instructor or guest booking
-  client         User?             @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
-  instructorId   String // This is User.id, NOT InstructorProfile.id
-  instructorUser User              @relation("InstructorBookings", fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_user_fkey")
-  // Note: No direct relation to InstructorProfile - access via instructorUser.instructorProfile
-  serviceId      String? // NOW OPTIONAL: deprecated, will use sessionDuration/Price from profile
-  service        Service?          @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-
-  // OLD FIELD - kept for backward compatibility
-  date DateTime? // Booking date and time (deprecated, use startTime/endTime)
-
-  // NEW FIELDS - all optional for backward compatibility with existing bookings
-  startTime DateTime? // Booking start time
-  endTime   DateTime? // Booking end time
-  duration  Int? // Duration in minutes (snapshot from profile)
-  price     Float? // Price snapshot from profile at booking time
-
-  status        BookingStatus @default(PENDING)
-  isShortNotice Boolean       @default(false) // True if booked less than minNoticeHours
-  isManualBlock Boolean       @default(false) // True if instructor manually blocked this slot
-  notes         String?       @db.Text
-
-  // Guest booking fields (for non-authenticated users)
-  guestName  String? // Guest full name
-  guestEmail String? // Guest email
-  guestPhone String? // Guest phone number
-
-  // Cancellation info
-  cancelledAt        DateTime?
-  cancelledBy        String? // "client" or "instructor"
-  cancellationReason String?   @db.Text
-  acknowledgedAt     DateTime? // When instructor acknowledged the cancellation
-
-  // Guest cancellation token
-  cancellationToken String? @unique // PostgreSQL treats each NULL as distinct – OK for sparse unique columns
-  cancellationTokenExpiresAt DateTime? // Expires 7 days after generation; cleaned by scheduled job
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  review Review?
+  id                         String        @id @default(uuid())
+  clientId                   String?
+  instructorId               String
+  serviceId                  String?
+  date                       DateTime?
+  status                     BookingStatus @default(PENDING)
+  notes                      String?
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+  cancellationReason         String?
+  cancelledAt                DateTime?
+  cancelledBy                String?
+  duration                   Int?
+  endTime                    DateTime?
+  isManualBlock              Boolean       @default(false)
+  isShortNotice              Boolean       @default(false)
+  price                      Float?
+  startTime                  DateTime?
+  guestEmail                 String?
+  guestName                  String?
+  guestPhone                 String?
+  acknowledgedAt             DateTime?
+  hiddenFromClient           Boolean       @default(false)
+  
+  // NOWE ZMIENNE Z TOKENAMI:
+  cancellationToken          String?       @unique
+  cancellationTokenExpiresAt DateTime?
+  
+  client                     User?         @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
+  instructorUser             User          @relation("InstructorBookings", fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_user_fkey")
+  service                    Service?      @relation(fields: [serviceId], references: [id])
+  review                     Review?
 
   @@index([clientId])
   @@index([instructorId])
   @@index([startTime])
   @@index([status])
+  
+  // NOWE INDEKSY DLA TOKENÓW:
+  @@index([cancellationToken])
+  @@index([cancellationTokenExpiresAt])
   @@map("bookings")
 }
 
 model Review {
   id        String   @id @default(uuid())
   bookingId String   @unique
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  rating    Int // 1-5 stars
-  comment   String?  @db.Text
+  rating    Int
+  comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
 
   @@map("reviews")
 }
 
-// Weekly availability template (e.g., "Every Monday 16:00-22:00")
 model Availability {
   id           String            @id @default(uuid())
   instructorId String
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
   instructor   InstructorProfile @relation("WeeklyAvailability", fields: [instructorId], references: [id], onDelete: Cascade)
-
-  dayOfWeek Int // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  startTime String // Format: "HH:MM" (e.g., "16:00")
-  endTime   String // Format: "HH:MM" (e.g., "22:00")
-  isActive  Boolean @default(true) // Can temporarily disable without deleting
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@unique([instructorId, dayOfWeek])
   @@index([instructorId])
   @@map("availability")
 }
 
-// Date-specific availability overrides (e.g., "May 6th only 16:00-20:00" or "May 7th unavailable")
 model AvailabilityException {
   id           String            @id @default(uuid())
   instructorId String
+  date         DateTime          @db.Date
+  isAvailable  Boolean           @default(false)
+  startTime    String?
+  endTime      String?
+  reason       String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
   instructor   InstructorProfile @relation("AvailabilityExceptions", fields: [instructorId], references: [id], onDelete: Cascade)
-
-  date        DateTime @db.Date // Specific date for this exception
-  isAvailable Boolean // False = completely unavailable this day
-  startTime   String? // Format: "HH:MM" - only if isAvailable = true
-  endTime     String? // Format: "HH:MM" - only if isAvailable = true
-  reason      String?  @db.Text // Optional reason (vacation, training, etc.)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   @@unique([instructorId, date])
   @@index([instructorId])
@@ -221,16 +179,29 @@ model AvailabilityException {
   @@map("availability_exceptions")
 }
 
-// Verification codes for email verification and password reset
 model VerificationCode {
   id        String   @id @default(uuid())
   email     String
-  code      String // 6-digit code
-  type      String // "email_verification" | "password_reset"
-  expiresAt DateTime // Code expires after 10 minutes
+  code      String
+  type      String
+  expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   @@index([email, type, used])
   @@map("verification_codes")
+}
+
+enum UserRole {
+  CLIENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  EXPIRED
 }
