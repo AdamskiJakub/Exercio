@@ -1,0 +1,246 @@
+import {
+  BookingEmailContent,
+  CancellationEmailContent,
+  InfoEmailContent,
+  PasswordResetEmailContent,
+  VerificationEmailContent,
+  BuildInfoDetails,
+} from './email.types';
+
+const escapeHtml = (text: string | undefined | null): string => {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+export const buildLayout = (content: string, footer: string): string => `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<table role="presentation" style="width:100%;">
+<tr>
+<td align="center" style="padding:40px 20px;">
+<table role="presentation" style="max-width:600px;width:100%;background:#1e293b;border-radius:12px;overflow:hidden;">
+<tr>
+<td style="background:linear-gradient(135deg,#f97316 0%,#dc2626 100%);padding:40px 20px;text-align:center;">
+<h1 style="margin:0;color:white;font-size:32px;font-weight:bold;">💪 Trainly</h1>
+</td>
+</tr>
+${content}
+<tr>
+<td style="padding:30px;background:#0f172a;text-align:center;">
+<p style="margin:0;color:#64748b;font-size:12px;">${footer}</p>
+<p style="margin-top:10px;color:#475569;font-size:12px;">© 2026 Trainly. All rights reserved.</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>
+`;
+
+export const detailsTable = (rows: string): string => `
+<div style="background:#334155;border-radius:8px;padding:20px;margin:20px 0;">
+<table role="presentation" style="width:100%;border-collapse:collapse;color:#cbd5e1;font-size:14px;">
+${rows}
+</table>
+</div>
+`;
+
+export const priceRow = (label: string, price?: number): string => {
+  if (price == null) return '';
+  return `
+<tr>
+<td style="padding:8px 0;color:#94a3b8;font-size:14px;">${label}</td>
+<td style="padding:8px 0;color:#f1f5f9;font-size:14px;font-weight:600;text-align:right;">${price} PLN</td>
+</tr>
+`;
+};
+
+export const buildInfoTemplate = (
+  content: InfoEmailContent,
+  details: BuildInfoDetails,
+): string => {
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;">${content.subtitle}</p>
+${detailsTable(`
+${
+  details.clientName
+    ? `
+<tr>
+  <td style="padding:6px 0;">${content.clientLabel || 'Klient'}</td>
+  <td style="padding:6px 0;color:#f1f5f9;font-weight:600;text-align:right;">${escapeHtml(details.clientName)}</td>
+</tr>
+`
+    : ''
+}
+${
+  details.clientEmail
+    ? `
+<tr>
+  <td style="padding:6px 0;">${content.clientEmailLabel || 'Email klienta'}</td>
+  <td style="padding:6px 0;color:#f1f5f9;text-align:right;">${escapeHtml(details.clientEmail)}</td>
+</tr>
+`
+    : ''
+}
+<tr><td style="padding:6px 0;">${content.dateLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.date)}</td></tr>
+<tr><td style="padding:6px 0;">${content.timeLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.time)}</td></tr>
+<tr><td style="padding:6px 0;">${content.durationLabel}</td><td align="right" style="color:#f1f5f9;">${details.duration} ${content.minutes}</td></tr>
+${priceRow(content.priceLabel, details.price)}
+`)}
+${content.info ? `<p style="color:#cbd5e1;">${content.info}</p>` : ''}
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+export const buildVerificationTemplate = (
+  code: string,
+  content: VerificationEmailContent,
+): string => {
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="margin:0 0 20px;color:#f1f5f9;font-size:24px;">${content.title}</h2>
+<p style="margin:0 0 30px;color:#cbd5e1;font-size:16px;">${content.subtitle}</p>
+<div style="background:#334155;border-radius:8px;padding:30px;text-align:center;">
+<div style="font-size:48px;font-weight:bold;letter-spacing:12px;color:#f97316;font-family:'Courier New',monospace;">${escapeHtml(code)}</div>
+</div>
+<p style="margin-top:30px;color:#94a3b8;font-size:14px;text-align:center;">${content.expires}</p>
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+export const buildPasswordResetTemplate = (
+  code: string,
+  content: PasswordResetEmailContent,
+): string => {
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;">${content.subtitle}</p>
+<p style="color:#cbd5e1;">${content.codeLabel}</p>
+<div style="background:#334155;border-radius:8px;padding:30px;text-align:center;">
+<div style="font-size:48px;font-weight:bold;letter-spacing:12px;color:#f97316;font-family:'Courier New',monospace;">${escapeHtml(code)}</div>
+</div>
+<p style="margin-top:30px;color:#94a3b8;font-size:14px;text-align:center;">${content.expires}</p>
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+export const buildBookingTemplate = (
+  content: BookingEmailContent,
+  details: {
+    date: string;
+    time: string;
+    duration: number;
+    price?: number;
+    instructorName?: string;
+  },
+  cancelLink?: string,
+): string => {
+  const hasDashboard = !!content.dashboardUrl;
+  const hasCancel = !!cancelLink && !!content.cancelButton;
+
+  let actionHtml = '';
+
+  if (hasDashboard && hasCancel) {
+    // Both buttons: blue dashboard + red cancel
+    actionHtml = `
+      <div style="margin-top:20px;">
+        <p style="color:#cbd5e1;font-size:14px;">${content.cancelInfo}</p>
+        <table role="presentation" style="margin-top:10px;">
+          <tr>
+            <td style="padding-right:12px;">
+              <a href="${content.dashboardUrl}" style="display:inline-block;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${content.cancelButton}</a>
+            </td>
+            <td>
+              <a href="${encodeURI(cancelLink!)}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${content.cancelButton === 'Przejdź do panelu' ? 'Anuluj sesję' : 'Cancel Session'}</a>
+            </td>
+          </tr>
+        </table>
+      </div>`;
+  } else if (hasDashboard) {
+    actionHtml = `
+      <p style="color:#cbd5e1;margin-top:20px;">${content.cancelInfo}</p>
+      <a href="${content.dashboardUrl}" style="display:inline-block;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;margin-top:10px;">${content.cancelButton}</a>`;
+  } else if (hasCancel) {
+    actionHtml = `
+      <p style="color:#cbd5e1;margin-top:20px;">${content.cancelInfo}</p>
+      <a href="${encodeURI(cancelLink!)}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;margin-top:10px;">${content.cancelButton}</a>`;
+  } else {
+    actionHtml = `<p style="color:#cbd5e1;margin-top:20px;">${content.cancelInfo}</p>`;
+  }
+
+  const instructorRow = details.instructorName
+    ? `<tr><td style="padding:6px 0;">Instruktor / Instructor</td><td align="right" style="color:#f1f5f9;font-weight:600;">${escapeHtml(details.instructorName)}</td></tr>`
+    : '';
+
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;">${content.subtitle}</p>
+${detailsTable(`
+<tr><td style="padding:6px 0;">${content.dateLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.date)}</td></tr>
+<tr><td style="padding:6px 0;">${content.timeLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.time)}</td></tr>
+<tr><td style="padding:6px 0;">${content.durationLabel}</td><td align="right" style="color:#f1f5f9;">${details.duration} ${content.minutes}</td></tr>
+${priceRow(content.priceLabel, details.price)}
+${instructorRow}
+`)}
+${actionHtml}
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+export const buildCancellationTemplate = (
+  content: CancellationEmailContent,
+  details: { date: string; time: string; reason?: string },
+): string => {
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;">${content.subtitle}</p>
+${detailsTable(`
+<tr><td style="padding:6px 0;">${content.dateLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.date)}</td></tr>
+<tr><td style="padding:6px 0;">${content.timeLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.time)}</td></tr>
+${details.reason ? `<tr><td style="padding:6px 0;">${content.reasonLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.reason)}</td></tr>` : ''}
+`)}
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};

@@ -68,7 +68,7 @@
     "passwordPlaceholder": "Wprowadź hasło",
     "passwordRequired": "Hasło jest wymagane",
     "passwordMin": "Hasło musi mieć minimum 8 znaków",
-    "passwordRegex": "Hasło musi zawierać: wielką literę, małą literę, cyfrę i znak specjalny (@$!%*?&)",
+    "passwordRegex": "Hasło musi zawierać: wielką literę, małą literę, cyfrę i znak specjalny",
     "passwordHint": "Min. 8 znaków: A-Z, a-z, 0-9, znak specjalny",
     "confirmPassword": "Potwierdź hasło",
     "confirmPasswordPlaceholder": "Potwierdź swoje hasło",
@@ -795,7 +795,3 @@
     "invalidLinkDescription": "Link do anulowania jest nieprawidłowy lub wygasł."
   }
 }
-
-
-
-

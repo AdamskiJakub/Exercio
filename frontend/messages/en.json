@@ -68,7 +68,7 @@
     "passwordPlaceholder": "Enter password",
     "passwordRequired": "Password is required",
     "passwordMin": "Password must be at least 8 characters",
-    "passwordRegex": "Password must contain: uppercase, lowercase, number, and special character (@$!%*?&)",
+    "passwordRegex": "Password must contain: uppercase, lowercase, number, and special character",
     "passwordHint": "Min 8 chars: A-Z, a-z, 0-9, special char",
     "confirmPassword": "Confirm Password",
     "confirmPasswordPlaceholder": "Confirm your password",
@@ -779,7 +779,7 @@
       "cancel": "Cancel"
     }
   },
-    "CancelBooking": {
+  "CancelBooking": {
     "title": "Cancel Session",
     "description": "Are you sure you want to cancel this session? The instructor will be notified.",
     "reasonLabel": "Cancellation reason",

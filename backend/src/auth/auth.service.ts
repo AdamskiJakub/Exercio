@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -35,7 +40,8 @@ export class AuthService {
       await this.sendVerificationCode(dto.email, language);
 
       return {
-        message: 'Registration successful. Please check your email for verification code.',
+        message:
+          'Registration successful. Please check your email for verification code.',
         user: {
           id: user.id,
           email: user.email,
@@ -49,7 +55,11 @@ export class AuthService {
       };
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException(
+          language === 'pl'
+            ? 'Użytkownik z tym adresem e-mail już istnieje'
+            : 'User with this email already exists',
+        );
       }
       throw error;
     }
@@ -99,7 +109,8 @@ export class AuthService {
       await this.sendVerificationCode(dto.email, language);
 
       return {
-        message: 'Registration successful. Please check your email for verification code.',
+        message:
+          'Registration successful. Please check your email for verification code.',
         user: {
           id: user.id,
           email: user.email,
@@ -113,7 +124,11 @@ export class AuthService {
       };
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new ConflictException('User with this email or username already exists');
+        throw new ConflictException(
+          language === 'pl'
+            ? 'Użytkownik z tym adresem e-mail lub nazwą użytkownika już istnieje'
+            : 'User with this email or username already exists',
+        );
       }
       throw error;
     }
@@ -185,7 +200,11 @@ export class AuthService {
 
       if (user) {
         // Prevent provider flipping - enforce single provider per account
-        if (user.provider && user.provider !== 'local' && user.provider !== oauthUser.provider) {
+        if (
+          user.provider &&
+          user.provider !== 'local' &&
+          user.provider !== oauthUser.provider
+        ) {
           throw new UnauthorizedException(
             `This email is already registered with ${user.provider}. Please use ${user.provider} to login.`,
           );
@@ -211,7 +230,7 @@ export class AuthService {
 
     if (!user) {
       const username = await this.generateUniqueUsername(oauthUser.email);
-      
+
       try {
         user = await this.prisma.user.create({
           data: {
@@ -272,7 +291,7 @@ export class AuthService {
       .split('@')[0]
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-');
-    
+
     let username = baseUsername;
     let counter = 1;
 
@@ -333,36 +352,36 @@ export class AuthService {
    * Send verification code after registration
    */
   async sendVerificationCode(email: string, language: 'pl' | 'en' = 'pl') {
-  const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email } });
 
-  if (!user || user.isEmailVerified) {
+    if (!user || user.isEmailVerified) {
+      return { message: 'Verification code sent successfully' };
+    }
+
+    const code = this.generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.prisma.verificationCode.deleteMany({
+      where: {
+        email,
+        type: 'email_verification',
+        used: false,
+      },
+    });
+
+    await this.prisma.verificationCode.create({
+      data: {
+        email,
+        code,
+        type: 'email_verification',
+        expiresAt,
+      },
+    });
+
+    await this.emailService.sendVerificationCode(email, code, language);
+
     return { message: 'Verification code sent successfully' };
   }
-
-  const code = this.generateVerificationCode();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
-  await this.prisma.verificationCode.deleteMany({
-    where: {
-      email,
-      type: 'email_verification',
-      used: false,
-    },
-  });
-
-  await this.prisma.verificationCode.create({
-    data: {
-      email,
-      code,
-      type: 'email_verification',
-      expiresAt,
-    },
-  });
-
-  await this.emailService.sendVerificationCode(email, code, language);
-
-  return { message: 'Verification code sent successfully' };
-}
 
   /**
    * Verify email with 6-digit code
@@ -425,12 +444,17 @@ export class AuthService {
 
     // Don't reveal if user exists or not (security)
     if (!user) {
-      return { message: 'If an account with that email exists, a password reset code has been sent' };
+      return {
+        message:
+          'If an account with that email exists, a password reset code has been sent',
+      };
     }
 
     // OAuth users can't reset password
     if (user.provider !== 'local') {
-      throw new BadRequestException('Password reset is not available for OAuth accounts');
+      throw new BadRequestException(
+        'Password reset is not available for OAuth accounts',
+      );
     }
 
     const code = this.generateVerificationCode();
@@ -458,7 +482,10 @@ export class AuthService {
     // Send email
     await this.emailService.sendPasswordResetCode(email, code, language);
 
-    return { message: 'If an account with that email exists, a password reset code has been sent' };
+    return {
+      message:
+        'If an account with that email exists, a password reset code has been sent',
+    };
   }
 
   /**
