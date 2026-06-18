@@ -9,6 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CreateManualBookingDto } from './dto/create-manual-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
+import type { Language } from '../email/email.types';
+import {
+  CANCELLATION_TOKEN_EXPIRY_MS,
+  END_OF_DAY_HOURS,
+  END_OF_DAY_MINUTES,
+  END_OF_DAY_SECONDS,
+  END_OF_DAY_MS,
+} from './bookings.constants';
 
 @Injectable()
 export class BookingsService {
@@ -59,7 +67,12 @@ export class BookingsService {
     const isInstructor = requestingUserId === profile.userId;
 
     const endDateTime = new Date(endDate);
-    endDateTime.setUTCHours(23, 59, 59, 999);
+    endDateTime.setUTCHours(
+      END_OF_DAY_HOURS,
+      END_OF_DAY_MINUTES,
+      END_OF_DAY_SECONDS,
+      END_OF_DAY_MS,
+    );
 
     // Get PENDING and CONFIRMED bookings - these block slots
     const existingBookings = await this.prisma.booking.findMany({
@@ -188,7 +201,12 @@ export class BookingsService {
     currentDate.setUTCHours(0, 0, 0, 0);
 
     const endDateTime = new Date(endDate);
-    endDateTime.setUTCHours(23, 59, 59, 999);
+    endDateTime.setUTCHours(
+      END_OF_DAY_HOURS,
+      END_OF_DAY_MINUTES,
+      END_OF_DAY_SECONDS,
+      END_OF_DAY_MS,
+    );
 
     const now = new Date();
     const minNoticeDate = new Date(
@@ -380,7 +398,7 @@ export class BookingsService {
   async createBooking(
     userId: string,
     dto: CreateBookingDto,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     // Get instructor profile
     const profile = await this.prisma.instructorProfile.findUnique({
@@ -569,10 +587,7 @@ export class BookingsService {
   /**
    * Create a guest booking (without authenticated user)
    */
-  async createGuestBooking(
-    dto: CreateBookingDto,
-    language: 'pl' | 'en' = 'pl',
-  ) {
+  async createGuestBooking(dto: CreateBookingDto, language: Language = 'pl') {
     // Get instructor profile
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: dto.instructorId },
@@ -665,8 +680,8 @@ export class BookingsService {
         guestPhone: dto.guestPhone,
         cancellationToken: crypto.randomUUID(),
         cancellationTokenExpiresAt: new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000,
-        ), // 7-day expiry
+          Date.now() + CANCELLATION_TOKEN_EXPIRY_MS,
+        ),
       },
       include: {
         instructorUser: {
@@ -749,7 +764,7 @@ export class BookingsService {
   async createManualBooking(
     userId: string,
     dto: CreateManualBookingDto,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { userId },
@@ -818,7 +833,7 @@ export class BookingsService {
         guestPhone: dto.guestPhone,
         cancellationToken: crypto.randomUUID(),
         cancellationTokenExpiresAt: new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000,
+          Date.now() + CANCELLATION_TOKEN_EXPIRY_MS,
         ),
       },
       include: {
@@ -1076,7 +1091,7 @@ export class BookingsService {
     bookingId: string,
     userId: string,
     dto: CancelBookingDto,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
@@ -1250,7 +1265,7 @@ export class BookingsService {
     bookingId: string,
     token: string,
     cancellationReason?: string,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
