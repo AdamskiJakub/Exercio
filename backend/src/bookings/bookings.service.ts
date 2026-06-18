@@ -9,6 +9,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { CreateManualBookingDto } from './dto/create-manual-booking.dto';
 import { CancelBookingDto } from './dto/cancel-booking.dto';
+import type { Language } from '../email/email.types';
+import {
+  CANCELLATION_TOKEN_EXPIRY_MS,
+  END_OF_DAY_HOURS,
+  END_OF_DAY_MINUTES,
+  END_OF_DAY_SECONDS,
+  END_OF_DAY_MS,
+} from './bookings.constants';
 
 @Injectable()
 export class BookingsService {
@@ -59,7 +67,12 @@ export class BookingsService {
     const isInstructor = requestingUserId === profile.userId;
 
     const endDateTime = new Date(endDate);
-    endDateTime.setUTCHours(23, 59, 59, 999);
+    endDateTime.setUTCHours(
+      END_OF_DAY_HOURS,
+      END_OF_DAY_MINUTES,
+      END_OF_DAY_SECONDS,
+      END_OF_DAY_MS,
+    );
 
     // Get PENDING and CONFIRMED bookings - these block slots
     const existingBookings = await this.prisma.booking.findMany({
@@ -188,7 +201,12 @@ export class BookingsService {
     currentDate.setUTCHours(0, 0, 0, 0);
 
     const endDateTime = new Date(endDate);
-    endDateTime.setUTCHours(23, 59, 59, 999);
+    endDateTime.setUTCHours(
+      END_OF_DAY_HOURS,
+      END_OF_DAY_MINUTES,
+      END_OF_DAY_SECONDS,
+      END_OF_DAY_MS,
+    );
 
     const now = new Date();
     const minNoticeDate = new Date(
@@ -380,7 +398,7 @@ export class BookingsService {
   async createBooking(
     userId: string,
     dto: CreateBookingDto,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     // Get instructor profile
     const profile = await this.prisma.instructorProfile.findUnique({
@@ -521,14 +539,22 @@ export class BookingsService {
         .join(' ') || 'Instructor';
 
     // Send confirmation email to client
+    const dashboardPath = language === 'pl' ? 'panel' : 'dashboard';
+    const dashboardUrl = `${process.env.FRONTEND_URL}/${language}/${dashboardPath}`;
+
     this.emailService
-      .sendBookingConfirmationClient(booking.client!.email, {
-        instructorName,
-        date: bookingDate,
-        time: bookingTime,
-        duration: booking.duration!,
-        price: booking.price ?? undefined,
-      })
+      .sendBookingConfirmationClient(
+        booking.client!.email,
+        language,
+        {
+          date: bookingDate,
+          time: bookingTime,
+          duration: booking.duration!,
+          price: booking.price ?? undefined,
+          instructorName,
+        },
+        dashboardUrl,
+      )
       .catch((err) =>
         console.error('Failed to send booking confirmation:', err),
       );
@@ -542,12 +568,13 @@ export class BookingsService {
     const instructorEmail = booking.instructorUser?.email;
     if (instructorEmail) {
       this.emailService
-        .sendNewBookingNotificationInstructor(instructorEmail, {
-          clientName,
+        .sendNewBookingNotificationInstructor(instructorEmail, language, {
           date: bookingDate,
           time: bookingTime,
           duration: booking.duration!,
           price: booking.price ?? undefined,
+          clientName: clientName,
+          clientEmail: booking.client?.email,
         })
         .catch((err) =>
           console.error('Failed to send instructor notification:', err),
@@ -560,10 +587,7 @@ export class BookingsService {
   /**
    * Create a guest booking (without authenticated user)
    */
-  async createGuestBooking(
-    dto: CreateBookingDto,
-    language: 'pl' | 'en' = 'pl',
-  ) {
+  async createGuestBooking(dto: CreateBookingDto, language: Language = 'pl') {
     // Get instructor profile
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: dto.instructorId },
@@ -642,7 +666,7 @@ export class BookingsService {
     // Create guest booking (clientId will be null)
     const booking = await this.prisma.booking.create({
       data: {
-        clientId: null, // Guest booking has no client ID
+        clientId: null,
         instructorId: profile.userId, // Use userId from instructor profile
         startTime,
         endTime,
@@ -656,8 +680,8 @@ export class BookingsService {
         guestPhone: dto.guestPhone,
         cancellationToken: crypto.randomUUID(),
         cancellationTokenExpiresAt: new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000,
-        ), // 7-day expiry
+          Date.now() + CANCELLATION_TOKEN_EXPIRY_MS,
+        ),
       },
       include: {
         instructorUser: {
@@ -693,16 +717,22 @@ export class BookingsService {
         .filter(Boolean)
         .join(' ') || 'Instructor';
 
+    // Build cancellation URL for guest
+    const cancellationUrl = `${process.env.FRONTEND_URL}/${language}/cancel-booking?bookingId=${booking.id}&token=${booking.cancellationToken}`;
+
     this.emailService
-      .sendBookingConfirmationGuest(dto.guestEmail!, {
-        instructorName,
-        date: bookingDate,
-        time: bookingTime,
-        duration: booking.duration!,
-        price: booking.price ?? undefined,
-        bookingId: booking.id,
-        cancellationToken: booking.cancellationToken!,
-      })
+      .sendBookingConfirmationGuest(
+        dto.guestEmail!,
+        language,
+        {
+          date: bookingDate,
+          time: bookingTime,
+          duration: booking.duration!,
+          price: booking.price ?? undefined,
+          instructorName,
+        },
+        cancellationUrl,
+      )
       .catch((err) =>
         console.error('Failed to send guest booking confirmation:', err),
       );
@@ -711,12 +741,13 @@ export class BookingsService {
     const instructorEmail = booking.instructorUser?.email;
     if (instructorEmail) {
       this.emailService
-        .sendNewBookingNotificationInstructor(instructorEmail, {
-          clientName,
+        .sendNewBookingNotificationInstructor(instructorEmail, language, {
           date: bookingDate,
           time: bookingTime,
           duration: booking.duration!,
           price: booking.price ?? undefined,
+          clientName,
+          clientEmail: dto.guestEmail,
         })
         .catch((err) =>
           console.error('Failed to send instructor notification:', err),
@@ -730,8 +761,11 @@ export class BookingsService {
    * Create a manual booking by instructor (e.g., phone booking)
    * Instructor can create bookings on their own calendar
    */
-  async createManualBooking(userId: string, dto: CreateManualBookingDto) {
-    // Get instructor profile for this user
+  async createManualBooking(
+    userId: string,
+    dto: CreateManualBookingDto,
+    language: Language = 'pl',
+  ) {
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { userId },
     });
@@ -748,28 +782,18 @@ export class BookingsService {
     );
     const now = new Date();
 
-    // Allow instructors to create bookings in the past (for retroactive bookings)
-    // but show a warning if it's too far in the past
     if (startTime <= now) {
-      // Just log, don't throw - instructors might need to add past bookings
       console.warn(
         `Instructor ${userId} creating booking in the past: ${startTime}`,
       );
     }
 
-    // Check if slot is already booked
     const existingBooking = await this.prisma.booking.findFirst({
       where: {
         instructorId: userId,
-        startTime: {
-          lt: endTime,
-        },
-        endTime: {
-          gt: startTime,
-        },
-        status: {
-          in: ['PENDING', 'CONFIRMED'],
-        },
+        startTime: { lt: endTime },
+        endTime: { gt: startTime },
+        status: { in: ['PENDING', 'CONFIRMED'] },
       },
     });
 
@@ -777,16 +801,25 @@ export class BookingsService {
       throw new BadRequestException('Time slot is already booked');
     }
 
-    // Check if within notice period
     const minNoticeDate = new Date(
       now.getTime() + profile.minNoticeHours * 60 * 60 * 1000,
     );
     const isShortNotice = startTime < minNoticeDate;
 
-    // Create manual booking (auto-confirmed since instructor creates it)
+    // Check if guest email belongs to a registered client
+    let clientId: string | null = null;
+    if (dto.guestEmail) {
+      const clientUser = await this.prisma.user.findFirst({
+        where: { email: dto.guestEmail, role: 'CLIENT' },
+      });
+      if (clientUser) {
+        clientId = clientUser.id;
+      }
+    }
+
     const booking = await this.prisma.booking.create({
       data: {
-        clientId: null,
+        clientId,
         instructorId: userId,
         startTime,
         endTime,
@@ -798,6 +831,10 @@ export class BookingsService {
         guestName: dto.guestName,
         guestEmail: dto.guestEmail,
         guestPhone: dto.guestPhone,
+        cancellationToken: crypto.randomUUID(),
+        cancellationTokenExpiresAt: new Date(
+          Date.now() + CANCELLATION_TOKEN_EXPIRY_MS,
+        ),
       },
       include: {
         instructorUser: {
@@ -818,53 +855,81 @@ export class BookingsService {
       },
     });
 
-    // Send emails for manual bookings
-    const locale = 'pl'; // Default to Polish, can be extended
-    const bookingDate = startTime.toLocaleDateString('pl-PL', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    const bookingTime = startTime.toLocaleTimeString('pl-PL', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    const bookingDate = startTime.toLocaleDateString(
+      language === 'pl' ? 'pl-PL' : 'en-GB',
+      { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
+    );
+    const bookingTime = startTime.toLocaleTimeString(
+      language === 'pl' ? 'pl-PL' : 'en-GB',
+      { hour: '2-digit', minute: '2-digit' },
+    );
 
     const instructorName =
       [booking.instructorUser?.firstName, booking.instructorUser?.lastName]
         .filter(Boolean)
         .join(' ') || 'Instructor';
 
-    // Send confirmation to guest (if email provided)
     if (dto.guestEmail) {
-      this.emailService
-        .sendManualBookingConfirmationGuest(dto.guestEmail, {
-          instructorName,
-          date: bookingDate,
-          time: bookingTime,
-          duration: booking.duration!,
-          price: booking.price ?? undefined,
-        })
-        .catch((err) =>
-          console.error(
-            'Failed to send manual booking confirmation to guest:',
-            err,
-          ),
-        );
+      const cancellationUrl = `${process.env.FRONTEND_URL}/${language}/cancel-booking?bookingId=${booking.id}&token=${booking.cancellationToken}`;
+
+      if (clientId) {
+        // Registered client: BOTH blue dashboard + red cancel
+        const dashboardPath = language === 'pl' ? 'panel' : 'dashboard';
+        const dashboardUrl = `${process.env.FRONTEND_URL}/${language}/${dashboardPath}`;
+
+        this.emailService
+          .sendBookingConfirmationClient(
+            dto.guestEmail,
+            language,
+            {
+              date: bookingDate,
+              time: bookingTime,
+              duration: booking.duration!,
+              price: booking.price ?? undefined,
+              instructorName,
+            },
+            dashboardUrl,
+            cancellationUrl,
+          )
+          .catch((err) =>
+            console.error(
+              'Failed to send manual booking confirmation to client:',
+              err,
+            ),
+          );
+      } else {
+        // Guest: only red cancel button
+        this.emailService
+          .sendBookingConfirmationGuest(
+            dto.guestEmail,
+            language,
+            {
+              date: bookingDate,
+              time: bookingTime,
+              duration: booking.duration!,
+              price: booking.price ?? undefined,
+              instructorName,
+            },
+            cancellationUrl,
+          )
+          .catch((err) =>
+            console.error(
+              'Failed to send manual booking confirmation to guest:',
+              err,
+            ),
+          );
+      }
     }
 
-    // Send notification to instructor (self-notification for records)
     const instructorEmail = booking.instructorUser?.email;
     if (instructorEmail) {
       this.emailService
-        .sendNewBookingNotificationInstructor(instructorEmail, {
-          clientName: dto.guestName || 'Client',
+        .sendNewBookingNotificationInstructor(instructorEmail, language, {
           date: bookingDate,
           time: bookingTime,
           duration: booking.duration!,
-          price: booking.price ?? undefined,
-          isManual: true,
+          clientName: dto.guestName || 'Guest',
+          clientEmail: dto.guestEmail,
         })
         .catch((err) =>
           console.error('Failed to send instructor notification:', err),
@@ -875,14 +940,17 @@ export class BookingsService {
   }
 
   /**
+   * Get single booking by ID
+   */
+
+  /**
    * Get bookings for a user (as client or instructor)
    */
   async getMyBookings(userId: string, role: 'client' | 'instructor') {
-    // NOTE: booking.instructorId is User.id, not InstructorProfile.id
     const where =
       role === 'client'
         ? { clientId: userId, hiddenFromClient: false }
-        : { instructorId: userId }; // For instructors, use userId directly
+        : { instructorId: userId };
 
     const bookings = await this.prisma.booking.findMany({
       where,
@@ -919,9 +987,6 @@ export class BookingsService {
     return bookings;
   }
 
-  /**
-   * Get single booking by ID
-   */
   async getBookingById(bookingId: string, userId: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
@@ -1026,7 +1091,7 @@ export class BookingsService {
     bookingId: string,
     userId: string,
     dto: CancelBookingDto,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
@@ -1155,11 +1220,11 @@ export class BookingsService {
           updatedBooking.guestEmail || updatedBooking.client?.email;
         if (clientEmail) {
           this.emailService
-            .sendCancellationByInstructor(clientEmail, {
-              instructorName,
+            .sendCancellationByInstructor(clientEmail, language, {
               date: bookingDate,
               time: bookingTime,
               reason: dto.cancellationReason,
+              instructorName,
             })
             .catch((err) =>
               console.error('Failed to send cancellation email:', err),
@@ -1177,11 +1242,11 @@ export class BookingsService {
             'Client';
 
           this.emailService
-            .sendCancellationByClient(instructorEmail, {
-              clientName,
+            .sendCancellationByClient(instructorEmail, language, {
               date: bookingDate,
               time: bookingTime,
               reason: dto.cancellationReason,
+              clientName: clientName,
             })
             .catch((err) =>
               console.error('Failed to send cancellation email:', err),
@@ -1200,7 +1265,7 @@ export class BookingsService {
     bookingId: string,
     token: string,
     cancellationReason?: string,
-    language: 'pl' | 'en' = 'pl',
+    language: Language = 'pl',
   ) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
@@ -1316,13 +1381,26 @@ export class BookingsService {
 
       const clientName = booking.guestName || 'Client';
 
+      const instructorName =
+        [
+          updatedBooking.instructorUser?.firstName,
+          updatedBooking.instructorUser?.lastName,
+        ]
+          .filter(Boolean)
+          .join(' ') || 'Instructor';
+
       this.emailService
-        .sendCancellationByClient(updatedBooking.instructorUser.email, {
-          clientName,
-          date: bookingDate,
-          time: bookingTime,
-          reason: cancellationReason,
-        })
+        .sendCancellationByClient(
+          updatedBooking.instructorUser.email,
+          language,
+          {
+            date: bookingDate,
+            time: bookingTime,
+            reason: cancellationReason,
+            instructorName: instructorName,
+            clientName,
+          },
+        )
         .catch((err) =>
           console.error('Failed to send cancellation email:', err),
         );
