@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,6 +11,11 @@ import { EmailService } from '../email/email.service';
 import { RegisterDto, LoginDto } from './dto';
 import { randomInt } from 'crypto';
 import * as bcrypt from 'bcrypt';
+import {
+  VERIFICATION_CODE_EXPIRY_MS,
+  BCRYPT_SALT_ROUNDS,
+  Language,
+} from './constants';
 
 @Injectable()
 export class AuthService {
@@ -19,98 +25,65 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  async register(dto: RegisterDto, language: 'pl' | 'en' = 'pl') {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+  private async createUserWithProfile(
+    dto: RegisterDto,
+    role: 'CLIENT' | 'INSTRUCTOR',
+    language: Language,
+  ) {
+    const hashedPassword = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
+
+    if (role === 'INSTRUCTOR' && !dto.phone) {
+      throw new BadRequestException(
+        language === 'pl'
+          ? 'Numer telefonu jest wymagany dla instruktorów'
+          : 'Phone number is required for instructors',
+      );
+    }
+
+    const data: any = {
+      email: dto.email,
+      username: dto.username,
+      password: hashedPassword,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      phone: dto.phone,
+      role,
+      isEmailVerified: false,
+    };
+
+    if (role === 'INSTRUCTOR') {
+      data.instructorProfile = {
+        create: {
+          bio: null,
+          specializations: [],
+          tags: [],
+          goals: [],
+          gallery: [],
+          languages: [],
+          location: null,
+          city: null,
+          hourlyRate: null,
+          photoUrl: null,
+          verified: false,
+          yearsExperience: null,
+        },
+      };
+    }
 
     try {
       const user = await this.prisma.user.create({
-        data: {
-          email: dto.email,
-          username: dto.username,
-          password: hashedPassword,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          phone: dto.phone,
-          role: 'CLIENT',
-          isEmailVerified: false, // New users are not verified
-        },
+        data,
+        include:
+          role === 'INSTRUCTOR' ? { instructorProfile: true } : undefined,
       });
 
-      // Send verification code instead of returning token
       await this.sendVerificationCode(dto.email, language);
 
       return {
         message:
-          'Registration successful. Please check your email for verification code.',
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phone,
-          isEmailVerified: user.isEmailVerified,
-        },
-      };
-    } catch (error) {
-      if (error.code === 'P2002') {
-        throw new ConflictException(
           language === 'pl'
-            ? 'Użytkownik z tym adresem e-mail już istnieje'
-            : 'User with this email already exists',
-        );
-      }
-      throw error;
-    }
-  }
-
-  async registerInstructor(dto: RegisterDto, language: 'pl' | 'en' = 'pl') {
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
-
-    if (!dto.phone) {
-      throw new BadRequestException('Phone number is required for instructors');
-    }
-
-    try {
-      const user = await this.prisma.user.create({
-        data: {
-          email: dto.email,
-          username: dto.username,
-          password: hashedPassword,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          phone: dto.phone,
-          role: 'INSTRUCTOR',
-          isEmailVerified: false, // New users are not verified
-          instructorProfile: {
-            create: {
-              bio: null,
-              specializations: [],
-              tags: [],
-              goals: [],
-              gallery: [],
-              languages: [],
-              location: null,
-              city: null,
-              hourlyRate: null,
-              photoUrl: null,
-              verified: false,
-              yearsExperience: null,
-            },
-          },
-        },
-        include: {
-          instructorProfile: true,
-        },
-      });
-
-      // Send verification code instead of returning token
-      await this.sendVerificationCode(dto.email, language);
-
-      return {
-        message:
-          'Registration successful. Please check your email for verification code.',
+            ? 'Rejestracja zakończona sukcesem. Sprawdź email, aby zweryfikować konto.'
+            : 'Registration successful. Please check your email for verification code.',
         user: {
           id: user.id,
           email: user.email,
@@ -123,6 +96,8 @@ export class AuthService {
         },
       };
     } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+
       if (error.code === 'P2002') {
         throw new ConflictException(
           language === 'pl'
@@ -134,6 +109,14 @@ export class AuthService {
     }
   }
 
+  async register(dto: RegisterDto, language: Language = 'pl') {
+    return this.createUserWithProfile(dto, 'CLIENT', language);
+  }
+
+  async registerInstructor(dto: RegisterDto, language: Language = 'pl') {
+    return this.createUserWithProfile(dto, 'INSTRUCTOR', language);
+  }
+
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -143,8 +126,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Prevent OAuth users from logging in with password
-    // Users with provider other than 'local' must use OAuth
     if (user.provider !== 'local') {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -199,7 +180,6 @@ export class AuthService {
       });
 
       if (user) {
-        // Prevent provider flipping - enforce single provider per account
         if (
           user.provider &&
           user.provider !== 'local' &&
@@ -210,14 +190,10 @@ export class AuthService {
           );
         }
 
-        // For local accounts: just update profile data, keep provider='local'
-        // For OAuth accounts: this shouldn't happen (caught by compound unique above)
-        // This allows users with local accounts to also login via OAuth
         if (user.provider === 'local') {
           user = await this.prisma.user.update({
             where: { id: user.id },
             data: {
-              // DO NOT change provider - keep 'local'
               isEmailVerified: true,
               avatarUrl: user.avatarUrl || oauthUser.avatarUrl,
               firstName: user.firstName || oauthUser.firstName,
@@ -249,22 +225,30 @@ export class AuthService {
       } catch (error) {
         if (error.code === 'P2002') {
           const retryUsername = `${username}-${Date.now()}`;
-          user = await this.prisma.user.create({
-            data: {
-              email: oauthUser.email,
-              username: retryUsername,
-              password: null,
-              firstName: oauthUser.firstName,
-              lastName: oauthUser.lastName,
-              provider: oauthUser.provider,
-              providerId: oauthUser.providerId,
-              isEmailVerified: true,
-              avatarUrl: oauthUser.avatarUrl,
-              role: 'CLIENT',
-            },
-          });
+          try {
+            user = await this.prisma.user.create({
+              data: {
+                email: oauthUser.email,
+                username: retryUsername,
+                password: null,
+                firstName: oauthUser.firstName,
+                lastName: oauthUser.lastName,
+                provider: oauthUser.provider,
+                providerId: oauthUser.providerId,
+                isEmailVerified: true,
+                avatarUrl: oauthUser.avatarUrl,
+                role: 'CLIENT',
+              },
+            });
+          } catch (retryError) {
+            throw new InternalServerErrorException(
+              'Unable to create OAuth user. Please try again.',
+            );
+          }
         } else {
-          throw error;
+          throw new InternalServerErrorException(
+            'An unexpected error occurred during OAuth login.',
+          );
         }
       }
     }
@@ -337,45 +321,42 @@ export class AuthService {
     return user;
   }
 
-  // ============================================
-  // EMAIL VERIFICATION & PASSWORD RESET METHODS
-  // ============================================
-
-  /**
-   * Generate a 6-digit verification code
-   */
   private generateVerificationCode(): string {
     return randomInt(0, 1_000_000).toString().padStart(6, '0');
   }
 
-  /**
-   * Send verification code after registration
-   */
-  async sendVerificationCode(email: string, language: 'pl' | 'en' = 'pl') {
+  async sendVerificationCode(email: string, language: Language = 'pl') {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user || user.isEmailVerified) {
-      return { message: 'Verification code sent successfully' };
+      return {
+        message:
+          language === 'pl'
+            ? 'Jeśli konto o tym adresie e-mail istnieje, kod weryfikacyjny został wysłany'
+            : 'If an account with that email exists, a verification code has been sent',
+      };
     }
 
     const code = this.generateVerificationCode();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MS);
 
-    await this.prisma.verificationCode.deleteMany({
-      where: {
-        email,
-        type: 'email_verification',
-        used: false,
-      },
-    });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.verificationCode.deleteMany({
+        where: {
+          email,
+          type: 'email_verification',
+          used: false,
+        },
+      });
 
-    await this.prisma.verificationCode.create({
-      data: {
-        email,
-        code,
-        type: 'email_verification',
-        expiresAt,
-      },
+      await tx.verificationCode.create({
+        data: {
+          email,
+          code,
+          type: 'email_verification',
+          expiresAt,
+        },
+      });
     });
 
     await this.emailService.sendVerificationCode(email, code, language);
@@ -383,9 +364,6 @@ export class AuthService {
     return { message: 'Verification code sent successfully' };
   }
 
-  /**
-   * Verify email with 6-digit code
-   */
   async verifyEmail(email: string, code: string) {
     const verificationCode = await this.prisma.verificationCode.findFirst({
       where: {
@@ -403,19 +381,16 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired verification code');
     }
 
-    // Mark code as used
     await this.prisma.verificationCode.update({
       where: { id: verificationCode.id },
       data: { used: true },
     });
 
-    // Update user's email verification status
     const user = await this.prisma.user.update({
       where: { email },
       data: { isEmailVerified: true },
     });
 
-    // Generate token for auto-login
     const token = await this.generateToken(user.id, user.email, user.role);
 
     return {
@@ -433,67 +408,61 @@ export class AuthService {
     };
   }
 
-  /**
-   * Request password reset - send 6-digit code
-   */
-  async requestPasswordReset(email: string, language: 'pl' | 'en' = 'pl') {
-    // Check if user exists
+  async requestPasswordReset(email: string, language: Language = 'pl') {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
 
-    // Don't reveal if user exists or not (security)
     if (!user) {
       return {
         message:
-          'If an account with that email exists, a password reset code has been sent',
+          language === 'pl'
+            ? 'Jeśli konto o tym adresie e-mail istnieje, kod resetujący został wysłany'
+            : 'If an account with that email exists, a password reset code has been sent',
       };
     }
 
-    // OAuth users can't reset password
     if (user.provider !== 'local') {
       throw new BadRequestException(
-        'Password reset is not available for OAuth accounts',
+        language === 'pl'
+          ? 'Reset hasła nie jest dostępny dla kont OAuth'
+          : 'Password reset is not available for OAuth accounts',
       );
     }
 
     const code = this.generateVerificationCode();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MS);
 
-    // Delete any existing unused codes for this email
-    await this.prisma.verificationCode.deleteMany({
-      where: {
-        email,
-        type: 'password_reset',
-        used: false,
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.verificationCode.deleteMany({
+        where: {
+          email,
+          type: 'password_reset',
+          used: false,
+        },
+      });
+
+      await tx.verificationCode.create({
+        data: {
+          email,
+          code,
+          type: 'password_reset',
+          expiresAt,
+        },
+      });
     });
 
-    // Create new reset code
-    await this.prisma.verificationCode.create({
-      data: {
-        email,
-        code,
-        type: 'password_reset',
-        expiresAt,
-      },
-    });
-
-    // Send email
     await this.emailService.sendPasswordResetCode(email, code, language);
 
     return {
       message:
-        'If an account with that email exists, a password reset code has been sent',
+        language === 'pl'
+          ? 'Jeśli konto o tym adresie e-mail istnieje, kod resetujący został wysłany'
+          : 'If an account with that email exists, a password reset code has been sent',
     };
   }
 
-  /**
-   * Reset password with 6-digit code
-   * Email is extracted from the code - no need to pass it separately
-   */
   async resetPassword(email: string, code: string, newPassword: string) {
-    // Find the verification code - email is stored in the code record
     const verificationCode = await this.prisma.verificationCode.findFirst({
       where: {
         code,
@@ -510,22 +479,18 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired reset code');
     }
 
-    // Mark code as used
     await this.prisma.verificationCode.update({
       where: { id: verificationCode.id },
       data: { used: true },
     });
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
 
-    // Update user's password
     const user = await this.prisma.user.update({
       where: { email },
       data: { password: hashedPassword },
     });
 
-    // Generate token for auto-login
     const token = await this.generateToken(user.id, user.email, user.role);
 
     return {
