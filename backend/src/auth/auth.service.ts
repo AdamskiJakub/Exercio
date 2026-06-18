@@ -11,11 +11,8 @@ import { EmailService } from '../email/email.service';
 import { RegisterDto, LoginDto } from './dto';
 import { randomInt } from 'crypto';
 import * as bcrypt from 'bcrypt';
-import {
-  VERIFICATION_CODE_EXPIRY_MS,
-  BCRYPT_SALT_ROUNDS,
-  Language,
-} from './constants';
+import { VERIFICATION_CODE_EXPIRY_MS, BCRYPT_SALT_ROUNDS } from './constants';
+import type { Language } from '../email/email.types';
 
 @Injectable()
 export class AuthService {
