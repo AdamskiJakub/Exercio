@@ -27,6 +27,12 @@ jobs:
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
             ':!**/node_modules/**' 2>/dev/null || true)
 
+          # Get list of changed files
+          FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
+            ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
+            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
+            ':!**/node_modules/**' 2>/dev/null || true)
+
           if [ -z "$DIFF" ]; then
             echo "✅ No code changes to review." > /tmp/review_comment.txt
             exit 0
@@ -37,22 +43,25 @@ jobs:
             DIFF="${DIFF:0:60000}"
           fi
 
-          # Save diff to temp file
+          # Save diff and file list to temp files
           echo "$DIFF" > /tmp/pr_diff.txt
+          echo "$FILES" > /tmp/pr_files.txt
 
           # Build JSON payload using jq with rawfile to avoid escaping issues
-          jq -n --rawfile diff /tmp/pr_diff.txt '{
+          jq -n \
+            --rawfile diff /tmp/pr_diff.txt \
+            --rawfile files /tmp/pr_files.txt '{
             model: "deepseek-chat",
             max_tokens: 2000,
             temperature: 0.3,
             messages: [
               {
                 role: "system",
-                content: "You are a senior code reviewer. Review the git diff and list issues. Focus on: bugs, security, performance, error handling, type safety. Be concise. Use markdown bullet points. If nothing important, say ✅ No significant issues found."
+                content: "You are a senior code reviewer. Review the git diff and list issues. For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say ✅ No significant issues found."
               },
               {
                 role: "user",
-                content: ("```diff\n" + $diff + "\n```")
+                content: ("Files changed:\n" + $files + "\n\nDiff:\n```diff\n" + $diff + "\n```")
               }
             ]
           }' > /tmp/payload.json
