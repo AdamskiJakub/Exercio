@@ -254,10 +254,11 @@ export class BookingsController {
     @Param('id') bookingId: string,
     @Body() body: { language?: string },
   ) {
+    const lang: Language = body.language === 'en' ? 'en' : 'pl';
     return this.bookingsService.acceptManualBooking(
       bookingId,
       req.user.id,
-      (body.language as Language) || 'pl',
+      lang,
     );
   }
 

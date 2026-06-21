@@ -125,7 +125,7 @@ export class BookingsService {
     userId: string,
     language: Language = 'pl',
   ) {
-    return this.bookingQueryService.acceptManualBooking(
+    return this.bookingCreationService.acceptManualBooking(
       bookingId,
       userId,
       language,
@@ -133,7 +133,7 @@ export class BookingsService {
   }
 
   async clearUserHistory(userId: string) {
-    return this.bookingQueryService.clearUserHistory(userId);
+    return this.bookingCreationService.clearUserHistory(userId);
   }
 
   // ------------------------------------------------------------------
