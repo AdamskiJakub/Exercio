@@ -48,7 +48,7 @@ export function PaginationSection({
   if (totalPages <= 1) return null;
 
   return (
-    <Pagination className="mt-8 [&_[data-slot=pagination-link]]:min-w-10 [&_[data-slot=pagination-link]]:h-10 [&_[data-slot=pagination-link]]:text-base">
+    <Pagination className="mt-8 **:data-[slot=pagination-link]:min-w-10 **:data-[slot=pagination-link]:h-10 **:data-[slot=pagination-link]:text-base">
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious

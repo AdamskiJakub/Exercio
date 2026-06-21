@@ -73,6 +73,10 @@ export function FiltersSidebar({
                 className="space-y-3 max-h-96 overflow-y-auto pr-2"
                 role="group"
                 aria-labelledby="tags-heading"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "#475569 transparent",
+                }}
               >
                 {availableTags.map((tag) => {
                   const isChecked = filters.tags?.includes(tag.id) || false;
