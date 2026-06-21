@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import {
   useConfirmBooking,
   useCompleteBooking,
+  useAcceptManualBooking,
 } from "@/hooks/useBookingActions";
 import { useCancelBooking } from "@/hooks/useCancelBooking";
 import { RejectBookingModal } from "./RejectBookingModal";
@@ -43,6 +44,7 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
   const confirmBooking = useConfirmBooking();
   const completeBooking = useCompleteBooking();
   const cancelBooking = useCancelBooking();
+  const acceptManualBooking = useAcceptManualBooking();
 
   if (bookings.length === 0) {
     return null;
@@ -222,12 +224,12 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
                 </div>
 
                 {/* Status & Actions */}
-                <div className="flex md:flex-col flex-row items-end gap-2 flex-wrap">
+                <div className="flex flex-col items-end gap-2">
                   {/* Status Badge - Hidden for instructor when actions are available */}
                   {!(role === "instructor" && (canConfirm || canComplete)) && (
                     <div
                       className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm whitespace-nowrap",
+                        "flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm whitespace-nowrap w-full justify-center",
                         getStatusColor(booking.status),
                       )}
                     >
@@ -238,24 +240,24 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
 
                   {/* Action Buttons for Instructor */}
                   {role === "instructor" && (canConfirm || canComplete) && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 w-full">
                       {canConfirm && (
                         <>
                           <Button
                             size="sm"
                             onClick={() => handleConfirm(booking.id)}
                             disabled={confirmBooking.isPending}
-                            className="bg-green-500 hover:bg-green-600 text-white h-8 px-3"
+                            className="bg-green-500 hover:bg-green-600 text-white h-8 px-3 w-full"
                           >
                             <Check className="w-4 h-4 mr-1" />
                             {t("acceptBooking")}
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="destructive"
                             onClick={() => handleReject(booking)}
                             disabled={confirmBooking.isPending}
-                            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white h-8 px-3"
+                            className="h-8 px-3 w-full"
                           >
                             <X className="w-4 h-4 mr-1" />
                             {t("rejectBooking")}
@@ -267,7 +269,7 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
                           size="sm"
                           onClick={() => handleCompleteClick(booking)}
                           disabled={completeBooking.isPending}
-                          className="bg-blue-500 hover:bg-blue-600 text-white h-8 px-3"
+                          className="bg-blue-500 hover:bg-blue-600 text-white h-8 px-3 w-full"
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
                           {t("completeBooking")}
@@ -276,20 +278,54 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
                     </div>
                   )}
 
-                  {/* Cancel Button for Clients */}
+                  {/* Action Buttons for Client */}
                   {role === "client" && (
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex flex-col gap-2 w-full">
+                      {/* Client's own PENDING booking: only show Cancel */}
                       {booking.status === "PENDING" && (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleConfirm(booking.id)}
-                            disabled={confirmBooking.isPending}
-                            className="bg-green-500 md:w-full hover:bg-green-600 text-white h-8 px-3"
-                          >
-                            <Check className="w-4 h-4 mr-1" />
-                            {t("acceptBooking")}
-                          </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleCancelClick(booking)}
+                          disabled={cancelBooking.isPending}
+                          className="h-8 px-3 md:w-full"
+                        >
+                          <XCircle className="w-4 h-4 mr-1" />
+                          {t("cancelSession")}
+                        </Button>
+                      )}
+                      {/* Manual booking (instructor-created, CONFIRMED): client can Accept or Reject */}
+                      {booking.status === "CONFIRMED" &&
+                        booking.isManualBooking && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                acceptManualBooking.mutateAsync({
+                                  bookingId: booking.id,
+                                })
+                              }
+                              disabled={acceptManualBooking.isPending}
+                              className="bg-green-500 md:w-full hover:bg-green-600 text-white h-8 px-3"
+                            >
+                              <Check className="w-4 h-4 mr-1" />
+                              {t("acceptBooking")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleCancelClick(booking)}
+                              disabled={cancelBooking.isPending}
+                              className="h-8 px-3 md:w-full"
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              {t("rejectBooking")}
+                            </Button>
+                          </>
+                        )}
+                      {/* Regular CONFIRMED booking (client-initiated, instructor confirmed): only Cancel */}
+                      {booking.status === "CONFIRMED" &&
+                        !booking.isManualBooking && (
                           <Button
                             size="sm"
                             variant="destructive"
@@ -298,22 +334,9 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
                             className="h-8 px-3 md:w-full"
                           >
                             <XCircle className="w-4 h-4 mr-1" />
-                            {t("rejectBooking")}
+                            {t("cancelSession")}
                           </Button>
-                        </>
-                      )}
-                      {booking.status === "CONFIRMED" && (
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleCancelClick(booking)}
-                          disabled={cancelBooking.isPending}
-                          className="h-8 px-3"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          {t("cancelSession")}
-                        </Button>
-                      )}
+                        )}
                     </div>
                   )}
                 </div>

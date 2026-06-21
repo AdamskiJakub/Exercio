@@ -145,26 +145,85 @@ export const CANCELLATION_TEXTS = {
 export const INFO_EMAIL_TEXTS = {
   manualBooking: {
     pl: {
-      title: 'Sesja zarezerwowana! 🎉',
+      title: 'Nowa sesja od instruktora 📅',
+      subtitle:
+        'Instruktor utworzył dla Ciebie rezerwację. Aby potwierdzić lub odrzucić sesję, przejdź do swojego panelu.',
+      dateLabel: 'Data',
+      timeLabel: 'Godzina',
+      durationLabel: 'Czas trwania',
+      priceLabel: 'Cena',
+      minutes: 'min',
+      cancelInfo:
+        'Możesz potwierdzić lub odrzucić tę sesję w swoim panelu użytkownika.',
+      cancelButton: 'Przejdź do panelu',
+      footer: 'Dziękujemy za skorzystanie z Trainly!',
+    },
+    en: {
+      title: 'New Session from Instructor 📅',
+      subtitle:
+        'An instructor created a booking for you. To confirm or reject the session, go to your dashboard.',
+      dateLabel: 'Date',
+      timeLabel: 'Time',
+      durationLabel: 'Duration',
+      priceLabel: 'Price',
+      minutes: 'min',
+      cancelInfo: 'You can confirm or reject this session in your dashboard.',
+      cancelButton: 'Go to Dashboard',
+      footer: 'Thank you for using Trainly!',
+    },
+  },
+
+  manualBookingCreatedGuest: {
+    pl: {
+      title: 'Nowa sesja od instruktora 📅',
       subtitle: 'Instruktor utworzył dla Ciebie rezerwację.',
       dateLabel: 'Data',
       timeLabel: 'Godzina',
       durationLabel: 'Czas trwania',
       priceLabel: 'Cena',
       minutes: 'min',
-      info: 'Jeśli potrzebujesz zmienić termin, skontaktuj się bezpośrednio z instruktorem.',
+      cancelInfo:
+        'Jeśli nie możesz wziąć udziału, anuluj sesję klikając przycisk poniżej.',
+      cancelButton: 'Anuluj sesję',
       footer: 'Dziękujemy za skorzystanie z Trainly!',
     },
     en: {
-      title: 'Session Booked! 🎉',
+      title: 'New Session from Instructor 📅',
       subtitle: 'An instructor created a booking for you.',
       dateLabel: 'Date',
       timeLabel: 'Time',
       durationLabel: 'Duration',
       priceLabel: 'Price',
       minutes: 'min',
-      info: 'If you need to reschedule, please contact your instructor directly.',
+      cancelInfo:
+        'If you cannot attend, cancel the session by clicking the button below.',
+      cancelButton: 'Cancel Session',
       footer: 'Thank you for using Trainly!',
+    },
+  },
+
+  clientAcceptedManualBooking: {
+    pl: {
+      title: 'Klient potwierdził sesję! ✅',
+      subtitle: 'Klient zaakceptował utworzoną przez Ciebie rezerwację.',
+      dateLabel: 'Data',
+      timeLabel: 'Godzina',
+      durationLabel: 'Czas trwania',
+      priceLabel: 'Cena',
+      minutes: 'min',
+      footer: 'Sprawdź swój kalendarz na Trainly.',
+      clientLabel: 'Klient',
+    },
+    en: {
+      title: 'Client Confirmed the Session! ✅',
+      subtitle: 'The client has accepted the booking you created.',
+      dateLabel: 'Date',
+      timeLabel: 'Time',
+      durationLabel: 'Duration',
+      priceLabel: 'Price',
+      minutes: 'min',
+      footer: 'Check your calendar on Trainly.',
+      clientLabel: 'Client',
     },
   },
 

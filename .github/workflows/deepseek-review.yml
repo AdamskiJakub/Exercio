@@ -12,18 +12,83 @@ jobs:
   code-review:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: DeepSeek AI Code Review
-        uses: Louis-7/ai-code-review@main
+      - name: Generate diff and call DeepSeek
+        id: review
         env:
-          ENGINE: "deepseek"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          DEEPSEEK_BASE_URL: "https://api.deepseek.com"
-          MODEL: "deepseek-chat"
-          LANGUAGE: "English"
-          PATH_TO_EXCLUDE: "**/pnpm-lock.yaml, **/node_modules/**, **/*.json, **/*.md"
+        run: |
+          # Generate diff between base branch and PR head
+          DIFF=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . \
+            ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
+            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
+            ':!**/node_modules/**' 2>/dev/null || true)
+
+          # Get list of changed files
+          FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
+            ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
+            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
+            ':!**/node_modules/**' 2>/dev/null || true)
+
+          if [ -z "$DIFF" ]; then
+            echo "✅ No code changes to review." > /tmp/review_comment.txt
+            exit 0
+          fi
+
+          # Truncate if too large for DeepSeek context
+          if [ ${#DIFF} -gt 60000 ]; then
+            DIFF="${DIFF:0:60000}"
+          fi
+
+          # Save diff and file list to temp files
+          echo "$DIFF" > /tmp/pr_diff.txt
+          echo "$FILES" > /tmp/pr_files.txt
+
+          # Build JSON payload using jq with rawfile to avoid escaping issues
+          jq -n \
+            --rawfile diff /tmp/pr_diff.txt \
+            --rawfile files /tmp/pr_files.txt '{
+            model: "deepseek-chat",
+            max_tokens: 2000,
+            temperature: 0.3,
+            messages: [
+              {
+                role: "system",
+                content: "You are a senior code reviewer. Review the git diff and list issues. For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say ✅ No significant issues found."
+              },
+              {
+                role: "user",
+                content: ("Files changed:\n" + $files + "\n\nDiff:\n```diff\n" + $diff + "\n```")
+              }
+            ]
+          }' > /tmp/payload.json
+
+          # Call DeepSeek API
+          RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+            -d @/tmp/payload.json)
+
+          # Extract comment from response
+          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "❌ API error"')
+
+          # Save to file for next step
+          echo "$COMMENT" > /tmp/review_comment.txt
+
+      - name: Post comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT=$(cat /tmp/review_comment.txt)
+
+          if [ -n "$COMMENT" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "## 🤖 DeepSeek Code Review
+
+          $COMMENT
+
+          ---
+          *Powered by DeepSeek AI*"
+          fi

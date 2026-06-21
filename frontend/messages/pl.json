@@ -792,6 +792,10 @@
     "errorTitle": "Błąd",
     "error": "Nie udało się anulować sesji. Spróbuj ponownie później.",
     "invalidLink": "Nieprawidłowy link",
-    "invalidLinkDescription": "Link do anulowania jest nieprawidłowy lub wygasł."
+    "invalidLinkDescription": "Link do anulowania jest nieprawidłowy lub wygasł.",
+    "checkingLink": "Sprawdzanie linku...",
+    "checkingLinkDescription": "Proszę czekać, weryfikujemy link do anulowania.",
+    "expiredLink": "Link wygasł",
+    "deadlinePassed": "Czas na anulowanie minął"
   }
 }
