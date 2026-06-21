@@ -35,6 +35,14 @@ export interface ManualBookingDetails {
   price?: number;
 }
 
+export interface ClientAcceptedManualBookingDetails {
+  clientName: string;
+  date: string;
+  time: string;
+  duration: number;
+  price?: number;
+}
+
 export interface InstructorBookingNotificationDetails {
   clientName: string;
   clientEmail?: string;

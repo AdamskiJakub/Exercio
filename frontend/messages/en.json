@@ -791,6 +791,10 @@
     "errorTitle": "Error",
     "error": "Failed to cancel the session. Please try again later.",
     "invalidLink": "Invalid Link",
-    "invalidLinkDescription": "The cancellation link is invalid or has expired."
+    "invalidLinkDescription": "The cancellation link is invalid or has expired.",
+    "checkingLink": "Checking cancellation link...",
+    "checkingLinkDescription": "Please wait while we verify your cancellation link.",
+    "expiredLink": "Link Expired",
+    "deadlinePassed": "Cancellation Deadline Passed"
   }
 }

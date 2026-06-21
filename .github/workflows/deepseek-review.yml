@@ -26,4 +26,5 @@ jobs:
           DEEPSEEK_BASE_URL: "https://api.deepseek.com"
           MODEL: "deepseek-chat"
           LANGUAGE: "English"
+          MAX_FILE_PER_PR: "100"
           PATH_TO_EXCLUDE: "**/pnpm-lock.yaml, **/node_modules/**, **/*.json, **/*.md"

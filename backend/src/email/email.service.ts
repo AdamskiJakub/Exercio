@@ -8,6 +8,7 @@ import {
   InstructorBookingNotificationDetails,
   CancellationByClientDetails,
   CancellationByInstructorDetails,
+  ClientAcceptedManualBookingDetails,
 } from './email.types';
 
 import {
@@ -124,12 +125,36 @@ export class EmailService {
     return this.sendEmail(email, texts.title, html);
   }
 
-  async sendManualBookingConfirmationGuest(
+  async sendManualBookingCreatedGuest(
     email: string,
     language: Language,
     details: BookingDetails,
+    cancellationUrl: string,
+  ) {
+    const texts = INFO_EMAIL_TEXTS.manualBookingCreatedGuest[language];
+    const html = buildBookingTemplate(texts, details, cancellationUrl);
+    return this.sendEmail(email, texts.title, html);
+  }
+
+  async sendManualBookingCreatedToClient(
+    email: string,
+    language: Language,
+    details: BookingDetails,
+    dashboardUrl: string,
+    cancelLink?: string,
   ) {
     const texts = INFO_EMAIL_TEXTS.manualBooking[language];
+    const textsWithDashboard = { ...texts, dashboardUrl };
+    const html = buildBookingTemplate(textsWithDashboard, details, cancelLink);
+    return this.sendEmail(email, texts.title, html);
+  }
+
+  async sendClientAcceptedManualBooking(
+    email: string,
+    language: Language,
+    details: ClientAcceptedManualBookingDetails,
+  ) {
+    const texts = INFO_EMAIL_TEXTS.clientAcceptedManualBooking[language];
     const html = buildInfoTemplate(texts, details);
     return this.sendEmail(email, texts.title, html);
   }

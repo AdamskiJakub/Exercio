@@ -102,6 +102,7 @@ model Booking {
   duration                   Int?
   endTime                    DateTime?
   isManualBlock              Boolean       @default(false)
+  isManualBooking            Boolean       @default(false)
   isShortNotice              Boolean       @default(false)
   price                      Float?
   startTime                  DateTime?
