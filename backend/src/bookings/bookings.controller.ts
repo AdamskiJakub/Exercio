@@ -101,7 +101,7 @@ export class BookingsController {
     @Query('token') token: string,
     @Query('language') language?: string,
   ) {
-    const lang = (language === 'en' ? 'en' : 'pl') as 'pl' | 'en';
+    const lang: Language = language === 'en' ? 'en' : 'pl';
     return this.bookingsService.validateCancellationToken(
       bookingId,
       token,

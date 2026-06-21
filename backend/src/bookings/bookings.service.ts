@@ -105,15 +105,19 @@ export class BookingsService {
     userId: string,
     language: Language = 'pl',
   ) {
-    return this.bookingQueryService.confirmBooking(bookingId, userId, language);
+    return this.bookingCreationService.confirmBooking(
+      bookingId,
+      userId,
+      language,
+    );
   }
 
   async completeBooking(bookingId: string, userId: string) {
-    return this.bookingQueryService.completeBooking(bookingId, userId);
+    return this.bookingCreationService.completeBooking(bookingId, userId);
   }
 
   async updateBookingNotes(userId: string, bookingId: string, notes: string) {
-    return this.bookingQueryService.updateBookingNotes(
+    return this.bookingCreationService.updateBookingNotes(
       userId,
       bookingId,
       notes,
