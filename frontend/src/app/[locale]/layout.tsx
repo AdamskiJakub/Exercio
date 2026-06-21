@@ -1,6 +1,6 @@
-import { routing } from '@/i18n/routing';
-import { getMessages } from 'next-intl/server';
-import { NextIntlClientProvider } from 'next-intl';
+import { routing } from "@/i18n/routing";
+import { getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -8,6 +8,7 @@ import { ReactQueryProvider } from "@/lib/react-query-provider";
 import { Toaster } from "@/components/toaster";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { CookieBanner } from "@/components/cookie-banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +22,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Trainly - Find Your Perfect Trainer",
-  description: "Marketplace for personal trainers, fitness instructors, and wellness professionals",
+  description:
+    "Marketplace for personal trainers, fitness instructors, and wellness professionals",
 };
 
 export function generateStaticParams() {
@@ -48,11 +50,10 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ReactQueryProvider>
             <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
+            <main className="flex-1">{children}</main>
             <Footer />
             <Toaster />
+            <CookieBanner />
           </ReactQueryProvider>
         </NextIntlClientProvider>
       </body>
