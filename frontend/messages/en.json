@@ -376,7 +376,7 @@
       "bio": "Bio",
       "bioPlaceholder": "Tell us about yourself, your experience, and your training philosophy...",
       "city": "City",
-      "cityPlaceholder": "e.g., Warsaw",
+      "cityPlaceholder": "Warszawa, Kraków, Gdańsk...",
       "location": "Full Location",
       "locationPlaceholder": "e.g., Warsaw, Mazovia, Poland",
       "locationHint": "Where do you conduct your sessions? (e.g., gym name, area, address)",

@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { useLocale, useTranslations } from 'next-intl';
-import { Input } from '@/components/ui/input';
+import { useLocale, useTranslations } from "next-intl";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useSpecializations, getSpecializationName } from '@/hooks/useConfig';
-import type { InstructorSearchBarProps } from './types';
+} from "@/components/ui/select";
+import { CityAutocomplete } from "@/components/ui/city-autocomplete";
+import { useSpecializations, getSpecializationName } from "@/hooks/useConfig";
+import type { InstructorSearchBarProps } from "./types";
 
 export function InstructorSearchBar({
   city,
@@ -20,41 +21,48 @@ export function InstructorSearchBar({
   onSpecializationChange,
   onSearchChange,
 }: InstructorSearchBarProps) {
-  const t = useTranslations('HomePage');
-  const tCommon = useTranslations('Common');
+  const t = useTranslations("HomePage");
+  const tCommon = useTranslations("Common");
   const locale = useLocale();
   const { specializations, loading } = useSpecializations();
 
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="flex-1">
-      <Input
-        type="text"
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        placeholder={t('hero.searchPlaceholder')}
-        aria-label={t('hero.searchLabel')}
-        className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white placeholder-slate-400 focus-visible:border-orange-500"
-      />
-    </div>
-      <div className="flex-1">
         <Input
           type="text"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={t("hero.searchPlaceholder")}
+          aria-label={t("hero.searchLabel")}
+          className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white placeholder:text-white focus-visible:border-orange-500"
+        />
+      </div>
+      <div className="flex-1">
+        <CityAutocomplete
           value={city}
-          onChange={(e) => onCityChange(e.target.value)}
-          placeholder={t('hero.citySearchPlaceholder')}
-          aria-label={t('hero.citySearchLabel')}
-          className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white placeholder-slate-400 focus-visible:border-orange-500"
+          onChange={onCityChange}
+          placeholder={t("hero.citySearchPlaceholder")}
         />
       </div>
 
       <div className="flex-1">
-        <Select value={specialization} onValueChange={onSpecializationChange} disabled={loading}>
+        <Select
+          value={specialization}
+          onValueChange={onSpecializationChange}
+          disabled={loading}
+        >
           <SelectTrigger
-            className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4"
-            aria-label={t('hero.specializationLabel')}
+            className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4 data-placeholder:text-white"
+            aria-label={t("hero.specializationLabel")}
           >
-            <SelectValue placeholder={loading ? tCommon('loading') : t('hero.specializationPlaceholder')} />
+            <SelectValue
+              placeholder={
+                loading
+                  ? tCommon("loading")
+                  : t("hero.specializationPlaceholder")
+              }
+            />
           </SelectTrigger>
           <SelectContent
             position="popper"
