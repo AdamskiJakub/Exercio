@@ -1,42 +1,60 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { InstructorSearchBar } from '@/components/instructors/instructor-search-bar';
-import { InstructorsPageHeader } from '@/components/instructors/page-header';
-import { FiltersSidebar } from '@/components/instructors/filters-sidebar';
-import { ResultsSection } from '@/components/instructors/results-section';
-import { useInstructorFilters } from '@/hooks/useInstructorFilters';
-import { useInstructors } from '@/hooks/useInstructors';
-import { applyClientSideFilters } from '@/lib/utils/client-side-filters';
-import { filterAndSortInstructors } from '@/lib/utils/instructor-filters';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { useTranslations } from 'next-intl';
+import { useMemo, useCallback } from "react";
+import { InstructorSearchBar } from "@/components/instructors/instructor-search-bar";
+import { InstructorsPageHeader } from "@/components/instructors/page-header";
+import { FiltersSidebar } from "@/components/instructors/filters-sidebar";
+import { ResultsSection } from "@/components/instructors/results-section";
+import { useInstructorFilters } from "@/hooks/useInstructorFilters";
+import { useInstructors } from "@/hooks/useInstructors";
+import { applyClientSideFilters } from "@/lib/utils/client-side-filters";
+import { filterAndSortInstructors } from "@/lib/utils/instructor-filters";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTranslations } from "next-intl";
+
+const PAGE_SIZE = 10;
 
 export default function InstructorsPage() {
-  const { filters, updateFilter, toggleTag, toggleGoal, clearFilters, hasActiveFilters } =
-    useInstructorFilters();
+  const {
+    filters,
+    updateFilter,
+    toggleTag,
+    toggleGoal,
+    clearFilters,
+    hasActiveFilters,
+  } = useInstructorFilters();
 
-  const t = useTranslations('InstructorsPage');
+  const t = useTranslations("InstructorsPage");
 
-  const { data: instructors, isLoading, error } = useInstructors({
-    city: filters.city,
-    specialization: filters.specialization,
-    tags: filters.tags,
-    goals: filters.goals,
-    priceMin: filters.priceMin,
-    priceMax: filters.priceMax,
-    minRating: filters.minRating,
-  });
+  const { instructors, total, page, totalPages, isLoading, error } =
+    useInstructors({
+      city: filters.city,
+      specialization: filters.specialization,
+      tags: filters.tags,
+      goals: filters.goals,
+      priceMin: filters.priceMin,
+      priceMax: filters.priceMax,
+      minRating: filters.minRating,
+      page: filters.page || 1,
+      limit: PAGE_SIZE,
+    });
 
   const filteredInstructors = useMemo(() => {
-    if (!instructors) return [];
     return applyClientSideFilters(instructors, filters);
   }, [instructors, filters]);
 
   // Apply sorting
   const sortedInstructors = useMemo(
     () => filterAndSortInstructors(filteredInstructors, filters),
-    [filteredInstructors, filters]
+    [filteredInstructors, filters],
+  );
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      updateFilter("page", newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [updateFilter],
   );
 
   return (
@@ -48,10 +66,12 @@ export default function InstructorsPage() {
           <InstructorSearchBar
             city={filters.city}
             specialization={filters.specialization}
-            search={filters.search || ''}
-            onCityChange={(city) => updateFilter('city', city)}
-            onSpecializationChange={(spec) => updateFilter('specialization', spec)}
-            onSearchChange={(search) => updateFilter('search', search)}
+            search={filters.search || ""}
+            onCityChange={(city) => updateFilter("city", city)}
+            onSpecializationChange={(spec) =>
+              updateFilter("specialization", spec)
+            }
+            onSearchChange={(search) => updateFilter("search", search)}
           />
         </div>
 
@@ -74,9 +94,7 @@ export default function InstructorsPage() {
           {error && (
             <div className="lg:col-span-3">
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-6">
-                <p className="text-red-400">
-                  {t('instructorsFailed')}
-                </p>
+                <p className="text-red-400">{t("instructorsFailed")}</p>
               </div>
             </div>
           )}
@@ -86,6 +104,10 @@ export default function InstructorsPage() {
               instructors={sortedInstructors}
               filters={filters}
               updateFilter={updateFilter}
+              total={total}
+              page={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
             />
           )}
         </div>

@@ -1,8 +1,22 @@
-import { Injectable, ConflictException, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorProfileDto } from './dto/create-instructor-profile.dto';
 import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto';
 import { StaticConfigService } from '../config/config.service';
+
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 interface InstructorFilters {
   city?: string;
@@ -12,6 +26,8 @@ interface InstructorFilters {
   // minRating?: number; // TODO: Implement when reviews/ratings are added
   priceMin?: number;
   priceMax?: number;
+  page?: number;
+  limit?: number;
 }
 
 @Injectable()
@@ -23,33 +39,33 @@ export class InstructorProfilesService {
     private configService: StaticConfigService,
   ) {}
 
-  async findAll(filters: InstructorFilters) {
+  async findAll(filters: InstructorFilters): Promise<PaginatedResult<any>> {
     const where: any = {
       isDraft: false,
     };
 
     if (filters.city) {
-      where.city = { 
-        contains: filters.city, 
-        mode: 'insensitive' 
+      where.city = {
+        contains: filters.city,
+        mode: 'insensitive',
       };
     }
 
     if (filters.specialization) {
-      where.specializations = { 
-        has: filters.specialization 
+      where.specializations = {
+        has: filters.specialization,
       };
     }
 
     if (filters.tags && filters.tags.length > 0) {
-      where.tags = { 
-        hasSome: filters.tags 
+      where.tags = {
+        hasSome: filters.tags,
       };
     }
 
     if (filters.goals && filters.goals.length > 0) {
-      where.goals = { 
-        hasSome: filters.goals 
+      where.goals = {
+        hasSome: filters.goals,
       };
     }
 
@@ -64,44 +80,67 @@ export class InstructorProfilesService {
       }
     }
 
-    const profiles = await this.prisma.instructorProfile.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            role: true,
+    // Pagination
+    const page = Math.max(1, filters.page || 1);
+    const limit = Math.min(100, Math.max(1, filters.limit || 20));
+    const skip = (page - 1) * limit;
+
+    const [profiles, total] = await Promise.all([
+      this.prisma.instructorProfile.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.instructorProfile.count({ where }),
+    ]);
 
-    const filteredProfiles = profiles.map(profile => {
-      const validSpecializations = profile.specializations.filter((spec) => 
-        this.configService.isValidSpecialization(spec)
+    const filteredProfiles = profiles.map((profile) => {
+      const validSpecializations = profile.specializations.filter((spec) =>
+        this.configService.isValidSpecialization(spec),
       );
-      
+
       // Ensure at least one valid specialization exists (primary is specializations[0])
       // If all are invalid, log warning but keep profile (UI will handle gracefully)
-      if (profile.specializations.length > 0 && validSpecializations.length === 0) {
-        this.logger.warn(`Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`);
+      if (
+        profile.specializations.length > 0 &&
+        validSpecializations.length === 0
+      ) {
+        this.logger.warn(
+          `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
+        );
       }
 
       return {
         ...profile,
         tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
         specializations: validSpecializations,
-        goals: profile.goals.filter((goal) => this.configService.isValidGoal(goal)),
+        goals: profile.goals.filter((goal) =>
+          this.configService.isValidGoal(goal),
+        ),
       };
     });
 
-    return filteredProfiles;
+    return {
+      data: filteredProfiles,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findByUsername(username: string) {
@@ -161,9 +200,11 @@ export class InstructorProfilesService {
       ...profile,
       tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
       specializations: profile.specializations.filter((spec) =>
-        this.configService.isValidSpecialization(spec)
+        this.configService.isValidSpecialization(spec),
       ),
-      goals: profile.goals.filter((goal) => this.configService.isValidGoal(goal)),
+      goals: profile.goals.filter((goal) =>
+        this.configService.isValidGoal(goal),
+      ),
       user: userInfo,
     };
   }
@@ -193,7 +234,9 @@ export class InstructorProfilesService {
       return profile;
     } catch (error) {
       if (error.code === 'P2002') {
-        throw new ConflictException('Instructor profile already exists for this user');
+        throw new ConflictException(
+          'Instructor profile already exists for this user',
+        );
       }
       throw error;
     }
@@ -218,7 +261,11 @@ export class InstructorProfilesService {
     });
   }
 
-  async update(profileId: string, userId: string, dto: UpdateInstructorProfileDto) {
+  async update(
+    profileId: string,
+    userId: string,
+    dto: UpdateInstructorProfileDto,
+  ) {
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: profileId },
     });
