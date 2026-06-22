@@ -563,7 +563,90 @@
   },
   "Contact": {
     "title": "Contact",
-    "comingSoon": "Page coming soon"
+    "comingSoon": "Page coming soon",
+    "heroTitle": "Need Help?",
+    "heroSubtitle": "Trainly connects people with trusted fitness professionals and makes finding the right trainer simple and transparent. Have a question, encountered a problem, or have an idea for improving the platform? We'd love to hear from you.",
+    "selectCategory": "Select a category",
+    "faqTitle": "Frequently Asked Questions",
+    "faqSubtitle": "Quick answers to common questions about Trainly",
+    "faq": {
+      "bookTrainer": {
+        "question": "How do I book a trainer?",
+        "answer": "Browse our trainer directory, find a trainer that matches your goals, and click \"Book a Session\" on their profile. Select your preferred date and time, then confirm your booking. The trainer will receive a notification and confirm your session."
+      },
+      "cancelBooking": {
+        "question": "Can I cancel a booking?",
+        "answer": "Yes, you can cancel a booking free of charge up to the specified notice period (usually 24 hours before the session). Go to your dashboard, find the booking, and click \"Cancel\". For guest bookings, use the cancellation link from your confirmation email."
+      },
+      "becomeTrainer": {
+        "question": "How do I become a trainer on Trainly?",
+        "answer": "Register as an instructor, complete your profile with your experience, specializations, and availability. Once published, clients can find and book you. Make sure to set up your booking preferences and calendar to start receiving sessions."
+      },
+      "profileNotVisible": {
+        "question": "Why can't I see my trainer profile?",
+        "answer": "Your profile needs to be published to be visible in search results. Go to your dashboard, edit your profile, and click \"Publish Profile\". Make sure all required fields are filled in before publishing."
+      },
+      "paymentMethods": {
+        "question": "What payment methods are available?",
+        "answer": "Trainers can accept various payment methods including cash, card payments, BLIK, and bank transfers. The available options are set by each trainer and displayed on their profile. Payment is arranged directly between you and the trainer."
+      },
+      "contactSupport": {
+        "question": "How can I contact Trainly support?",
+        "answer": "Use the contact form on this page to send us a message. Select the appropriate category so we can route your inquiry to the right team. We typically respond within 24 hours during business days."
+      }
+    },
+    "categories": {
+      "client": {
+        "title": "Client",
+        "description": "Booking issues, payments, cancellations and general support for clients.",
+        "topic1": "Booking & scheduling",
+        "topic2": "Payments & refunds",
+        "topic3": "Account support"
+      },
+      "trainer": {
+        "title": "Trainer",
+        "description": "Profile visibility, onboarding, and support for fitness professionals.",
+        "topic1": "Profile & visibility",
+        "topic2": "Onboarding help",
+        "topic3": "Trainer support"
+      },
+      "partner": {
+        "title": "Partnership",
+        "description": "Business inquiries, collaborations and media requests.",
+        "topic1": "Business inquiries",
+        "topic2": "Collaborations",
+        "topic3": "Media & PR"
+      },
+      "other": {
+        "title": "Other",
+        "description": "Something else? Select this category for general inquiries.",
+        "topic1": "General inquiry",
+        "topic2": "Feature request",
+        "topic3": "Report a bug"
+      }
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Your full name",
+      "nameRequired": "Name is required",
+      "nameInvalid": "Name can only contain letters",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "categoryRequired": "Category is required",
+      "message": "Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "messageMin": "Message must be at least 10 characters",
+      "messageMax": "Message must not exceed 2000 characters",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "successTitle": "Message Sent!",
+      "successDescription": "Thank you for reaching out. We'll get back to you as soon as possible. We usually respond within 24 hours.",
+      "errorGeneric": "Something went wrong. Please try again later."
+    }
   },
   "FAQ": {
     "title": "Frequently Asked Questions",
@@ -842,5 +925,11 @@
     "checkingLinkDescription": "Please wait while we verify your cancellation link.",
     "expiredLink": "Link Expired",
     "deadlinePassed": "Cancellation Deadline Passed"
+  },
+  "NotFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
+    "goHome": "Go Home",
+    "browseTrainers": "Browse Trainers"
   }
 }

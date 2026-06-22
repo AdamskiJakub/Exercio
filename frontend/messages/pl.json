@@ -563,7 +563,90 @@
   },
   "Contact": {
     "title": "Kontakt",
-    "comingSoon": "Strona w przygotowaniu"
+    "comingSoon": "Strona w przygotowaniu",
+    "heroTitle": "Potrzebujesz Pomocy?",
+    "heroSubtitle": "Trainly łączy ludzi z zaufanymi profesjonalistami fitness i sprawia, że znalezienie odpowiedniego trenera jest proste i przejrzyste. Masz pytanie, napotkałeś problem lub masz pomysł na ulepszenie platformy? Chętnie Cię wysłuchamy.",
+    "selectCategory": "Wybierz kategorię",
+    "faqTitle": "Najczęściej Zadawane Pytania",
+    "faqSubtitle": "Szybkie odpowiedzi na najczęstsze pytania dotyczące Trainly",
+    "faq": {
+      "bookTrainer": {
+        "question": "Jak zarezerwować trenera?",
+        "answer": "Przeglądaj katalog trenerów, znajdź trenera odpowiadającego Twoim celom i kliknij \"Zarezerwuj sesję\" na jego profilu. Wybierz preferowaną datę i godzinę, a następnie potwierdź rezerwację. Trener otrzyma powiadomienie i potwierdzi sesję."
+      },
+      "cancelBooking": {
+        "question": "Czy mogę anulować rezerwację?",
+        "answer": "Tak, możesz anulować rezerwację bezpłatnie w określonym terminie (zwykle 24 godziny przed sesją). Przejdź do panelu, znajdź rezerwację i kliknij \"Anuluj\". W przypadku rezerwacji gościnnych użyj linku anulowania z e-maila potwierdzającego."
+      },
+      "becomeTrainer": {
+        "question": "Jak zostać trenerem na Trainly?",
+        "answer": "Zarejestruj się jako instruktor, uzupełnij profil swoim doświadczeniem, specjalizacjami i dostępnością. Po opublikowaniu klienci będą mogli Cię znaleźć i rezerwować. Pamiętaj, aby skonfigurować preferencje rezerwacji i kalendarz."
+      },
+      "profileNotVisible": {
+        "question": "Dlaczego nie widzę swojego profilu trenera?",
+        "answer": "Twój profil musi być opublikowany, aby był widoczny w wynikach wyszukiwania. Przejdź do panelu, edytuj profil i kliknij \"Opublikuj profil\". Upewnij się, że wszystkie wymagane pola są wypełnione przed publikacją."
+      },
+      "paymentMethods": {
+        "question": "Jakie metody płatności są dostępne?",
+        "answer": "Trenerzy mogą akceptować różne metody płatności, w tym gotówkę, płatności kartą, BLIK i przelewy bankowe. Dostępne opcje są ustawiane przez każdego trenera i wyświetlane na jego profilu. Płatność jest ustalana bezpośrednio między Tobą a trenerem."
+      },
+      "contactSupport": {
+        "question": "Jak mogę skontaktować się z pomocą Trainly?",
+        "answer": "Użyj formularza kontaktowego na tej stronie, aby wysłać nam wiadomość. Wybierz odpowiednią kategorię, abyśmy mogli skierować Twoje zapytanie do odpowiedniego zespołu. Odpowiadamy zwykle w ciągu 24 godzin w dni robocze."
+      }
+    },
+    "categories": {
+      "client": {
+        "title": "Klient",
+        "description": "Problemy z rezerwacją, płatnościami, anulowaniem i ogólne wsparcie dla klientów.",
+        "topic1": "Rezerwacje i harmonogram",
+        "topic2": "Płatności i zwroty",
+        "topic3": "Wsparcie konta"
+      },
+      "trainer": {
+        "title": "Trener",
+        "description": "Widoczność profilu, proces wdrożenia i wsparcie dla profesjonalistów fitness.",
+        "topic1": "Profil i widoczność",
+        "topic2": "Pomoc przy wdrożeniu",
+        "topic3": "Wsparcie trenera"
+      },
+      "partner": {
+        "title": "Partnerstwo",
+        "description": "Zapytania biznesowe, współpraca i zapytania medialne.",
+        "topic1": "Zapytania biznesowe",
+        "topic2": "Współpraca",
+        "topic3": "Media i PR"
+      },
+      "other": {
+        "title": "Inne",
+        "description": "Coś innego? Wybierz tę kategorię dla ogólnych zapytań.",
+        "topic1": "Ogólne zapytanie",
+        "topic2": "Propozycja funkcji",
+        "topic3": "Zgłoś błąd"
+      }
+    },
+    "form": {
+      "name": "Imię i nazwisko",
+      "namePlaceholder": "Twoje imię i nazwisko",
+      "nameRequired": "Imię i nazwisko jest wymagane",
+      "nameInvalid": "Imię i nazwisko może zawierać tylko litery",
+      "email": "Email",
+      "emailPlaceholder": "twoj@email.com",
+      "emailRequired": "Email jest wymagany",
+      "emailInvalid": "Nieprawidłowy format email",
+      "category": "Kategoria",
+      "categoryPlaceholder": "Wybierz kategorię",
+      "categoryRequired": "Kategoria jest wymagana",
+      "message": "Wiadomość",
+      "messagePlaceholder": "Opowiedz nam, jak możemy Ci pomóc...",
+      "messageMin": "Wiadomość musi mieć co najmniej 10 znaków",
+      "messageMax": "Wiadomość nie może przekraczać 2000 znaków",
+      "send": "Wyślij wiadomość",
+      "sending": "Wysyłanie...",
+      "successTitle": "Wiadomość wysłana!",
+      "successDescription": "Dziękujemy za kontakt. Odpowiemy najszybciej jak to możliwe. Zwykle odpowiadamy w ciągu 24 godzin.",
+      "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie później."
+    }
   },
   "FAQ": {
     "title": "Najczęściej Zadawane Pytania",
@@ -843,5 +926,11 @@
     "checkingLinkDescription": "Proszę czekać, weryfikujemy link do anulowania.",
     "expiredLink": "Link wygasł",
     "deadlinePassed": "Czas na anulowanie minął"
+  },
+  "NotFound": {
+    "title": "Strona Nie Znaleziona",
+    "description": "Strona, której szukasz, nie istnieje lub została przeniesiona. Pomóżmy Ci wrócić na właściwą ścieżkę.",
+    "goHome": "Strona Główna",
+    "browseTrainers": "Przeglądaj Trenerów"
   }
 }

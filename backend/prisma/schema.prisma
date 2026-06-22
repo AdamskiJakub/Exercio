@@ -193,6 +193,17 @@ model VerificationCode {
   @@map("verification_codes")
 }
 
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  category  String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
 enum UserRole {
   CLIENT
   INSTRUCTOR

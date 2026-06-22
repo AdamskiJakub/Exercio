@@ -223,6 +223,51 @@ ${actionHtml}
   );
 };
 
+export const buildContactEmailTemplate = (data: {
+  name: string;
+  email: string;
+  category: string;
+  message: string;
+}): string => {
+  const categoryLabels: Record<string, string> = {
+    client: 'Klient / Client',
+    trainer: 'Trener / Trainer',
+    partner: 'Partnerstwo / Partnership',
+    other: 'Inne / Other',
+  };
+  const categoryLabel = categoryLabels[data.category] || data.category;
+
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<div style="background:#334155;border-radius:8px;padding:20px;margin-bottom:20px;">
+<table role="presentation" style="width:100%;border-collapse:collapse;color:#cbd5e1;font-size:14px;">
+<tr>
+  <td style="padding:8px 0;color:#94a3b8;width:120px;">Imię / Name</td>
+  <td style="padding:8px 0;color:#f1f5f9;font-weight:600;">${escapeHtml(data.name)}</td>
+</tr>
+<tr>
+  <td style="padding:8px 0;color:#94a3b8;">Email</td>
+  <td style="padding:8px 0;color:#f1f5f9;"><a href="mailto:${escapeHtml(data.email)}" style="color:#f97316;">${escapeHtml(data.email)}</a></td>
+</tr>
+<tr>
+  <td style="padding:8px 0;color:#94a3b8;">Kategoria</td>
+  <td style="padding:8px 0;color:#f1f5f9;">${escapeHtml(categoryLabel)}</td>
+</tr>
+</table>
+</div>
+<div style="background:#334155;border-radius:8px;padding:20px;">
+<h3 style="margin:0 0 12px;color:#f1f5f9;font-size:16px;">Wiadomość / Message</h3>
+<p style="margin:0;color:#cbd5e1;font-size:14px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(data.message)}</p>
+</div>
+</td>
+</tr>
+`,
+    'Otrzymano z formularza kontaktowego Trainly',
+  );
+};
+
 export const buildCancellationTemplate = (
   content: CancellationEmailContent,
   details: { date: string; time: string; reason?: string },
