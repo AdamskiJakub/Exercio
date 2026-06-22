@@ -81,6 +81,13 @@ export class EmailService {
     }
   }
 
+  /**
+   * Send a raw email - used by other modules (e.g., Contact)
+   */
+  async sendRawEmail(to: string, subject: string, html: string) {
+    return this.sendEmail(to, subject, html);
+  }
+
   async sendVerificationCode(
     email: string,
     code: string,

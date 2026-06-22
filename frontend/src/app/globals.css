@@ -132,34 +132,46 @@
 /* 🎨 TRAINLY CUSTOM COLORS */
 @layer theme {
   :root {
-    --color-trainly-orange: oklch(0.70 0.18 35);
+    --color-trainly-orange: oklch(0.7 0.18 35);
     --color-trainly-coral: oklch(0.75 0.15 40);
     --color-trainly-blue: oklch(0.45 0.15 250);
-    --color-trainly-purple: oklch(0.60 0.18 290);
+    --color-trainly-purple: oklch(0.6 0.18 290);
     --color-trainly-green: oklch(0.65 0.18 150);
   }
 
   .dark {
-    --color-trainly-orange: oklch(0.75 0.20 35);
-    --color-trainly-coral: oklch(0.80 0.18 40);
+    --color-trainly-orange: oklch(0.75 0.2 35);
+    --color-trainly-coral: oklch(0.8 0.18 40);
     --color-trainly-blue: oklch(0.55 0.18 250);
-    --color-trainly-purple: oklch(0.68 0.20 290);
-    --color-trainly-green: oklch(0.70 0.20 150);
+    --color-trainly-purple: oklch(0.68 0.2 290);
+    --color-trainly-green: oklch(0.7 0.2 150);
   }
 }
 
 /* 🎯 TRAINLY UTILITY CLASSES */
 @layer utilities {
   .gradient-trainly-primary {
-    background: linear-gradient(to right, var(--color-trainly-orange), var(--color-trainly-coral));
+    background: linear-gradient(
+      to right,
+      var(--color-trainly-orange),
+      var(--color-trainly-coral)
+    );
   }
-  
+
   .gradient-trainly-premium {
-    background: linear-gradient(to right, var(--color-trainly-purple), var(--color-trainly-blue));
+    background: linear-gradient(
+      to right,
+      var(--color-trainly-purple),
+      var(--color-trainly-blue)
+    );
   }
-  
+
   .text-gradient-trainly {
-    background: linear-gradient(to right, var(--color-trainly-orange), var(--color-trainly-purple));
+    background: linear-gradient(
+      to right,
+      var(--color-trainly-orange),
+      var(--color-trainly-purple)
+    );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -169,7 +181,8 @@
 /* 🎬 TRAINLY ANIMATIONS */
 @layer utilities {
   @keyframes pulse-slow {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 0.4;
       transform: scale(1);
     }
@@ -184,7 +197,8 @@
   }
 
   @keyframes float-word {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0) scale(1);
       opacity: 0.3;
     }
@@ -196,6 +210,15 @@
 
   .animate-float-word {
     animation: float-word 4s ease-in-out infinite;
+  }
+
+  /* Hide scrollbar for horizontal scroll containers */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }
 

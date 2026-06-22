@@ -13,6 +13,7 @@ import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { StaticConfigModule } from './config/config.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -22,10 +23,12 @@ import { StaticConfigModule } from './config/config.module';
     ScheduleModule.forRoot(),
     // Global rate limit: 100 req/min allows normal browsing/polling
     // Stricter limits on write operations (e.g., booking creation: 3/10min)
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     PrismaModule,
     AuthModule,
     InstructorProfilesModule,
@@ -34,6 +37,7 @@ import { StaticConfigModule } from './config/config.module';
     BookingsModule,
     AvailabilityModule,
     StaticConfigModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [
