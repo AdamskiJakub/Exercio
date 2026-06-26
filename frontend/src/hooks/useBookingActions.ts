@@ -118,6 +118,7 @@ export function useCompleteBooking() {
         queryKey: ["bookings", "my", "instructor"],
       });
       queryClient.invalidateQueries({ queryKey: ["availableSlots"] });
+      queryClient.invalidateQueries({ queryKey: ["reviews", "pending"] });
       toast.success(t("bookingCompleted") || "Booking marked as completed");
     },
     onError: (error: any) => {

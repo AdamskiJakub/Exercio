@@ -112,9 +112,10 @@ model Booking {
   acknowledgedAt             DateTime?
   hiddenFromClient           Boolean       @default(false)
   
-  // NOWE ZMIENNE Z TOKENAMI:
   cancellationToken          String?       @unique
   cancellationTokenExpiresAt DateTime?
+  reviewToken                String?       @unique
+  reviewTokenExpiresAt       DateTime?
   
   client                     User?         @relation("ClientBookings", fields: [clientId], references: [id], onDelete: Cascade)
   instructorUser             User          @relation("InstructorBookings", fields: [instructorId], references: [id], onDelete: Cascade, map: "bookings_instructor_user_fkey")
@@ -126,23 +127,27 @@ model Booking {
   @@index([startTime])
   @@index([status])
   
-  // NOWE INDEKSY DLA TOKENÓW:
   @@index([cancellationToken])
   @@index([cancellationTokenExpiresAt])
+  @@index([reviewToken])
+  @@index([reviewTokenExpiresAt])
   @@map("bookings")
 }
 
 model Review {
-  id        String   @id @default(uuid())
-  bookingId String   @unique
-  userId    String
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+  id              String   @id @default(uuid())
+  bookingId       String   @unique
+  userId          String?                          // nullable for guest reviews
+  rating          Int                              // 1-5
+  comment         String?                          // required for 1-3 stars, optional for 4-5
+  lowRatingReason String?                          // "no-show" | "unprofessional" | "not-as-described" | "other"
+  isGuestReview   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id])
 
+  @@index([userId])
   @@map("reviews")
 }
 

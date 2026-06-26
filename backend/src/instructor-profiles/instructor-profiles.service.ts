@@ -23,7 +23,7 @@ interface InstructorFilters {
   specialization?: string;
   tags?: string[];
   goals?: string[];
-  // minRating?: number; // TODO: Implement when reviews/ratings are added
+  minRating?: number;
   priceMin?: number;
   priceMax?: number;
   page?: number;
@@ -108,31 +108,78 @@ export class InstructorProfilesService {
       this.prisma.instructorProfile.count({ where }),
     ]);
 
-    const filteredProfiles = profiles.map((profile) => {
-      const validSpecializations = profile.specializations.filter((spec) =>
-        this.configService.isValidSpecialization(spec),
-      );
+    // If minRating filter is set, fetch review stats for all returned profiles
+    let profileIdsToFilter: Set<string> | null = null;
+    if (filters.minRating !== undefined) {
+      const profileIds = profiles.map((p) => p.id);
+      const reviewsStats = await this.prisma.review.findMany({
+        where: {
+          booking: {
+            instructorId: { in: profileIds },
+          },
+        },
+        select: {
+          booking: {
+            select: { instructorId: true },
+          },
+          rating: true,
+        },
+      });
 
-      // Ensure at least one valid specialization exists (primary is specializations[0])
-      // If all are invalid, log warning but keep profile (UI will handle gracefully)
-      if (
-        profile.specializations.length > 0 &&
-        validSpecializations.length === 0
-      ) {
-        this.logger.warn(
-          `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
-        );
+      // Aggregate ratings per instructor
+      const ratingMap = new Map<string, { sum: number; count: number }>();
+      for (const review of reviewsStats) {
+        const instrId = review.booking.instructorId;
+        const entry = ratingMap.get(instrId) || { sum: 0, count: 0 };
+        entry.sum += review.rating;
+        entry.count++;
+        ratingMap.set(instrId, entry);
       }
 
-      return {
-        ...profile,
-        tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
-        specializations: validSpecializations,
-        goals: profile.goals.filter((goal) =>
-          this.configService.isValidGoal(goal),
-        ),
-      };
-    });
+      // Filter profiles that meet the minRating threshold (need at least 5 reviews)
+      profileIdsToFilter = new Set(
+        profiles
+          .filter((p) => {
+            const stats = ratingMap.get(p.id);
+            if (!stats || stats.count < 5) return false;
+            return stats.sum / stats.count >= filters.minRating!;
+          })
+          .map((p) => p.id),
+      );
+    }
+
+    const filteredProfiles = profiles
+      .filter((profile) => {
+        if (profileIdsToFilter === null) return true;
+        return profileIdsToFilter.has(profile.id);
+      })
+      .map((profile) => {
+        const validSpecializations = profile.specializations.filter((spec) =>
+          this.configService.isValidSpecialization(spec),
+        );
+
+        // Ensure at least one valid specialization exists (primary is specializations[0])
+        // If all are invalid, log warning but keep profile (UI will handle gracefully)
+        if (
+          profile.specializations.length > 0 &&
+          validSpecializations.length === 0
+        ) {
+          this.logger.warn(
+            `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
+          );
+        }
+
+        return {
+          ...profile,
+          tags: profile.tags.filter((tag) =>
+            this.configService.isValidTag(tag),
+          ),
+          specializations: validSpecializations,
+          goals: profile.goals.filter((goal) =>
+            this.configService.isValidGoal(goal),
+          ),
+        };
+      });
 
     return {
       data: filteredProfiles,

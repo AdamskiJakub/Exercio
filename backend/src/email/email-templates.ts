@@ -4,6 +4,7 @@ import {
   InfoEmailContent,
   PasswordResetEmailContent,
   VerificationEmailContent,
+  ReviewInvitationEmailContent,
   BuildInfoDetails,
 } from './email.types';
 
@@ -283,6 +284,34 @@ ${detailsTable(`
 <tr><td style="padding:6px 0;">${content.timeLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.time)}</td></tr>
 ${details.reason ? `<tr><td style="padding:6px 0;">${content.reasonLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.reason)}</td></tr>` : ''}
 `)}
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+/**
+ * Review invitation template - used for guest users (no account).
+ * Registered users see review prompts in their dashboard instead.
+ */
+export const buildReviewInvitationTemplate = (
+  content: ReviewInvitationEmailContent,
+  reviewUrl: string,
+): string => {
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;">${content.subtitle}</p>
+<div style="background:#334155;border-radius:8px;padding:20px;margin:20px 0;">
+<table role="presentation" style="width:100%;border-collapse:collapse;color:#cbd5e1;font-size:14px;">
+<tr><td style="padding:6px 0;color:#94a3b8;">Instruktor</td><td align="right" style="color:#f1f5f9;font-weight:600;">${escapeHtml(content.instructorName)}</td></tr>
+</table>
+</div>
+<p style="color:#cbd5e1;font-size:14px;margin-bottom:20px;">${content.reviewButton}</p>
+<a href="${reviewUrl}" style="display:inline-block;background:linear-gradient(135deg,#f97316 0%,#dc2626 100%);color:white;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:16px;">${content.reviewButton}</a>
 </td>
 </tr>
 `,

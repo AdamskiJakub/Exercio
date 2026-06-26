@@ -17,6 +17,7 @@ import {
 import { useTranslations, useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { PortalTooltip } from "@/components/ui/portal-tooltip";
 import {
   useConfirmBooking,
   useCompleteBooking,
@@ -53,13 +54,13 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
   const getStatusIcon = (status: Booking["status"]) => {
     switch (status) {
       case "CONFIRMED":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
       case "PENDING":
-        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+        return <AlertCircle className="w-5 h-5 text-amber-500" />;
       case "CANCELLED":
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-5 h-5 text-rose-500" />;
       case "COMPLETED":
-        return <CheckCircle className="w-5 h-5 text-blue-500" />;
+        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
       default:
         return null;
     }
@@ -83,13 +84,13 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
   const getStatusColor = (status: Booking["status"]) => {
     switch (status) {
       case "CONFIRMED":
-        return "bg-green-500/10 text-green-500";
+        return "bg-emerald-500/10 text-emerald-500";
       case "PENDING":
-        return "bg-yellow-500/10 text-yellow-500 justify-center md:w-full";
+        return "bg-amber-500/10 text-amber-500 justify-center md:w-full";
       case "CANCELLED":
-        return "bg-red-500/10 text-red-500";
+        return "bg-rose-500/10 text-rose-500";
       case "COMPLETED":
-        return "bg-blue-500/10 text-blue-500";
+        return "bg-emerald-500/10 text-emerald-500";
       default:
         return "bg-slate-500/10 text-slate-500";
     }
@@ -155,6 +156,13 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
             role === "instructor" && booking.status === "PENDING";
           const canComplete =
             role === "instructor" && booking.status === "CONFIRMED";
+          const devBypass =
+            process.env.NEXT_PUBLIC_DEV_BYPASS_SESSION_TIME === "true";
+          const isBeforeEndTime =
+            canComplete &&
+            booking.endTime &&
+            new Date() < new Date(booking.endTime) &&
+            !devBypass;
           const canCancel =
             booking.status === "PENDING" || booking.status === "CONFIRMED";
 
@@ -265,15 +273,39 @@ export function BookingsList({ bookings, role }: BookingsListProps) {
                         </>
                       )}
                       {canComplete && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleCompleteClick(booking)}
-                          disabled={completeBooking.isPending}
-                          className="bg-blue-500 hover:bg-blue-600 text-white h-8 px-3 w-full"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          {t("completeBooking")}
-                        </Button>
+                        <div className="relative">
+                          <Button
+                            size="sm"
+                            onClick={() => handleCompleteClick(booking)}
+                            disabled={
+                              isBeforeEndTime || completeBooking.isPending
+                            }
+                            className={cn(
+                              "h-8 px-3 w-full",
+                              isBeforeEndTime
+                                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+                                : "bg-blue-500 hover:bg-blue-600 text-white",
+                            )}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            {t("completeBooking")}
+                          </Button>
+                          {isBeforeEndTime && (
+                            <PortalTooltip
+                              content={t("completeAfterEndTime", {
+                                date: format(
+                                  new Date(booking.endTime),
+                                  "d MMMM",
+                                  { locale: dateLocale },
+                                ),
+                                time: format(
+                                  new Date(booking.endTime),
+                                  "HH:mm",
+                                ),
+                              })}
+                            />
+                          )}
+                        </div>
                       )}
                     </div>
                   )}

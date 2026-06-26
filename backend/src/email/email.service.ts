@@ -16,6 +16,7 @@ import {
   buildCancellationTemplate,
   buildInfoTemplate,
   buildPasswordResetTemplate,
+  buildReviewInvitationTemplate,
   buildVerificationTemplate,
 } from './email-templates';
 
@@ -24,6 +25,7 @@ import {
   CANCELLATION_TEXTS,
   INFO_EMAIL_TEXTS,
   PASSWORD_RESET_TEXTS,
+  REVIEW_INVITATION_TEXTS,
   VERIFICATION_TEXTS,
 } from './email.translations';
 
@@ -193,6 +195,22 @@ export class EmailService {
   ) {
     const texts = CANCELLATION_TEXTS.byClient[language];
     const html = buildCancellationTemplate(texts, details);
+    return this.sendEmail(email, texts.title, html);
+  }
+
+  /**
+   * Send review invitation email to a guest user (no account).
+   * Registered users see review prompts in their dashboard instead.
+   */
+  async sendReviewInvitation(
+    email: string,
+    language: Language,
+    instructorName: string,
+    reviewUrl: string,
+  ) {
+    const texts = REVIEW_INVITATION_TEXTS[language];
+    const textsWithInstructor = { ...texts, instructorName };
+    const html = buildReviewInvitationTemplate(textsWithInstructor, reviewUrl);
     return this.sendEmail(email, texts.title, html);
   }
 }

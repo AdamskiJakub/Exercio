@@ -113,3 +113,15 @@ export interface CancellationEmailContent {
   reasonLabel: string;
   footer: string;
 }
+
+export interface ReviewInvitationEmailContent {
+  title: string;
+  subtitle: string;
+  instructorName: string;
+  dateLabel: string;
+  timeLabel: string;
+  durationLabel: string;
+  minutes: string;
+  reviewButton: string;
+  footer: string;
+}
