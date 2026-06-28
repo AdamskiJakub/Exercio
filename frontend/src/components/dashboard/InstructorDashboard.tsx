@@ -2,6 +2,7 @@
 
 import { useMyInstructorProfile } from "@/hooks/useMyInstructorProfile";
 import { useMyBookings } from "@/hooks/useMyBookings";
+import type { Booking } from "@/hooks/useMyBookings";
 import {
   useInstructorReviews,
   useInstructorReviewStats,
@@ -11,8 +12,6 @@ import { useReviewFlow } from "@/hooks/useReviewFlow";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
-import { titleVariants } from "@/lib/animations";
 import { NAV_SOURCE } from "@/components/instructors/profile/types";
 import {
   Star,
@@ -25,18 +24,22 @@ import {
   Clock,
   FileText,
   Settings,
-  MessageSquare,
   Heart,
+  GraduationCap,
+  User,
 } from "lucide-react";
 import { getMediaUrl } from "@/lib/utils/media";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
 import { EmptyStateCard } from "./EmptyStateCard";
+import { DashboardHeader } from "./DashboardHeader";
+import { PendingReviewsSection } from "./PendingReviewsSection";
+import { BookingHistorySection } from "./BookingHistorySection";
 import { BookingsList } from "@/components/bookings/BookingsList";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { useState, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import { PaginationSection } from "@/components/instructors/pagination-section";
+import { useClearHistory } from "@/hooks/useClearHistory";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 export function InstructorDashboard() {
   const t = useTranslations("Dashboard.instructor");
@@ -52,7 +55,7 @@ export function InstructorDashboard() {
   const { data: pendingReviews, isLoading: pendingReviewsLoading } =
     usePendingReviews();
 
-  // Review flow state & handlers (shared with ClientDashboard)
+  // Review flow state & handlers
   const {
     reviewFormOpen,
     selectedBookingForReview,
@@ -62,13 +65,10 @@ export function InstructorDashboard() {
     handleReviewClose,
   } = useReviewFlow();
 
-  // Pagination for past bookings
-  const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 5;
+  const clearHistory = useClearHistory();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Filter upcoming bookings (pending or confirmed, in the future)
-  // NOTE: useMemo must be called BEFORE any early return to avoid
-  // "Rendered more hooks than during the previous render" error
   const now = useMemo(() => new Date(), []);
   const upcomingBookings = useMemo(
     () =>
@@ -80,7 +80,26 @@ export function InstructorDashboard() {
     [bookings, now],
   );
 
-  // Client-side bookings
+  // Client-side bookings (instructor as client)
+  const upcomingClientBookings = useMemo(
+    () =>
+      clientBookings?.filter(
+        (booking) =>
+          (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
+          new Date(booking.startTime) > now,
+      ) || [],
+    [clientBookings, now],
+  );
+
+  const pastInstructorBookings = useMemo(
+    () =>
+      bookings?.filter(
+        (booking) =>
+          booking.status === "COMPLETED" || booking.status === "CANCELLED",
+      ) || [],
+    [bookings],
+  );
+
   const pastClientBookings = useMemo(
     () =>
       clientBookings?.filter(
@@ -94,12 +113,6 @@ export function InstructorDashboard() {
     return <LoadingSpinner />;
   }
 
-  const paginatedPastBookings = pastClientBookings.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  );
-  const totalPages = Math.ceil(pastClientBookings.length / ITEMS_PER_PAGE);
-
   const pendingReviewCount = pendingReviews?.length || 0;
 
   const stats = {
@@ -109,75 +122,41 @@ export function InstructorDashboard() {
     activeClients: 0, // TODO: Get from bookings
   };
 
+  const getInstructorName = (booking: Booking) => {
+    return booking.instructorUser?.firstName
+      ? `${booking.instructorUser.firstName} ${booking.instructorUser.lastName || ""}`.trim()
+      : booking.instructorUser?.email || "Instructor";
+  };
+
   return (
     <div className="space-y-4">
-      {/* Welcome Header - Clean Design with Animation */}
-      <div className="text-center space-y-6 py-8">
-        {profile?.photoUrl && (
-          <motion.div
-            className="flex justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <img
-              src={getMediaUrl(profile.photoUrl)}
-              alt="Profile"
-              className="w-32 h-32 rounded-full object-cover border-4 border-slate-700 shadow-2xl"
-            />
-          </motion.div>
-        )}
-        <div className="space-y-3">
-          <motion.h1
-            variants={titleVariants}
-            initial="hidden"
-            animate="visible"
-            className="text-5xl md:text-6xl font-bold text-gradient-trainly"
-          >
-            {t("welcomeBack")},{" "}
-            {profile?.user?.firstName ||
-              profile?.user?.username ||
-              "Instructor"}
-            !
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto"
-          >
-            {t("manageProfile")}
-          </motion.p>
-        </div>
-        <motion.div
-          className="flex flex-wrap items-center justify-center gap-3 pt-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-        >
-          <Link
-            href="/dashboard/profile/edit"
-            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
-          >
-            <Edit className="w-5 h-5" />
-            {t("editProfile")}
-          </Link>
-          <Link
-            href="/dashboard/settings"
-            className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
-          >
-            <Settings className="w-5 h-5" />
-            {t("accountSettings")}
-          </Link>
-          <Link
-            href="/dashboard/calendar"
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
-          >
-            <Clock className="w-5 h-5" />
-            {t("calendar")}
-          </Link>
-        </motion.div>
-      </div>
+      {/* Welcome Header */}
+      <DashboardHeader
+        greeting={`${t("welcomeBack")}, ${profile?.user?.firstName || profile?.user?.username || "Instructor"}!`}
+        subtitle={t("manageProfile")}
+        avatarUrl={profile?.photoUrl ? getMediaUrl(profile.photoUrl) : null}
+        actionLinks={[
+          {
+            href: "/dashboard/profile/edit",
+            icon: <Edit className="w-5 h-5" />,
+            label: t("editProfile"),
+            className:
+              "px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg",
+          },
+          {
+            href: "/dashboard/settings",
+            icon: <Settings className="w-5 h-5" />,
+            label: t("accountSettings"),
+          },
+          {
+            href: "/dashboard/calendar",
+            icon: <Clock className="w-5 h-5" />,
+            label: t("calendar"),
+            className:
+              "px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg",
+          },
+        ]}
+      />
 
       {/* Profile Status */}
       {profile && (
@@ -298,8 +277,8 @@ export function InstructorDashboard() {
 
       {/* My Trainings Section — instructor as client */}
       <div className="pt-6">
-        <div className="flex items-center gap-3 mb-4">
-          <Heart className="w-6 h-6 text-pink-500" />
+        <div className="flex items-center justify-center gap-3 mb-4 text-center">
+          <Heart className="w-6 h-6 text-pink-500 shrink-0" />
           <h2 className="text-2xl font-bold text-white">{t("myTrainings")}</h2>
           <span className="text-sm text-slate-400">
             — {t("myTrainingsDescription")}
@@ -308,43 +287,41 @@ export function InstructorDashboard() {
 
         {/* Review Banner */}
         {pendingReviewCount > 0 && pendingReviews && pendingReviews[0] && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4 mb-4 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <Star className="w-6 h-6 text-amber-400" />
-              <div>
-                <p className="text-white font-medium">
-                  {t("reviewBannerTitle", {
-                    count: pendingReviewCount,
-                  })}
-                </p>
-                <p className="text-sm text-slate-400">
-                  {pendingReviewCount}{" "}
-                  {pendingReviewCount === 1
-                    ? "session"
-                    : t("reviewCompletedSessions")}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() =>
-                handleOpenReview(
-                  pendingReviews[0].bookingId,
-                  pendingReviews[0].instructorName,
-                  0,
-                )
-              }
-              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all hover:scale-105 text-sm"
-            >
-              {t("reviewBannerAction")}
-            </button>
-          </motion.div>
+          <PendingReviewsSection
+            pendingReviews={pendingReviews}
+            isLoading={false}
+            onOpenReview={handleOpenReview}
+            t={t}
+            variant="instructor"
+          />
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Upcoming Sessions as Client */}
+          <div id="my-client-upcoming" className="scroll-mt-20">
+            <DashboardCard
+              icon={Calendar}
+              iconColor="text-pink-500"
+              iconBgColor="bg-pink-500/10"
+              title={t("myUpcomingSessions")}
+              delay={7}
+            >
+              {clientBookingsLoading ? (
+                <div className="flex justify-center py-8">
+                  <LoadingSpinner />
+                </div>
+              ) : upcomingClientBookings.length > 0 ? (
+                <BookingsList bookings={upcomingClientBookings} role="client" />
+              ) : (
+                <EmptyStateCard
+                  icon={Calendar}
+                  title={t("noUpcomingSessions")}
+                  description={t("bookAsClientDescription")}
+                />
+              )}
+            </DashboardCard>
+          </div>
+
           {/* Pending Reviews */}
           <div id="my-pending-reviews" className="scroll-mt-20">
             <DashboardCard
@@ -354,162 +331,65 @@ export function InstructorDashboard() {
               title={t("pendingReviews")}
               delay={7}
             >
-              {pendingReviewsLoading ? (
-                <div className="flex justify-center py-8">
-                  <LoadingSpinner />
-                </div>
-              ) : pendingReviewCount > 0 ? (
-                <div className="space-y-2">
-                  {pendingReviews?.slice(0, 3).map((review) => (
-                    <div
-                      key={review.bookingId}
-                      className="flex items-center justify-between bg-slate-700/30 rounded-lg p-3 border border-slate-600/50"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-white truncate">
-                            {review.instructorName}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            {new Date(review.startTime).toLocaleDateString()}
-                            {review.serviceName && ` · ${review.serviceName}`}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() =>
-                          handleOpenReview(
-                            review.bookingId,
-                            review.instructorName,
-                          )
-                        }
-                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors shrink-0"
-                      >
-                        {t("leaveReview")}
-                      </button>
-                    </div>
-                  ))}
-                  {pendingReviewCount > 3 && (
-                    <p className="text-center text-xs text-slate-500">
-                      {t("moreReviews", {
-                        count: pendingReviewCount - 3,
-                      })}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <EmptyStateCard
-                  icon={Star}
-                  title={t("noPendingReviews")}
-                  description={t("noPendingReviewsDescription")}
-                />
-              )}
+              <PendingReviewsSection
+                pendingReviews={pendingReviews}
+                isLoading={pendingReviewsLoading}
+                onOpenReview={handleOpenReview}
+                t={t}
+                variant="instructor"
+              />
             </DashboardCard>
           </div>
 
-          {/* Booking History as Client */}
-          <div id="my-client-history" className="scroll-mt-20">
+          {/* Unified Booking History with tabs */}
+          <div id="my-client-history" className="scroll-mt-20 md:col-span-2">
             <DashboardCard
               icon={FileText}
               iconColor="text-slate-400"
               title={t("bookingHistory")}
               delay={8}
             >
-              {clientBookingsLoading ? (
-                <div className="flex justify-center py-8">
-                  <LoadingSpinner />
-                </div>
-              ) : pastClientBookings.length > 0 ? (
-                <div className="space-y-3">
-                  {paginatedPastBookings.map((booking) => {
-                    const isCompleted = booking.status === "COMPLETED";
-                    const needsReview =
-                      isCompleted &&
-                      pendingReviews?.some((pr) => pr.bookingId === booking.id);
-                    const instructorName = booking.instructorUser?.firstName
-                      ? `${booking.instructorUser.firstName} ${booking.instructorUser.lastName || ""}`.trim()
-                      : booking.instructorUser?.email || "Instructor";
-
-                    return (
-                      <div
-                        key={booking.id}
-                        className={cn(
-                          "bg-slate-800/50 rounded-lg p-4 border transition-colors",
-                          isCompleted
-                            ? "border-emerald-500/20 hover:border-emerald-500/40"
-                            : booking.status === "CANCELLED"
-                              ? "border-rose-500/20 hover:border-rose-500/40"
-                              : "border-slate-700/50 hover:border-slate-600",
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-white truncate">
-                              {instructorName}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              {new Date(booking.startTime).toLocaleDateString()}{" "}
-                              ·{" "}
-                              {new Date(booking.startTime).toLocaleTimeString(
-                                [],
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0 ml-3">
-                            {needsReview && (
-                              <button
-                                onClick={() =>
-                                  handleOpenReview(booking.id, instructorName)
-                                }
-                                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors"
-                              >
-                                {t("leaveReview")}
-                              </button>
-                            )}
-                            <span
-                              className={cn(
-                                "text-xs font-medium px-2 py-1 rounded-full",
-                                isCompleted
-                                  ? "bg-emerald-500/10 text-emerald-400"
-                                  : booking.status === "CANCELLED"
-                                    ? "bg-rose-500/10 text-rose-400"
-                                    : "bg-slate-500/10 text-slate-400",
-                              )}
-                            >
-                              {isCompleted
-                                ? tb("completed")
-                                : booking.status === "CANCELLED"
-                                  ? tb("cancelled")
-                                  : booking.status}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {totalPages > 1 && (
-                    <PaginationSection
-                      page={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={setCurrentPage}
-                    />
-                  )}
-                </div>
-              ) : (
-                <EmptyStateCard
-                  icon={FileText}
-                  title={t("noPendingReviews")}
-                  description={t("noPendingReviewsDescription")}
-                />
-              )}
+              <BookingHistorySection
+                instructorBookings={pastInstructorBookings}
+                clientBookings={pastClientBookings}
+                isLoading={bookingsLoading || clientBookingsLoading}
+                pendingReviews={pendingReviews}
+                onOpenReview={handleOpenReview}
+                getInstructorName={getInstructorName}
+                tb={tb}
+                emptyTitle={t("noHistory")}
+                emptyDescription={t("historyDescription")}
+                leaveReviewLabel={t("leaveReview")}
+                onClearHistory={() => setConfirmOpen(true)}
+                clearHistoryLabel={t("clearHistory")}
+                tabs={{
+                  instructor: {
+                    label: t("asInstructor"),
+                    icon: <GraduationCap className="w-4 h-4" />,
+                  },
+                  client: {
+                    label: t("asClient"),
+                    icon: <User className="w-4 h-4" />,
+                  },
+                }}
+              />
             </DashboardCard>
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={async () => {
+          await clearHistory.mutateAsync();
+          setConfirmOpen(false);
+        }}
+        title={t("clearHistory")}
+        description={t("clearHistoryDescription")}
+        confirmText={t("clear")}
+        cancelText={t("cancel")}
+      />
 
       {/* Review Form Modal */}
       {selectedBookingForReview && (
@@ -592,7 +472,7 @@ function RecentReviews({
       ))}
       {reviews.length > 5 && (
         <p className="text-center text-xs text-slate-500">
-          +{reviews.length - 5} more
+          {t("moreReviews", { count: reviews.length - 5 })}
         </p>
       )}
     </div>

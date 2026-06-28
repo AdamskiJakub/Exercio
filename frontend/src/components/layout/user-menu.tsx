@@ -1,10 +1,10 @@
 "use client";
 
 import { useAuthStore } from "@/stores/auth-store";
-import { Link, useRouter } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +24,9 @@ import {
   User,
   LayoutDashboard,
   LogOut,
-  ChevronDown,
   Calendar,
   Star,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api";
@@ -35,17 +35,14 @@ import { usePendingReviews } from "@/hooks/useReviews";
 import { useQuery } from "@tanstack/react-query";
 import { getMediaUrl } from "@/lib/utils/media";
 import { scrollToSection } from "@/lib/utils/scroll";
-
-function getInitials(
-  firstName: string | null,
-  lastName: string | null,
-): string {
-  const first = firstName?.charAt(0) || "";
-  const last = lastName?.charAt(0) || "";
-  return (first + last).toUpperCase() || "?";
-}
+import { UserAvatar } from "@/components/layout/UserAvatar";
+import { UserInfo } from "@/components/layout/UserInfo";
+import { NotificationItem } from "@/components/layout/NotificationItem";
+import { NavItem } from "@/components/layout/NavItem";
+import type { Booking } from "@/hooks/useMyBookings";
 
 export function UserMenu() {
+  const queryClient = useQueryClient();
   const { user, isAuthenticated, logout } = useAuthStore();
   const router = useRouter();
   const t = useTranslations("Common");
@@ -65,12 +62,18 @@ export function UserMenu() {
     enabled: isAuthenticated && user?.role === "INSTRUCTOR",
   });
 
+  // Client bookings — used to detect cancelled bookings for all authenticated users
+  const { data: clientBookings } = useQuery({
+    queryKey: ["bookings", "my", "client"],
+    queryFn: async () => {
+      const response = await apiClient.get("/bookings/my?role=client");
+      return response.data;
+    },
+    enabled: isAuthenticated,
+  });
+
   // Pending reviews count (for all authenticated users - instructors can also be clients)
   const { data: pendingReviews } = usePendingReviews();
-
-  const pendingBookingCount =
-    instructorBookings?.filter((b: any) => b.status === "PENDING").length || 0;
-  const pendingReviewCount = pendingReviews?.length || 0;
 
   // --- Notification read tracking (like Facebook) ---
   // We store the last time the user opened the notification dropdown in localStorage.
@@ -93,21 +96,58 @@ export function UserMenu() {
 
   // Count only unread notifications (created after lastReadTime)
   const unreadBookingCount =
-    instructorBookings?.filter((b: any) => {
+    instructorBookings?.filter((b: Booking) => {
       if (b.status !== "PENDING") return false;
       const createdAt = new Date(b.createdAt).getTime();
       return createdAt > lastReadTime;
     }).length || 0;
 
   const unreadReviewCount =
-    pendingReviews?.filter((r: any) => {
+    pendingReviews?.filter((r) => {
       const createdAt = new Date(r.createdAt).getTime();
       return createdAt > lastReadTime;
     }).length || 0;
 
+  // Cancelled bookings count — detect recently cancelled bookings for all users
+  // Check both instructor and client bookings for cancelled status.
+  // Skip self-cancellations: if the user cancelled their own session, don't notify them.
+  const cancelledFromInstructor =
+    instructorBookings?.filter((b: Booking) => {
+      if (b.status !== "CANCELLED") return false;
+      // Skip if the instructor cancelled their own session
+      if (b.cancelledBy === "instructor") return false;
+      const cancelledAt = b.cancelledAt
+        ? new Date(b.cancelledAt).getTime()
+        : new Date(b.updatedAt).getTime();
+      return cancelledAt > lastReadTime;
+    }) || [];
+
+  const cancelledFromClient =
+    clientBookings?.filter((b: Booking) => {
+      if (b.status !== "CANCELLED") return false;
+      // Skip if the client cancelled their own session
+      if (b.cancelledBy === "client") return false;
+      const cancelledAt = b.cancelledAt
+        ? new Date(b.cancelledAt).getTime()
+        : new Date(b.updatedAt).getTime();
+      return cancelledAt > lastReadTime;
+    }) || [];
+
+  // Deduplicate by id (a booking can appear in both lists for instructor+client users)
+  const unreadCancelledCount = Array.from(
+    new Map(
+      [...cancelledFromInstructor, ...cancelledFromClient].map((b: Booking) => [
+        b.id,
+        b,
+      ]),
+    ).values(),
+  ).length;
+
   // Total unread notifications
   const notificationCount =
-    (user?.role === "INSTRUCTOR" ? unreadBookingCount : 0) + unreadReviewCount;
+    (user?.role === "INSTRUCTOR" ? unreadBookingCount : 0) +
+    unreadReviewCount +
+    unreadCancelledCount;
 
   const avatarUrl =
     user?.role === "INSTRUCTOR" && instructorProfile?.photoUrl
@@ -126,6 +166,7 @@ export function UserMenu() {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      queryClient.clear();
       logout();
       setMobileMenuOpen(false);
       router.push("/");
@@ -184,36 +225,39 @@ export function UserMenu() {
             <div className="max-h-80 overflow-y-auto">
               {/* Pending bookings (instructor only) — scrolls to upcoming-sections */}
               {user?.role === "INSTRUCTOR" && unreadBookingCount > 0 && (
-                <div
-                  className="px-4 py-3 hover:bg-slate-800/50 transition-colors border-b border-slate-700/50 cursor-pointer"
+                <NotificationItem
+                  icon={
+                    <div className="p-1.5 rounded-full bg-blue-500/10">
+                      <Calendar className="w-4 h-4 text-blue-400" />
+                    </div>
+                  }
+                  title={t("pendingBookings") || "New Booking Requests"}
+                  description={`${unreadBookingCount} ${
+                    unreadBookingCount === 1
+                      ? t("pendingBookingSingular") || "pending request"
+                      : t("pendingBookingPlural") || "pending requests"
+                  }`}
                   onClick={() => {
                     router.push("/dashboard");
                     setTimeout(() => scrollToSection("upcoming-sections"), 100);
                   }}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 p-1.5 rounded-full bg-blue-500/10 shrink-0">
-                      <Calendar className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-white truncate">
-                        {t("pendingBookings") || "New Booking Requests"}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        {unreadBookingCount}{" "}
-                        {unreadBookingCount === 1
-                          ? t("pendingBookingSingular") || "pending request"
-                          : t("pendingBookingPlural") || "pending requests"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                />
               )}
 
               {/* Pending reviews (all users) — scrolls to pending-reviews-section */}
               {unreadReviewCount > 0 && (
-                <div
-                  className="px-4 py-3 hover:bg-slate-800/50 transition-colors border-b border-slate-700/50 cursor-pointer"
+                <NotificationItem
+                  icon={
+                    <div className="p-1.5 rounded-full bg-amber-500/10">
+                      <Star className="w-4 h-4 text-amber-400" />
+                    </div>
+                  }
+                  title={t("pendingReviews") || "Reviews to Leave"}
+                  description={`${unreadReviewCount} ${
+                    unreadReviewCount === 1
+                      ? t("pendingReviewSingular") || "review to give"
+                      : t("pendingReviewPlural") || "reviews to give"
+                  }`}
                   onClick={() => {
                     router.push("/dashboard");
                     setTimeout(
@@ -226,24 +270,36 @@ export function UserMenu() {
                       100,
                     );
                   }}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 p-1.5 rounded-full bg-amber-500/10 shrink-0">
-                      <Star className="w-4 h-4 text-amber-400" />
+                />
+              )}
+
+              {/* Cancelled bookings (all users) — scrolls to booking history */}
+              {unreadCancelledCount > 0 && (
+                <NotificationItem
+                  icon={
+                    <div className="p-1.5 rounded-full bg-red-500/10">
+                      <XCircle className="w-4 h-4 text-red-400" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-white truncate">
-                        {t("pendingReviews") || "Reviews to Leave"}
-                      </p>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        {unreadReviewCount}{" "}
-                        {unreadReviewCount === 1
-                          ? t("pendingReviewSingular") || "review to give"
-                          : t("pendingReviewPlural") || "reviews to give"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  }
+                  title={t("cancelledBookings") || "Cancelled Sessions"}
+                  description={`${unreadCancelledCount} ${
+                    unreadCancelledCount === 1
+                      ? t("cancelledBookingSingular") || "cancelled session"
+                      : t("cancelledBookingPlural") || "cancelled sessions"
+                  }`}
+                  onClick={() => {
+                    router.push("/dashboard");
+                    setTimeout(
+                      () =>
+                        scrollToSection(
+                          user?.role === "INSTRUCTOR"
+                            ? "my-client-history"
+                            : "booking-history",
+                        ),
+                      100,
+                    );
+                  }}
+                />
               )}
 
               {/* Empty state — show when no unread notifications */}
@@ -259,6 +315,7 @@ export function UserMenu() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Desktop Dropdown Menu */}
         <div className="hidden md:block">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -266,15 +323,13 @@ export function UserMenu() {
                 type="button"
                 className="relative rounded-full outline-none"
               >
-                <Avatar className="h-10 w-10 cursor-pointer border-2 border-slate-700 hover:border-orange-500 transition-colors">
-                  <AvatarImage src={avatarUrl} alt={user.email} />
-                  <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-600 text-white font-semibold">
-                    {getInitials(user.firstName, user.lastName)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute -bottom-0.5 -right-0.5 bg-slate-800 rounded-full p-0.5 border border-slate-700">
-                  <ChevronDown className="h-3 w-3 text-slate-400" />
-                </div>
+                <UserAvatar
+                  src={avatarUrl}
+                  alt={user.email}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
+                  showChevron
+                />
               </button>
             </DropdownMenuTrigger>
 
@@ -285,22 +340,17 @@ export function UserMenu() {
             >
               <DropdownMenuLabel className="font-normal">
                 <div className="flex items-center gap-3 p-2">
-                  <Avatar className="h-10 w-10 border-2 border-slate-700">
-                    <AvatarImage src={avatarUrl} alt={user.email} />
-                    <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-600 text-white font-semibold text-sm">
-                      {getInitials(user.firstName, user.lastName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col space-y-1 overflow-hidden">
-                    <p className="text-sm font-semibold text-slate-100 truncate">
-                      {user.firstName && user.lastName
-                        ? `${user.firstName} ${user.lastName}`
-                        : user.email.split("@")[0]}
-                    </p>
-                    <p className="text-xs text-slate-400 truncate">
-                      {user.email}
-                    </p>
-                  </div>
+                  <UserAvatar
+                    src={avatarUrl}
+                    alt={user.email}
+                    firstName={user.firstName}
+                    lastName={user.lastName}
+                  />
+                  <UserInfo
+                    firstName={user.firstName}
+                    lastName={user.lastName}
+                    email={user.email}
+                  />
                 </div>
               </DropdownMenuLabel>
 
@@ -310,10 +360,11 @@ export function UserMenu() {
                 asChild
                 className="cursor-pointer text-slate-200"
               >
-                <Link href="/dashboard" className="flex items-center gap-2">
-                  <LayoutDashboard className="text-slate-400" />
-                  <span>{t("dashboard")}</span>
-                </Link>
+                <NavItem
+                  href="/dashboard"
+                  icon={<LayoutDashboard className="h-4 w-4" />}
+                  label={t("dashboard")}
+                />
               </DropdownMenuItem>
 
               {user.role === "INSTRUCTOR" && (
@@ -321,13 +372,11 @@ export function UserMenu() {
                   asChild
                   className="cursor-pointer text-slate-200"
                 >
-                  <Link
+                  <NavItem
                     href="/dashboard/profile"
-                    className="flex items-center gap-2"
-                  >
-                    <User className="text-slate-400" />
-                    <span>{t("editProfile")}</span>
-                  </Link>
+                    icon={<User className="h-4 w-4" />}
+                    label={t("editProfile")}
+                  />
                 </DropdownMenuItem>
               )}
 
@@ -345,21 +394,20 @@ export function UserMenu() {
         </div>
       </div>
 
+      {/* Mobile Sheet Menu */}
       <div className="md:hidden">
         <button
           type="button"
           onClick={() => setMobileMenuOpen(true)}
           className="relative rounded-full outline-none"
         >
-          <Avatar className="h-10 w-10 cursor-pointer border-2 border-slate-700 active:border-orange-500 transition-colors">
-            <AvatarImage src={avatarUrl} alt={user.email} />
-            <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-600 text-white font-semibold">
-              {getInitials(user.firstName, user.lastName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="absolute -bottom-0.5 -right-0.5 bg-slate-800 rounded-full p-0.5 border border-slate-700">
-            <ChevronDown className="h-3 w-3 text-slate-400" />
-          </div>
+          <UserAvatar
+            src={avatarUrl}
+            alt={user.email}
+            firstName={user.firstName}
+            lastName={user.lastName}
+            showChevron
+          />
         </button>
 
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -369,12 +417,13 @@ export function UserMenu() {
           >
             <SheetHeader className="border-b border-slate-700 p-6">
               <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12 border-2 border-slate-700">
-                  <AvatarImage src={avatarUrl} alt={user.email} />
-                  <AvatarFallback className="bg-linear-to-br from-orange-500 to-red-600 text-white font-semibold">
-                    {getInitials(user.firstName, user.lastName)}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar
+                  src={avatarUrl}
+                  alt={user.email}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
+                  size="lg"
+                />
                 <div className="flex flex-col overflow-hidden text-left">
                   <SheetTitle className="text-base font-semibold text-slate-100 truncate">
                     {user.firstName && user.lastName
@@ -390,24 +439,22 @@ export function UserMenu() {
 
             <div className="flex flex-col justify-between h-[calc(100%-120px)]">
               <div className="flex flex-col p-4 space-y-2">
-                <Link
+                <NavItem
                   href="/dashboard"
+                  icon={<LayoutDashboard className="h-5 w-5" />}
+                  label={t("dashboard")}
+                  variant="sheet"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-slate-200 hover:bg-slate-800 hover:text-white rounded-lg transition-colors"
-                >
-                  <LayoutDashboard className="h-5 w-5 text-slate-400" />
-                  <span className="font-medium">{t("dashboard")}</span>
-                </Link>
+                />
 
                 {user.role === "INSTRUCTOR" && (
-                  <Link
+                  <NavItem
                     href="/dashboard/profile"
+                    icon={<User className="h-5 w-5" />}
+                    label={t("editProfile")}
+                    variant="sheet"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-slate-200 hover:bg-slate-800 hover:text-white rounded-lg transition-colors"
-                  >
-                    <User className="h-5 w-5 text-slate-400" />
-                    <span className="font-medium">{t("editProfile")}</span>
-                  </Link>
+                  />
                 )}
               </div>
 

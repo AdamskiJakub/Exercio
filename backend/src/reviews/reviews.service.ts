@@ -331,7 +331,7 @@ export class ReviewsService {
     const averageRating = result._avg.rating;
 
     return {
-      averageRating: reviewCount >= 1 ? averageRating : null,
+      averageRating: reviewCount >= 5 ? averageRating : null,
       reviewCount,
       ratingLabel:
         reviewCount === 0

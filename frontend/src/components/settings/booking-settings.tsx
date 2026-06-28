@@ -1,119 +1,95 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
-import { Calendar, DollarSign, Clock, Bell } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useTranslations } from "next-intl";
+import { Controller } from "react-hook-form";
+import { Clock, DollarSign, Bell, Gift } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
-import { apiClient } from '@/lib/api';
-import { SESSION_DURATION_OPTIONS, MIN_NOTICE_HOURS_OPTIONS } from '@/constants/availability';
-import { BookingSettingsProps } from '@/types/booking-settings';
+} from "@/components/ui/select";
+import {
+  SESSION_DURATION_OPTIONS,
+  MIN_NOTICE_HOURS_OPTIONS,
+} from "@/constants/availability";
+import type { UseFormReturn } from "react-hook-form";
+import type { InstructorProfileFormData } from "@/lib/validations/schemas/instructor-profile";
 
-export function BookingSettings({
-  profileId,
-  initialSettings,
-}: BookingSettingsProps) {
-  const t = useTranslations('Dashboard.settings.bookings');
+interface BookingSettingsFormProps {
+  form: UseFormReturn<InstructorProfileFormData>;
+}
 
-  const [settings, setSettings] = useState({
-    isBookingEnabled: initialSettings?.isBookingEnabled ?? false,
-    sessionDuration: initialSettings?.sessionDuration ?? 60,
-    sessionPrice: initialSettings?.sessionPrice ?? null,
-    minNoticeHours: initialSettings?.minNoticeHours ?? 48,
-  });
+export function BookingSettings({ form }: BookingSettingsFormProps) {
+  const t = useTranslations("Dashboard.settings.bookings");
+  const tProfile = useTranslations("Dashboard.profileForm");
+  const { watch, setValue, control, register } = form;
 
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await apiClient.patch(
-        `/instructor-profiles/${profileId}`,
-        settings
-      );
-
-      toast.success(t('saveSuccess'));
-    } catch (error: any) {
-      toast.error(t('saveError'), {
-        description: error.message,
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const isBookingEnabled = watch("isBookingEnabled");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 space-y-6"
-    >
-      <div className="flex items-start gap-4">
-        <div className="p-3 bg-orange-500/10 rounded-lg">
-          <Calendar className="w-6 h-6 text-orange-500" />
+    <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-5 space-y-4">
+      <div className="flex items-start gap-3 mb-2">
+        <div className="p-2 bg-orange-500/10 rounded-lg shrink-0">
+          <DollarSign className="w-5 h-5 text-orange-500" />
         </div>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {t('title')}
-          </h2>
-          <p className="text-slate-400">{t('description')}</p>
+        <div>
+          <h3 className="text-lg font-bold text-white">{t("title")}</h3>
+          <p className="text-sm text-slate-400">{t("description")}</p>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Enable Bookings Toggle */}
-        <label 
+        <label
           htmlFor="bookings-enabled"
           className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-600 transition-colors"
         >
           <div className="space-y-1 flex-1">
-            <span className="text-white font-semibold text-base block">
-              {t('enableBookings')}
+            <span className="text-white font-semibold text-sm block">
+              {t("enableBookings")}
             </span>
             <p className="text-sm text-slate-400">
-              {t('enableBookingsDescription')}
+              {t("enableBookingsDescription")}
             </p>
           </div>
           <Checkbox
             id="bookings-enabled"
-            checked={settings.isBookingEnabled}
+            checked={isBookingEnabled}
             onCheckedChange={(checked: boolean) =>
-              setSettings({ ...settings, isBookingEnabled: checked })
+              setValue("isBookingEnabled", checked)
             }
             className="h-5 w-5 data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600 cursor-pointer"
           />
         </label>
 
         {/* Session Duration */}
-        <div className="space-y-3">
-          <Label htmlFor="sessionDuration" className="text-white font-semibold text-base flex items-center gap-2">
-            <Clock className="w-5 h-5 text-orange-500" />
-            {t('sessionDuration')}
+        <div className="space-y-2">
+          <Label
+            htmlFor="sessionDuration"
+            className="text-white font-semibold text-sm flex items-center gap-2"
+          >
+            <Clock className="w-4 h-4 text-orange-500" />
+            {t("sessionDuration")}
           </Label>
           <Select
-            value={settings.sessionDuration.toString()}
+            value={String(watch("sessionDuration") ?? 60)}
             onValueChange={(value) =>
-              setSettings({ ...settings, sessionDuration: parseInt(value) })
+              setValue("sessionDuration", parseInt(value))
             }
           >
-            <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white hover:bg-slate-900 hover:border-slate-600 transition-colors h-11 text-base">
+            <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white hover:bg-slate-900 hover:border-slate-600 transition-colors h-10 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-600 text-white">
               {SESSION_DURATION_OPTIONS.map((option) => (
-                <SelectItem 
-                  key={option.value} 
+                <SelectItem
+                  key={option.value}
                   value={option.value.toString()}
                   className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
@@ -122,14 +98,19 @@ export function BookingSettings({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-slate-400 leading-relaxed">{t('sessionDurationHint')}</p>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            {t("sessionDurationHint")}
+          </p>
         </div>
 
         {/* Session Price */}
-        <div className="space-y-3">
-          <Label htmlFor="sessionPrice" className="text-white font-semibold text-base flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-orange-500" />
-            {t('sessionPrice')}
+        <div className="space-y-2">
+          <Label
+            htmlFor="sessionPrice"
+            className="text-white font-semibold text-sm flex items-center gap-2"
+          >
+            <DollarSign className="w-4 h-4 text-orange-500" />
+            {t("sessionPrice")}
           </Label>
           <div className="relative">
             <Input
@@ -138,61 +119,123 @@ export function BookingSettings({
               min="0"
               step="10"
               placeholder="150"
-              value={settings.sessionPrice ?? ''}
+              value={watch("sessionPrice") ?? ""}
               onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  sessionPrice: e.target.value ? parseFloat(e.target.value) : null,
-                })
+                setValue(
+                  "sessionPrice",
+                  e.target.value ? parseFloat(e.target.value) : null,
+                )
               }
-              className="bg-slate-900/50 border-slate-700 text-white pr-16 h-11 text-base hover:bg-slate-900 hover:border-slate-600 transition-colors"
+              className="bg-slate-900/50 border-slate-700 text-white pr-14 h-10 text-sm hover:bg-slate-900 hover:border-slate-600 transition-colors"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">
               PLN
             </span>
           </div>
-          <p className="text-sm text-slate-400 leading-relaxed">{t('sessionPriceHint')}</p>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            {t("sessionPriceHint")}
+          </p>
+        </div>
+
+        {/* Package Deals */}
+        <div className="space-y-3 pt-2 ">
+          <label className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors border border-slate-700">
+            <Gift className="w-5 h-5 text-orange-500 shrink-0" />
+            <Controller
+              name="packageDealsEnabled"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={(checked) => {
+                    const isChecked = checked === true;
+                    field.onChange(isChecked);
+                    if (!isChecked) {
+                      setValue("packageDealsDescription", "");
+                    }
+                  }}
+                  className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                />
+              )}
+            />
+            <span
+              className={`text-base font-medium select-none ${
+                watch("packageDealsEnabled")
+                  ? "bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+                  : "text-slate-200"
+              }`}
+            >
+              {tProfile("packageDealsEnabled")}
+            </span>
+          </label>
+
+          {/* Package Deals Description */}
+          {watch("packageDealsEnabled") && (
+            <div className="ml-6 space-y-2">
+              <Label
+                htmlFor="packageDealsDescription"
+                className="text-base font-semibold text-slate-200"
+              >
+                {tProfile("packageDealsDescription")}
+              </Label>
+              <Textarea
+                {...register("packageDealsDescription")}
+                id="packageDealsDescription"
+                placeholder={tProfile("packageDealsPlaceholder")}
+                rows={3}
+                className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+              />
+              <p className="text-sm text-slate-400">
+                {tProfile("packageDealsHint")}
+              </p>
+              {form.formState.errors.packageDealsDescription && (
+                <p className="text-red-400 text-sm">
+                  {form.formState.errors.packageDealsDescription.message}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Minimum Notice Hours */}
-        <div className="space-y-3">
-          <Label htmlFor="minNoticeHours" className="text-white font-semibold text-base flex items-center gap-2">
-            <Bell className="w-5 h-5 text-orange-500" />
-            {t('minNoticeHours')}
+        <div className="space-y-2">
+          <Label
+            htmlFor="minNoticeHours"
+            className="text-white font-semibold text-sm flex items-center gap-2"
+          >
+            <Bell className="w-4 h-4 text-orange-500" />
+            {t("minNoticeHours")}
           </Label>
           <Select
-            value={settings.minNoticeHours.toString()}
+            value={String(watch("minNoticeHours") ?? 48)}
             onValueChange={(value) =>
-              setSettings({ ...settings, minNoticeHours: parseInt(value) })
+              setValue("minNoticeHours", parseInt(value))
             }
           >
-            <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white hover:bg-slate-900 hover:border-slate-600 transition-colors h-11 text-base">
+            <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white hover:bg-slate-900 hover:border-slate-600 transition-colors h-10 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-slate-800 border-slate-600 text-white">
               {MIN_NOTICE_HOURS_OPTIONS.map((option) => (
-                <SelectItem 
-                  key={option.value} 
+                <SelectItem
+                  key={option.value}
                   value={option.value.toString()}
                   className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
                 >
-                  {option.key === 'noMinimum' ? t('noMinimum') : option.key === 'week' ? t('week') : t('hours', { count: option.count })}
+                  {option.key === "noMinimum"
+                    ? t("noMinimum")
+                    : option.key === "week"
+                      ? t("week")
+                      : t("hours", { count: option.count })}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-slate-400 leading-relaxed">{t('minNoticeHoursHint')}</p>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            {t("minNoticeHoursHint")}
+          </p>
         </div>
-
-        {/* Save Button */}
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="bg-orange-600 hover:bg-orange-700 text-white h-11 px-8 py-2.5 text-base font-semibold"
-        >
-          {isSaving ? t('saving') : t('save')}
-        </Button>
       </div>
-    </motion.div>
+    </div>
   );
 }

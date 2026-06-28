@@ -30,6 +30,10 @@ export default function GuestReviewPage() {
   const [lowRatingReason, setLowRatingReason] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
 
+  // Token from randomBytes(32).toString('hex') is a 64-char hex string
+  const isValidTokenFormat = (t: string | null): t is string =>
+    typeof t === "string" && /^[0-9a-f]{64}$/i.test(t);
+
   const {
     data: validation,
     isLoading: isValidating,
@@ -42,7 +46,7 @@ export default function GuestReviewPage() {
       );
       return response.data;
     },
-    enabled: !!bookingId && !!token,
+    enabled: !!bookingId && isValidTokenFormat(token),
     retry: false,
   });
 
@@ -66,9 +70,7 @@ export default function GuestReviewPage() {
 
   const isValid = validation?.valid === true;
   const isLowRating = rating >= 1 && rating <= 3;
-  const canSubmit =
-    rating > 0 &&
-    (!isLowRating || (comment.trim().length > 0 && lowRatingReason));
+  const canSubmit = rating > 0 && (!isLowRating || lowRatingReason.length > 0);
 
   // Missing params
   if (!bookingId || !token) {

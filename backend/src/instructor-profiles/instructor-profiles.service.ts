@@ -85,6 +85,31 @@ export class InstructorProfilesService {
     const limit = Math.min(100, Math.max(1, filters.limit || 20));
     const skip = (page - 1) * limit;
 
+    // If minRating filter is set, filter profiles at DB level using review aggregation
+    if (filters.minRating !== undefined) {
+      // Use raw SQL to find instructor IDs that meet the minRating threshold
+      // (at least 5 reviews with average rating >= minRating)
+      const qualifyingInstructorIds = await this.prisma.$queryRaw<
+        Array<{ instructor_id: string }>
+      >`
+        SELECT b."instructorId" AS instructor_id
+        FROM "Review" r
+        JOIN "Booking" b ON b."id" = r."bookingId"
+        GROUP BY b."instructorId"
+        HAVING COUNT(*) >= 5 AND AVG(r.rating) >= ${filters.minRating}
+      `;
+
+      const qualifyingIds = new Set(
+        qualifyingInstructorIds.map((row) => row.instructor_id),
+      );
+
+      // Filter profiles to only those that match the instructor IDs from the subquery
+      // We need to map profile.userId (which is the instructor's user ID) to the instructorId in Booking
+      // Actually, profile.id is the instructorProfile.id, and booking.instructorId is the user ID
+      // So we filter by profile.userId (which is the user ID = instructorId in Booking)
+      where.userId = { in: Array.from(qualifyingIds) };
+    }
+
     const [profiles, total] = await Promise.all([
       this.prisma.instructorProfile.findMany({
         where,
@@ -108,78 +133,31 @@ export class InstructorProfilesService {
       this.prisma.instructorProfile.count({ where }),
     ]);
 
-    // If minRating filter is set, fetch review stats for all returned profiles
-    let profileIdsToFilter: Set<string> | null = null;
-    if (filters.minRating !== undefined) {
-      const profileIds = profiles.map((p) => p.id);
-      const reviewsStats = await this.prisma.review.findMany({
-        where: {
-          booking: {
-            instructorId: { in: profileIds },
-          },
-        },
-        select: {
-          booking: {
-            select: { instructorId: true },
-          },
-          rating: true,
-        },
-      });
+    const filteredProfiles = profiles.map((profile) => {
+      const validSpecializations = profile.specializations.filter((spec) =>
+        this.configService.isValidSpecialization(spec),
+      );
 
-      // Aggregate ratings per instructor
-      const ratingMap = new Map<string, { sum: number; count: number }>();
-      for (const review of reviewsStats) {
-        const instrId = review.booking.instructorId;
-        const entry = ratingMap.get(instrId) || { sum: 0, count: 0 };
-        entry.sum += review.rating;
-        entry.count++;
-        ratingMap.set(instrId, entry);
+      // Ensure at least one valid specialization exists (primary is specializations[0])
+      // If all are invalid, log warning but keep profile (UI will handle gracefully)
+      if (
+        profile.specializations.length > 0 &&
+        validSpecializations.length === 0
+      ) {
+        this.logger.warn(
+          `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
+        );
       }
 
-      // Filter profiles that meet the minRating threshold (need at least 5 reviews)
-      profileIdsToFilter = new Set(
-        profiles
-          .filter((p) => {
-            const stats = ratingMap.get(p.id);
-            if (!stats || stats.count < 5) return false;
-            return stats.sum / stats.count >= filters.minRating!;
-          })
-          .map((p) => p.id),
-      );
-    }
-
-    const filteredProfiles = profiles
-      .filter((profile) => {
-        if (profileIdsToFilter === null) return true;
-        return profileIdsToFilter.has(profile.id);
-      })
-      .map((profile) => {
-        const validSpecializations = profile.specializations.filter((spec) =>
-          this.configService.isValidSpecialization(spec),
-        );
-
-        // Ensure at least one valid specialization exists (primary is specializations[0])
-        // If all are invalid, log warning but keep profile (UI will handle gracefully)
-        if (
-          profile.specializations.length > 0 &&
-          validSpecializations.length === 0
-        ) {
-          this.logger.warn(
-            `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
-          );
-        }
-
-        return {
-          ...profile,
-          tags: profile.tags.filter((tag) =>
-            this.configService.isValidTag(tag),
-          ),
-          specializations: validSpecializations,
-          goals: profile.goals.filter((goal) =>
-            this.configService.isValidGoal(goal),
-          ),
-        };
-      });
+      return {
+        ...profile,
+        tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
+        specializations: validSpecializations,
+        goals: profile.goals.filter((goal) =>
+          this.configService.isValidGoal(goal),
+        ),
+      };
+    });
 
     return {
       data: filteredProfiles,

@@ -74,8 +74,9 @@ export class BookingsController {
     const isAuthenticated = req.user && req.user.id;
 
     if (isAuthenticated) {
-      // Authenticated user - must be CLIENT role
-      if (req.user.role !== 'CLIENT') {
+      // Authenticated user - must be CLIENT or INSTRUCTOR role
+      // Instructors can also book sessions with other instructors
+      if (req.user.role !== 'CLIENT' && req.user.role !== 'INSTRUCTOR') {
         throw new ForbiddenException('Only clients can create bookings');
       }
       return this.bookingsService.createBooking(req.user.id, dto);

@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
-import { Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
-import { apiClient } from '@/lib/api';
-import { MonthlyCalendarPreview } from './monthly-calendar-preview';
-import { useMyInstructorProfile } from '@/hooks/useMyInstructorProfile';
-import type { DaySchedule, AvailabilityException } from '@/types/availability';
-import { DAYS_OF_WEEK } from '@/constants/availability';
+import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
+import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { apiClient } from "@/lib/api";
+import { MonthlyCalendarPreview } from "./monthly-calendar-preview";
+import type { DaySchedule, AvailabilityException } from "@/types/availability";
+import { DAYS_OF_WEEK } from "@/constants/availability";
 
 export function WeeklySchedule() {
-  const t = useTranslations('Dashboard.availability');
-  const { data: instructorProfile } = useMyInstructorProfile();
-  
+  const t = useTranslations("Dashboard.availability");
+  const queryClient = useQueryClient();
+
   const [schedule, setSchedule] = useState<DaySchedule[]>([]);
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -23,10 +23,12 @@ export function WeeklySchedule() {
 
   const fetchExceptions = useCallback(async () => {
     try {
-      const response = await apiClient.get<AvailabilityException[]>('/availability/exceptions');
+      const response = await apiClient.get<AvailabilityException[]>(
+        "/availability/exceptions",
+      );
       setExceptions(response.data);
     } catch (error) {
-      console.error('Failed to fetch exceptions:', error);
+      console.error("Failed to fetch exceptions:", error);
     }
   }, []);
 
@@ -34,24 +36,25 @@ export function WeeklySchedule() {
   useEffect(() => {
     fetchSchedule();
     fetchExceptions();
-    
+
     // Listen for exception updates from ExceptionsList
     const handleExceptionsUpdate = () => {
       fetchExceptions();
     };
-    
-    window.addEventListener('exceptionsUpdated', handleExceptionsUpdate);
-    return () => window.removeEventListener('exceptionsUpdated', handleExceptionsUpdate);
+
+    window.addEventListener("exceptionsUpdated", handleExceptionsUpdate);
+    return () =>
+      window.removeEventListener("exceptionsUpdated", handleExceptionsUpdate);
   }, [fetchExceptions]);
 
   const fetchSchedule = async () => {
     try {
-      const response = await apiClient.get('/availability/weekly');
+      const response = await apiClient.get("/availability/weekly");
       const data = response.data;
-      
+
       const fullSchedule = DAYS_OF_WEEK.map((dayOfWeek) => {
         const existingDay = data.find((d: any) => d.dayOfWeek === dayOfWeek);
-        
+
         if (existingDay) {
           return {
             dayOfWeek,
@@ -63,16 +66,16 @@ export function WeeklySchedule() {
           return {
             dayOfWeek,
             isAvailable: false,
-            startTime: '09:00',
-            endTime: '17:00',
+            startTime: "09:00",
+            endTime: "17:00",
           };
         }
       });
-      
+
       setSchedule(fullSchedule);
     } catch (error) {
-      console.error('Error fetching schedule:', error);
-      toast.error(t('saveError'));
+      console.error("Error fetching schedule:", error);
+      toast.error(t("saveError"));
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +86,7 @@ export function WeeklySchedule() {
       const existing = prev.find((d) => d.dayOfWeek === dayOfWeek);
       if (existing) {
         return prev.map((d) =>
-          d.dayOfWeek === dayOfWeek ? { ...d, isAvailable } : d
+          d.dayOfWeek === dayOfWeek ? { ...d, isAvailable } : d,
         );
       } else {
         return [
@@ -91,8 +94,8 @@ export function WeeklySchedule() {
           {
             dayOfWeek,
             isAvailable,
-            startTime: '09:00',
-            endTime: '17:00',
+            startTime: "09:00",
+            endTime: "17:00",
           },
         ];
       }
@@ -101,53 +104,66 @@ export function WeeklySchedule() {
 
   const handleTimeChange = (
     dayOfWeek: number,
-    field: 'startTime' | 'endTime',
-    value: string
+    field: "startTime" | "endTime",
+    value: string,
   ) => {
     setSchedule((prev) =>
       prev.map((d) =>
-        d.dayOfWeek === dayOfWeek ? { ...d, [field]: value } : d
-      )
+        d.dayOfWeek === dayOfWeek ? { ...d, [field]: value } : d,
+      ),
     );
   };
 
   const handleSave = async () => {
     const fullSchedule = DAYS_OF_WEEK.map((dayOfWeek) => {
       const existing = schedule.find((d) => d.dayOfWeek === dayOfWeek);
-      return existing || {
-        dayOfWeek,
-        isAvailable: false,
-        startTime: '09:00',
-        endTime: '17:00',
-      };
+      return (
+        existing || {
+          dayOfWeek,
+          isAvailable: false,
+          startTime: "09:00",
+          endTime: "17:00",
+        }
+      );
     });
 
     for (const day of fullSchedule) {
       if (day.isAvailable && day.startTime >= day.endTime) {
-        toast.error(t('endBeforeStart'));
+        toast.error(t("endBeforeStart"));
         return;
       }
     }
 
     setIsSaving(true);
     try {
-      await apiClient.post('/availability/weekly', { 
-        schedule: fullSchedule 
+      await apiClient.post("/availability/weekly", {
+        schedule: fullSchedule,
       });
 
-      toast.success(t('saveSuccess'));
+      toast.success(t("saveSuccess"));
 
       await fetchSchedule();
+
+      // Invalidate available slots so the calendar preview updates immediately
+      queryClient.invalidateQueries({ queryKey: ["availableSlots"] });
     } catch (error: any) {
-      console.error('Error saving schedule:', error);
-      toast.error(t('saveError'));
+      console.error("Error saving schedule:", error);
+      toast.error(t("saveError"));
     } finally {
       setIsSaving(false);
     }
   };
 
   const getDayName = (dayOfWeek: number) => {
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayNames = [
+      "sunday",
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+    ];
     return t(`days.${dayNames[dayOfWeek]}`);
   };
 
@@ -168,8 +184,8 @@ export function WeeklySchedule() {
         const daySchedule = schedule.find((d) => d.dayOfWeek === dayOfWeek) || {
           dayOfWeek,
           isAvailable: false,
-          startTime: '09:00',
-          endTime: '17:00',
+          startTime: "09:00",
+          endTime: "17:00",
         };
 
         return (
@@ -198,10 +214,10 @@ export function WeeklySchedule() {
             {/* Time Inputs */}
             {daySchedule.isAvailable ? (
               <div className="flex items-center gap-1.5 sm:gap-2 pl-0 sm:pl-8">
-                <div 
+                <div
                   className="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-lg px-2 py-2.5 w-35 sm:flex-1 cursor-pointer hover:bg-slate-700 transition-colors"
                   onClick={(e) => {
-                    const input = e.currentTarget.querySelector('input');
+                    const input = e.currentTarget.querySelector("input");
                     input?.showPicker?.();
                   }}
                 >
@@ -210,17 +226,17 @@ export function WeeklySchedule() {
                     type="time"
                     value={daySchedule.startTime}
                     onChange={(e) =>
-                      handleTimeChange(dayOfWeek, 'startTime', e.target.value)
+                      handleTimeChange(dayOfWeek, "startTime", e.target.value)
                     }
-                    style={{ colorScheme: 'dark' }}
+                    style={{ colorScheme: "dark" }}
                     className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
                   />
                 </div>
                 <span className="text-slate-400 shrink-0">—</span>
-                <div 
+                <div
                   className="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-lg px-2 py-2.5 w-35 sm:flex-1 cursor-pointer hover:bg-slate-700 transition-colors"
                   onClick={(e) => {
-                    const input = e.currentTarget.querySelector('input');
+                    const input = e.currentTarget.querySelector("input");
                     input?.showPicker?.();
                   }}
                 >
@@ -228,16 +244,18 @@ export function WeeklySchedule() {
                   <input
                     type="time"
                     value={daySchedule.endTime}
-                  onChange={(e) =>
-                    handleTimeChange(dayOfWeek, 'endTime', e.target.value)
-                  }
-                  style={{ colorScheme: 'dark' }}
-                  className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
-                />
+                    onChange={(e) =>
+                      handleTimeChange(dayOfWeek, "endTime", e.target.value)
+                    }
+                    style={{ colorScheme: "dark" }}
+                    className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
+                  />
                 </div>
               </div>
             ) : (
-              <span className="text-slate-500 text-sm pl-0 sm:pl-8">{t('unavailable')}</span>
+              <span className="text-slate-500 text-sm pl-0 sm:pl-8">
+                {t("unavailable")}
+              </span>
             )}
           </div>
         );
@@ -250,7 +268,7 @@ export function WeeklySchedule() {
           disabled={isSaving}
           className="bg-orange-600 hover:bg-orange-700 text-white h-11 px-8 py-2.5 text-base font-semibold"
         >
-          {isSaving ? t('saving') : t('save')}
+          {isSaving ? t("saving") : t("save")}
         </Button>
       </div>
     </div>

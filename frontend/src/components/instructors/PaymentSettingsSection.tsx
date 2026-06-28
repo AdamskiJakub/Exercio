@@ -1,30 +1,38 @@
-'use client';
+"use client";
 
-import { UseFormReturn, Controller } from 'react-hook-form';
-import { InstructorProfileFormData } from '@/lib/validations/schemas/instructor-profile';
-import { useTranslations } from 'next-intl';
-import { CreditCard } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
-import { PAYMENT_METHOD_OPTIONS, PAYMENT_METHOD_ICONS, type PaymentMethod } from '@/constants/payment';
+import { UseFormReturn, Controller } from "react-hook-form";
+import { InstructorProfileFormData } from "@/lib/validations/schemas/instructor-profile";
+import { useTranslations } from "next-intl";
+import { CreditCard } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  PAYMENT_METHOD_OPTIONS,
+  PAYMENT_METHOD_ICONS,
+  type PaymentMethod,
+} from "@/constants/payment";
 
 interface PaymentSettingsSectionProps {
   form: UseFormReturn<InstructorProfileFormData>;
 }
 
 export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
-  const t = useTranslations('Dashboard.profileForm.paymentSettings');
-  const tCommon = useTranslations('Common.paymentMethods');
+  const t = useTranslations("Dashboard.profileForm.paymentSettings");
+  const tCommon = useTranslations("Common.paymentMethods");
 
-  const paymentMethods = (form.watch('paymentMethods') as PaymentMethod[]) || [];
+  const paymentMethods =
+    (form.watch("paymentMethods") as PaymentMethod[]) || [];
 
   const togglePaymentMethod = (method: PaymentMethod) => {
-    const current = (form.getValues('paymentMethods') as PaymentMethod[]) || [];
+    const current = (form.getValues("paymentMethods") as PaymentMethod[]) || [];
     if (current.includes(method)) {
-      form.setValue('paymentMethods', current.filter((m) => m !== method));
+      form.setValue(
+        "paymentMethods",
+        current.filter((m) => m !== method),
+      );
     } else {
-      form.setValue('paymentMethods', [...current, method]);
+      form.setValue("paymentMethods", [...current, method]);
     }
   };
 
@@ -33,11 +41,9 @@ export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
       <div>
         <h3 className="text-base font-semibold text-white flex items-center gap-2 mb-2">
           <CreditCard className="size-5 text-orange-500" />
-          {t('title')}
+          {t("title")}
         </h3>
-        <p className="text-xs text-slate-400">
-          {t('description')}
-        </p>
+        <p className="text-sm text-slate-400">{t("description")}</p>
       </div>
 
       {/* Payment Methods Checkboxes */}
@@ -61,8 +67,8 @@ export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
                 <span
                   className={`text-sm font-medium select-none ${
                     isChecked
-                      ? 'bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent'
-                      : 'text-slate-200'
+                      ? "bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
+                      : "text-slate-200"
                   }`}
                 >
                   {tCommon(option.labelKey)}
@@ -76,8 +82,8 @@ export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
       {/* Additional Payment Info */}
       <div className="space-y-2">
         <Label htmlFor="paymentInfo" className="text-slate-200 text-sm">
-          {t('additionalInfo')}
-          <span className="text-slate-500 ml-1">({t('optional')})</span>
+          {t("additionalInfo")}
+          <span className="text-slate-500 ml-1">({t("optional")})</span>
         </Label>
         <Controller
           name="paymentInfo"
@@ -85,17 +91,15 @@ export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
           render={({ field }) => (
             <Textarea
               {...field}
-              value={(field.value as string) || ''}
+              value={(field.value as string) || ""}
               id="paymentInfo"
-              placeholder={t('additionalInfoPlaceholder')}
+              placeholder={t("additionalInfoPlaceholder")}
               className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 min-h-20"
               maxLength={500}
             />
           )}
         />
-        <p className="text-xs text-slate-400">
-          {t('additionalInfoHint')}
-        </p>
+        <p className="text-sm text-slate-400">{t("additionalInfoHint")}</p>
       </div>
     </div>
   );

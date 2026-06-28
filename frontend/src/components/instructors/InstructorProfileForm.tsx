@@ -32,6 +32,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { MediaUpload } from "@/components/instructors/MediaUpload";
 import { ContactSettingsSection } from "@/components/instructors/ContactSettingsSection";
 import { PaymentSettingsSection } from "@/components/instructors/PaymentSettingsSection";
+import { BookingSettings } from "@/components/settings/booking-settings";
 import {
   Select,
   SelectContent,
@@ -146,6 +147,10 @@ export function InstructorProfileForm({
       contactMessage: profile?.contactMessage || "",
       paymentMethods: profile?.paymentMethods || [],
       paymentInfo: profile?.paymentInfo || "",
+      isBookingEnabled: profile?.isBookingEnabled ?? false,
+      sessionDuration: profile?.sessionDuration ?? 60,
+      sessionPrice: profile?.sessionPrice ?? null,
+      minNoticeHours: profile?.minNoticeHours ?? 48,
     },
   });
 
@@ -178,6 +183,10 @@ export function InstructorProfileForm({
         contactMessage: profile.contactMessage || "",
         paymentMethods: profile.paymentMethods || [],
         paymentInfo: profile.paymentInfo || "",
+        isBookingEnabled: profile.isBookingEnabled ?? false,
+        sessionDuration: profile.sessionDuration ?? 60,
+        sessionPrice: profile.sessionPrice ?? null,
+        minNoticeHours: profile.minNoticeHours ?? 48,
       });
     }
   }, [profile, reset]);
@@ -245,6 +254,10 @@ export function InstructorProfileForm({
         data.photoUrl && data.photoUrl.trim() !== ""
           ? data.photoUrl.trim()
           : null,
+      isBookingEnabled: data.isBookingEnabled ?? false,
+      sessionDuration: data.sessionDuration ?? 60,
+      sessionPrice: data.sessionPrice ?? null,
+      minNoticeHours: data.minNoticeHours ?? 48,
     };
 
     updateProfile(
@@ -380,7 +393,7 @@ export function InstructorProfileForm({
               <h3 className="text-base font-semibold text-white mb-2">
                 {t("additionalSpecializations")}
               </h3>
-              <p className="text-xs text-slate-400 mb-3">
+              <p className="text-sm text-slate-400 mb-3">
                 {t("additionalSpecializationsHint", {
                   max: MAX_ADDITIONAL_SPECIALIZATIONS,
                 })}
@@ -438,7 +451,7 @@ export function InstructorProfileForm({
               <h3 className="text-base font-semibold text-white mb-2">
                 {t("tags")}
               </h3>
-              <p className="text-xs text-slate-400 mb-3">
+              <p className="text-sm text-slate-400 mb-3">
                 {t("tagsHint", { max: MAX_TAGS })}
                 {selectedTags.length >= MAX_TAGS && (
                   <span className="text-orange-400 ml-2">
@@ -487,7 +500,7 @@ export function InstructorProfileForm({
             <h3 className="text-base font-semibold text-white mb-2">
               {t("goals")}
             </h3>
-            <p className="text-xs text-slate-400 mb-3">
+            <p className="text-sm text-slate-400 mb-3">
               {t("goalsHint")}
               {selectedGoals.length >= MAX_GOALS && (
                 <span className="text-orange-400 ml-2">
@@ -532,7 +545,7 @@ export function InstructorProfileForm({
         </div>
       </div>
 
-      {/* === LOCATION & PRICING SECTION === */}
+      {/* === LOCATION SECTION === */}
       <div className="pt-4 border-t border-slate-700/50">
         <div className="mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
@@ -601,7 +614,7 @@ export function InstructorProfileForm({
                   {errors.location.message}
                 </p>
               )}
-              <p className="text-xs text-slate-400">{t("locationHint")}</p>
+              <p className="text-sm text-slate-400">{t("locationHint")}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -658,65 +671,6 @@ export function InstructorProfileForm({
             </div>
           </div>
 
-          {/* Package Deals Checkbox */}
-          <div className="space-y-3">
-            <label className="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors border border-slate-700">
-              <Controller
-                name="packageDealsEnabled"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={(checked) => {
-                      const isChecked = checked === true;
-                      field.onChange(isChecked);
-                      if (!isChecked) {
-                        setValue("packageDealsDescription", "");
-                      }
-                    }}
-                    className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                  />
-                )}
-              />
-              <span
-                className={`text-base font-medium select-none ${
-                  watch("packageDealsEnabled")
-                    ? "bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent"
-                    : "text-slate-200"
-                }`}
-              >
-                {t("packageDealsEnabled")}
-              </span>
-            </label>
-
-            {/* Package Deals Description - pokazuje się tylko gdy checkbox zaznaczony */}
-            {watch("packageDealsEnabled") && (
-              <div className="ml-6 space-y-2">
-                <Label
-                  htmlFor="packageDealsDescription"
-                  className="text-base font-semibold text-slate-200"
-                >
-                  {t("packageDealsDescription")}
-                </Label>
-                <Textarea
-                  {...register("packageDealsDescription")}
-                  id="packageDealsDescription"
-                  placeholder={t("packageDealsPlaceholder")}
-                  rows={3}
-                  className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
-                />
-                <p className="text-slate-400 text-sm">
-                  {t("packageDealsHint")}
-                </p>
-                {errors.packageDealsDescription && (
-                  <p className="text-red-400 text-sm">
-                    {errors.packageDealsDescription.message}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* Languages */}
           <div className="space-y-2">
             <Label
@@ -737,6 +691,21 @@ export function InstructorProfileForm({
             )}
           </div>
         </div>
+      </div>
+
+      {/* === BOOKING SETTINGS & PRICING SECTION === */}
+      <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span className="text-2xl">💰</span>
+            {t("bookingSettingsTitle")}
+          </h2>
+          <p className="text-sm text-slate-400">
+            {t("bookingSettingsSubtitle")}
+          </p>
+        </div>
+
+        <BookingSettings form={form} />
       </div>
 
       {/* === CONTACT & MEDIA SECTION === */}

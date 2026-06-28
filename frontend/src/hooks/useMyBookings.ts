@@ -31,6 +31,7 @@ export interface Booking {
   guestPhone: string | null;
   cancelledBy: string | null;
   cancellationReason: string | null;
+  cancelledAt: string | null;
   createdAt: string;
   updatedAt: string;
   isManualBooking: boolean;
