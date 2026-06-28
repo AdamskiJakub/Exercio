@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { PAYMENT_METHODS } from '@/constants/payment';
+import { z } from "zod";
+import { PAYMENT_METHODS } from "@/constants/payment";
 
 // Payment methods enum for zod validation
 const paymentMethodsEnum = [
@@ -12,10 +12,10 @@ const paymentMethodsEnum = [
 // Helper to validate comma-separated languages
 const commaSeparatedStrings = z.string().refine(
   (val) => {
-    if (!val || val.trim() === '') return true;
-    return val.split(',').every(s => s.trim().length > 0);
+    if (!val || val.trim() === "") return true;
+    return val.split(",").every((s) => s.trim().length > 0);
   },
-  { message: 'Invalid format' }
+  { message: "Invalid format" },
 );
 
 // Helper to validate upload paths (relative /uploads/... or absolute URLs)
@@ -23,9 +23,9 @@ const commaSeparatedStrings = z.string().refine(
 const uploadPathOrUrl = z.string().refine(
   (val) => {
     // Reject empty or whitespace-only strings
-    if (!val || val.trim() === '') return false;
+    if (!val || val.trim() === "") return false;
     // Allow relative upload paths
-    if (val.startsWith('/uploads/')) return true;
+    if (val.startsWith("/uploads/")) return true;
     // Allow absolute URLs
     try {
       new URL(val);
@@ -34,7 +34,7 @@ const uploadPathOrUrl = z.string().refine(
       return false;
     }
   },
-  { message: 'Must be a valid URL or upload path' }
+  { message: "Must be a valid URL or upload path" },
 );
 
 export const instructorProfileSchema = z.object({
@@ -45,7 +45,7 @@ export const instructorProfileSchema = z.object({
   packageDealsEnabled: z.boolean().optional(),
   packageDealsDescription: z.string().max(500).optional(),
   // photoUrl can be null/undefined (use nullable + optional for flexibility)
-  photoUrl: z.union([uploadPathOrUrl, z.literal(''), z.null()]).optional(),
+  photoUrl: z.union([uploadPathOrUrl, z.literal(""), z.null()]).optional(),
   gallery: z.array(uploadPathOrUrl).optional(),
   languages: commaSeparatedStrings.optional(),
   yearsExperience: z.number().min(0).max(100).optional().nullable(),
@@ -55,6 +55,11 @@ export const instructorProfileSchema = z.object({
   // Payment settings
   paymentMethods: z.array(z.enum(paymentMethodsEnum)).max(10).optional(),
   paymentInfo: z.string().max(500).optional().nullable(),
+  // Booking settings
+  isBookingEnabled: z.boolean().optional(),
+  sessionDuration: z.number().min(15).max(240).optional(),
+  sessionPrice: z.number().min(0).optional().nullable(),
+  minNoticeHours: z.number().min(0).max(720).optional(),
 });
 
 export type InstructorProfileFormData = z.infer<typeof instructorProfileSchema>;

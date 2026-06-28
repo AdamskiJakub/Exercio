@@ -4,6 +4,7 @@ import {
   InfoEmailContent,
   PasswordResetEmailContent,
   VerificationEmailContent,
+  ReviewInvitationEmailContent,
 } from './email.types';
 
 export const VERIFICATION_TEXTS: Record<'pl' | 'en', VerificationEmailContent> =
@@ -252,5 +253,35 @@ export const INFO_EMAIL_TEXTS = {
       clientLabel: 'Client',
       clientEmailLabel: 'Client email',
     },
+  },
+};
+
+export const REVIEW_INVITATION_TEXTS: Record<
+  'pl' | 'en',
+  ReviewInvitationEmailContent
+> = {
+  pl: {
+    title: 'Sesja zakończona — wystaw opinię! ⭐',
+    subtitle:
+      'Twoja sesja treningowa została zakończona. Podziel się swoją opinią o trenerze.',
+    instructorName: 'Instruktor',
+    dateLabel: 'Data',
+    timeLabel: 'Godzina',
+    durationLabel: 'Czas trwania',
+    minutes: 'min',
+    reviewButton: 'Wystaw opinię',
+    footer: 'Dziękujemy za skorzystanie z Trainly!',
+  },
+  en: {
+    title: 'Session Completed — Leave a Review! ⭐',
+    subtitle:
+      'Your training session has ended. Share your feedback about the instructor.',
+    instructorName: 'Instructor',
+    dateLabel: 'Date',
+    timeLabel: 'Time',
+    durationLabel: 'Duration',
+    minutes: 'min',
+    reviewButton: 'Leave a Review',
+    footer: 'Thank you for using Trainly!',
   },
 };

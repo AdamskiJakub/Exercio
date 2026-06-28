@@ -14,6 +14,7 @@ import { BookingsModule } from './bookings/bookings.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { StaticConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ContactModule } from './contact/contact.module';
     AvailabilityModule,
     StaticConfigModule,
     ContactModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [

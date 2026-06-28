@@ -1,125 +1,129 @@
-import { defineRouting } from 'next-intl/routing';
-import { createNavigation } from 'next-intl/navigation';
+import { defineRouting } from "next-intl/routing";
+import { createNavigation } from "next-intl/navigation";
 
 export const routing = defineRouting({
   // A list of all locales that are supported
-  locales: ['pl', 'en'],
+  locales: ["pl", "en"],
 
   // Used when no locale matches
-  defaultLocale: 'pl',
-  
+  defaultLocale: "pl",
+
   // Always show locale prefix in URL
-  localePrefix: 'always',
-  
+  localePrefix: "always",
+
   // Localized pathnames (folder names stay in English!)
   pathnames: {
-    '/': {
-      pl: '/',
-      en: '/',
+    "/": {
+      pl: "/",
+      en: "/",
     },
-    '/login': {
-      pl: '/logowanie',
-      en: '/login',
+    "/login": {
+      pl: "/logowanie",
+      en: "/login",
     },
-    '/register': {
-      pl: '/rejestracja',
-      en: '/register',
+    "/register": {
+      pl: "/rejestracja",
+      en: "/register",
     },
-    '/register/client': {
-      pl: '/rejestracja/klient',
-      en: '/register/client',
+    "/register/client": {
+      pl: "/rejestracja/klient",
+      en: "/register/client",
     },
-    '/register/instructor': {
-      pl: '/rejestracja/instruktor',
-      en: '/register/instructor',
+    "/register/instructor": {
+      pl: "/rejestracja/instruktor",
+      en: "/register/instructor",
     },
-    '/forgot-password': {
-      pl: '/zapomnialem-hasla',
-      en: '/forgot-password',
+    "/forgot-password": {
+      pl: "/zapomnialem-hasla",
+      en: "/forgot-password",
     },
-    '/reset-password': {
-      pl: '/resetowanie-hasla',
-      en: '/reset-password',
+    "/reset-password": {
+      pl: "/resetowanie-hasla",
+      en: "/reset-password",
     },
-    '/verify-email': {
-      pl: '/weryfikacja-email',
-      en: '/verify-email',
+    "/verify-email": {
+      pl: "/weryfikacja-email",
+      en: "/verify-email",
     },
-    '/auth/callback': {
-      pl: '/auth/callback',
-      en: '/auth/callback',
+    "/auth/callback": {
+      pl: "/auth/callback",
+      en: "/auth/callback",
     },
-    '/dashboard': {
-      pl: '/panel',
-      en: '/dashboard',
+    "/dashboard": {
+      pl: "/panel",
+      en: "/dashboard",
     },
-    '/dashboard/profile': {
-      pl: '/panel/profil',
-      en: '/dashboard/profile',
+    "/dashboard/profile": {
+      pl: "/panel/profil",
+      en: "/dashboard/profile",
     },
-    '/dashboard/profile/edit': {
-      pl: '/panel/profil/edycja',
-      en: '/dashboard/profile/edit',
+    "/dashboard/profile/edit": {
+      pl: "/panel/profil/edycja",
+      en: "/dashboard/profile/edit",
     },
-    '/dashboard/profile/preview': {
-      pl: '/panel/profil/podglad',
-      en: '/dashboard/profile/preview',
+    "/dashboard/profile/preview": {
+      pl: "/panel/profil/podglad",
+      en: "/dashboard/profile/preview",
     },
-    '/dashboard/settings': {
-      pl: '/panel/ustawienia',
-      en: '/dashboard/settings',
+    "/dashboard/settings": {
+      pl: "/panel/ustawienia",
+      en: "/dashboard/settings",
     },
-    '/dashboard/calendar': {
-      pl: '/panel/kalendarz',
-      en: '/dashboard/calendar',
+    "/dashboard/calendar": {
+      pl: "/panel/kalendarz",
+      en: "/dashboard/calendar",
     },
-    '/instructors': {
-      pl: '/instruktorzy',
-      en: '/instructors',
+    "/instructors": {
+      pl: "/instruktorzy",
+      en: "/instructors",
     },
-    '/instructors/[username]': {
-      pl: '/instruktorzy/[username]',
-      en: '/instructors/[username]',
+    "/instructors/[username]": {
+      pl: "/instruktorzy/[username]",
+      en: "/instructors/[username]",
     },
-    '/instructors/[username]/book': {
-      pl: '/instruktorzy/[username]/rezerwacja',
-      en: '/instructors/[username]/book',
+    "/instructors/[username]/book": {
+      pl: "/instruktorzy/[username]/rezerwacja",
+      en: "/instructors/[username]/book",
     },
-    '/how-it-works': {
-      pl: '/jak-to-dziala',
-      en: '/how-it-works',
+    "/how-it-works": {
+      pl: "/jak-to-dziala",
+      en: "/how-it-works",
     },
-    '/pricing': {
-      pl: '/cennik',
-      en: '/pricing',
+    "/pricing": {
+      pl: "/cennik",
+      en: "/pricing",
     },
-    '/help': {
-      pl: '/pomoc',
-      en: '/help',
+    "/help": {
+      pl: "/pomoc",
+      en: "/help",
     },
-    '/contact': {
-      pl: '/kontakt',
-      en: '/contact',
+    "/contact": {
+      pl: "/kontakt",
+      en: "/contact",
     },
-    '/faq': {
-      pl: '/faq',
-      en: '/faq',
+    "/faq": {
+      pl: "/faq",
+      en: "/faq",
     },
-    '/safety': {
-      pl: '/bezpieczenstwo',
-      en: '/safety',
+    "/safety": {
+      pl: "/bezpieczenstwo",
+      en: "/safety",
     },
-    '/privacy': {
-      pl: '/polityka-prywatnosci',
-      en: '/privacy',
+    "/privacy": {
+      pl: "/polityka-prywatnosci",
+      en: "/privacy",
     },
-    '/terms': {
-      pl: '/regulamin',
-      en: '/terms',
+    "/terms": {
+      pl: "/regulamin",
+      en: "/terms",
     },
-    '/cookies': {
-      pl: '/polityka-cookies',
-      en: '/cookies',
+    "/review": {
+      pl: "/opinia",
+      en: "/review",
+    },
+    "/cookies": {
+      pl: "/polityka-cookies",
+      en: "/cookies",
     },
   },
 });

@@ -46,7 +46,7 @@ export class BookingQueryService {
         },
       },
       orderBy: {
-        startTime: 'asc',
+        startTime: 'desc',
       },
     });
   }

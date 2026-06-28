@@ -1,12 +1,16 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SlotGenerationService } from './slot-generation.service';
 import { BookingNotificationHelper } from '../helpers/booking-notification.helper';
+import { EmailService } from '../../email/email.service';
+import { ReviewsService } from '../../reviews/reviews.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { CreateManualBookingDto } from '../dto/create-manual-booking.dto';
 import { CANCELLATION_TOKEN_EXPIRY_MS } from '../bookings.constants';
@@ -14,10 +18,15 @@ import type { Language } from '../../email/email.types';
 
 @Injectable()
 export class BookingCreationService {
+  private readonly logger = new Logger(BookingCreationService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly slotGenerationService: SlotGenerationService,
     private readonly notificationHelper: BookingNotificationHelper,
+    private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
+    private readonly reviewsService: ReviewsService,
   ) {}
 
   /**
@@ -584,6 +593,7 @@ export class BookingCreationService {
 
   /**
    * Complete a booking (instructor only)
+   * Can only be called after the session endTime has passed
    */
   async completeBooking(bookingId: string, userId: string) {
     const booking = await this.prisma.booking.findUnique({
@@ -602,10 +612,85 @@ export class BookingCreationService {
       throw new BadRequestException('Only confirmed bookings can be completed');
     }
 
-    return this.prisma.booking.update({
+    // Prevent completing before the session endTime
+    const nodeEnv = this.configService.get<string>('NODE_ENV');
+    const devBypassEnabled =
+      this.configService.get<string>('DEV_BYPASS_SESSION_TIME') === 'true';
+    const devBypass = nodeEnv === 'development' && devBypassEnabled;
+
+    // Production guard: never allow bypass in production
+    if (nodeEnv === 'production' && devBypassEnabled) {
+      throw new BadRequestException(
+        'DEV_BYPASS_SESSION_TIME is not allowed in production',
+      );
+    }
+
+    if (
+      !devBypass &&
+      booking.endTime &&
+      new Date() < new Date(booking.endTime)
+    ) {
+      throw new BadRequestException(
+        'Cannot complete a booking before the session end time',
+      );
+    }
+
+    const updated = await this.prisma.booking.update({
       where: { id: bookingId },
       data: { status: 'COMPLETED' },
     });
+
+    // Generate review token and send invitation email
+    try {
+      const { token } =
+        await this.reviewsService.generateReviewToken(bookingId);
+
+      const frontendUrl =
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:3000';
+      const reviewUrl = `${frontendUrl}/review?bookingId=${bookingId}&token=${token}`;
+
+      // Resolve instructor name for the email template
+      const instructor = await this.prisma.user.findUnique({
+        where: { id: booking.instructorId },
+        select: { firstName: true, lastName: true },
+      });
+      const instructorName = instructor?.firstName
+        ? `${instructor.firstName} ${instructor.lastName || ''}`.trim()
+        : 'Trainer';
+
+      if (booking.guestEmail) {
+        await this.emailService.sendReviewInvitation(
+          booking.guestEmail,
+          'pl',
+          instructorName,
+          reviewUrl,
+        );
+      }
+
+      // For registered clients, also send an email notification
+      if (booking.clientId) {
+        const client = await this.prisma.user.findUnique({
+          where: { id: booking.clientId },
+          select: { email: true, firstName: true },
+        });
+        if (client?.email) {
+          await this.emailService.sendReviewInvitation(
+            client.email,
+            'pl',
+            instructorName,
+            reviewUrl,
+          );
+        }
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to send review invitation for booking ${bookingId}`,
+        error,
+      );
+    }
+
+    return updated;
   }
 
   /**

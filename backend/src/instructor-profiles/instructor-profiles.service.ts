@@ -23,7 +23,7 @@ interface InstructorFilters {
   specialization?: string;
   tags?: string[];
   goals?: string[];
-  // minRating?: number; // TODO: Implement when reviews/ratings are added
+  minRating?: number;
   priceMin?: number;
   priceMax?: number;
   page?: number;
@@ -84,6 +84,31 @@ export class InstructorProfilesService {
     const page = Math.max(1, filters.page || 1);
     const limit = Math.min(100, Math.max(1, filters.limit || 20));
     const skip = (page - 1) * limit;
+
+    // If minRating filter is set, filter profiles at DB level using review aggregation
+    if (filters.minRating !== undefined) {
+      // Use raw SQL to find instructor IDs that meet the minRating threshold
+      // (at least 5 reviews with average rating >= minRating)
+      const qualifyingInstructorIds = await this.prisma.$queryRaw<
+        Array<{ instructor_id: string }>
+      >`
+        SELECT b."instructorId" AS instructor_id
+        FROM "Review" r
+        JOIN "Booking" b ON b."id" = r."bookingId"
+        GROUP BY b."instructorId"
+        HAVING COUNT(*) >= 5 AND AVG(r.rating) >= ${filters.minRating}
+      `;
+
+      const qualifyingIds = new Set(
+        qualifyingInstructorIds.map((row) => row.instructor_id),
+      );
+
+      // Filter profiles to only those that match the instructor IDs from the subquery
+      // We need to map profile.userId (which is the instructor's user ID) to the instructorId in Booking
+      // Actually, profile.id is the instructorProfile.id, and booking.instructorId is the user ID
+      // So we filter by profile.userId (which is the user ID = instructorId in Booking)
+      where.userId = { in: Array.from(qualifyingIds) };
+    }
 
     const [profiles, total] = await Promise.all([
       this.prisma.instructorProfile.findMany({

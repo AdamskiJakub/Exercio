@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { cardVariants } from '@/lib/animations';
-import { LucideIcon } from 'lucide-react';
+import { motion } from "framer-motion";
+import { cardVariants } from "@/lib/animations";
+import { LucideIcon } from "lucide-react";
+import { Link } from "@/i18n/routing";
 
 interface StatsCardProps {
   icon: LucideIcon;
@@ -12,6 +13,8 @@ interface StatsCardProps {
   value: string | number;
   subtitle: string;
   delay?: number;
+  href?: string;
+  onClick?: () => void;
 }
 
 export function StatsCard({
@@ -22,14 +25,17 @@ export function StatsCard({
   value,
   subtitle,
   delay = 0,
+  href,
+  onClick,
 }: StatsCardProps) {
-  return (
+  const content = (
     <motion.div
       variants={cardVariants}
       initial="hidden"
       animate="visible"
       custom={delay}
       className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500 rounded-xl p-6 cursor-pointer transition-colors duration-300"
+      onClick={onClick}
     >
       <div className="flex items-center gap-3 mb-2">
         <div className={`p-2 ${iconBgColor} rounded-lg`}>
@@ -41,4 +47,10 @@ export function StatsCard({
       <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
     </motion.div>
   );
+
+  if (href) {
+    return <Link href={href as any}>{content}</Link>;
+  }
+
+  return content;
 }
