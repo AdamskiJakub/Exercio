@@ -260,7 +260,7 @@ export class InstructorProfilesService {
     const reviewAgg = await this.prisma.review.aggregate({
       where: {
         booking: {
-          instructorId: profile.userId,
+          instructorId: profile.id,
         },
       },
       _avg: {

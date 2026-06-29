@@ -16,52 +16,78 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Generate diff and call DeepSeek
-        id: review
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      - name: Get changed files
+        id: files
         run: |
-          # Generate diff between base branch and PR head
-          DIFF=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . \
-            ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
-            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
-            ':!**/node_modules/**' 2>/dev/null || true)
-
-          # Get list of changed files
+          # Get list of changed files (code only)
           FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
             ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
             ':!**/node_modules/**' 2>/dev/null || true)
 
-          if [ -z "$DIFF" ]; then
+          echo "FILES<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate full file contents for review
+        id: review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          FILES="${{ steps.files.outputs.FILES }}"
+
+          if [ -z "$FILES" ]; then
             echo "✅ No code changes to review." > /tmp/review_comment.txt
             exit 0
           fi
 
-          # Truncate if too large for DeepSeek context
-          if [ ${#DIFF} -gt 60000 ]; then
-            DIFF="${DIFF:0:60000}"
-          fi
+          # Build context: for each changed file, include its FULL content
+          CONTEXT=""
+          TOTAL_LENGTH=0
+          MAX_LENGTH=80000
 
-          # Save diff and file list to temp files
-          echo "$DIFF" > /tmp/pr_diff.txt
-          echo "$FILES" > /tmp/pr_files.txt
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              FILE_CONTENT=$(cat "$file")
+              FILE_LENGTH=${#FILE_CONTENT}
+              
+              # Estimate tokens (roughly 4 chars per token)
+              EST_TOKENS=$((FILE_LENGTH / 4))
+              
+              # Skip binary or huge files
+              if [ "$FILE_LENGTH" -gt 50000 ]; then
+                FILE_CONTENT="${FILE_CONTENT:0:50000}\n\n// ... [truncated, file too large]"
+                FILE_LENGTH=50000
+              fi
+              
+              ENTRY="\n\n=== $file ===\n\`\`\`\n$FILE_CONTENT\n\`\`\`"
+              ENTRY_LENGTH=${#ENTRY}
+              
+              if [ $((TOTAL_LENGTH + ENTRY_LENGTH)) -gt $MAX_LENGTH ]; then
+                CONTEXT="${CONTEXT}\n\n// ... [remaining files truncated due to context limit]"
+                break
+              fi
+              
+              CONTEXT="${CONTEXT}${ENTRY}"
+              TOTAL_LENGTH=$((TOTAL_LENGTH + ENTRY_LENGTH))
+            fi
+          done <<< "$FILES"
 
-          # Build JSON payload using jq with rawfile to avoid escaping issues
+          # Build JSON payload
           jq -n \
-            --rawfile diff /tmp/pr_diff.txt \
-            --rawfile files /tmp/pr_files.txt '{
+            --arg context "$CONTEXT" \
+            --arg files "$FILES" '{
             model: "deepseek-chat",
             max_tokens: 2000,
             temperature: 0.3,
             messages: [
               {
                 role: "system",
-                content: "You are a senior code reviewer. Review the git diff and list issues. For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say ✅ No significant issues found."
+                content: "You are a senior code reviewer. Review the FULL source code of changed files (not just the diff). For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety, unused imports/variables, incorrect logic. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say ✅ No significant issues found. IMPORTANT: You have the FULL file contents, not just a diff. Use this to check for unused imports, unused variables, and logic errors that span across changed and unchanged lines."
               },
               {
                 role: "user",
-                content: ("Files changed:\n" + $files + "\n\nDiff:\n```diff\n" + $diff + "\n```")
+                content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
               }
             ]
           }' > /tmp/payload.json
