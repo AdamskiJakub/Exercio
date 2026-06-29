@@ -287,7 +287,7 @@ export class SlotGenerationService {
           break;
         }
 
-        if (slotStart > now) {
+        if (slotStart > minNoticeDate) {
           const bookedSession = existingBookings.find((booking) => {
             const bookingStart = new Date(booking.startTime);
             const bookingEnd = new Date(booking.endTime);

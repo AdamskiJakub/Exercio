@@ -210,7 +210,7 @@ export function BookingHistorySection({
                               : booking.status}
                         </span>
                         {isCancelled && booking.cancellationReason && (
-                          <span className="text-xs text-slate-500 italic truncate max-w-[250px]">
+                          <span className="text-xs text-slate-500 italic truncate max-w-62.5">
                             &mdash; {booking.cancellationReason}
                           </span>
                         )}

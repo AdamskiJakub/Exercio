@@ -39,6 +39,42 @@ export class InstructorProfilesService {
     private configService: StaticConfigService,
   ) {}
 
+  /**
+   * Verify that the user owns the instructor profile.
+   * Shared across multiple services to avoid duplication.
+   */
+  async verifyInstructorOwnership(userId: string, instructorId: string) {
+    const profile = await this.prisma.instructorProfile.findUnique({
+      where: { id: instructorId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Instructor profile not found');
+    }
+
+    if (profile.userId !== userId) {
+      throw new ForbiddenException('You do not own this instructor profile');
+    }
+
+    return profile;
+  }
+
+  /**
+   * Find instructor profile by userId, throwing if not found.
+   * Shared across multiple services to avoid duplication.
+   */
+  async findInstructorProfileByUserIdOrThrow(userId: string) {
+    const profile = await this.prisma.instructorProfile.findUnique({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Instructor profile not found');
+    }
+
+    return profile;
+  }
+
   async findAll(filters: InstructorFilters): Promise<PaginatedResult<any>> {
     const where: any = {
       isDraft: false,
@@ -220,6 +256,22 @@ export class InstructorProfilesService {
       userInfo.phone = profile.user.phone;
     }
 
+    // Fetch review stats for this instructor
+    const reviewAgg = await this.prisma.review.aggregate({
+      where: {
+        booking: {
+          instructorId: profile.userId,
+        },
+      },
+      _avg: {
+        rating: true,
+      },
+      _count: true,
+    });
+
+    const reviewCount = reviewAgg._count;
+    const averageRating = reviewAgg._avg.rating;
+
     // contactMessage is always public if set (shown in contact section)
     return {
       ...profile,
@@ -231,6 +283,8 @@ export class InstructorProfilesService {
         this.configService.isValidGoal(goal),
       ),
       user: userInfo,
+      averageRating: reviewCount >= 5 ? averageRating : null,
+      reviewCount,
     };
   }
 

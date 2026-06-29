@@ -41,11 +41,25 @@ export class ReviewsController {
 
   /**
    * GET /reviews/instructor/:id
-   * Get all reviews for an instructor's profile (public).
+   * Get paginated reviews for an instructor's profile (public).
+   * @param page - page number (default: 1)
+   * @param limit - reviews per page (default: 10, max: 50)
    */
   @Get('instructor/:id')
-  async getInstructorReviews(@Param('id') instructorProfileId: string) {
-    return this.reviewsService.getInstructorReviews(instructorProfileId);
+  async getInstructorReviews(
+    @Param('id') instructorProfileId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? Math.max(1, parseInt(page, 10) || 1) : 1;
+    const limitNum = limit
+      ? Math.min(50, Math.max(1, parseInt(limit, 10) || 10))
+      : 10;
+    return this.reviewsService.getInstructorReviews(
+      instructorProfileId,
+      pageNum,
+      limitNum,
+    );
   }
 
   /**

@@ -40,6 +40,7 @@ import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { useState, useMemo } from "react";
 import { useClearHistory } from "@/hooks/useClearHistory";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { getInstructorName } from "@/lib/utils/user";
 
 export function InstructorDashboard() {
   const t = useTranslations("Dashboard.instructor");
@@ -120,12 +121,6 @@ export function InstructorDashboard() {
     totalReviews: reviewStats?.reviewCount || 0,
     totalSessions: 0, // TODO: Get from bookings
     activeClients: 0, // TODO: Get from bookings
-  };
-
-  const getInstructorName = (booking: Booking) => {
-    return booking.instructorUser?.firstName
-      ? `${booking.instructorUser.firstName} ${booking.instructorUser.lastName || ""}`.trim()
-      : booking.instructorUser?.email || "Instructor";
   };
 
   return (
@@ -414,8 +409,12 @@ function RecentReviews({
   instructorProfileId: string | undefined;
 }) {
   const t = useTranslations("Dashboard.instructor");
-  const { data: reviews, isLoading } =
-    useInstructorReviews(instructorProfileId);
+  const { data: reviewsData, isLoading } = useInstructorReviews(
+    instructorProfileId,
+    1,
+    5,
+  );
+  const reviews = reviewsData?.data ?? [];
 
   if (isLoading) {
     return (
@@ -425,7 +424,7 @@ function RecentReviews({
     );
   }
 
-  if (!reviews || reviews.length === 0) {
+  if (reviews.length === 0) {
     return (
       <EmptyStateCard
         icon={Star}
@@ -437,7 +436,7 @@ function RecentReviews({
 
   return (
     <div className="space-y-3">
-      {reviews.slice(0, 5).map((review) => (
+      {reviews.map((review) => (
         <div
           key={review.id}
           className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50"
@@ -470,9 +469,9 @@ function RecentReviews({
           </p>
         </div>
       ))}
-      {reviews.length > 5 && (
+      {reviewsData && reviewsData.totalCount > 5 && (
         <p className="text-center text-xs text-slate-500">
-          {t("moreReviews", { count: reviews.length - 5 })}
+          {t("moreReviews", { count: reviewsData.totalCount - 5 })}
         </p>
       )}
     </div>

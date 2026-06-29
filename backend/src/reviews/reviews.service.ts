@@ -188,7 +188,11 @@ export class ReviewsService {
   /**
    * Get all reviews for an instructor's profile.
    */
-  async getInstructorReviews(instructorProfileId: string) {
+  async getInstructorReviews(
+    instructorProfileId: string,
+    page: number = 1,
+    limit: number = 10,
+  ) {
     // First find the instructor's user ID
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: instructorProfileId },
@@ -199,40 +203,53 @@ export class ReviewsService {
       throw new NotFoundException('Instructor profile not found');
     }
 
-    const reviews = await this.prisma.review.findMany({
-      where: {
-        booking: {
-          instructorId: profile.userId,
-        },
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatarUrl: true,
+    const skip = (page - 1) * limit;
+
+    const [reviews, totalCount] = await Promise.all([
+      this.prisma.review.findMany({
+        where: {
+          booking: {
+            instructorId: profile.userId,
           },
         },
-        booking: {
-          select: {
-            id: true,
-            startTime: true,
-            service: {
-              select: {
-                name: true,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
+          booking: {
+            select: {
+              id: true,
+              startTime: true,
+              service: {
+                select: {
+                  name: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      }),
+      this.prisma.review.count({
+        where: {
+          booking: {
+            instructorId: profile.userId,
+          },
+        },
+      }),
+    ]);
 
     // Map guest reviews to show "Verified Client" instead of user data
-    return reviews.map((review) => ({
+    const data = reviews.map((review) => ({
       id: review.id,
       rating: review.rating,
       comment: review.comment,
@@ -251,6 +268,14 @@ export class ReviewsService {
       serviceName: review.booking?.service?.name || null,
       bookingDate: review.booking?.startTime,
     }));
+
+    return {
+      data,
+      totalCount,
+      page,
+      limit,
+      hasMore: skip + limit < totalCount,
+    };
   }
 
   /**
