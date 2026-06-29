@@ -1,10 +1,10 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { InstructorProfilesService } from '../instructor-profiles/instructor-profiles.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { CreateAvailabilityExceptionDto } from './dto/create-availability-exception.dto';
@@ -12,24 +12,10 @@ import { UpdateAvailabilityExceptionDto } from './dto/update-availability-except
 
 @Injectable()
 export class AvailabilityService {
-  constructor(private prisma: PrismaService) {}
-
-  // ==================== HELPER METHODS ====================
-
-  /**
-   * Find instructor profile by userId
-   */
-  async findInstructorProfileByUserId(userId: string) {
-    const profile = await this.prisma.instructorProfile.findUnique({
-      where: { userId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException('Instructor profile not found');
-    }
-
-    return profile;
-  }
+  constructor(
+    private prisma: PrismaService,
+    private instructorProfilesService: InstructorProfilesService,
+  ) {}
 
   /**
    * Bulk set weekly schedule (create or update)
@@ -45,7 +31,10 @@ export class AvailabilityService {
     }>,
   ) {
     // Verify ownership
-    await this.verifyInstructorOwnership(userId, instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      instructorId,
+    );
 
     // Validate all time ranges for available days
     for (const slot of schedule) {
@@ -61,7 +50,7 @@ export class AvailabilityService {
 
     // Create new schedule (only for available days)
     const availableSlots = schedule.filter((s) => s.isAvailable);
-    
+
     if (availableSlots.length === 0) {
       return [];
     }
@@ -101,7 +90,10 @@ export class AvailabilityService {
     dto: CreateAvailabilityDto,
   ) {
     // Verify user owns this instructor profile
-    await this.verifyInstructorOwnership(userId, instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      instructorId,
+    );
 
     // Check if availability for this day already exists
     const existing = await this.prisma.availability.findUnique({
@@ -149,7 +141,10 @@ export class AvailabilityService {
       throw new NotFoundException('Availability slot not found');
     }
 
-    await this.verifyInstructorOwnership(userId, availability.instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      availability.instructorId,
+    );
 
     // Validate time range if provided
     if (dto.startTime || dto.endTime) {
@@ -176,7 +171,10 @@ export class AvailabilityService {
       throw new NotFoundException('Availability slot not found');
     }
 
-    await this.verifyInstructorOwnership(userId, availability.instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      availability.instructorId,
+    );
 
     return this.prisma.availability.delete({
       where: { id: availabilityId },
@@ -216,7 +214,10 @@ export class AvailabilityService {
     instructorId: string,
     dto: CreateAvailabilityExceptionDto,
   ) {
-    await this.verifyInstructorOwnership(userId, instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      instructorId,
+    );
 
     const date = new Date(dto.date);
 
@@ -269,13 +270,16 @@ export class AvailabilityService {
       throw new NotFoundException('Availability exception not found');
     }
 
-    await this.verifyInstructorOwnership(userId, exception.instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      exception.instructorId,
+    );
 
     // If date is being changed, check for conflicts
     if (dto.date) {
       const newDate = new Date(dto.date);
       const existingDate = exception.date;
-      
+
       // Only check for conflicts if date actually changes
       if (newDate.getTime() !== existingDate.getTime()) {
         const conflict = await this.prisma.availabilityException.findUnique({
@@ -330,7 +334,10 @@ export class AvailabilityService {
       throw new NotFoundException('Availability exception not found');
     }
 
-    await this.verifyInstructorOwnership(userId, exception.instructorId);
+    await this.instructorProfilesService.verifyInstructorOwnership(
+      userId,
+      exception.instructorId,
+    );
 
     return this.prisma.availabilityException.delete({
       where: { id: exceptionId },
@@ -338,25 +345,6 @@ export class AvailabilityService {
   }
 
   // ==================== HELPER METHODS ====================
-
-  /**
-   * Verify that the user owns the instructor profile
-   */
-  private async verifyInstructorOwnership(userId: string, instructorId: string) {
-    const profile = await this.prisma.instructorProfile.findUnique({
-      where: { id: instructorId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException('Instructor profile not found');
-    }
-
-    if (profile.userId !== userId) {
-      throw new ForbiddenException('You do not own this instructor profile');
-    }
-
-    return profile;
-  }
 
   /**
    * Validate time range (start must be before end)

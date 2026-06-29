@@ -30,6 +30,7 @@ import { useState, useMemo } from "react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { scrollToSection } from "@/lib/utils/scroll";
+import { getInstructorName } from "@/lib/utils/user";
 
 export function ClientDashboard() {
   const t = useTranslations("Dashboard.client");
@@ -85,12 +86,6 @@ export function ClientDashboard() {
     completedSessions: completedBookings.length,
     favoriteTrainers: 0,
     pendingReviews: pendingReviewCount,
-  };
-
-  const getInstructorName = (booking: Booking) => {
-    return booking.instructorUser?.firstName
-      ? `${booking.instructorUser.firstName} ${booking.instructorUser.lastName || ""}`.trim()
-      : booking.instructorUser?.email || "Instructor";
   };
 
   return (

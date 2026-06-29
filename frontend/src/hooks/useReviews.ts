@@ -44,6 +44,14 @@ export interface InstructorReviewStats {
   ratingLabel: string | null;
 }
 
+export interface PaginatedReviews {
+  data: InstructorReview[];
+  totalCount: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
 export function usePendingReviews() {
   return useQuery({
     queryKey: ["reviews", "pending"],
@@ -71,12 +79,16 @@ export function useCreateReview() {
   });
 }
 
-export function useInstructorReviews(instructorProfileId: string | undefined) {
+export function useInstructorReviews(
+  instructorProfileId: string | undefined,
+  page: number = 1,
+  limit: number = 10,
+) {
   return useQuery({
-    queryKey: ["reviews", "instructor", instructorProfileId],
+    queryKey: ["reviews", "instructor", instructorProfileId, page, limit],
     queryFn: async () => {
-      const response = await apiClient.get<InstructorReview[]>(
-        `/reviews/instructor/${instructorProfileId}`,
+      const response = await apiClient.get<PaginatedReviews>(
+        `/reviews/instructor/${instructorProfileId}?page=${page}&limit=${limit}`,
       );
       return response.data;
     },
