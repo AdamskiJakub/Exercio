@@ -246,6 +246,7 @@
       "myUpcomingSessions": "My Upcoming Sessions",
       "noUpcomingSessions": "No upcoming sessions",
       "bookAsClientDescription": "Here you'll see sessions you've booked with other instructors",
+      "favoriteTrainers": "Favorite Trainers",
       "asInstructor": "As Instructor",
       "asClient": "As Client"
     },
@@ -1041,6 +1042,16 @@
     "title": "Page Not Found",
     "description": "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
     "goHome": "Go Home",
+    "browseTrainers": "Browse Trainers"
+  },
+  "Favorites": {
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "myFavorites": "Favorite Trainers",
+    "noFavorites": "No favorite trainers yet",
+    "noFavoritesDescription": "Browse available trainers and add them to your favorites to keep them at your fingertips.",
+    "favoriteTrainers": "Favorite Trainers",
+    "saved": "saved",
     "browseTrainers": "Browse Trainers"
   }
 }

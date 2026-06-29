@@ -15,6 +15,7 @@ import { AvailabilityModule } from './availability/availability.module';
 import { StaticConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     StaticConfigModule,
     ContactModule,
     ReviewsModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [

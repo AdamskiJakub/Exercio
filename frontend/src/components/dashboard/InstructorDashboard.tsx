@@ -35,10 +35,12 @@ import { EmptyStateCard } from "./EmptyStateCard";
 import { DashboardHeader } from "./DashboardHeader";
 import { PendingReviewsSection } from "./PendingReviewsSection";
 import { BookingHistorySection } from "./BookingHistorySection";
+import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
 import { BookingsList } from "@/components/bookings/BookingsList";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { useState, useMemo } from "react";
 import { useClearHistory } from "@/hooks/useClearHistory";
+import { useMyFavorites } from "@/hooks/useFavorites";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { getInstructorName } from "@/lib/utils/user";
 
@@ -55,6 +57,7 @@ export function InstructorDashboard() {
     useMyBookings("client");
   const { data: pendingReviews, isLoading: pendingReviewsLoading } =
     usePendingReviews();
+  const { data: favorites } = useMyFavorites();
 
   // Review flow state & handlers
   const {
@@ -336,13 +339,24 @@ export function InstructorDashboard() {
             </DashboardCard>
           </div>
 
+          {/* Favorite Trainers */}
+          <DashboardCard
+            icon={Heart}
+            iconColor="text-pink-500"
+            iconBgColor="bg-pink-500/10"
+            title={t("favoriteTrainers")}
+            delay={8}
+          >
+            <FavoriteTrainersSection />
+          </DashboardCard>
+
           {/* Unified Booking History with tabs */}
           <div id="my-client-history" className="scroll-mt-20 md:col-span-2">
             <DashboardCard
               icon={FileText}
               iconColor="text-slate-400"
               title={t("bookingHistory")}
-              delay={8}
+              delay={9}
             >
               <BookingHistorySection
                 instructorBookings={pastInstructorBookings}

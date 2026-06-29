@@ -1,10 +1,8 @@
 "use client";
 
-import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/stores/auth-store";
 import { useMyBookings } from "@/hooks/useMyBookings";
-import type { Booking } from "@/hooks/useMyBookings";
 import { usePendingReviews } from "@/hooks/useReviews";
 import { useReviewFlow } from "@/hooks/useReviewFlow";
 import {
@@ -12,7 +10,6 @@ import {
   Heart,
   MessageSquare,
   Star,
-  Search,
   FileText,
   TrendingUp,
   Settings,
@@ -23,9 +20,11 @@ import { EmptyStateCard } from "./EmptyStateCard";
 import { DashboardHeader } from "./DashboardHeader";
 import { PendingReviewsSection } from "./PendingReviewsSection";
 import { BookingHistorySection } from "./BookingHistorySection";
+import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
 import { BookingsList } from "@/components/bookings/BookingsList";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useClearHistory } from "@/hooks/useClearHistory";
+import { useMyFavorites } from "@/hooks/useFavorites";
 import { useState, useMemo } from "react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
@@ -40,6 +39,7 @@ export function ClientDashboard() {
     useMyBookings("client");
   const { data: pendingReviews, isLoading: pendingReviewsLoading } =
     usePendingReviews();
+  const { data: favorites } = useMyFavorites();
   const clearHistory = useClearHistory();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -84,7 +84,7 @@ export function ClientDashboard() {
   const stats = {
     upcomingBookings: upcomingBookings.length,
     completedSessions: completedBookings.length,
-    favoriteTrainers: 0,
+    favoriteTrainers: favorites?.length || 0,
     pendingReviews: pendingReviewCount,
   };
 
@@ -204,38 +204,30 @@ export function ClientDashboard() {
           </DashboardCard>
         </div>
 
+        {/* Favorite Trainers */}
+        <DashboardCard
+          icon={Heart}
+          iconColor="text-pink-500"
+          iconBgColor="bg-pink-500/10"
+          title={t("favoriteTrainers")}
+          delay={6}
+        >
+          <FavoriteTrainersSection />
+        </DashboardCard>
+
         {/* Messages */}
         <DashboardCard
           icon={MessageSquare}
           iconColor="text-purple-500"
           iconBgColor="bg-purple-500/10"
           title={t("messages")}
-          delay={6}
+          delay={7}
         >
           <EmptyStateCard
             icon={MessageSquare}
             title={t("noMessages")}
             description={t("messagesComingSoon")}
           />
-        </DashboardCard>
-
-        {/* Find Trainers CTA */}
-        <DashboardCard
-          icon={Search}
-          iconColor="text-orange-500"
-          iconBgColor="bg-orange-500/10"
-          title={t("findTrainers")}
-          delay={7}
-        >
-          <>
-            <p className="text-slate-400 mb-auto">{t("browseDescription")}</p>
-            <Link
-              href="/instructors"
-              className="inline-block px-6 py-3 text-center bg-linear-to-r from-orange-500 to-red-500 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all mt-4"
-            >
-              {t("browseTrainers")}
-            </Link>
-          </>
         </DashboardCard>
       </div>
 
