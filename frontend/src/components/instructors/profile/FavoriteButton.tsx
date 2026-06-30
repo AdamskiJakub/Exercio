@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { useIsFavorited, useToggleFavorite } from "@/hooks/useFavorites";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "@/i18n/routing";
@@ -25,10 +26,24 @@ export function FavoriteButton({ instructorProfileId }: FavoriteButtonProps) {
       return;
     }
 
-    toggleMutation.mutate({
-      instructorProfileId,
-      isFavorited: !!isFavorited,
-    });
+    toggleMutation.mutate(
+      {
+        instructorProfileId,
+        isFavorited: !!isFavorited,
+      },
+      {
+        onSuccess: (_data, variables) => {
+          if (variables.isFavorited) {
+            toast.success(t("removedToast"));
+          } else {
+            toast.success(t("addedToast"));
+          }
+        },
+        onError: () => {
+          toast.error(t("errorToast"));
+        },
+      },
+    );
   };
 
   const isLoading = checkLoading || toggleMutation.isPending;

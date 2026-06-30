@@ -1052,6 +1052,9 @@
     "noFavoritesDescription": "Browse available trainers and add them to your favorites to keep them at your fingertips.",
     "favoriteTrainers": "Favorite Trainers",
     "saved": "saved",
-    "browseTrainers": "Browse Trainers"
+    "browseTrainers": "Browse Trainers",
+    "addedToast": "Added to favorites!",
+    "removedToast": "Removed from favorites",
+    "errorToast": "Failed to update favorites"
   }
 }

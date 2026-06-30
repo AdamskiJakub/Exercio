@@ -1053,6 +1053,9 @@
     "noFavoritesDescription": "Przeglądaj dostępnych trenerów i dodaj ich do ulubionych, aby mieć ich zawsze pod ręką.",
     "favoriteTrainers": "Ulubieni Trenerzy",
     "saved": "zapisani",
-    "browseTrainers": "Przeglądaj Trenerów"
+    "browseTrainers": "Przeglądaj Trenerów",
+    "addedToast": "Dodano do ulubionych!",
+    "removedToast": "Usunięto z ulubionych",
+    "errorToast": "Nie udało się zmienić statusu ulubionych"
   }
 }
