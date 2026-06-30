@@ -26,6 +26,8 @@ model User {
   bookingsAsInstructor Booking[]          @relation("InstructorBookings")
   reviews              Review[]
   favorites            Favorite[]
+  notifications        Notification[]
+  profileViews         ProfileView[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -68,6 +70,7 @@ model InstructorProfile {
   user                    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   services                Service[]
   favorites               Favorite[]
+  profileViews            ProfileView[]
 
   @@map("instructor_profiles")
 }
@@ -225,10 +228,45 @@ model ContactMessage {
   @@map("contact_messages")
 }
 
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@map("notifications")
+}
+
+model ProfileView {
+  id                   String             @id @default(uuid())
+  userId               String
+  instructorProfileId  String
+  viewedAt             DateTime           @default(now())
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructorProfile    InstructorProfile  @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, instructorProfileId])
+  @@index([userId, viewedAt])
+  @@map("profile_views")
+}
+
 enum UserRole {
   CLIENT
   INSTRUCTOR
   ADMIN
+}
+
+enum NotificationType {
+  FAVORITE
+  NEW_BOOKING
+  NEW_REVIEW
+  BOOKING_CANCELLED
 }
 
 enum BookingStatus {

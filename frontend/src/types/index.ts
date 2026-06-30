@@ -159,3 +159,27 @@ export interface AuthResponse {
   access_token: string;
   user: User;
 }
+
+export type NotificationType =
+  | "FAVORITE"
+  | "NEW_BOOKING"
+  | "NEW_REVIEW"
+  | "BOOKING_CANCELLED";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  data?: Record<string, unknown>;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface PaginatedNotifications {
+  data: Notification[];
+  totalCount: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}

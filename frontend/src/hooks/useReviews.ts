@@ -119,3 +119,25 @@ export function useCreateGuestReview() {
     },
   });
 }
+
+export interface MyReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+  instructorName: string;
+  instructorAvatar: string | null;
+  instructorProfileId: string | null;
+  serviceName: string | null;
+  bookingDate: string;
+}
+
+export function useMyReviews() {
+  return useQuery({
+    queryKey: ["reviews", "my"],
+    queryFn: async () => {
+      const response = await apiClient.get<MyReview[]>("/reviews/my");
+      return response.data;
+    },
+  });
+}

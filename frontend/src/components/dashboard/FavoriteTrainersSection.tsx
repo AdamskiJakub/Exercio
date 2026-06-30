@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Heart, MapPin, Trash2 } from "lucide-react";
 import { useToggleFavorite } from "@/hooks/useFavorites";
-import { getSpecializationNameById } from "@/hooks/useConfig";
+import { useSpecializations } from "@/hooks/useConfig";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { getMediaUrl } from "@/lib/utils/media";
@@ -101,7 +101,16 @@ function FavoriteCard({
       .filter(Boolean)
       .join(" ") || favorite.user.username;
 
-  const primarySpec = favorite.specializations?.[0];
+  const { specializations } = useSpecializations();
+  const primarySpecId = favorite.specializations?.[0];
+  const primarySpec = primarySpecId
+    ? specializations.find((s) => s.id === primarySpecId)
+    : undefined;
+  const primarySpecName = primarySpec
+    ? locale === "pl"
+      ? primarySpec.namePl
+      : primarySpec.nameEn
+    : null;
 
   return (
     <motion.div
@@ -135,7 +144,7 @@ function FavoriteCard({
         </div>
 
         {/* Info */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 text-left">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold text-white truncate">
               {fullName}
@@ -144,13 +153,11 @@ function FavoriteCard({
               <span className="size-3.5 rounded-full bg-orange-500 shrink-0" />
             )}
           </div>
-          {primarySpec && (
-            <p className="text-xs text-slate-400 mt-0.5">
-              {getSpecializationNameById(primarySpec, locale)}
-            </p>
+          {primarySpecName && (
+            <p className="text-xs text-slate-400 mt-0.5">{primarySpecName}</p>
           )}
           {favorite.city && (
-            <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
+            <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
               <MapPin className="size-3" />
               <span>{favorite.city}</span>
             </div>

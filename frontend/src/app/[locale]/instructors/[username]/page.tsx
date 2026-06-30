@@ -10,6 +10,7 @@ import { useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useAuthStore } from "@/stores/auth-store";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTrackProfileView } from "@/hooks/useRecentlyViewed";
 
 export default function InstructorPublicProfilePage() {
   const params = useParams();
@@ -19,6 +20,7 @@ export default function InstructorPublicProfilePage() {
   const source = searchParams.get("from");
   const { user, isAuthenticated } = useAuthStore();
   const tProfile = useTranslations("InstructorProfile");
+  const trackView = useTrackProfileView();
 
   const {
     data: profile,
@@ -38,6 +40,13 @@ export default function InstructorPublicProfilePage() {
       router.push("/instructors");
     }
   }, [profile, router]);
+
+  // Track profile view when authenticated user views an instructor profile
+  useEffect(() => {
+    if (profile && isAuthenticated && !profile.isDraft) {
+      trackView.mutate(profile.id);
+    }
+  }, [profile?.id, isAuthenticated]);
 
   if (isLoading) {
     return <LoadingSpinner />;

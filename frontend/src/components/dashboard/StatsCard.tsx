@@ -37,14 +37,14 @@ export function StatsCard({
       className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500 rounded-xl p-6 cursor-pointer transition-colors duration-300"
       onClick={onClick}
     >
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-3 mb-3">
         <div className={`p-2 ${iconBgColor} rounded-lg`}>
           <Icon className={`w-5 h-5 ${iconColor}`} />
         </div>
-        <h3 className="text-sm font-medium text-slate-400">{title}</h3>
+        <h3 className="text-sm font-semibold text-slate-300">{title}</h3>
       </div>
-      <p className="text-3xl font-bold text-white">{value}</p>
-      <p className="text-sm text-slate-500 mt-1">{subtitle}</p>
+      <p className="text-3xl font-bold text-white mb-1.5">{value}</p>
+      <p className="text-sm text-slate-400">{subtitle}</p>
     </motion.div>
   );
 

@@ -272,6 +272,7 @@ export class InstructorProfilesService {
     const reviewCount = reviewAgg._count;
     const averageRating = reviewAgg._avg.rating;
 
+    // Fetch favorite count
     const favoriteCount = await this.prisma.favorite.count({
       where: { instructorProfileId: profile.id },
     });

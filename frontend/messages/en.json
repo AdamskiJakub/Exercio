@@ -226,6 +226,8 @@
       "noReviewsYet": "No reviews yet",
       "bookingsComingSoon": "Booking system coming soon! You'll be able to see all your scheduled sessions here.",
       "reviewsComingSoon": "Review system coming soon! Client feedback will appear here.",
+      "myBusiness": "My Business",
+      "myBusinessDescription": "Your instructor dashboard — stats, bookings, and reviews",
       "myTrainings": "My Trainings",
       "myTrainingsDescription": "Sessions you've booked as a client",
       "pendingReviews": "Pending Reviews",
@@ -242,13 +244,17 @@
       "clear": "Clear",
       "cancel": "Cancel",
       "reviewBannerTitle": "{count, plural, one {You have 1 completed session to review!} other {You have # completed sessions to review!}}",
+      "reviewBannerSubtitle": "{count, plural, one {Review for {names}} other {Reviews for: {names} and {count, plural, one {1 other} other {# others}}}}",
       "reviewBannerAction": "Leave a Review",
       "myUpcomingSessions": "My Upcoming Sessions",
       "noUpcomingSessions": "No upcoming sessions",
       "bookAsClientDescription": "Here you'll see sessions you've booked with other instructors",
       "favoriteTrainers": "Favorite Trainers",
       "asInstructor": "As Instructor",
-      "asClient": "As Client"
+      "asClient": "As Client",
+      "recentlyViewed": "Recently Viewed",
+      "noRecentlyViewed": "No recently viewed",
+      "recentlyViewedDescription": "Trainers you've recently viewed will appear here."
     },
     "client": {
       "welcomeBack": "Welcome back",
@@ -260,6 +266,8 @@
       "nextWeek": "next week",
       "allTime": "all time",
       "saved": "saved",
+      "myTrainings": "My Trainings",
+      "myTrainingsDescription": "Sessions you've booked as a client",
       "findTrainers": "Find Trainers",
       "browseDescription": "Discover and connect with professional trainers that match your goals",
       "browseTrainers": "Browse Trainers",
@@ -288,7 +296,18 @@
       "noPendingReviews": "No pending reviews",
       "noPendingReviewsDescription": "You've reviewed all your completed sessions.",
       "reviewCompletedSessions": "completed sessions to review",
-      "moreReviews": "+{count} more"
+      "moreReviews": "+{count} more",
+      "myReviews": "My Reviews",
+      "noReviewsYet": "No reviews yet",
+      "myReviewsDescription": "Your reviews for trainers will appear here.",
+      "unknownTrainer": "Unknown trainer",
+      "recentlyViewed": "Recently Viewed",
+      "noRecentlyViewed": "No recently viewed",
+      "recentlyViewedDescription": "Trainers you've recently viewed will appear here.",
+      "welcomeUpcoming": "You have {count} upcoming session | You have {count} upcoming sessions",
+      "welcomeReviews": "You have {count} pending review to write | You have {count} pending reviews to write",
+      "welcomeUpcomingAndReviews": "You have {upcoming} upcoming session and {reviews} review to write | You have {upcoming} upcoming sessions and {reviews} reviews to write",
+      "welcomeFree": "You're free today — browse available trainers!"
     },
     "settings": {
       "title": "Account Settings",
@@ -903,6 +922,8 @@
     "bookedSlotTitle": "Booked - {clientName}",
     "cancelledSlotTitle": "Cancelled - {clientName}",
     "addManualBooking": "Add manual booking",
+    "all": "All",
+    "upcoming": "Upcoming",
     "confirmed": "Confirmed",
     "pending": "Pending",
     "cancelled": "Cancelled",
@@ -1056,5 +1077,13 @@
     "addedToast": "Added to favorites!",
     "removedToast": "Removed from favorites",
     "errorToast": "Failed to update favorites"
+  },
+  "Notifications": {
+    "favoriteTitle": "New Favorite",
+    "favoriteMessage": "{name} added you to favorites!",
+    "markAsRead": "Mark as read",
+    "markAllAsRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "unread": "unread"
   }
 }

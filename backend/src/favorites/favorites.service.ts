@@ -4,15 +4,30 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/dto/create-notification.dto';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async addFavorite(userId: string, instructorProfileId: string) {
     // Verify the instructor profile exists
     const profile = await this.prisma.instructorProfile.findUnique({
       where: { id: instructorProfileId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true,
+          },
+        },
+      },
     });
 
     if (!profile) {
@@ -24,14 +39,42 @@ export class FavoritesService {
       throw new BadRequestException('Cannot favorite your own profile');
     }
 
+    // Get the user who is favoriting (to include their name in the notification)
+    const favoritingUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true, username: true },
+    });
+
     // Upsert — if already favorited, no-op
-    return this.prisma.favorite.upsert({
+    const favorite = await this.prisma.favorite.upsert({
       where: {
         userId_instructorProfileId: { userId, instructorProfileId },
       },
       create: { userId, instructorProfileId },
       update: {},
     });
+
+    // Notify the instructor profile owner
+    const displayName =
+      favoritingUser?.firstName && favoritingUser?.lastName
+        ? `${favoritingUser.firstName} ${favoritingUser.lastName}`
+        : favoritingUser?.username || 'Someone';
+
+    await this.notificationsService.createNotification({
+      userId: profile.userId,
+      type: NotificationType.FAVORITE,
+      title: 'New Favorite',
+      message: `${displayName} added you to favorites!`,
+      data: {
+        instructorProfileId,
+        userId,
+        displayName,
+        instructorUsername: profile.user.username,
+        favoritedByUsername: favoritingUser?.username || null,
+      },
+    });
+
+    return favorite;
   }
 
   async removeFavorite(userId: string, instructorProfileId: string) {

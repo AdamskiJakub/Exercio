@@ -16,6 +16,8 @@ import { StaticConfigModule } from './config/config.module';
 import { ContactModule } from './contact/contact.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ProfileViewsModule } from './profile-views/profile-views.module';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { FavoritesModule } from './favorites/favorites.module';
     ContactModule,
     ReviewsModule,
     FavoritesModule,
+    NotificationsModule,
+    ProfileViewsModule,
   ],
   controllers: [AppController],
   providers: [

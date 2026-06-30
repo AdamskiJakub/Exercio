@@ -1,7 +1,14 @@
 "use client";
 
-import { Star, FileText } from "lucide-react";
-import { useState } from "react";
+import {
+  Star,
+  FileText,
+  List,
+  Calendar,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { EmptyStateCard } from "./EmptyStateCard";
 import { PaginationSection } from "@/components/instructors/pagination-section";
@@ -9,6 +16,31 @@ import type { Booking } from "@/hooks/useMyBookings";
 import type { PendingReview } from "@/hooks/useReviews";
 
 type BookingTab = "instructor" | "client";
+
+type StatusFilter = "all" | "upcoming" | "completed" | "cancelled";
+
+const STATUS_FILTERS: {
+  key: StatusFilter;
+  icon: React.ReactNode;
+  labelKey: string;
+}[] = [
+  { key: "all", icon: <List className="w-3.5 h-3.5" />, labelKey: "all" },
+  {
+    key: "upcoming",
+    icon: <Calendar className="w-3.5 h-3.5" />,
+    labelKey: "upcoming",
+  },
+  {
+    key: "completed",
+    icon: <CheckCircle className="w-3.5 h-3.5" />,
+    labelKey: "completed",
+  },
+  {
+    key: "cancelled",
+    icon: <XCircle className="w-3.5 h-3.5" />,
+    labelKey: "cancelled",
+  },
+];
 
 interface BookingTabConfig {
   /** Label for the tab button */
@@ -69,6 +101,7 @@ export function BookingHistorySection({
 }: BookingHistorySectionProps) {
   const [internalTab, setInternalTab] = useState<BookingTab>("instructor");
   const [historyPage, setHistoryPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   // Determine which bookings to show based on tab mode
   const isTabbed = !!tabs;
@@ -80,8 +113,27 @@ export function BookingHistorySection({
       : (clientBookings ?? [])
     : (bookings ?? []);
 
-  const totalPages = Math.max(1, Math.ceil(currentBookings.length / pageSize));
-  const paginatedBookings = currentBookings.slice(
+  // Apply status filter
+  const filteredBookings = useMemo(() => {
+    const now = new Date();
+    switch (statusFilter) {
+      case "upcoming":
+        return currentBookings.filter(
+          (b) =>
+            (b.status === "PENDING" || b.status === "CONFIRMED") &&
+            new Date(b.startTime) > now,
+        );
+      case "completed":
+        return currentBookings.filter((b) => b.status === "COMPLETED");
+      case "cancelled":
+        return currentBookings.filter((b) => b.status === "CANCELLED");
+      default:
+        return currentBookings;
+    }
+  }, [currentBookings, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / pageSize));
+  const paginatedBookings = filteredBookings.slice(
     (historyPage - 1) * pageSize,
     historyPage * pageSize,
   );
@@ -93,11 +145,17 @@ export function BookingHistorySection({
 
   const handleTabChange = (tab: BookingTab) => {
     setHistoryPage(1);
+    setStatusFilter("all");
     if (onTabChange) {
       onTabChange(tab);
     } else {
       setInternalTab(tab);
     }
+  };
+
+  const handleStatusFilterChange = (filter: StatusFilter) => {
+    setHistoryPage(1);
+    setStatusFilter(filter);
   };
 
   if (isLoading) {
@@ -133,8 +191,29 @@ export function BookingHistorySection({
         </div>
       )}
 
+      {/* Status filter tabs */}
+      {currentBookings.length > 0 && (
+        <div className="flex gap-1 mb-4 bg-slate-700/50 rounded-lg p-1">
+          {STATUS_FILTERS.map((filter) => (
+            <button
+              key={filter.key}
+              onClick={() => handleStatusFilterChange(filter.key)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all flex-1 justify-center",
+                statusFilter === filter.key
+                  ? "bg-orange-500 text-white shadow-sm"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-600/50",
+              )}
+            >
+              {filter.icon}
+              {tb(filter.labelKey)}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Empty state */}
-      {currentBookings.length === 0 && (
+      {filteredBookings.length === 0 && (
         <EmptyStateCard
           icon={FileText}
           title={emptyTitle}
@@ -143,7 +222,7 @@ export function BookingHistorySection({
       )}
 
       {/* Clear history button — only show on "client" tab when in tabbed mode */}
-      {currentBookings.length > 0 &&
+      {filteredBookings.length > 0 &&
         onClearHistory &&
         (!isTabbed || activeTab === "client") && (
           <div className="flex justify-end mb-4">
@@ -157,7 +236,7 @@ export function BookingHistorySection({
         )}
 
       {/* Booking list */}
-      {currentBookings.length > 0 && (
+      {filteredBookings.length > 0 && (
         <>
           <div className="space-y-3">
             {paginatedBookings.map((booking) => {
@@ -180,13 +259,13 @@ export function BookingHistorySection({
                         : "border-slate-700/50 hover:border-slate-600",
                   )}
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 min-w-0 text-left">
                       <p className="text-white font-medium truncate">
                         {instructorName}
                       </p>
                       <p className="text-slate-400 text-sm">
-                        {new Date(booking.startTime).toLocaleDateString()} -{" "}
+                        {new Date(booking.startTime).toLocaleDateString()} ·{" "}
                         {new Date(booking.startTime).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
