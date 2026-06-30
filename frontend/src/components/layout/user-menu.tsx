@@ -27,6 +27,7 @@ import {
   Calendar,
   Star,
   XCircle,
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api";
@@ -40,6 +41,12 @@ import { UserInfo } from "@/components/layout/UserInfo";
 import { NotificationItem } from "@/components/layout/NotificationItem";
 import { NavItem } from "@/components/layout/NavItem";
 import type { Booking } from "@/hooks/useMyBookings";
+import {
+  useUnreadCount,
+  useMyNotifications,
+  useMarkAsRead,
+  useMarkAllAsRead,
+} from "@/hooks/useNotifications";
 
 export function UserMenu() {
   const queryClient = useQueryClient();
@@ -74,6 +81,13 @@ export function UserMenu() {
 
   // Pending reviews count (for all authenticated users - instructors can also be clients)
   const { data: pendingReviews } = usePendingReviews();
+
+  // System notifications (favorites, etc.) — from the new Notifications module
+  const { data: unreadSystemCount } = useUnreadCount();
+  const { data: systemNotifications } = useMyNotifications(1, 50);
+  const markAsRead = useMarkAsRead();
+  const markAllAsRead = useMarkAllAsRead();
+  const tNotifications = useTranslations("Notifications");
 
   // --- Notification read tracking (like Facebook) ---
   // We store the last time the user opened the notification dropdown in localStorage.
@@ -143,11 +157,12 @@ export function UserMenu() {
     ).values(),
   ).length;
 
-  // Total unread notifications
+  // Total unread notifications (including system notifications)
   const notificationCount =
     (user?.role === "INSTRUCTOR" ? unreadBookingCount : 0) +
     unreadReviewCount +
-    unreadCancelledCount;
+    unreadCancelledCount +
+    (unreadSystemCount ?? 0);
 
   const avatarUrl =
     user?.role === "INSTRUCTOR" && instructorProfile?.photoUrl
@@ -173,11 +188,18 @@ export function UserMenu() {
     }
   };
 
+  const handleDropdownClose = () => {
+    // Mark old-style notifications as read (localStorage-based tracking)
+    markNotificationsRead();
+    // Mark backend system notifications as read
+    markAllAsRead.mutate();
+  };
+
   return (
     <>
       <div className="flex items-center gap-2">
         {/* Notification Bell Dropdown - like Facebook */}
-        <DropdownMenu onOpenChange={(open) => !open && markNotificationsRead()}>
+        <DropdownMenu onOpenChange={(open) => !open && handleDropdownClose()}>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
@@ -301,6 +323,54 @@ export function UserMenu() {
                   }}
                 />
               )}
+
+              {/* System notifications (favorites, etc.) — mixed into the same list */}
+              {systemNotifications?.data
+                ?.filter((n) => !n.read)
+                .slice(0, 5)
+                .map((notification) => {
+                  const data = notification.data as
+                    | Record<string, unknown>
+                    | undefined;
+                  const title =
+                    notification.type === "FAVORITE"
+                      ? tNotifications("favoriteTitle")
+                      : notification.title;
+                  const description =
+                    notification.type === "FAVORITE"
+                      ? tNotifications("favoriteMessage", {
+                          name: (data?.displayName as string) || "",
+                        })
+                      : notification.message;
+
+                  return (
+                    <NotificationItem
+                      key={notification.id}
+                      icon={
+                        <div className="p-1.5 rounded-full bg-pink-500/10">
+                          <Heart className="w-4 h-4 text-pink-400" />
+                        </div>
+                      }
+                      title={title}
+                      description={description}
+                      onClick={() => {
+                        markAsRead.mutate(notification.id);
+                        const username =
+                          (data?.favoritedByUsername as string) ||
+                          (data?.instructorUsername as string) ||
+                          undefined;
+                        if (username) {
+                          router.push({
+                            pathname: "/instructors/[username]",
+                            params: { username },
+                          });
+                        } else {
+                          router.push("/dashboard");
+                        }
+                      }}
+                    />
+                  );
+                })}
 
               {/* Empty state — show when no unread notifications */}
               {notificationCount === 0 && (

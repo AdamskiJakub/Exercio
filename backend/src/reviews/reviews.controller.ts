@@ -82,6 +82,16 @@ export class ReviewsController {
   }
 
   /**
+   * GET /reviews/my
+   * Get reviews written by the current user (JWT required).
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('my')
+  async getMyReviews(@Request() req) {
+    return this.reviewsService.getMyReviews(req.user.id);
+  }
+
+  /**
    * POST /reviews/generate-token
    * Generate a review token for a completed booking (JWT required).
    * Used to send review invitation emails.

@@ -53,22 +53,32 @@ export function PendingReviewsSection({
           animate={{ opacity: 1, y: 0 }}
           className={
             variant === "instructor"
-              ? "bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4 mb-4 flex items-center justify-between"
-              : "bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 flex items-center justify-between gap-4"
+              ? "bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5 flex items-center justify-between gap-4"
+              : "bg-orange-500/10 border border-orange-500/20 rounded-xl p-5 flex items-center justify-between gap-4"
           }
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-orange-500/10 rounded-lg">
-              <Star className="w-5 h-5 text-orange-400" />
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="p-3 bg-orange-500/10 rounded-lg shrink-0">
+              <Star className="w-6 h-6 text-orange-400" />
             </div>
-            <div>
-              <p className="text-white font-medium text-sm">
+            <div className="min-w-0">
+              <p className="text-white font-semibold text-base">
                 {variant === "instructor"
                   ? t("reviewBannerTitle", { count: pendingReviewCount })
                   : t("reviewBannerTitle")}
               </p>
-              <p className="text-slate-400 text-xs mt-0.5">
-                {pendingReviewCount} {t("reviewCompletedSessions")}
+              <p className="text-slate-300 text-sm mt-1 truncate">
+                {pendingReviewCount === 1
+                  ? pendingReviews[0].instructorName
+                  : pendingReviewCount > 1
+                    ? t("reviewBannerSubtitle", {
+                        names: pendingReviews
+                          .slice(0, 3)
+                          .map((r) => r.instructorName)
+                          .join(", "),
+                        count: pendingReviewCount,
+                      })
+                    : pendingReviews[0].instructorName}
               </p>
             </div>
           </div>
@@ -82,59 +92,14 @@ export function PendingReviewsSection({
             }
             className={
               variant === "instructor"
-                ? "px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all hover:scale-105 text-sm"
-                : "px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
+                ? "px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all hover:scale-105 text-base shrink-0 shadow-lg shadow-amber-500/20"
+                : "px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors whitespace-nowrap shrink-0"
             }
           >
             {t("reviewBannerAction")}
           </button>
         </motion.div>
       )}
-
-      {/* Pending Reviews List */}
-      <div className="space-y-2">
-        {pendingReviews?.slice(0, 3).map((review) => (
-          <div
-            key={review.bookingId}
-            className={
-              variant === "instructor"
-                ? "flex items-center justify-between bg-slate-700/30 rounded-lg p-3 border border-slate-600/50"
-                : "flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
-            }
-          >
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">
-                {review.instructorName}
-              </p>
-              <p className="text-slate-400 text-xs">
-                {new Date(review.startTime).toLocaleDateString()}
-                {review.serviceName && ` · ${review.serviceName}`}
-              </p>
-            </div>
-            <button
-              onClick={() =>
-                onOpenReview(
-                  review.bookingId,
-                  review.instructorName,
-                  pendingReviews?.indexOf(review),
-                )
-              }
-              className={
-                variant === "instructor"
-                  ? "px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors shrink-0 ml-2"
-                  : "px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-medium transition-colors ml-2 whitespace-nowrap"
-              }
-            >
-              {t("leaveReview")}
-            </button>
-          </div>
-        ))}
-        {pendingReviews && pendingReviews.length > 3 && (
-          <p className="text-center text-xs text-slate-500">
-            {t("moreReviews", { count: pendingReviews.length - 3 })}
-          </p>
-        )}
-      </div>
     </>
   );
 }

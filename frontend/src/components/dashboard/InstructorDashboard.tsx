@@ -2,16 +2,14 @@
 
 import { useMyInstructorProfile } from "@/hooks/useMyInstructorProfile";
 import { useMyBookings } from "@/hooks/useMyBookings";
-import type { Booking } from "@/hooks/useMyBookings";
 import {
-  useInstructorReviews,
   useInstructorReviewStats,
   usePendingReviews,
 } from "@/hooks/useReviews";
 import { useReviewFlow } from "@/hooks/useReviewFlow";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { NAV_SOURCE } from "@/components/instructors/profile/types";
 import {
   Star,
@@ -27,6 +25,8 @@ import {
   Heart,
   GraduationCap,
   User,
+  MapPin,
+  UserCheck,
 } from "lucide-react";
 import { getMediaUrl } from "@/lib/utils/media";
 import { StatsCard } from "./StatsCard";
@@ -34,6 +34,7 @@ import { DashboardCard } from "./DashboardCard";
 import { EmptyStateCard } from "./EmptyStateCard";
 import { DashboardHeader } from "./DashboardHeader";
 import { PendingReviewsSection } from "./PendingReviewsSection";
+import { RecentReviewsSection } from "./RecentReviewsSection";
 import { BookingHistorySection } from "./BookingHistorySection";
 import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
 import { BookingsList } from "@/components/bookings/BookingsList";
@@ -41,12 +42,15 @@ import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { useState, useMemo } from "react";
 import { useClearHistory } from "@/hooks/useClearHistory";
 import { useMyFavorites } from "@/hooks/useFavorites";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { useSpecializations } from "@/hooks/useConfig";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { getInstructorName } from "@/lib/utils/user";
 
 export function InstructorDashboard() {
   const t = useTranslations("Dashboard.instructor");
   const tb = useTranslations("Booking");
+  const locale = useLocale();
   const { data: profile, isLoading } = useMyInstructorProfile();
   const { data: bookings, isLoading: bookingsLoading } =
     useMyBookings("instructor");
@@ -58,6 +62,9 @@ export function InstructorDashboard() {
   const { data: pendingReviews, isLoading: pendingReviewsLoading } =
     usePendingReviews();
   const { data: favorites } = useMyFavorites();
+  const { data: recentlyViewed, isLoading: recentlyViewedLoading } =
+    useRecentlyViewed();
+  const { specializations } = useSpecializations();
 
   // Review flow state & handlers
   const {
@@ -73,15 +80,15 @@ export function InstructorDashboard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Filter upcoming bookings (pending or confirmed, in the future)
-  const now = useMemo(() => new Date(), []);
+  // Use inline new Date() to avoid stale "now" values on long-lived mounts
   const upcomingBookings = useMemo(
     () =>
       bookings?.filter(
         (booking) =>
           (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
-          new Date(booking.startTime) > now,
+          new Date(booking.startTime) > new Date(),
       ) || [],
-    [bookings, now],
+    [bookings],
   );
 
   // Client-side bookings (instructor as client)
@@ -90,9 +97,9 @@ export function InstructorDashboard() {
       clientBookings?.filter(
         (booking) =>
           (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
-          new Date(booking.startTime) > now,
+          new Date(booking.startTime) > new Date(),
       ) || [],
-    [clientBookings, now],
+    [clientBookings],
   );
 
   const pastInstructorBookings = useMemo(
@@ -119,15 +126,34 @@ export function InstructorDashboard() {
 
   const pendingReviewCount = pendingReviews?.length || 0;
 
+  // Calculate real stats from bookings
+  const totalSessions =
+    bookings?.filter((b) => b.status === "COMPLETED").length || 0;
+
+  const activeClients = useMemo(() => {
+    if (!bookings) return 0;
+    const uniqueClients = new Set(
+      bookings
+        .filter(
+          (b) =>
+            b.status === "CONFIRMED" ||
+            b.status === "PENDING" ||
+            b.status === "COMPLETED",
+        )
+        .map((b) => b.clientId),
+    );
+    return uniqueClients.size;
+  }, [bookings]);
+
   const stats = {
     averageRating: reviewStats?.averageRating || 0,
     totalReviews: reviewStats?.reviewCount || 0,
-    totalSessions: 0, // TODO: Get from bookings
-    activeClients: 0, // TODO: Get from bookings
+    totalSessions,
+    activeClients,
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Welcome Header */}
       <DashboardHeader
         greeting={`${t("welcomeBack")}, ${profile?.user?.firstName || profile?.user?.username || "Instructor"}!`}
@@ -155,6 +181,32 @@ export function InstructorDashboard() {
           },
         ]}
       />
+
+      {/* 🟨 GOLDEN ALERT — Review Banner (action required, shown first) */}
+      {pendingReviewCount > 0 && pendingReviews && pendingReviews[0] && (
+        <PendingReviewsSection
+          pendingReviews={pendingReviews}
+          isLoading={false}
+          onOpenReview={handleOpenReview}
+          t={t}
+          variant="instructor"
+        />
+      )}
+
+      {/* ============================================================ */}
+      {/* MÓJ BIZNES (INSTRUKTOR)                                       */}
+      {/* ============================================================ */}
+      <div className="pt-4 text-center">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <GraduationCap className="w-7 h-7 text-blue-400 shrink-0" />
+          <h2 className="text-2xl font-bold text-white tracking-wide">
+            {t("myBusiness")}
+          </h2>
+        </div>
+        <p className="text-sm text-slate-400 mb-8 leading-relaxed max-w-lg mx-auto">
+          {t("myBusinessDescription")}
+        </p>
+      </div>
 
       {/* Profile Status */}
       {profile && (
@@ -269,30 +321,23 @@ export function InstructorDashboard() {
           title={t("recentReviews")}
           delay={6}
         >
-          <RecentReviews instructorProfileId={profile?.id} />
+          <RecentReviewsSection instructorProfileId={profile?.id} />
         </DashboardCard>
       </div>
 
-      {/* My Trainings Section — instructor as client */}
-      <div className="pt-6">
-        <div className="flex items-center justify-center gap-3 mb-4 text-center">
-          <Heart className="w-6 h-6 text-pink-500 shrink-0" />
-          <h2 className="text-2xl font-bold text-white">{t("myTrainings")}</h2>
-          <span className="text-sm text-slate-400">
-            — {t("myTrainingsDescription")}
-          </span>
+      {/* ============================================================ */}
+      {/* MOJE TRENINGI (JAKO KLIENT)                                   */}
+      {/* ============================================================ */}
+      <div className="pt-8 text-center">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <Heart className="w-7 h-7 text-pink-400 shrink-0" />
+          <h2 className="text-2xl font-bold text-white tracking-wide">
+            {t("myTrainings")}
+          </h2>
         </div>
-
-        {/* Review Banner */}
-        {pendingReviewCount > 0 && pendingReviews && pendingReviews[0] && (
-          <PendingReviewsSection
-            pendingReviews={pendingReviews}
-            isLoading={false}
-            onOpenReview={handleOpenReview}
-            t={t}
-            variant="instructor"
-          />
-        )}
+        <p className="text-sm text-slate-400 mb-8 leading-relaxed max-w-lg mx-auto">
+          {t("myTrainingsDescription")}
+        </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Upcoming Sessions as Client */}
@@ -320,25 +365,6 @@ export function InstructorDashboard() {
             </DashboardCard>
           </div>
 
-          {/* Pending Reviews */}
-          <div id="my-pending-reviews" className="scroll-mt-20">
-            <DashboardCard
-              icon={Star}
-              iconColor="text-amber-500"
-              iconBgColor="bg-amber-500/10"
-              title={t("pendingReviews")}
-              delay={7}
-            >
-              <PendingReviewsSection
-                pendingReviews={pendingReviews}
-                isLoading={pendingReviewsLoading}
-                onOpenReview={handleOpenReview}
-                t={t}
-                variant="instructor"
-              />
-            </DashboardCard>
-          </div>
-
           {/* Favorite Trainers */}
           <DashboardCard
             icon={Heart}
@@ -350,13 +376,97 @@ export function InstructorDashboard() {
             <FavoriteTrainersSection favorites={favorites} isLoading={false} />
           </DashboardCard>
 
+          {/* Recently Viewed Trainers */}
+          <DashboardCard
+            icon={Clock}
+            iconColor="text-cyan-500"
+            iconBgColor="bg-cyan-500/10"
+            title={t("recentlyViewed")}
+            delay={9}
+          >
+            {recentlyViewedLoading ? (
+              <div className="flex justify-center py-8">
+                <LoadingSpinner />
+              </div>
+            ) : recentlyViewed && recentlyViewed.length > 0 ? (
+              <div className="space-y-2">
+                {recentlyViewed.map((instructor) => {
+                  const name =
+                    [instructor.firstName, instructor.lastName]
+                      .filter(Boolean)
+                      .join(" ") || instructor.username;
+                  const avatarSrc = getMediaUrl(
+                    instructor.photoUrl || instructor.avatarUrl,
+                  );
+                  const primarySpecId = instructor.specializations?.[0];
+                  const primarySpec = primarySpecId
+                    ? specializations.find((s) => s.id === primarySpecId)
+                    : undefined;
+                  const primarySpecName = primarySpec
+                    ? locale === "pl"
+                      ? primarySpec.namePl
+                      : primarySpec.nameEn
+                    : null;
+                  return (
+                    <Link
+                      key={instructor.id}
+                      href={`/instructors/${instructor.username}` as any}
+                      className="flex items-center gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500/50 rounded-xl overflow-hidden transition-colors duration-300 group p-4"
+                    >
+                      <div className="size-14 rounded-full overflow-hidden bg-slate-700 shrink-0 border-2 border-slate-600">
+                        {avatarSrc ? (
+                          <img
+                            src={avatarSrc}
+                            alt={name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg bg-slate-700">
+                            {name
+                              .split(" ")
+                              .map((n: string) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h4 className="text-sm font-semibold text-white truncate">
+                          {name}
+                        </h4>
+                        {primarySpecName && (
+                          <p className="text-xs text-slate-400 mt-0.5 truncate">
+                            {primarySpecName}
+                          </p>
+                        )}
+                        {instructor.city && (
+                          <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
+                            <MapPin className="size-3" />
+                            <span>{instructor.city}</span>
+                          </div>
+                        )}
+                      </div>
+                      <Clock className="w-4 h-4 text-slate-500 shrink-0" />
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyStateCard
+                icon={UserCheck}
+                title={t("noRecentlyViewed")}
+                description={t("recentlyViewedDescription")}
+              />
+            )}
+          </DashboardCard>
+
           {/* Unified Booking History with tabs */}
           <div id="my-client-history" className="scroll-mt-20 md:col-span-2">
             <DashboardCard
               icon={FileText}
               iconColor="text-slate-400"
               title={t("bookingHistory")}
-              delay={9}
+              delay={10}
             >
               <BookingHistorySection
                 instructorBookings={pastInstructorBookings}
@@ -411,82 +521,6 @@ export function InstructorDashboard() {
           reviewIndex={reviewIndex}
           totalReviews={pendingReviewCount}
         />
-      )}
-    </div>
-  );
-}
-
-/** Internal component to display recent reviews for an instructor */
-function RecentReviews({
-  instructorProfileId,
-}: {
-  instructorProfileId: string | undefined;
-}) {
-  const t = useTranslations("Dashboard.instructor");
-  const { data: reviewsData, isLoading } = useInstructorReviews(
-    instructorProfileId,
-    1,
-    5,
-  );
-  const reviews = reviewsData?.data ?? [];
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-8">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (reviews.length === 0) {
-    return (
-      <EmptyStateCard
-        icon={Star}
-        title={t("noReviewsYet")}
-        description={t("reviewsComingSoon")}
-      />
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {reviews.map((review) => (
-        <div
-          key={review.id}
-          className="bg-slate-700/30 rounded-lg p-3 border border-slate-600/50"
-        >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-white truncate">
-              {review.author.displayName}
-            </span>
-            <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-3.5 h-3.5 ${
-                    star <= review.rating
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-slate-600"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-          {review.comment && (
-            <p className="text-xs text-slate-400 line-clamp-2 mt-1">
-              {review.comment}
-            </p>
-          )}
-          <p className="text-[10px] text-slate-500 mt-1">
-            {new Date(review.createdAt).toLocaleDateString()}
-            {review.serviceName && ` · ${review.serviceName}`}
-          </p>
-        </div>
-      ))}
-      {reviewsData && reviewsData.totalCount > 5 && (
-        <p className="text-center text-xs text-slate-500">
-          {t("moreReviews", { count: reviewsData.totalCount - 5 })}
-        </p>
       )}
     </div>
   );

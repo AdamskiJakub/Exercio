@@ -257,10 +257,11 @@ export class InstructorProfilesService {
     }
 
     // Fetch review stats for this instructor
+    // booking.instructorId is the user ID (User.id), so we compare to profile.userId
     const reviewAgg = await this.prisma.review.aggregate({
       where: {
         booking: {
-          instructorId: profile.id,
+          instructorId: profile.userId,
         },
       },
       _avg: {
@@ -272,6 +273,7 @@ export class InstructorProfilesService {
     const reviewCount = reviewAgg._count;
     const averageRating = reviewAgg._avg.rating;
 
+    // Fetch favorite count
     const favoriteCount = await this.prisma.favorite.count({
       where: { instructorProfileId: profile.id },
     });

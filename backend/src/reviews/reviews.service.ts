@@ -327,6 +327,48 @@ export class ReviewsService {
   }
 
   /**
+   * Get reviews written by the current user (client).
+   */
+  async getMyReviews(userId: string) {
+    const reviews = await this.prisma.review.findMany({
+      where: { userId },
+      include: {
+        booking: {
+          select: {
+            id: true,
+            startTime: true,
+            instructorUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatarUrl: true,
+                instructorProfile: { select: { id: true } },
+              },
+            },
+            service: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    return reviews.map((review) => ({
+      id: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+      instructorName:
+        `${review.booking.instructorUser.firstName || ''} ${review.booking.instructorUser.lastName || ''}`.trim(),
+      instructorAvatar: review.booking.instructorUser.avatarUrl,
+      instructorProfileId: review.booking.instructorUser.instructorProfile?.id,
+      serviceName: review.booking.service?.name || null,
+      bookingDate: review.booking.startTime,
+    }));
+  }
+
+  /**
    * Get review statistics for an instructor profile.
    * Returns average rating (null if < 5 reviews) and count.
    */

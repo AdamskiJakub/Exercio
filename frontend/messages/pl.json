@@ -226,6 +226,8 @@
       "noReviewsYet": "Brak recenzji",
       "bookingsComingSoon": "System rezerwacji wkrótce! Będziesz mógł zobaczyć tutaj wszystkie zaplanowane sesje.",
       "reviewsComingSoon": "System recenzji wkrótce! Opinie klientów pojawią się tutaj.",
+      "myBusiness": "Mój Biznes",
+      "myBusinessDescription": "Panel instruktora — statystyki, rezerwacje i recenzje",
       "myTrainings": "Moje Treningi",
       "myTrainingsDescription": "Sesje, które zarezerwowałeś jako klient",
       "pendingReviews": "Oczekujące opinie",
@@ -242,13 +244,17 @@
       "clear": "Wyczyść",
       "cancel": "Anuluj",
       "reviewBannerTitle": "Masz {count} ukończoną sesję do ocenienia!",
+      "reviewBannerSubtitle": "{count, plural, one {Opinia dla {names}} few {Opinie dla: {names} i {count, plural, one {1 inne} few {# inne} other {# innych}}} other {Opinie dla: {names} i {count, plural, one {1 inne} few {# inne} other {# innych}}}}",
       "reviewBannerAction": "Wystaw opinię",
       "myUpcomingSessions": "Moje Nadchodzące Sesje",
       "noUpcomingSessions": "Brak nadchodzących sesji",
       "bookAsClientDescription": "Tutaj zobaczysz sesje, które zarezerwowałeś u innych instruktorów",
       "favoriteTrainers": "Ulubieni Trenerzy",
       "asInstructor": "Jako instruktor",
-      "asClient": "Jako klient"
+      "asClient": "Jako klient",
+      "recentlyViewed": "Ostatnio oglądani",
+      "noRecentlyViewed": "Brak ostatnio oglądanych",
+      "recentlyViewedDescription": "Trenerzy, których profile ostatnio odwiedziłeś, pojawią się tutaj."
     },
     "client": {
       "welcomeBack": "Witaj ponownie",
@@ -260,6 +266,8 @@
       "nextWeek": "w przyszłym tygodniu",
       "allTime": "wszystkie",
       "saved": "zapisani",
+      "myTrainings": "Moje Treningi",
+      "myTrainingsDescription": "Sesje, które zarezerwowałeś jako klient",
       "findTrainers": "Znajdź Trenerów",
       "browseDescription": "Odkryj i połącz się z profesjonalnymi trenerami zgodnymi z Twoimi celami",
       "browseTrainers": "Przeglądaj Trenerów",
@@ -288,7 +296,18 @@
       "noPendingReviews": "Brak oczekujących opinii",
       "noPendingReviewsDescription": "Oceniłeś już wszystkie ukończone sesje.",
       "reviewCompletedSessions": "ukończonych sesji do oceny",
-      "moreReviews": "+{count} więcej"
+      "moreReviews": "+{count} więcej",
+      "myReviews": "Moje Opinie",
+      "noReviewsYet": "Brak wystawionych opinii",
+      "myReviewsDescription": "Twoje wystawione opinie o trenerach pojawią się tutaj.",
+      "unknownTrainer": "Nieznany trener",
+      "recentlyViewed": "Ostatnio oglądani",
+      "noRecentlyViewed": "Brak ostatnio oglądanych",
+      "recentlyViewedDescription": "Trenerzy, których profile ostatnio odwiedziłeś, pojawią się tutaj.",
+      "welcomeUpcoming": "Masz {count} nadchodzącą sesję | Masz {count} nadchodzące sesje | Masz {count} nadchodzących sesji",
+      "welcomeReviews": "Masz {count} oczekującą opinię do wystawienia | Masz {count} oczekujące opinie do wystawienia | Masz {count} oczekujących opinii do wystawienia",
+      "welcomeUpcomingAndReviews": "Masz {upcoming} nadchodzącą sesję i {reviews} opinię do wystawienia | Masz {upcoming} nadchodzące sesje i {reviews} opinie do wystawienia | Masz {upcoming} nadchodzących sesji i {reviews} opinii do wystawienia",
+      "welcomeFree": "Dzisiaj masz wolne — przeglądaj dostępnych trenerów!"
     },
     "settings": {
       "title": "Ustawienia Konta",
@@ -901,6 +920,8 @@
     "instructorRole": "Instruktora",
     "specialistRole": "Specjalisty",
     "profileTitle": "Profil",
+    "all": "Wszystkie",
+    "upcoming": "Nadchodzące",
     "confirmed": "Potwierdzona",
     "pending": "Oczekująca",
     "cancelled": "Anulowana",
@@ -1057,5 +1078,13 @@
     "addedToast": "Dodano do ulubionych!",
     "removedToast": "Usunięto z ulubionych",
     "errorToast": "Nie udało się zmienić statusu ulubionych"
+  },
+  "Notifications": {
+    "favoriteTitle": "Nowy Ulubiony",
+    "favoriteMessage": "{name} dodał(a) Cię do ulubionych!",
+    "markAsRead": "Oznacz jako przeczytane",
+    "markAllAsRead": "Oznacz wszystkie jako przeczytane",
+    "noNotifications": "Brak powiadomień",
+    "unread": "nieprzeczytane"
   }
 }
