@@ -212,7 +212,7 @@ export function ClientDashboard() {
           title={t("favoriteTrainers")}
           delay={6}
         >
-          <FavoriteTrainersSection />
+          <FavoriteTrainersSection favorites={favorites} isLoading={false} />
         </DashboardCard>
 
         {/* Messages */}

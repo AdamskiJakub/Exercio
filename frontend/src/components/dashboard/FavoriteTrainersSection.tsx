@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Heart, MapPin, Trash2 } from "lucide-react";
-import { useMyFavorites, useToggleFavorite } from "@/hooks/useFavorites";
+import { useToggleFavorite } from "@/hooks/useFavorites";
 import { getSpecializationNameById } from "@/hooks/useConfig";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -12,10 +12,17 @@ import { motion } from "framer-motion";
 import { cardVariants } from "@/lib/animations";
 import type { FavoriteInstructor } from "@/types";
 
-export function FavoriteTrainersSection() {
+interface FavoriteTrainersSectionProps {
+  favorites: FavoriteInstructor[] | undefined;
+  isLoading: boolean;
+}
+
+export function FavoriteTrainersSection({
+  favorites,
+  isLoading,
+}: FavoriteTrainersSectionProps) {
   const t = useTranslations("Favorites");
   const locale = useLocale();
-  const { data: favorites, isLoading } = useMyFavorites();
   const toggleMutation = useToggleFavorite();
 
   if (isLoading) {

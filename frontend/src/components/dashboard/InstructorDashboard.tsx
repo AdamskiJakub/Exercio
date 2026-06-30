@@ -347,7 +347,7 @@ export function InstructorDashboard() {
             title={t("favoriteTrainers")}
             delay={8}
           >
-            <FavoriteTrainersSection />
+            <FavoriteTrainersSection favorites={favorites} isLoading={false} />
           </DashboardCard>
 
           {/* Unified Booking History with tabs */}
