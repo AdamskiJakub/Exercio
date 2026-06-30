@@ -246,6 +246,7 @@
       "myUpcomingSessions": "Moje Nadchodzące Sesje",
       "noUpcomingSessions": "Brak nadchodzących sesji",
       "bookAsClientDescription": "Tutaj zobaczysz sesje, które zarezerwowałeś u innych instruktorów",
+      "favoriteTrainers": "Ulubieni Trenerzy",
       "asInstructor": "Jako instruktor",
       "asClient": "Jako klient"
     },
@@ -1043,5 +1044,18 @@
     "description": "Strona, której szukasz, nie istnieje lub została przeniesiona. Pomóżmy Ci wrócić na właściwą ścieżkę.",
     "goHome": "Strona Główna",
     "browseTrainers": "Przeglądaj Trenerów"
+  },
+  "Favorites": {
+    "addToFavorites": "Dodaj do ulubionych",
+    "removeFromFavorites": "Usuń z ulubionych",
+    "myFavorites": "Ulubieni Trenerzy",
+    "noFavorites": "Nie masz jeszcze ulubionych trenerów",
+    "noFavoritesDescription": "Przeglądaj dostępnych trenerów i dodaj ich do ulubionych, aby mieć ich zawsze pod ręką.",
+    "favoriteTrainers": "Ulubieni Trenerzy",
+    "saved": "zapisani",
+    "browseTrainers": "Przeglądaj Trenerów",
+    "addedToast": "Dodano do ulubionych!",
+    "removedToast": "Usunięto z ulubionych",
+    "errorToast": "Nie udało się zmienić statusu ulubionych"
   }
 }

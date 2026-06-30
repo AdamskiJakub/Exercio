@@ -25,6 +25,7 @@ model User {
   bookingsAsClient     Booking[]          @relation("ClientBookings")
   bookingsAsInstructor Booking[]          @relation("InstructorBookings")
   reviews              Review[]
+  favorites            Favorite[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -66,6 +67,7 @@ model InstructorProfile {
   availabilityExceptions  AvailabilityException[] @relation("AvailabilityExceptions")
   user                    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   services                Service[]
+  favorites               Favorite[]
 
   @@map("instructor_profiles")
 }
@@ -149,6 +151,20 @@ model Review {
 
   @@index([userId])
   @@map("reviews")
+}
+
+model Favorite {
+  id                   String             @id @default(uuid())
+  userId               String
+  instructorProfileId  String
+  createdAt            DateTime           @default(now())
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructorProfile    InstructorProfile  @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, instructorProfileId])
+  @@index([userId])
+  @@index([instructorProfileId])
+  @@map("favorites")
 }
 
 model Availability {

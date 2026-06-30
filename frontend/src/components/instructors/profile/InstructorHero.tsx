@@ -10,6 +10,8 @@ import { getFullName } from "@/lib/utils/user";
 import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
 import type { InstructorProfile } from "@/types";
+import { useAuthStore } from "@/stores/auth-store";
+import { FavoriteButton } from "./FavoriteButton";
 
 interface InstructorHeroProps {
   profile: InstructorProfile;
@@ -22,10 +24,14 @@ export function InstructorHero({
   onBookClick,
   nearestSlot,
 }: InstructorHeroProps) {
+  const { user } = useAuthStore();
   const t = useTranslations("InstructorProfile");
   const locale = useLocale();
   const dateLocale = locale === "pl" ? pl : undefined;
   const { specializations } = useSpecializations();
+
+  // Don't show favorite button on own profile
+  const isOwnProfile = user?.id === profile.userId;
 
   const fullName = getFullName(profile.user, "Instructor");
   const primarySpecialization = profile.specializations?.[0];
@@ -56,7 +62,7 @@ export function InstructorHero({
       format(new Date(Date.now() + 86400000), "yyyy-MM-dd");
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl overflow-hidden">
+    <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 p-8 lg:p-10">
         {/* LEFT COLUMN: Avatar & Basic Info */}
         <div className="lg:col-span-3 space-y-5">
@@ -209,7 +215,7 @@ export function InstructorHero({
 
         {/* RIGHT COLUMN: Booking Card (sticky on desktop) */}
         <div className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
-          <div className="bg-slate-900/80 border-2 border-orange-500/40 rounded-xl p-8 space-y-6 shadow-xl shadow-orange-500/5">
+          <div className="relative bg-slate-900/80 border-2 border-orange-500/40 rounded-xl p-8 space-y-6 shadow-xl shadow-orange-500/5">
             {/* Price */}
             {showPrice ? (
               <div className="text-center">
@@ -258,6 +264,13 @@ export function InstructorHero({
               >
                 {t("chooseTerm")}
               </Button>
+            )}
+
+            {/* Favorite Button — below CTA (hidden on own profile) */}
+            {profile.isBookingEnabled && !isOwnProfile && (
+              <div className="mt-3">
+                <FavoriteButton instructorProfileId={profile.id} />
+              </div>
             )}
           </div>
         </div>

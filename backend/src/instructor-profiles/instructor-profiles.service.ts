@@ -272,6 +272,10 @@ export class InstructorProfilesService {
     const reviewCount = reviewAgg._count;
     const averageRating = reviewAgg._avg.rating;
 
+    const favoriteCount = await this.prisma.favorite.count({
+      where: { instructorProfileId: profile.id },
+    });
+
     // contactMessage is always public if set (shown in contact section)
     return {
       ...profile,
@@ -285,6 +289,7 @@ export class InstructorProfilesService {
       user: userInfo,
       averageRating: reviewCount >= 5 ? averageRating : null,
       reviewCount,
+      favoriteCount,
     };
   }
 
