@@ -45,13 +45,19 @@ export class FavoritesService {
       select: { firstName: true, lastName: true, username: true },
     });
 
-    // Upsert — if already favorited, no-op
-    const favorite = await this.prisma.favorite.upsert({
+    // Check if already favorited before upsert to avoid duplicate notifications
+    const existingFavorite = await this.prisma.favorite.findUnique({
       where: {
         userId_instructorProfileId: { userId, instructorProfileId },
       },
-      create: { userId, instructorProfileId },
-      update: {},
+    });
+
+    if (existingFavorite) {
+      return existingFavorite;
+    }
+
+    const favorite = await this.prisma.favorite.create({
+      data: { userId, instructorProfileId },
     });
 
     // Notify the instructor profile owner

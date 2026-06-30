@@ -80,15 +80,15 @@ export function InstructorDashboard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Filter upcoming bookings (pending or confirmed, in the future)
-  const now = useMemo(() => new Date(), []);
+  // Use inline new Date() to avoid stale "now" values on long-lived mounts
   const upcomingBookings = useMemo(
     () =>
       bookings?.filter(
         (booking) =>
           (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
-          new Date(booking.startTime) > now,
+          new Date(booking.startTime) > new Date(),
       ) || [],
-    [bookings, now],
+    [bookings],
   );
 
   // Client-side bookings (instructor as client)
@@ -97,9 +97,9 @@ export function InstructorDashboard() {
       clientBookings?.filter(
         (booking) =>
           (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
-          new Date(booking.startTime) > now,
+          new Date(booking.startTime) > new Date(),
       ) || [],
-    [clientBookings, now],
+    [clientBookings],
   );
 
   const pastInstructorBookings = useMemo(

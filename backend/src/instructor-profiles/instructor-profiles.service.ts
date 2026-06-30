@@ -257,10 +257,11 @@ export class InstructorProfilesService {
     }
 
     // Fetch review stats for this instructor
+    // booking.instructorId is the user ID (User.id), so we compare to profile.userId
     const reviewAgg = await this.prisma.review.aggregate({
       where: {
         booking: {
-          instructorId: profile.id,
+          instructorId: profile.userId,
         },
       },
       _avg: {

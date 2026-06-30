@@ -66,15 +66,15 @@ export function ClientDashboard() {
   } = useReviewFlow();
 
   // Filter bookings
-  const now = useMemo(() => new Date(), []);
+  // Use a function to get current time on each render to avoid stale "now" values
   const upcomingBookings = useMemo(
     () =>
       bookings?.filter(
         (booking) =>
           (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
-          new Date(booking.startTime) > now,
+          new Date(booking.startTime) > new Date(),
       ) || [],
-    [bookings, now],
+    [bookings],
   );
 
   const completedBookings = useMemo(
