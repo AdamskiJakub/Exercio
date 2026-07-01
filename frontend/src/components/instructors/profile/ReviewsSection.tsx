@@ -190,7 +190,7 @@ export function ReviewsSection({ instructorProfileId }: ReviewsSectionProps) {
                 variant="outline"
                 size="lg"
                 onClick={() => setPage((p) => p + 1)}
-                className="border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
+                className="cursor-pointer border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
               >
                 <ChevronDown className="size-4 mr-2" />
                 {t("showMoreReviews") || "Pokaż więcej opinii"}

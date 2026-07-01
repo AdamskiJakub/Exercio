@@ -38,7 +38,7 @@ export function HeroSearchBar() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t("hero.searchPlaceholder")}
           aria-label={t("hero.searchLabel")}
-          className="h-14 text-lg bg-slate-800/50 border-2 border-slate-700 text-white placeholder:text-white focus-visible:border-orange-500"
+          className="h-14 text-lg bg-slate-800/50 border-2 border-slate-700 text-white placeholder:text-white focus-visible:border-orange-500 cursor-pointer"
         />
       </div>
       <div className="flex flex-col sm:flex-row gap-4">
@@ -58,7 +58,7 @@ export function HeroSearchBar() {
             disabled={loading}
           >
             <SelectTrigger
-              className="h-14 text-lg bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4 data-placeholder:text-white"
+              className="h-14 text-lg bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4 data-placeholder:text-white cursor-pointer"
               aria-label={t("hero.specializationLabel")}
             >
               <SelectValue
@@ -91,7 +91,7 @@ export function HeroSearchBar() {
       <Button
         type="submit"
         size="lg"
-        className="w-full bg-linear-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold px-10 py-7 text-xl shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transition-all"
+        className="w-full bg-linear-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold px-10 py-7 text-xl shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transition-all cursor-pointer"
       >
         {t("hero.primaryCta")}
       </Button>

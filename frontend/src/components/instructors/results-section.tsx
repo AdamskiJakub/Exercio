@@ -51,7 +51,7 @@ export function ResultsSection({
             }
           >
             <SelectTrigger
-              className="w-full h-12 text-base bg-slate-800/50 border-slate-700 text-white focus-visible:border-orange-500 px-4"
+              className="w-full h-12 text-base bg-slate-800/50 border-slate-700 text-white focus-visible:border-orange-500 px-4 cursor-pointer"
               aria-label={t("sortBy.label")}
             >
               <SelectValue />
@@ -63,27 +63,39 @@ export function ResultsSection({
             >
               <SelectItem
                 value="relevance"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
               >
                 {t("sortBy.relevance")}
               </SelectItem>
               <SelectItem
+                value="rating"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
+              >
+                {t("sortBy.rating")}
+              </SelectItem>
+              <SelectItem
+                value="most-reviewed"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
+              >
+                {t("sortBy.mostReviewed")}
+              </SelectItem>
+              <SelectItem
                 value="price-asc"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
               >
                 {t("sortBy.priceAsc")}
               </SelectItem>
               <SelectItem
                 value="price-desc"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
               >
                 {t("sortBy.priceDesc")}
               </SelectItem>
               <SelectItem
-                value="rating"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3"
+                value="newest"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
               >
-                {t("sortBy.rating")}
+                {t("sortBy.newest")}
               </SelectItem>
             </SelectContent>
           </Select>

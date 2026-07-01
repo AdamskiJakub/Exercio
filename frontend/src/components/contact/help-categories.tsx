@@ -58,8 +58,8 @@ export function HelpCategories({
       className="w-full max-w-5xl mx-auto px-4 md:px-6"
     >
       {/* Section label */}
-      <div className="text-center mb-6">
-        <p className="text-sm text-white uppercase tracking-wider font-medium">
+      <div className="text-center mb-8">
+        <p className="text-base md:text-lg text-white uppercase tracking-wider font-semibold">
           {t("selectCategory")}
         </p>
       </div>
@@ -110,19 +110,19 @@ export function HelpCategories({
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-xl font-semibold text-white mb-3">
                 {t(`categories.${category.key}.title`)}
               </h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-base text-slate-400 leading-relaxed">
                 {t(`categories.${category.key}.description`)}
               </p>
 
               {/* Topics list */}
-              <ul className="mt-4 space-y-1.5 w-full">
+              <ul className="mt-4 space-y-2 w-full">
                 {(["topic1", "topic2", "topic3"] as const).map((topic) => (
                   <li
                     key={topic}
-                    className="text-xs text-slate-400 flex items-center gap-2"
+                    className="text-sm text-slate-400 flex items-center gap-2"
                   >
                     <span
                       className={cn(

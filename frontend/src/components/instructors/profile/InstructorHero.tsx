@@ -260,7 +260,7 @@ export function InstructorHero({
             {profile.isBookingEnabled && (
               <Button
                 onClick={onBookClick}
-                className="w-full py-6 text-lg font-bold bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-lg shadow-orange-500/20"
+                className="cursor-pointer w-full py-6 text-lg font-bold bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-lg shadow-orange-500/20"
               >
                 {t("chooseTerm")}
               </Button>

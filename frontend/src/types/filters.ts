@@ -8,13 +8,18 @@ export interface SearchFilters {
 export interface InstructorFilters extends SearchFilters {
   priceMin?: number;
   priceMax?: number;
-  minRating?: number;
-  experience?: "beginner" | "intermediate" | "expert" | "all";
+  experience?: "0-2" | "3-5" | "6-10" | "10+" | "all";
   availability?: "online" | "in-person" | "both" | "all";
   gender?: "male" | "female" | "all";
   languages?: string[];
   goals?: string[];
-  sortBy?: "relevance" | "price-asc" | "price-desc" | "rating";
+  sortBy?:
+    | "relevance"
+    | "price-asc"
+    | "price-desc"
+    | "rating"
+    | "most-reviewed"
+    | "newest";
   page?: number;
   limit?: number;
 }

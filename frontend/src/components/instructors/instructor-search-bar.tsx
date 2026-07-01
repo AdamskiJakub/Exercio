@@ -35,7 +35,7 @@ export function InstructorSearchBar({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("hero.searchPlaceholder")}
           aria-label={t("hero.searchLabel")}
-          className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white placeholder:text-white focus-visible:border-orange-500"
+          className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white placeholder:text-white focus-visible:border-orange-500 cursor-pointer"
         />
       </div>
       <div className="flex-1">
@@ -53,7 +53,7 @@ export function InstructorSearchBar({
           disabled={loading}
         >
           <SelectTrigger
-            className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4 data-placeholder:text-white"
+            className="h-12 text-base bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4 data-placeholder:text-white cursor-pointer"
             aria-label={t("hero.specializationLabel")}
           >
             <SelectValue

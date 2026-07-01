@@ -23,18 +23,6 @@ const staticRoutes = [
     priority: 0.9,
   },
   {
-    url: `${BASE_URL}/pl/jak-to-dziala`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  },
-  {
-    url: `${BASE_URL}/pl/cennik`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  },
-  {
     url: `${BASE_URL}/pl/pomoc`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
@@ -42,12 +30,6 @@ const staticRoutes = [
   },
   {
     url: `${BASE_URL}/pl/kontakt`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  },
-  {
-    url: `${BASE_URL}/pl/faq`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.5,
@@ -90,18 +72,6 @@ const staticRoutes = [
     priority: 0.8,
   },
   {
-    url: `${BASE_URL}/en/how-it-works`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/en/pricing`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  },
-  {
     url: `${BASE_URL}/en/help`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
@@ -109,12 +79,6 @@ const staticRoutes = [
   },
   {
     url: `${BASE_URL}/en/contact`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.4,
-  },
-  {
-    url: `${BASE_URL}/en/faq`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: 0.4,

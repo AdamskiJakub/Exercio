@@ -42,11 +42,16 @@ export default function InstructorPublicProfilePage() {
   }, [profile, router]);
 
   // Track profile view when authenticated user views an instructor profile
+  // Skip if the viewer is the profile owner (instructor viewing their own profile)
   useEffect(() => {
     if (profile && isAuthenticated && !profile.isDraft) {
-      trackView.mutate(profile.id);
+      const isOwnProfile =
+        user?.role === "INSTRUCTOR" && profile.user?.id === user.id;
+      if (!isOwnProfile) {
+        trackView.mutate(profile.id);
+      }
     }
-  }, [profile?.id, isAuthenticated]);
+  }, [profile?.id, isAuthenticated, user?.id, user?.role]);
 
   if (isLoading) {
     return <LoadingSpinner />;

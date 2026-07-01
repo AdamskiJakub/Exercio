@@ -117,7 +117,7 @@ export function QuickAvailability({
           <Button
             variant="outline"
             onClick={handleFullCalendar}
-            className="border-slate-600"
+            className="cursor-pointer border-slate-600"
           >
             {t("seeFullCalendar")}
           </Button>
@@ -131,7 +131,7 @@ export function QuickAvailability({
           <Button
             variant="outline"
             onClick={handleFullCalendar}
-            className="border-slate-600"
+            className="cursor-pointer border-slate-600"
           >
             {t("seeFullCalendar")}
           </Button>
@@ -164,7 +164,7 @@ export function QuickAvailability({
                     <button
                       key={`${day.date}-${time}`}
                       onClick={() => handleSlotClick(day.date, time)}
-                      className="px-6 py-3 bg-green-500/15 border border-green-500/40 text-green-400 rounded-xl text-base font-semibold hover:bg-green-500/25 hover:border-green-500/60 transition-all hover:scale-105 active:scale-95"
+                      className="cursor-pointer px-6 py-3 bg-green-500/15 border border-green-500/40 text-green-400 rounded-xl text-base font-semibold hover:bg-green-500/25 hover:border-green-500/60 transition-all hover:scale-105 active:scale-95"
                     >
                       <Clock className="size-4 inline mr-2" />
                       {time}
@@ -179,7 +179,7 @@ export function QuickAvailability({
           <div className="pt-6 border-t border-slate-700">
             <button
               onClick={handleFullCalendar}
-              className="flex items-center gap-2 text-orange-400 hover:text-orange-300 transition-colors text-base font-medium"
+              className="cursor-pointer flex items-center gap-2 text-orange-400 hover:text-orange-300 transition-colors text-base font-medium"
             >
               {t("seeFullCalendar")}
               <ChevronRight className="size-5" />

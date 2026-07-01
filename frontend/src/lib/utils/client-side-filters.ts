@@ -1,9 +1,9 @@
-import type { InstructorListing } from '@/types';
-import type { InstructorFilters } from '@/types/filters';
+import type { InstructorListing } from "@/types";
+import type { InstructorFilters } from "@/types/filters";
 
 export function applyClientSideFilters(
   instructors: InstructorListing[],
-  filters: InstructorFilters
+  filters: InstructorFilters,
 ): InstructorListing[] {
   let result = [...instructors];
 
@@ -18,30 +18,32 @@ export function applyClientSideFilters(
         instructor.user?.lastName,
       ]
         .filter(Boolean)
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return searchableText.includes(searchLower);
     });
   }
 
-  if (filters.experience && filters.experience !== 'all') {
+  if (filters.experience && filters.experience !== "all") {
     result = result.filter((instructor) => {
       const years = instructor.yearsExperience || 0;
       switch (filters.experience) {
-        case 'beginner':
-          return years <= 2;
-        case 'intermediate':
-          return years > 2 && years <= 5;
-        case 'expert':
-          return years > 5;
+        case "0-2":
+          return years >= 0 && years <= 2;
+        case "3-5":
+          return years >= 3 && years <= 5;
+        case "6-10":
+          return years >= 6 && years <= 10;
+        case "10+":
+          return years >= 10;
         default:
           return true;
       }
     });
   }
 
-  if (filters.availability && filters.availability !== 'all') {
+  if (filters.availability && filters.availability !== "all") {
     result = result.filter((instructor) => {
       return instructor.availability === filters.availability;
     });

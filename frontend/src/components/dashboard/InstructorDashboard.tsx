@@ -120,13 +120,7 @@ export function InstructorDashboard() {
     [clientBookings],
   );
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  const pendingReviewCount = pendingReviews?.length || 0;
-
-  // Calculate real stats from bookings
+  // Calculate real stats from bookings — must be before early return to keep hooks consistent
   const totalSessions =
     bookings?.filter((b) => b.status === "COMPLETED").length || 0;
 
@@ -144,6 +138,12 @@ export function InstructorDashboard() {
     );
     return uniqueClients.size;
   }, [bookings]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  const pendingReviewCount = pendingReviews?.length || 0;
 
   const stats = {
     averageRating: reviewStats?.averageRating || 0,

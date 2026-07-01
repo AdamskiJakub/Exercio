@@ -72,6 +72,9 @@
       "transfer": "Bank Transfer"
     }
   },
+  "Navigation": {
+    "contact": "Contact"
+  },
   "auth": {
     "loginSubtitle": "Sign in to your account",
     "registerSubtitle": "Create your account",
@@ -304,10 +307,9 @@
       "recentlyViewed": "Recently Viewed",
       "noRecentlyViewed": "No recently viewed",
       "recentlyViewedDescription": "Trainers you've recently viewed will appear here.",
-      "welcomeUpcoming": "You have {count} upcoming session | You have {count} upcoming sessions",
-      "welcomeReviews": "You have {count} pending review to write | You have {count} pending reviews to write",
-      "welcomeUpcomingAndReviews": "You have {upcoming} upcoming session and {reviews} review to write | You have {upcoming} upcoming sessions and {reviews} reviews to write",
-      "welcomeFree": "You're free today — browse available trainers!"
+      "welcomeToday": "Hi {name}! Your next session with {trainer} is today at {time}. Great workout awaits! 💪",
+      "welcomeThisWeek": "You have {count} {count, plural, one {upcoming session} other {upcoming sessions}} this week. Next one on {day} at {time}. 🗓️",
+      "welcomeFree": "No sessions planned yet. Time to find a new trainer and get in shape! 🏋️"
     },
     "settings": {
       "title": "Account Settings",
@@ -540,9 +542,7 @@
     "platform": {
       "title": "Platform",
       "findTrainers": "Find Trainers",
-      "becomeInstructor": "Become Instructor",
-      "howItWorks": "How It Works",
-      "pricing": "Pricing"
+      "becomeInstructor": "Become Instructor"
     },
     "support": {
       "title": "Support",
@@ -583,20 +583,17 @@
       "goals": "Your Goals",
       "goalsAriaLabel": "Filter by training goals",
       "price": "Price per session",
-      "rating": "Minimum rating",
-      "ratingAriaLabel": "Minimum rating filter",
-      "ratingOption": "{rating} stars and up",
-      "andUp": "& up",
       "experience": "Experience",
       "availability": "Availability",
       "clearAll": "Clear filters",
       "showResults": "Show results"
     },
     "experience": {
-      "all": "All",
-      "beginner": "Beginner (0-2 years)",
-      "intermediate": "Intermediate (3-5 years)",
-      "expert": "Expert (5+ years)"
+      "all": "Any",
+      "0-2": "0–2 years",
+      "3-5": "3–5 years",
+      "6-10": "6–10 years",
+      "10+": "10+ years"
     },
     "availability": {
       "all": "All",
@@ -607,24 +604,17 @@
     "sortBy": {
       "label": "Sort by",
       "relevance": "Relevance",
+      "rating": "Highest Rated",
+      "mostReviewed": "Most Reviews",
       "priceAsc": "Price: Low to High",
       "priceDesc": "Price: High to Low",
-      "rating": "Highest Rated",
-      "distance": "Distance"
+      "newest": "Newest"
     },
     "resultsAriaLabel": "Search results",
     "noResults": "No trainers found",
     "noResultsDescription": "Try adjusting your filters or search in a different city",
     "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}",
     "instructorsFailed": "Failed to load instructors. Please try again later."
-  },
-  "HowItWorks": {
-    "title": "How It Works",
-    "comingSoon": "Page coming soon"
-  },
-  "Pricing": {
-    "title": "Pricing",
-    "comingSoon": "Page coming soon"
   },
   "Help": {
     "title": "Help Center",
@@ -662,6 +652,22 @@
       "contactSupport": {
         "question": "How can I contact Trainly support?",
         "answer": "Use the contact form on this page to send us a message. Select the appropriate category so we can route your inquiry to the right team. We typically respond within 24 hours during business days."
+      },
+      "manualBooking": {
+        "question": "Can I manually add a session for a client as an instructor?",
+        "answer": "Yes, simply go to your calendar, click on the desired time slot, and add the session by entering the client's details. This allows you to book sessions for clients who may not have booked through the platform themselves."
+      },
+      "trainWithoutAccount": {
+        "question": "Can I train people who don't have an account?",
+        "answer": "Yes, you can train with anyone regardless of whether they have a Trainly account. You can manually add sessions for them through your calendar, and they will receive email confirmations and reminders."
+      },
+      "guestReview": {
+        "question": "Can I leave a review as a guest?",
+        "answer": "Yes, after a completed session, you will receive an email with a link to leave a review. This allows guests to share their experience even without creating an account on Trainly."
+      },
+      "guestCancellation": {
+        "question": "Can I cancel a session as a guest?",
+        "answer": "Yes, once the instructor confirms your session, you will receive an email with a cancellation link. You can use that link to cancel the booking without needing to log in."
       }
     },
     "categories": {
@@ -716,10 +722,6 @@
       "successDescription": "Thank you for reaching out. We'll get back to you as soon as possible. We usually respond within 24 hours.",
       "errorGeneric": "Something went wrong. Please try again later."
     }
-  },
-  "FAQ": {
-    "title": "Frequently Asked Questions",
-    "comingSoon": "Page coming soon"
   },
   "Safety": {
     "title": "Safety",

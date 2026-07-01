@@ -72,6 +72,9 @@
       "transfer": "Przelew"
     }
   },
+  "Navigation": {
+    "contact": "Kontakt"
+  },
   "auth": {
     "loginSubtitle": "Zaloguj się do swojego konta",
     "registerSubtitle": "Stwórz swoje konto",
@@ -304,10 +307,9 @@
       "recentlyViewed": "Ostatnio oglądani",
       "noRecentlyViewed": "Brak ostatnio oglądanych",
       "recentlyViewedDescription": "Trenerzy, których profile ostatnio odwiedziłeś, pojawią się tutaj.",
-      "welcomeUpcoming": "Masz {count} nadchodzącą sesję | Masz {count} nadchodzące sesje | Masz {count} nadchodzących sesji",
-      "welcomeReviews": "Masz {count} oczekującą opinię do wystawienia | Masz {count} oczekujące opinie do wystawienia | Masz {count} oczekujących opinii do wystawienia",
-      "welcomeUpcomingAndReviews": "Masz {upcoming} nadchodzącą sesję i {reviews} opinię do wystawienia | Masz {upcoming} nadchodzące sesje i {reviews} opinie do wystawienia | Masz {upcoming} nadchodzących sesji i {reviews} opinii do wystawienia",
-      "welcomeFree": "Dzisiaj masz wolne — przeglądaj dostępnych trenerów!"
+      "welcomeToday": "Cześć {name}! Twój najbliższy trening z: {trainer} już dziś o {time}. Dobrego wycisku! 💪",
+      "welcomeThisWeek": "Masz {count} {count, plural, one {nadchodzący trening} few {nadchodzące treningi} many {nadchodzących treningów} other {nadchodzących treningów}} w tym tygodniu. Najbliższy {day} o {time}. 🗓️",
+      "welcomeFree": "Nie masz zaplanowanych treningów na najbliższe dni. Czas znaleźć nowego trenera i zrobić formę! 🏋️"
     },
     "settings": {
       "title": "Ustawienia Konta",
@@ -540,9 +542,7 @@
     "platform": {
       "title": "Platforma",
       "findTrainers": "Znajdź Trenerów",
-      "becomeInstructor": "Zostań Instruktorem",
-      "howItWorks": "Jak to działa",
-      "pricing": "Cennik"
+      "becomeInstructor": "Zostań Instruktorem"
     },
     "support": {
       "title": "Pomoc",
@@ -583,20 +583,17 @@
       "goals": "Twoje cele",
       "goalsAriaLabel": "Filtruj po celach treningowych",
       "price": "Cena za sesję",
-      "rating": "Minimalna ocena",
-      "ratingAriaLabel": "Filtr minimalnej oceny",
-      "ratingOption": "{rating} gwiazdek i więcej",
-      "andUp": "i więcej",
       "experience": "Doświadczenie",
       "availability": "Dostępność",
       "clearAll": "Wyczyść filtry",
       "showResults": "Pokaż wyniki"
     },
     "experience": {
-      "all": "Wszystkie",
-      "beginner": "Początkujący (0-2 lata)",
-      "intermediate": "Średniozaawansowany (3-5 lat)",
-      "expert": "Ekspert (5+ lat)"
+      "all": "Dowolne",
+      "0-2": "0–2 lata",
+      "3-5": "3–5 lat",
+      "6-10": "6–10 lat",
+      "10+": "10+ lat"
     },
     "availability": {
       "all": "Wszystkie",
@@ -607,24 +604,17 @@
     "sortBy": {
       "label": "Sortuj według",
       "relevance": "Trafność",
+      "rating": "Najwyżej oceniani",
+      "mostReviewed": "Najwięcej opinii",
       "priceAsc": "Cena: rosnąco",
       "priceDesc": "Cena: malejąco",
-      "rating": "Najwyżej oceniani",
-      "distance": "Odległość"
+      "newest": "Najnowsi"
     },
     "resultsAriaLabel": "Wyniki wyszukiwania",
     "noResults": "Nie znaleziono trenerów",
     "noResultsDescription": "Spróbuj zmienić filtry lub wyszukaj w innym mieście",
     "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}",
     "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później."
-  },
-  "HowItWorks": {
-    "title": "Jak to działa",
-    "comingSoon": "Strona w przygotowaniu"
-  },
-  "Pricing": {
-    "title": "Cennik",
-    "comingSoon": "Strona w przygotowaniu"
   },
   "Help": {
     "title": "Centrum Pomocy",
@@ -662,6 +652,22 @@
       "contactSupport": {
         "question": "Jak mogę skontaktować się z pomocą Trainly?",
         "answer": "Użyj formularza kontaktowego na tej stronie, aby wysłać nam wiadomość. Wybierz odpowiednią kategorię, abyśmy mogli skierować Twoje zapytanie do odpowiedniego zespołu. Odpowiadamy zwykle w ciągu 24 godzin w dni robocze."
+      },
+      "manualBooking": {
+        "question": "Czy mogę manualnie dodać sesję jako instruktor dla klienta?",
+        "answer": "Tak, wystarczy że wejdziesz w kalendarz, klikniesz w daną godzinę i dodasz sesję wpisując dane klienta. Dzięki temu możesz rezerwować sesje dla klientów, którzy nie dokonali rezerwacji samodzielnie przez platformę."
+      },
+      "trainWithoutAccount": {
+        "question": "Czy mogę trenować z osobami które nie mają konta?",
+        "answer": "Tak, możesz trenować z kim chcesz, niezależnie od tego czy mają konto na Trainly. Możesz manualnie dodawać dla nich sesje przez swój kalendarz, a oni otrzymają e-mailowe potwierdzenia i przypomnienia."
+      },
+      "guestReview": {
+        "question": "Czy jako gość mogę wystawić opinię?",
+        "answer": "Tak, po odbytej i zakończonej sesji dostaniesz maila z linkiem do wystawienia opinii. Dzięki temu goście mogą podzielić się swoimi doświadczeniami nawet bez zakładania konta na Trainly."
+      },
+      "guestCancellation": {
+        "question": "Czy jako gość mogę anulować sesję?",
+        "answer": "Tak, kiedy instruktor potwierdzi twoją sesję, dostaniesz maila z linkiem do anulowania. Możesz użyć tego linku, aby anulować rezerwację bez konieczności logowania się."
       }
     },
     "categories": {
@@ -716,10 +722,6 @@
       "successDescription": "Dziękujemy za kontakt. Odpowiemy najszybciej jak to możliwe. Zwykle odpowiadamy w ciągu 24 godzin.",
       "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie później."
     }
-  },
-  "FAQ": {
-    "title": "Najczęściej Zadawane Pytania",
-    "comingSoon": "Strona w przygotowaniu"
   },
   "Safety": {
     "title": "Bezpieczeństwo",
