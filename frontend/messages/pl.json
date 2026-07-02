@@ -131,6 +131,8 @@
     "verificationFailed": "Nieprawidłowy lub wygasły kod. Spróbuj ponownie.",
     "resendCode": "Wyślij kod ponownie",
     "resendingCode": "Wysyłanie...",
+    "verifyEmailRequired": "Zweryfikuj swój email przed zalogowaniem.",
+    "verifyEmailNow": "Zweryfikuj email →",
     "codeResent": "Kod został wysłany ponownie!",
     "codeSent": "Kod został wysłany!",
     "resendFailed": "Nie udało się wysłać kodu. Spróbuj ponownie.",
@@ -138,6 +140,7 @@
     "resetCodeSent": "Jeśli konto z tym adresem email istnieje, kod został wysłany.",
     "codeSentToEmail": "Kod został wysłany na ten adres email",
     "redirectingToLogin": "Za chwilę zostaniesz przekierowany do strony logowania...",
+    "redirectingToDashboard": "Za chwilę zostaniesz przekierowany do panelu...",
     "login": "Zaloguj się",
     "loggingIn": "Logowanie...",
     "loginFailed": "Nieprawidłowy email lub hasło. Sprawdź dane i spróbuj ponownie.",
@@ -186,7 +189,11 @@
     "specializations": "Specjalizacje",
     "specializationsRequired": "Podaj przynajmniej jedną specjalizację",
     "specializationsPlaceholder": "Trening personalny, Yoga, Taniec",
-    "specializationsHint": "Oddziel przecinkami (np. Trening siłowy, Yoga, Stretching)"
+    "specializationsHint": "Oddziel przecinkami (np. Trening siłowy, Yoga, Stretching)",
+    "becomeInstructor": "Zostań instruktorem",
+    "becomeInstructorDescription": "Aby zostać instruktorem, potrzebujemy Twojego numeru telefonu",
+    "becomeInstructorPhoneInfo": "Podaj numer telefonu, aby klienci mogli się z Tobą kontaktować",
+    "processing": "Przetwarzanie..."
   },
   "Dashboard": {
     "welcomeBack": "Witaj ponownie",
@@ -291,6 +298,7 @@
       "clear": "Wyczyść",
       "cancel": "Anuluj",
       "reviewBannerTitle": "Sesja zakończona!",
+      "reviewBannerSubtitle": "{count, plural, one {Opinia dla {names}} few {Opinie dla: {names} i {count, plural, one {1 inne} few {# inne} other {# innych}}} other {Opinie dla: {names} i {count, plural, one {1 inne} few {# inne} other {# innych}}}}",
       "reviewBannerDescription": "Jak minęła sesja treningowa? Podziel się swoją opinią z instruktorem.",
       "reviewBannerAction": "Wystaw opinię",
       "pendingReviews": "Oczekujące opinie",
@@ -309,7 +317,9 @@
       "recentlyViewedDescription": "Trenerzy, których profile ostatnio odwiedziłeś, pojawią się tutaj.",
       "welcomeToday": "Cześć {name}! Twój najbliższy trening z: {trainer} już dziś o {time}. Dobrego wycisku! 💪",
       "welcomeThisWeek": "Masz {count} {count, plural, one {nadchodzący trening} few {nadchodzące treningi} many {nadchodzących treningów} other {nadchodzących treningów}} w tym tygodniu. Najbliższy {day} o {time}. 🗓️",
-      "welcomeFree": "Nie masz zaplanowanych treningów na najbliższe dni. Czas znaleźć nowego trenera i zrobić formę! 🏋️"
+      "welcomeFree": "Nie masz zaplanowanych treningów na najbliższe dni. Czas znaleźć nowego trenera i zrobić formę! 🏋️",
+      "becomeInstructor": "Zostań instruktorem",
+      "becomeInstructorDesc": "Chcesz dzielić się swoją wiedzą? Przejdź na konto instruktora i zacznij prowadzić własne treningi!"
     },
     "settings": {
       "title": "Ustawienia Konta",

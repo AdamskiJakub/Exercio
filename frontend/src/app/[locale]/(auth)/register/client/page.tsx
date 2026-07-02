@@ -1,5 +1,5 @@
-import RegisterClientForm from "@/components/forms/RegisterClientForm";
+import RegisterForm from "@/components/forms/RegisterForm";
 
 export default function RegisterClientPage() {
-  return <RegisterClientForm />;
+  return <RegisterForm intent="client" />;
 }

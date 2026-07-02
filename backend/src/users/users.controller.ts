@@ -2,6 +2,7 @@ import {
   Controller,
   Patch,
   Delete,
+  Post,
   Body,
   UseGuards,
   Req,
@@ -10,7 +11,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UpdateUserDto, UpdatePasswordDto } from './dto';
+import { UpdateUserDto, UpdatePasswordDto, BecomeInstructorDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import type { Request } from 'express';
 import type { AuthenticatedUser } from '../types/express';
@@ -42,6 +43,21 @@ export class UsersController {
     }
 
     return this.usersService.updatePassword(user.id, dto);
+  }
+
+  @Post('become-instructor')
+  @HttpCode(HttpStatus.OK)
+  async becomeInstructor(
+    @Body() dto: BecomeInstructorDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user as AuthenticatedUser;
+
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    return this.usersService.becomeInstructor(user.id, dto);
   }
 
   @Delete('me')

@@ -16,6 +16,7 @@ import {
   Clock,
   UserCheck,
   MapPin,
+  Rocket,
 } from "lucide-react";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
@@ -38,6 +39,7 @@ import { scrollToSection } from "@/lib/utils/scroll";
 import { getInstructorName } from "@/lib/utils/user";
 import { getMediaUrl } from "@/lib/utils/media";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { format, isToday, parseISO, isThisWeek } from "date-fns";
 import { pl } from "date-fns/locale";
 
@@ -339,6 +341,27 @@ export function ClientDashboard() {
               description={t("recentlyViewedDescription")}
             />
           )}
+        </DashboardCard>
+
+        {/* Become Instructor CTA */}
+        <DashboardCard
+          icon={Rocket}
+          iconColor="text-purple-500"
+          iconBgColor="bg-purple-500/10"
+          title={t("becomeInstructor")}
+          delay={8}
+        >
+          <div className="text-center py-4">
+            <p className="text-slate-300 mb-4">{t("becomeInstructorDesc")}</p>
+            <Link href="/onboarding/instructor">
+              <Button
+                variant="default"
+                className="bg-linear-to-r from-purple-600 to-indigo-600 text-white font-semibold hover:from-purple-700 hover:to-indigo-700"
+              >
+                🚀 {t("becomeInstructor")}
+              </Button>
+            </Link>
+          </div>
         </DashboardCard>
       </div>
 

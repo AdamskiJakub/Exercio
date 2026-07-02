@@ -19,6 +19,9 @@ export function useLoginForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailForVerification, setEmailForVerification] = useState<
+    string | null
+  >(null);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(createLoginSchema(t)),
@@ -28,6 +31,7 @@ export function useLoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     setError(null);
+    setEmailForVerification(null);
     // Clear any previous manual errors
     form.clearErrors();
 
@@ -40,12 +44,18 @@ export function useLoginForm() {
       router.push("/dashboard");
     } catch (err: any) {
       const backendMessage = err?.response?.data?.message;
-      // Map backend "Invalid credentials" to localized message
-      const errorMessage =
-        backendMessage === "Invalid credentials"
-          ? t("loginFailed")
-          : normalizeApiError(err, t("loginFailed"));
-      setError(errorMessage);
+      // Check if the error is about unverified email
+      if (backendMessage === "Please verify your email before logging in") {
+        setEmailForVerification(data.email);
+        setError(t("verifyEmailRequired"));
+      } else {
+        // Map backend "Invalid credentials" to localized message
+        const errorMessage =
+          backendMessage === "Invalid credentials"
+            ? t("loginFailed")
+            : normalizeApiError(err, t("loginFailed"));
+        setError(errorMessage);
+      }
 
       // Set errors on both fields since we don't know which one is wrong
       form.setError("email", {
@@ -65,9 +75,11 @@ export function useLoginForm() {
     form,
     isLoading,
     error,
+    emailForVerification,
     onSubmit: form.handleSubmit(onSubmit),
     clearServerError: () => {
       setError(null);
+      setEmailForVerification(null);
       form.clearErrors(["email", "password"]);
     },
   };

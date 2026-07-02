@@ -1,5 +1,5 @@
-import RegisterInstructorForm from "@/components/forms/RegisterInstructorForm";
+import RegisterForm from "@/components/forms/RegisterForm";
 
 export default function RegisterInstructorPage() {
-  return <RegisterInstructorForm />;
+  return <RegisterForm intent="instructor" />;
 }

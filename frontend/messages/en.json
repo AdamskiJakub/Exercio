@@ -131,6 +131,8 @@
     "verificationFailed": "Invalid or expired code. Please try again.",
     "resendCode": "Resend code",
     "resendingCode": "Sending...",
+    "verifyEmailRequired": "Please verify your email before logging in.",
+    "verifyEmailNow": "Verify email now →",
     "codeResent": "Code sent again!",
     "codeSent": "Code sent!",
     "resendFailed": "Failed to send code. Please try again.",
@@ -138,6 +140,7 @@
     "resetCodeSent": "If an account with that email exists, a code has been sent.",
     "codeSentToEmail": "Code was sent to this email address",
     "redirectingToLogin": "Redirecting to login page in a moment...",
+    "redirectingToDashboard": "Redirecting to dashboard in a moment...",
     "login": "Log In",
     "loggingIn": "Logging in...",
     "loginFailed": "Invalid email or password. Please check your credentials and try again.",
@@ -186,7 +189,11 @@
     "specializations": "Specializations",
     "specializationsRequired": "Provide at least one specialization",
     "specializationsPlaceholder": "Personal Training, Yoga, Dance",
-    "specializationsHint": "Separate with commas (e.g. Strength Training, Yoga, Stretching)"
+    "specializationsHint": "Separate with commas (e.g. Strength Training, Yoga, Stretching)",
+    "becomeInstructor": "Become an Instructor",
+    "becomeInstructorDescription": "To become an instructor, we need your phone number",
+    "becomeInstructorPhoneInfo": "Provide your phone number so clients can contact you",
+    "processing": "Processing..."
   },
   "Dashboard": {
     "welcomeBack": "Welcome back",
@@ -291,6 +298,7 @@
       "clear": "Clear",
       "cancel": "Cancel",
       "reviewBannerTitle": "Your session is complete!",
+      "reviewBannerSubtitle": "{count, plural, one {Review for {names}} other {Reviews for: {names} and {count, plural, one {1 other} other {# others}}}}",
       "reviewBannerDescription": "How was your training session? Share your feedback with the instructor.",
       "reviewBannerAction": "Leave a Review",
       "pendingReviews": "Pending Reviews",
@@ -309,7 +317,9 @@
       "recentlyViewedDescription": "Trainers you've recently viewed will appear here.",
       "welcomeToday": "Hi {name}! Your next session with {trainer} is today at {time}. Great workout awaits! 💪",
       "welcomeThisWeek": "You have {count} {count, plural, one {upcoming session} other {upcoming sessions}} this week. Next one on {day} at {time}. 🗓️",
-      "welcomeFree": "No sessions planned yet. Time to find a new trainer and get in shape! 🏋️"
+      "welcomeFree": "No sessions planned yet. Time to find a new trainer and get in shape! 🏋️",
+      "becomeInstructor": "Become an Instructor",
+      "becomeInstructorDesc": "Want to share your knowledge? Switch to an instructor account and start leading your own training sessions!"
     },
     "settings": {
       "title": "Account Settings",
