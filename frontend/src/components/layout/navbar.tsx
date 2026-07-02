@@ -18,6 +18,7 @@ import {
 
 export function Navbar() {
   const t = useTranslations("Common");
+  const navT = useTranslations("Navigation");
   const { isAuthenticated } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,6 +30,7 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-20">
+          {/* Left: Logo */}
           <Link
             href="/"
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
@@ -43,15 +45,28 @@ export function Navbar() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* Right side */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Contact link — visible on md and up */}
+            <div className="hidden md:flex items-center">
+              <Link
+                href="/contact"
+                className="text-slate-300 hover:text-orange-500 transition-colors text-lg font-semibold px-4 py-2.5 rounded-lg hover:bg-slate-800/50"
+              >
+                {navT("contact")}
+              </Link>
+            </div>
+
+            {/* LocaleSwitcher — always visible */}
             <LocaleSwitcher />
 
+            {/* Auth section */}
             {isAuthenticated ? (
               <UserMenu />
             ) : (
               <>
-                {/* Desktop: Login/Register buttons */}
-                <div className="hidden lg:flex items-center gap-3">
+                {/* Desktop: Login/Register */}
+                <div className="hidden md:flex items-center gap-3">
                   <Button
                     variant="outline"
                     size="lg"
@@ -72,8 +87,8 @@ export function Navbar() {
                   </Button>
                 </div>
 
-                {/* Mobile: Hamburger menu */}
-                <div className="lg:hidden">
+                {/* Mobile: Hamburger */}
+                <div className="md:hidden">
                   <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                     <SheetTrigger asChild>
                       <Button
@@ -101,6 +116,16 @@ export function Navbar() {
                       </SheetHeader>
 
                       <div className="flex flex-col gap-3 p-6">
+                        <Link
+                          href="/contact"
+                          className="text-slate-300 hover:text-orange-500 transition-colors text-base font-medium text-center px-4 py-3 rounded-lg hover:bg-slate-800"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {navT("contact")}
+                        </Link>
+
+                        <div className="border-t border-slate-800 my-2" />
+
                         <Button
                           variant="outline"
                           size="lg"

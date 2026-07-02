@@ -18,6 +18,10 @@ const FAQ_ITEMS = [
   { key: "profileNotVisible" },
   { key: "paymentMethods" },
   { key: "contactSupport" },
+  { key: "manualBooking" },
+  { key: "trainWithoutAccount" },
+  { key: "guestReview" },
+  { key: "guestCancellation" },
 ] as const;
 
 export function FAQSection() {
@@ -25,11 +29,12 @@ export function FAQSection() {
 
   return (
     <motion.section
+      id="faq"
       variants={fadeInUp}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
-      className="w-full max-w-3xl mx-auto px-4 md:px-6"
+      className="w-full max-w-3xl mx-auto px-4 md:px-6 scroll-mt-20"
       aria-label={t("faqTitle")}
     >
       <div className="text-center mb-10">
@@ -45,10 +50,10 @@ export function FAQSection() {
         <Accordion type="single" collapsible className="w-full">
           {FAQ_ITEMS.map((item, index) => (
             <AccordionItem key={item.key} value={item.key}>
-              <AccordionTrigger className="px-4 text-base">
+              <AccordionTrigger className="px-4 text-lg md:text-xl font-semibold">
                 {t(`faq.${item.key}.question`)}
               </AccordionTrigger>
-              <AccordionContent className="px-4 leading-relaxed">
+              <AccordionContent className="px-4 leading-relaxed text-base md:text-lg text-slate-300">
                 {t(`faq.${item.key}.answer`)}
               </AccordionContent>
             </AccordionItem>

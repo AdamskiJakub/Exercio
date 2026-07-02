@@ -38,6 +38,8 @@ import { scrollToSection } from "@/lib/utils/scroll";
 import { getInstructorName } from "@/lib/utils/user";
 import { getMediaUrl } from "@/lib/utils/media";
 import Link from "next/link";
+import { format, isToday, parseISO, isThisWeek } from "date-fns";
+import { pl } from "date-fns/locale";
 
 export function ClientDashboard() {
   const t = useTranslations("Dashboard.client");
@@ -100,22 +102,39 @@ export function ClientDashboard() {
     pendingReviews: pendingReviewCount,
   };
 
-  // Dynamic welcome subtitle
+  // Dynamic welcome subtitle — three states: today, this week, or free
   const welcomeSubtitle = useMemo(() => {
-    if (upcomingBookings.length > 0 && pendingReviewCount > 0) {
-      return t("welcomeUpcomingAndReviews", {
-        upcoming: upcomingBookings.length,
-        reviews: pendingReviewCount,
+    if (upcomingBookings.length === 0) {
+      return t("welcomeFree");
+    }
+
+    const nextBooking = upcomingBookings[0];
+    const bookingDate = parseISO(nextBooking.startTime);
+    const bookingTime = format(bookingDate, "HH:mm");
+    const dateLocale = locale === "pl" ? pl : undefined;
+
+    // State 1: Training TODAY
+    if (isToday(bookingDate)) {
+      return t("welcomeToday", {
+        name: user?.firstName || "",
+        trainer: getInstructorName(nextBooking),
+        time: bookingTime,
       });
     }
-    if (upcomingBookings.length > 0) {
-      return t("welcomeUpcoming", { count: upcomingBookings.length });
+
+    // State 2: Training THIS WEEK
+    if (isThisWeek(bookingDate)) {
+      const dayName = format(bookingDate, "EEEE", { locale: dateLocale });
+      return t("welcomeThisWeek", {
+        count: upcomingBookings.length,
+        day: dayName,
+        time: bookingTime,
+      });
     }
-    if (pendingReviewCount > 0) {
-      return t("welcomeReviews", { count: pendingReviewCount });
-    }
+
+    // State 3: No plans in the near future
     return t("welcomeFree");
-  }, [upcomingBookings.length, pendingReviewCount, t]);
+  }, [upcomingBookings, t, locale, user?.firstName]);
 
   return (
     <div className="space-y-6">

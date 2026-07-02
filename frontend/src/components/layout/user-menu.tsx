@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/stores/auth-store";
-import { useRouter } from "@/i18n/routing";
+import { useRouter, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -53,6 +53,7 @@ export function UserMenu() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const router = useRouter();
   const t = useTranslations("Common");
+  const navT = useTranslations("Navigation");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: instructorProfile } = useMyInstructorProfile({
@@ -509,22 +510,34 @@ export function UserMenu() {
 
             <div className="flex flex-col justify-between h-[calc(100%-120px)]">
               <div className="flex flex-col p-4 space-y-2">
-                <NavItem
-                  href="/dashboard"
-                  icon={<LayoutDashboard className="h-5 w-5" />}
-                  label={t("dashboard")}
-                  variant="sheet"
+                <Link
+                  href="/contact"
+                  className="text-slate-300 hover:text-orange-500 transition-colors text-base font-medium text-center px-4 py-3 rounded-lg hover:bg-slate-800"
                   onClick={() => setMobileMenuOpen(false)}
-                />
+                >
+                  {navT("contact")}
+                </Link>
+
+                <div className="border-t border-slate-700 my-2" />
+
+                <Link
+                  href="/dashboard"
+                  className="flex items-center justify-start gap-3 text-slate-300 hover:text-orange-500 transition-colors text-base font-medium px-4 py-3 rounded-lg hover:bg-slate-800"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <LayoutDashboard className="h-5 w-5" />
+                  {t("dashboard")}
+                </Link>
 
                 {user.role === "INSTRUCTOR" && (
-                  <NavItem
+                  <Link
                     href="/dashboard/profile"
-                    icon={<User className="h-5 w-5" />}
-                    label={t("editProfile")}
-                    variant="sheet"
+                    className="flex items-center justify-start gap-3 text-slate-300 hover:text-orange-500 transition-colors text-base font-medium px-4 py-3 rounded-lg hover:bg-slate-800"
                     onClick={() => setMobileMenuOpen(false)}
-                  />
+                  >
+                    <User className="h-5 w-5" />
+                    {t("editProfile")}
+                  </Link>
                 )}
               </div>
 

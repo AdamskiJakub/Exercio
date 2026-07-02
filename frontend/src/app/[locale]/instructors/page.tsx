@@ -34,7 +34,6 @@ export default function InstructorsPage() {
       goals: filters.goals,
       priceMin: filters.priceMin,
       priceMax: filters.priceMax,
-      minRating: filters.minRating,
       page: filters.page || 1,
       limit: PAGE_SIZE,
     });

@@ -55,7 +55,7 @@ export function FavoriteButton({ instructorProfileId }: FavoriteButtonProps) {
       whileTap={{ scale: 0.97 }}
       animate={{ scale: isFavorited ? [1, 1.05, 1] : 1 }}
       transition={{ duration: 0.3 }}
-      className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all duration-200 border text-sm font-medium ${
+      className={`cursor-pointer w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg transition-all duration-200 border text-sm font-medium ${
         isFavorited
           ? "text-red-400 bg-red-500/10 border-red-500/30 hover:bg-red-500/20"
           : "text-slate-400 bg-transparent border-slate-800 hover:border-orange-500 hover:text-orange-500"

@@ -30,7 +30,6 @@ export function useInstructorFilters() {
     })(),
     priceMin: parseNumericParam("priceMin"),
     priceMax: parseNumericParam("priceMax"),
-    minRating: parseNumericParam("minRating"),
     experience: (searchParams.get("experience") as any) || "all",
     availability: (searchParams.get("availability") as any) || "all",
     gender: (searchParams.get("gender") as any) || "all",
@@ -141,7 +140,6 @@ export function useInstructorFilters() {
     (filters.goals && filters.goals.length > 0) ||
     filters.priceMin !== undefined ||
     filters.priceMax !== undefined ||
-    filters.minRating !== undefined ||
     (filters.experience && filters.experience !== "all") ||
     (filters.availability && filters.availability !== "all") ||
     (filters.gender && filters.gender !== "all");

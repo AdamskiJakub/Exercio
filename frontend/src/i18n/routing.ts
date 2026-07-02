@@ -85,14 +85,6 @@ export const routing = defineRouting({
       pl: "/instruktorzy/[username]/rezerwacja",
       en: "/instructors/[username]/book",
     },
-    "/how-it-works": {
-      pl: "/jak-to-dziala",
-      en: "/how-it-works",
-    },
-    "/pricing": {
-      pl: "/cennik",
-      en: "/pricing",
-    },
     "/help": {
       pl: "/pomoc",
       en: "/help",
@@ -100,10 +92,6 @@ export const routing = defineRouting({
     "/contact": {
       pl: "/kontakt",
       en: "/contact",
-    },
-    "/faq": {
-      pl: "/faq",
-      en: "/faq",
     },
     "/safety": {
       pl: "/bezpieczenstwo",
