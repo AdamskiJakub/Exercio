@@ -289,7 +289,7 @@
       "noSessionsToReview": "No sessions to review",
       "noMessages": "No messages",
       "noHistory": "No booking history",
-      "sessionsComingSoon": "Booking system coming soon! Your scheduled sessions will appear here.",
+      "sessionsComingSoon": "No upcoming sessions. Your scheduled sessions will appear here.",
       "reviewsComingSoon": "Review system coming soon! You'll be able to review your past sessions here.",
       "messagesComingSoon": "Messaging system coming soon! You'll be able to chat with your trainers here.",
       "historyDescription": "Your past sessions will appear here",
@@ -319,7 +319,11 @@
       "welcomeThisWeek": "You have {count} {count, plural, one {upcoming session} other {upcoming sessions}} this week. Next one on {day} at {time}. 🗓️",
       "welcomeFree": "No sessions planned yet. Time to find a new trainer and get in shape! 🏋️",
       "becomeInstructor": "Become an Instructor",
-      "becomeInstructorDesc": "Want to share your knowledge? Switch to an instructor account and start leading your own training sessions!"
+      "becomeInstructorDesc": "Want to share your knowledge? Switch to an instructor account and start leading your own training sessions!",
+      "becomeInstructorBannerTitle": "Become a Trainly Instructor",
+      "becomeInstructorBannerDesc": "Share your profile, accept bookings, and grow your personal brand.",
+      "dismissBanner": "Dismiss",
+      "learnMore": "Learn more"
     },
     "settings": {
       "title": "Account Settings",
@@ -649,7 +653,7 @@
       },
       "becomeTrainer": {
         "question": "How do I become a trainer on Trainly?",
-        "answer": "Register as an instructor, complete your profile with your experience, specializations, and availability. Once published, clients can find and book you. Make sure to set up your booking preferences and calendar to start receiving sessions."
+        "answer": "You can register directly as an instructor when creating an account. If you already have a client account, there's no need to create a new one — go to your client dashboard and click \"Become an Instructor\". Fill in your profile with experience, specializations, and availability. Once published, clients will be able to find and book you."
       },
       "profileNotVisible": {
         "question": "Why can't I see my trainer profile?",

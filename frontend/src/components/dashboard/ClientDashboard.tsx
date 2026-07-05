@@ -23,6 +23,7 @@ import { DashboardCard } from "./DashboardCard";
 import { EmptyStateCard } from "./EmptyStateCard";
 import { DashboardHeader } from "./DashboardHeader";
 import { PendingReviewsSection } from "./PendingReviewsSection";
+import { BecomeInstructorBanner } from "./BecomeInstructorBanner";
 import { MyReviewsSection } from "./MyReviewsSection";
 import { BookingHistorySection } from "./BookingHistorySection";
 import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
@@ -152,6 +153,9 @@ export function ClientDashboard() {
           },
         ]}
       />
+
+      {/* Become Instructor Banner — premium CTA for CLIENT role */}
+      <BecomeInstructorBanner />
 
       {/* Review Banner */}
       {pendingReviewCount > 0 && pendingReviews && pendingReviews[0] && (
@@ -354,10 +358,7 @@ export function ClientDashboard() {
           <div className="text-center py-4">
             <p className="text-slate-300 mb-4">{t("becomeInstructorDesc")}</p>
             <Link href="/onboarding/instructor">
-              <Button
-                variant="default"
-                className="bg-linear-to-r from-purple-600 to-indigo-600 text-white font-semibold hover:from-purple-700 hover:to-indigo-700"
-              >
+              <Button variant="premium" size="xl">
                 🚀 {t("becomeInstructor")}
               </Button>
             </Link>

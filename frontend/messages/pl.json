@@ -289,7 +289,7 @@
       "noSessionsToReview": "Brak sesji do recenzji",
       "noMessages": "Brak wiadomości",
       "noHistory": "Brak historii rezerwacji",
-      "sessionsComingSoon": "System rezerwacji wkrótce! Twoje zaplanowane sesje pojawią się tutaj.",
+      "sessionsComingSoon": "Brak nadchodzących sesji. Twoje zaplanowane sesje pojawią się tutaj.",
       "reviewsComingSoon": "System recenzji wkrótce! Będziesz mógł oceniać swoje przeszłe sesje tutaj.",
       "messagesComingSoon": "System wiadomości wkrótce! Będziesz mógł rozmawiać ze swoimi trenerami tutaj.",
       "historyDescription": "Twoje przeszłe sesje pojawią się tutaj",
@@ -319,7 +319,11 @@
       "welcomeThisWeek": "Masz {count} {count, plural, one {nadchodzący trening} few {nadchodzące treningi} many {nadchodzących treningów} other {nadchodzących treningów}} w tym tygodniu. Najbliższy {day} o {time}. 🗓️",
       "welcomeFree": "Nie masz zaplanowanych treningów na najbliższe dni. Czas znaleźć nowego trenera i zrobić formę! 🏋️",
       "becomeInstructor": "Zostań instruktorem",
-      "becomeInstructorDesc": "Chcesz dzielić się swoją wiedzą? Przejdź na konto instruktora i zacznij prowadzić własne treningi!"
+      "becomeInstructorDesc": "Chcesz dzielić się swoją wiedzą? Przejdź na konto instruktora i zacznij prowadzić własne treningi!",
+      "becomeInstructorBannerTitle": "Zostań instruktorem Trainly",
+      "becomeInstructorBannerDesc": "Udostępnij swój profil, przyjmuj rezerwacje i rozwijaj swoją markę osobistą.",
+      "dismissBanner": "Zamknij",
+      "learnMore": "Dowiedz się więcej"
     },
     "settings": {
       "title": "Ustawienia Konta",
@@ -649,7 +653,7 @@
       },
       "becomeTrainer": {
         "question": "Jak zostać trenerem na Trainly?",
-        "answer": "Zarejestruj się jako instruktor, uzupełnij profil swoim doświadczeniem, specjalizacjami i dostępnością. Po opublikowaniu klienci będą mogli Cię znaleźć i rezerwować. Pamiętaj, aby skonfigurować preferencje rezerwacji i kalendarz."
+        "answer": "Możesz zarejestrować się bezpośrednio jako instruktor podczas zakładania konta. Jeśli już masz konto klienta, nie musisz zakładać nowego — przejdź do panelu klienta i kliknij \"Zostań instruktorem\". Wypełnij swój profil doświadczeniem, specjalizacjami i dostępnością, a po opublikowaniu klienci będą mogli Cię znaleźć i rezerwować."
       },
       "profileNotVisible": {
         "question": "Dlaczego nie widzę swojego profilu trenera?",
