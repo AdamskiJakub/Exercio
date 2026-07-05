@@ -58,6 +58,12 @@ const staticRoutes = [
     changeFrequency: "yearly" as const,
     priority: 0.3,
   },
+  {
+    url: `${BASE_URL}/pl/onboarding/instruktor`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.3,
+  },
   // English routes
   {
     url: `${BASE_URL}/en`,
@@ -105,6 +111,12 @@ const staticRoutes = [
     url: `${BASE_URL}/en/cookies`,
     lastModified: new Date(),
     changeFrequency: "yearly" as const,
+    priority: 0.3,
+  },
+  {
+    url: `${BASE_URL}/en/onboarding/instructor`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
     priority: 0.3,
   },
 ];

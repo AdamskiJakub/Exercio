@@ -2,31 +2,37 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { Dumbbell } from "lucide-react";
-import { useRegisterInstructorForm } from "@/hooks/useRegisterInstructorForm";
+import { useRegisterForm } from "@/hooks/useRegisterForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { AuthHeader } from "@/components/ui/auth-header";
 
-export default function RegisterInstructorForm() {
+interface RegisterFormProps {
+  intent: "client" | "instructor";
+}
+
+export default function RegisterForm({ intent }: RegisterFormProps) {
   const t = useTranslations("auth");
-  const { form, isLoading, error, onSubmit } = useRegisterInstructorForm();
+  const { form, isLoading, error, onSubmit } = useRegisterForm({ intent });
   const {
     register,
     formState: { errors },
   } = form;
 
+  const isInstructor = intent === "instructor";
+
   return (
     <div className="flex items-center justify-center py-16 px-4">
       <div className="max-w-md w-full">
         <AuthHeader
-          title={`${t("createAccount")} - ${t("instructorRole")}`}
-          subtitle={t("instructorRoleDesc")}
-          icon={<Dumbbell className="w-10 h-10 text-purple-500" />}
+          title={`${t("createAccount")} - ${isInstructor ? t("instructorRole") : t("clientRole")}`}
+          subtitle={
+            isInstructor ? t("instructorRoleDesc") : t("clientRoleDesc")
+          }
         />
 
-        {/* Card */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl space-y-6">
           {/* Form */}
           <form className="space-y-6" onSubmit={onSubmit} noValidate>
@@ -40,7 +46,7 @@ export default function RegisterInstructorForm() {
               {/* First Name */}
               <div className="space-y-2">
                 <Label htmlFor="firstName">
-                  {t("firstName")} <span className="text-red-500">*</span>
+                  {t("firstName")} <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="firstName"
@@ -59,7 +65,7 @@ export default function RegisterInstructorForm() {
               {/* Last Name */}
               <div className="space-y-2">
                 <Label htmlFor="lastName">
-                  {t("lastName")} <span className="text-red-500">*</span>
+                  {t("lastName")} <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="lastName"
@@ -78,7 +84,7 @@ export default function RegisterInstructorForm() {
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">
-                  {t("email")} <span className="text-red-500">*</span>
+                  {t("email")} <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="email"
@@ -97,7 +103,14 @@ export default function RegisterInstructorForm() {
               {/* Phone */}
               <div className="space-y-2">
                 <Label htmlFor="phone">
-                  {t("phone")} <span className="text-red-500">*</span>
+                  {t("phone")}{" "}
+                  {isInstructor ? (
+                    <span className="text-red-400">*</span>
+                  ) : (
+                    <span className="text-gray-500 font-normal">
+                      ({t("phoneHint")})
+                    </span>
+                  )}
                 </Label>
                 <Input
                   id="phone"
@@ -106,9 +119,6 @@ export default function RegisterInstructorForm() {
                   placeholder="123456789"
                   aria-invalid={errors.phone ? "true" : "false"}
                 />
-                <p className="text-xs text-gray-500">
-                  {t("phoneRequiredForInstructor")}
-                </p>
                 {errors.phone && (
                   <p className="text-sm text-red-500">
                     {errors.phone.message as string}
@@ -119,7 +129,7 @@ export default function RegisterInstructorForm() {
               {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">
-                  {t("password")} <span className="text-red-500">*</span>
+                  {t("password")} <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="password"
@@ -138,7 +148,7 @@ export default function RegisterInstructorForm() {
               {/* Confirm Password */}
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">
-                  {t("confirmPassword")} <span className="text-red-500">*</span>
+                  {t("confirmPassword")} <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="confirmPassword"
@@ -158,33 +168,43 @@ export default function RegisterInstructorForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-linear-to-r from-purple-500 to-purple-600 text-white font-semibold hover:from-purple-600 hover:to-purple-700"
+              className={`w-full text-white font-semibold ${
+                isInstructor
+                  ? "bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  : "bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+              }`}
             >
               {isLoading ? t("creatingAccount") : t("createAccount")}
             </Button>
           </form>
 
+          {/* Social Login Buttons - BELOW FORM */}
+          <div className="mt-6">
+            <SocialLoginButtons />
+          </div>
+
           {/* Footer links */}
-          <div className="space-y-3 mt-6 text-center">
-            <Link
-              href="/register/client"
-              className="text-sm text-orange-400 hover:text-orange-300 transition-colors block"
-            >
-              {t("registerAsClientInstead")}
-            </Link>
-
-            <Link
-              href="/register"
-              className="text-sm text-slate-400 hover:text-slate-200 transition-colors block"
-            >
-              ← {t("backToRoleSelection")}
-            </Link>
-
+          <div className="text-center mt-6 space-y-3">
+            {isInstructor ? (
+              <Link
+                href="/register/client"
+                className="text-sm text-orange-400 hover:text-orange-300 transition-colors block"
+              >
+                {t("registerAsClientInstead")}
+              </Link>
+            ) : (
+              <Link
+                href="/register/instructor"
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors block"
+              >
+                {t("areYouInstructor")}
+              </Link>
+            )}
             <p className="text-sm text-slate-400">
               {t("haveAccount")}{" "}
               <Link
                 href="/login"
-                className="font-medium text-purple-400 hover:text-purple-300 transition-colors"
+                className="font-medium text-orange-500 hover:text-orange-400 transition-colors"
               >
                 {t("loginLink")}
               </Link>

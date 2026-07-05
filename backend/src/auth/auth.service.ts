@@ -22,20 +22,10 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  private async createUserWithProfile(
-    dto: RegisterDto,
-    role: 'CLIENT' | 'INSTRUCTOR',
-    language: Language,
-  ) {
+  private async createUserWithProfile(dto: RegisterDto, language: Language) {
     const hashedPassword = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
 
-    if (role === 'INSTRUCTOR' && !dto.phone) {
-      throw new BadRequestException(
-        language === 'pl'
-          ? 'Numer telefonu jest wymagany dla instruktorów'
-          : 'Phone number is required for instructors',
-      );
-    }
+    const isInstructor = dto.role === 'INSTRUCTOR';
 
     const data: any = {
       email: dto.email,
@@ -44,11 +34,12 @@ export class AuthService {
       firstName: dto.firstName,
       lastName: dto.lastName,
       phone: dto.phone,
-      role,
+      role: isInstructor ? 'INSTRUCTOR' : 'CLIENT',
       isEmailVerified: false,
     };
 
-    if (role === 'INSTRUCTOR') {
+    // If registering as instructor, also create InstructorProfile
+    if (isInstructor) {
       data.instructorProfile = {
         create: {
           bio: null,
@@ -70,8 +61,9 @@ export class AuthService {
     try {
       const user = await this.prisma.user.create({
         data,
-        include:
-          role === 'INSTRUCTOR' ? { instructorProfile: true } : undefined,
+        include: {
+          instructorProfile: isInstructor,
+        },
       });
 
       await this.sendVerificationCode(dto.email, language);
@@ -107,11 +99,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto, language: Language = 'pl') {
-    return this.createUserWithProfile(dto, 'CLIENT', language);
-  }
-
-  async registerInstructor(dto: RegisterDto, language: Language = 'pl') {
-    return this.createUserWithProfile(dto, 'INSTRUCTOR', language);
+    return this.createUserWithProfile(dto, language);
   }
 
   async login(dto: LoginDto) {
@@ -135,6 +123,12 @@ export class AuthService {
 
     if (!passwordValid) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException(
+        'Please verify your email before logging in',
+      );
     }
 
     const token = await this.generateToken(user.id, user.email, user.role);
@@ -361,7 +355,7 @@ export class AuthService {
     return { message: 'Verification code sent successfully' };
   }
 
-  async verifyEmail(email: string, code: string) {
+  async verifyEmail(email: string, code: string, language: Language = 'pl') {
     const verificationCode = await this.prisma.verificationCode.findFirst({
       where: {
         email,
@@ -375,7 +369,11 @@ export class AuthService {
     });
 
     if (!verificationCode) {
-      throw new BadRequestException('Invalid or expired verification code');
+      throw new BadRequestException(
+        language === 'pl'
+          ? 'Nieprawidłowy lub wygasły kod weryfikacyjny'
+          : 'Invalid or expired verification code',
+      );
     }
 
     await this.prisma.verificationCode.update({

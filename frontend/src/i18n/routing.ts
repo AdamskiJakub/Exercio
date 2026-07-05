@@ -113,6 +113,10 @@ export const routing = defineRouting({
       pl: "/polityka-cookies",
       en: "/cookies",
     },
+    "/onboarding/instructor": {
+      pl: "/onboarding/instruktor",
+      en: "/onboarding/instructor",
+    },
   },
 });
 

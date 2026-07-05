@@ -1,17 +1,25 @@
-import { z } from 'zod';
+import { z } from "zod";
 import {
   createEmailSchema,
   createStrongPasswordSchema,
   createConfirmPasswordSchema,
   createFirstNameSchema,
   createLastNameSchema,
+  createOptionalPhoneSchema,
   createRequiredPhoneSchema,
   passwordMatchRefiner,
-} from './schemas/auth-base';
+} from "./schemas/auth-base";
 
-export const createRegisterInstructorSchema = (t: (key: string) => string) => {
+export const createRegisterSchema = (
+  t: (key: string) => string,
+  intent: "client" | "instructor" = "client",
+) => {
   const refiner = passwordMatchRefiner(t);
-  
+  const phoneSchema =
+    intent === "instructor"
+      ? createRequiredPhoneSchema(t)
+      : createOptionalPhoneSchema(t);
+
   return z
     .object({
       email: createEmailSchema(t),
@@ -19,12 +27,12 @@ export const createRegisterInstructorSchema = (t: (key: string) => string) => {
       confirmPassword: createConfirmPasswordSchema(t),
       firstName: createFirstNameSchema(t),
       lastName: createLastNameSchema(t),
-      phone: createRequiredPhoneSchema(t),
+      phone: phoneSchema,
     })
     .refine(refiner.refine, {
       message: refiner.message,
-      path: ['confirmPassword'],
+      path: ["confirmPassword"],
     });
 };
 
-export type RegisterInstructorFormData = z.infer<ReturnType<typeof createRegisterInstructorSchema>>;
+export type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;

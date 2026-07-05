@@ -1,19 +1,20 @@
-import axios from 'axios';
-import { useAuthStore } from '@/stores/auth-store';
-import { API_BASE_URL } from './utils/api-url';
+import axios from "axios";
+import { useAuthStore } from "@/stores/auth-store";
+import { API_BASE_URL } from "./utils/api-url";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
   config.headers = config.headers || {};
-  
-  const isFormData = typeof FormData !== 'undefined' && config.data instanceof FormData;
 
-  if (!config.headers['Content-Type'] && !isFormData) {
-    config.headers['Content-Type'] = 'application/json';
+  const isFormData =
+    typeof FormData !== "undefined" && config.data instanceof FormData;
+
+  if (!config.headers["Content-Type"] && !isFormData) {
+    config.headers["Content-Type"] = "application/json";
   }
   return config;
 });
@@ -22,17 +23,32 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
-                             error.config?.url?.includes('/auth/register');
-      
-      if (!isAuthEndpoint) {
-        useAuthStore.getState().logout();
+      const isAuthEndpoint =
+        error.config?.url?.includes("/auth/login") ||
+        error.config?.url?.includes("/auth/register") ||
+        error.config?.url?.includes("/auth/verify-email");
 
-        if (typeof window !== 'undefined') {
+      if (!isAuthEndpoint) {
+        console.log(
+          "[API 401] URL:",
+          error.config?.url,
+          "method:",
+          error.config?.method,
+        );
+        console.log("[API 401] Current auth state:", useAuthStore.getState());
+
+        useAuthStore.getState().logout();
+        if (typeof window !== "undefined") {
           setTimeout(() => {
             if (!useAuthStore.getState().isAuthenticated) {
-              const segments = window.location.pathname.split('/').filter(Boolean);
-              const locale = segments[0] || 'pl';
+              const segments = window.location.pathname
+                .split("/")
+                .filter(Boolean);
+              const locale = segments[0] || "pl";
+              console.log(
+                "[API 401] Redirecting to login from:",
+                window.location.pathname,
+              );
               window.location.href = `/${locale}/login`;
             }
           }, 100);
@@ -40,5 +56,5 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
