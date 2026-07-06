@@ -624,7 +624,9 @@
       "mostReviewed": "Najwięcej opinii",
       "priceAsc": "Cena: rosnąco",
       "priceDesc": "Cena: malejąco",
-      "newest": "Najnowsi"
+      "newest": "Najnowsi",
+      "nameAsc": "Nazwa: A-Z",
+      "nameDesc": "Nazwa: Z-A"
     },
     "resultsAriaLabel": "Wyniki wyszukiwania",
     "noResults": "Nie znaleziono trenerów",

@@ -114,6 +114,7 @@ export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
         }
         if (filters.type && filters.type !== "all")
           params.append("type", filters.type);
+        if (filters.sortBy) params.append("sortBy", filters.sortBy);
         if (filters.page) params.append("page", String(filters.page));
         if (filters.limit) params.append("limit", String(filters.limit));
 
@@ -140,6 +141,7 @@ export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
           params.append("priceMin", filters.priceMin.toString());
         if (filters.priceMax !== undefined)
           params.append("priceMax", filters.priceMax.toString());
+        if (filters.sortBy) params.append("sortBy", filters.sortBy);
         if (filters.page !== undefined)
           params.append("page", filters.page.toString());
         if (filters.limit !== undefined)

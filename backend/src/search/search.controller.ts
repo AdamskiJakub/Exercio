@@ -11,6 +11,7 @@ export class SearchController {
     @Query('city') city?: string,
     @Query('tags') tags?: string | string[],
     @Query('type') type?: 'all' | 'instructors' | 'enterprises',
+    @Query('sortBy') sortBy?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -25,6 +26,7 @@ export class SearchController {
       city,
       tags: Array.isArray(tags) ? tags : tags ? [tags] : undefined,
       type: type || 'all',
+      sortBy,
       page: parseNumeric(page),
       limit: parseNumeric(limit),
     });

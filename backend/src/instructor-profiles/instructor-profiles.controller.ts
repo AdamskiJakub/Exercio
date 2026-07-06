@@ -33,6 +33,7 @@ export class InstructorProfilesController {
     @Query('minRating') minRating?: string,
     @Query('priceMin') priceMin?: string,
     @Query('priceMax') priceMax?: string,
+    @Query('sortBy') sortBy?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
@@ -51,6 +52,7 @@ export class InstructorProfilesController {
       minRating: parseNumeric(minRating),
       priceMin: parseNumeric(priceMin),
       priceMax: parseNumeric(priceMax),
+      sortBy,
       page: parseNumeric(page),
       limit: parseNumeric(limit),
     };

@@ -624,7 +624,9 @@
       "mostReviewed": "Most Reviews",
       "priceAsc": "Price: Low to High",
       "priceDesc": "Price: High to Low",
-      "newest": "Newest"
+      "newest": "Newest",
+      "nameAsc": "Name: A-Z",
+      "nameDesc": "Name: Z-A"
     },
     "resultsAriaLabel": "Search results",
     "noResults": "No trainers found",

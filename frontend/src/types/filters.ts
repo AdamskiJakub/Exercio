@@ -20,7 +20,9 @@ export interface InstructorFilters extends SearchFilters {
     | "price-desc"
     | "rating"
     | "most-reviewed"
-    | "newest";
+    | "newest"
+    | "name-asc"
+    | "name-desc";
   page?: number;
   limit?: number;
 }

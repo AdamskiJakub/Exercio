@@ -1,11 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  getInstructorOrderBy,
+  getEnterpriseOrderBy,
+} from '../common/sort-utils';
 
 interface SearchFilters {
   q?: string;
   city?: string;
   tags?: string[];
   type?: 'all' | 'instructors' | 'enterprises';
+  sortBy?: string;
   page?: number;
   limit?: number;
 }
@@ -33,6 +38,7 @@ export class SearchService {
         filters.tags,
         page,
         limit,
+        filters.sortBy,
       );
     }
 
@@ -43,6 +49,7 @@ export class SearchService {
         filters.tags,
         page,
         limit,
+        filters.sortBy,
       );
     }
 
@@ -55,6 +62,7 @@ export class SearchService {
     tags?: string[],
     page: number = 1,
     limit: number = 20,
+    sortBy?: string,
   ) {
     const where: any = { isDraft: false };
 
@@ -82,6 +90,8 @@ export class SearchService {
 
     const skip = (page - 1) * limit;
 
+    const orderBy = getInstructorOrderBy(sortBy);
+
     const [data, total] = await Promise.all([
       this.prisma.instructorProfile.findMany({
         where,
@@ -98,7 +108,7 @@ export class SearchService {
             },
           },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       this.prisma.instructorProfile.count({ where }),
     ]);
@@ -119,6 +129,7 @@ export class SearchService {
     tags?: string[],
     page: number = 1,
     limit: number = 20,
+    sortBy?: string,
   ) {
     const where: any = { status: 'ACTIVE' };
 
@@ -143,12 +154,14 @@ export class SearchService {
 
     const skip = (page - 1) * limit;
 
+    const orderBy = getEnterpriseOrderBy(sortBy);
+
     const [enterprises, total] = await Promise.all([
       this.prisma.enterpriseProfile.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: {
           _count: {
             select: {
