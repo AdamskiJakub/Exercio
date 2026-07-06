@@ -5,6 +5,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/dto/create-notification.dto';
@@ -281,7 +282,7 @@ export class EnterpriseInvitationsService {
       })
     ).map((e) => e.instructorId);
 
-    const where: any = {
+    const where: Prisma.InstructorProfileWhereInput = {
       id: { notIn: existingIds },
       isDraft: false,
     };

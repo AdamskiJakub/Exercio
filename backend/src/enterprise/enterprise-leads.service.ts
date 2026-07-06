@@ -69,16 +69,16 @@ export class EnterpriseLeadsService {
       );
     }
 
-    // Generate a slug from company name
+    // Generate a slug from company name with timestamp suffix to avoid collisions
     const slug =
       lead.companyName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '') +
       '-' +
-      Math.random().toString(36).substring(2, 6);
+      Date.now().toString(36);
 
-    // Generate a username from company name
+    // Generate a username from company name with timestamp suffix to avoid collisions
     const username =
       lead.companyName
         .toLowerCase()
@@ -86,7 +86,7 @@ export class EnterpriseLeadsService {
         .replace(/^_|_$/g, '')
         .substring(0, 20) +
       '_' +
-      Math.random().toString(36).substring(2, 6);
+      Date.now().toString(36).substring(0, 6);
 
     // Create User + EnterpriseProfile in a transaction
     const result = await this.prisma.$transaction(async (tx) => {

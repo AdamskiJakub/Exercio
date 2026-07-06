@@ -47,14 +47,10 @@ export class EnterpriseInvitationsController {
   async searchInstructors(
     @Param('id') id: string,
     @Query('q') q: string,
+    @Req() req: Request,
     @Query('city') city?: string,
-    @Req() req?: Request,
   ) {
-    const user = req!.user as AuthenticatedUser;
-
-    if (!user) {
-      throw new UnauthorizedException('User not authenticated');
-    }
+    const user = req.user as AuthenticatedUser;
 
     return this.invitationsService.searchInstructors(id, q, city);
   }
