@@ -8,9 +8,33 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { AuthHeader } from "@/components/ui/auth-header";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+
+const OAUTH_PROVIDER_CONFLICT_REGEX =
+  /^This email is already registered with (\w+)\. Please use \1 to login\.$/;
+
+function parseOAuthError(error: string | null): {
+  type: "provider_conflict" | "unknown";
+  provider?: string;
+} {
+  if (!error) return { type: "unknown" };
+  const match = error.match(OAUTH_PROVIDER_CONFLICT_REGEX);
+  if (match) {
+    return { type: "provider_conflict", provider: match[1] };
+  }
+  return { type: "unknown" };
+}
 
 export default function LoginPage() {
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
+  const oauthError = useMemo(() => searchParams.get("error"), [searchParams]);
+  const parsedOAuthError = useMemo(
+    () => parseOAuthError(oauthError),
+    [oauthError],
+  );
+
   const {
     form,
     isLoading,
@@ -75,6 +99,23 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
+
+            {/* OAuth Error — shown when redirect from failed OAuth login */}
+            {oauthError && (
+              <div
+                className="bg-red-500/10 border border-red-500/50 rounded-lg p-3"
+                role="alert"
+              >
+                <p className="text-red-400 text-sm">
+                  {parsedOAuthError.type === "provider_conflict" &&
+                  parsedOAuthError.provider
+                    ? t("oauthProviderConflict", {
+                        provider: parsedOAuthError.provider,
+                      })
+                    : oauthError}
+                </p>
+              </div>
+            )}
 
             {/* Server Error */}
             {error && (

@@ -193,7 +193,8 @@
     "becomeInstructor": "Become an Instructor",
     "becomeInstructorDescription": "To become an instructor, we need your phone number",
     "becomeInstructorPhoneInfo": "Provide your phone number so clients can contact you",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "oauthProviderConflict": "This email is already registered with {provider}. Please use {provider} to login."
   },
   "Dashboard": {
     "welcomeBack": "Welcome back",
@@ -574,8 +575,8 @@
     "allRightsReserved": "All rights reserved."
   },
   "InstructorsPage": {
-    "title": "Browse Trainers",
-    "subtitle": "Find your perfect trainer",
+    "title": "Discover",
+    "subtitle": "Find an instructor, school or club near you",
     "searchPlaceholder": "Search...",
     "card": {
       "perHour": "per hour",
@@ -599,6 +600,7 @@
       "price": "Price per session",
       "experience": "Experience",
       "availability": "Availability",
+      "type": "Type",
       "clearAll": "Clear filters",
       "showResults": "Show results"
     },
@@ -628,7 +630,18 @@
     "noResults": "No trainers found",
     "noResultsDescription": "Try adjusting your filters or search in a different city",
     "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}",
-    "instructorsFailed": "Failed to load instructors. Please try again later."
+    "instructorCount": "{count} {count, plural, one {instructor} other {instructors}}",
+    "enterpriseCount": "{count} {count, plural, one {partner} other {partners}}",
+    "instructorsSection": "Instructors",
+    "enterprisesSection": "Partners",
+    "instructorsFailed": "Failed to load instructors. Please try again later.",
+    "type": {
+      "all": "All",
+      "instructors": "Instructors",
+      "enterprises": "Enterprises"
+    },
+    "enterprises": "Enterprises",
+    "instructors": "Instructors"
   },
   "Help": {
     "title": "Help Center",
@@ -1101,5 +1114,42 @@
     "markAllAsRead": "Mark all as read",
     "noNotifications": "No notifications",
     "unread": "unread"
+  },
+  "EnterpriseProfile": {
+    "amenities": "Amenities",
+    "gallery": "Gallery",
+    "backToListing": "Back to listing",
+    "contact": "Contact",
+    "website": "Website",
+    "social": "Social Media",
+    "reviews": "reviews",
+    "ourInstructors": "Our Instructors",
+    "news": "News & Updates",
+    "readMore": "Read more",
+    "categories": {
+      "DANCE_SCHOOL": "Dance School",
+      "FITNESS_CLUB": "Fitness Club",
+      "YOGA_STUDIO": "Yoga Studio",
+      "GYM": "Gym",
+      "SWIMMING_POOL": "Swimming Pool / Swim School",
+      "MARTIAL_ARTS": "Martial Arts",
+      "OTHER": "Other"
+    }
+  },
+  "EnterpriseCard": {
+    "verified": "Verified",
+    "viewProfile": "View profile",
+    "partner": "Partner",
+    "instructor": "instructor",
+    "instructors": "instructors",
+    "categories": {
+      "DANCE_SCHOOL": "Dance School",
+      "FITNESS_CLUB": "Fitness Club",
+      "YOGA_STUDIO": "Yoga Studio",
+      "GYM": "Gym",
+      "SWIMMING_POOL": "Swimming Pool",
+      "MARTIAL_ARTS": "Martial Arts",
+      "OTHER": "Other"
+    }
   }
 }

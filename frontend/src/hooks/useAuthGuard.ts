@@ -70,7 +70,8 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     };
 
     checkAuth();
-  }, [hasHydrated, requireAuth, requireRole, redirectTo, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated, requireAuth, requireRole, redirectTo]);
 
   return {
     isChecking,

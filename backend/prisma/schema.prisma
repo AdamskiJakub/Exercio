@@ -22,6 +22,7 @@ model User {
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   instructorProfile    InstructorProfile?
+  enterpriseProfile    EnterpriseProfile?                 // 1:1 for Enterprise
   bookingsAsClient     Booking[]          @relation("ClientBookings")
   bookingsAsInstructor Booking[]          @relation("InstructorBookings")
   reviews              Review[]
@@ -71,6 +72,7 @@ model InstructorProfile {
   services                Service[]
   favorites               Favorite[]
   profileViews            ProfileView[]
+  enterpriseMemberships   EnterpriseInstructor[]
 
   @@map("instructor_profiles")
 }
@@ -260,6 +262,7 @@ enum UserRole {
   CLIENT
   INSTRUCTOR
   ADMIN
+  ENTERPRISE
 }
 
 enum NotificationType {
@@ -267,6 +270,8 @@ enum NotificationType {
   NEW_BOOKING
   NEW_REVIEW
   BOOKING_CANCELLED
+  ENTERPRISE_INVITATION
+  ENTERPRISE_INVITATION_ACCEPTED
 }
 
 enum BookingStatus {
@@ -275,4 +280,151 @@ enum BookingStatus {
   COMPLETED
   CANCELLED
   EXPIRED
+}
+
+// ===== ENTERPRISE MODELS =====
+
+enum EnterpriseCategory {
+  DANCE_SCHOOL
+  GYM
+  FITNESS_CLUB
+  YOGA_STUDIO
+  PILATES_STUDIO
+  MARTIAL_ARTS
+  SWIMMING_POOL
+  PERSONAL_TRAINING_STUDIO
+  SPORTS_CENTER
+  OTHER
+}
+
+enum EnterpriseStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  REMOVED
+}
+
+model EnterpriseProfile {
+  id              String             @id @default(uuid())
+
+  userId          String             @unique
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status          EnterpriseStatus   @default(PENDING)
+  verified        Boolean            @default(false)
+
+  companyName     String
+  slug            String             @unique
+  shortDescription String?
+  description     String?
+  email           String?
+  phone           String?
+  website         String?
+  logoUrl         String?
+
+  facebookUrl     String?
+  instagramUrl    String?
+  youtubeUrl      String?
+  tiktokUrl       String?
+
+  city            String?
+  address         String?
+  postalCode      String?
+
+  category        EnterpriseCategory @default(OTHER)
+  tags            String[]
+
+  amenities       String[]
+
+  gallery         String[]
+  videos          String[]
+
+  partners        String[]
+  certificates    String[]
+
+  subscriptionId  String?
+  subscriptionStatus String? @default("incomplete")
+  subscribedAt    DateTime?
+  subscriptionExpiresAt DateTime?
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  instructors     EnterpriseInstructor[]
+  news            EnterpriseNews[]
+
+  @@index([status])
+  @@index([city])
+  @@index([category])
+  @@index([slug])
+  @@map("enterprise_profiles")
+}
+
+model EnterpriseInstructor {
+  id              String            @id @default(uuid())
+
+  enterpriseId    String
+  instructorId    String
+
+  status          InvitationStatus  @default(PENDING)
+  role            String?
+
+  invitedAt       DateTime          @default(now())
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  removedAt       DateTime?
+
+  enterprise      EnterpriseProfile @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  instructor      InstructorProfile @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@unique([enterpriseId, instructorId])
+  @@index([enterpriseId])
+  @@index([instructorId])
+  @@index([status])
+  @@map("enterprise_instructors")
+}
+
+model EnterpriseNews {
+  id              String            @id @default(uuid())
+
+  enterpriseId    String
+  url             String
+  title           String?
+  description     String?
+  thumbnailUrl    String?
+  platform        String?
+
+  createdAt       DateTime          @default(now())
+
+  enterprise      EnterpriseProfile @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+
+  @@index([enterpriseId])
+  @@map("enterprise_news")
+}
+
+model EnterpriseLead {
+  id              String            @id @default(uuid())
+
+  companyName     String
+  city            String?
+  email           String
+  phone           String?
+  website         String?
+  message         String?
+
+  status          String            @default("new")
+  notes           String?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([status])
+  @@map("enterprise_leads")
 }

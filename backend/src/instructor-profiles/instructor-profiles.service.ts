@@ -19,6 +19,7 @@ export interface PaginatedResult<T> {
 }
 
 interface InstructorFilters {
+  q?: string;
   city?: string;
   specialization?: string;
   tags?: string[];
@@ -79,6 +80,19 @@ export class InstructorProfilesService {
     const where: any = {
       isDraft: false,
     };
+
+    if (filters.q) {
+      where.OR = [
+        { user: { firstName: { contains: filters.q, mode: 'insensitive' } } },
+        { user: { lastName: { contains: filters.q, mode: 'insensitive' } } },
+        { user: { username: { contains: filters.q, mode: 'insensitive' } } },
+        { bio: { contains: filters.q, mode: 'insensitive' } },
+        { tagline: { contains: filters.q, mode: 'insensitive' } },
+        { tags: { has: filters.q } },
+        { specializations: { has: filters.q } },
+        { city: { contains: filters.q, mode: 'insensitive' } },
+      ];
+    }
 
     if (filters.city) {
       where.city = {

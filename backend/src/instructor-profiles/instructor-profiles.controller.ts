@@ -25,6 +25,7 @@ export class InstructorProfilesController {
 
   @Get()
   async findAll(
+    @Query('q') q?: string,
     @Query('city') city?: string,
     @Query('specialization') specialization?: string,
     @Query('tags') tags?: string | string[],
@@ -42,6 +43,7 @@ export class InstructorProfilesController {
     };
 
     const filters = {
+      q,
       city,
       specialization,
       tags: Array.isArray(tags) ? tags : tags ? [tags] : undefined,

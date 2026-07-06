@@ -3,6 +3,7 @@ export interface SearchFilters {
   specialization: string;
   tags?: string[];
   search?: string;
+  type?: "all" | "instructors" | "enterprises";
 }
 
 export interface InstructorFilters extends SearchFilters {
