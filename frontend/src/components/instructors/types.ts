@@ -29,12 +29,14 @@ export interface FiltersSidebarProps {
 
 export interface ResultsSectionProps {
   instructors: InstructorListing[];
+  enterprises?: import("@/types/enterprise").EnterpriseListing[];
   filters: InstructorFilters;
   updateFilter: <K extends keyof InstructorFilters>(
     key: K,
     value: InstructorFilters[K],
   ) => void;
   total?: number;
+  enterpriseTotal?: number;
   page?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;

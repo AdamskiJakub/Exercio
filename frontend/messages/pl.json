@@ -193,7 +193,8 @@
     "becomeInstructor": "Zostań instruktorem",
     "becomeInstructorDescription": "Aby zostać instruktorem, potrzebujemy Twojego numeru telefonu",
     "becomeInstructorPhoneInfo": "Podaj numer telefonu, aby klienci mogli się z Tobą kontaktować",
-    "processing": "Przetwarzanie..."
+    "processing": "Przetwarzanie...",
+    "oauthProviderConflict": "Ten adres email jest już zarejestrowany przez {provider}. Zaloguj się przez {provider}."
   },
   "Dashboard": {
     "welcomeBack": "Witaj ponownie",
@@ -574,8 +575,8 @@
     "allRightsReserved": "Wszelkie prawa zastrzeżone."
   },
   "InstructorsPage": {
-    "title": "Przeglądaj Trenerów",
-    "subtitle": "Znajdź idealnego trenera dla siebie",
+    "title": "Odkrywaj",
+    "subtitle": "Znajdź instruktora, szkołę lub klub w swojej okolicy",
     "searchPlaceholder": "Szukaj...",
     "card": {
       "perHour": "za godzinę",
@@ -599,6 +600,7 @@
       "price": "Cena za sesję",
       "experience": "Doświadczenie",
       "availability": "Dostępność",
+      "type": "Typ",
       "clearAll": "Wyczyść filtry",
       "showResults": "Pokaż wyniki"
     },
@@ -622,13 +624,26 @@
       "mostReviewed": "Najwięcej opinii",
       "priceAsc": "Cena: rosnąco",
       "priceDesc": "Cena: malejąco",
-      "newest": "Najnowsi"
+      "newest": "Najnowsi",
+      "nameAsc": "Nazwa: A-Z",
+      "nameDesc": "Nazwa: Z-A"
     },
     "resultsAriaLabel": "Wyniki wyszukiwania",
     "noResults": "Nie znaleziono trenerów",
     "noResultsDescription": "Spróbuj zmienić filtry lub wyszukaj w innym mieście",
     "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}",
-    "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później."
+    "instructorCount": "{count} {count, plural, one {instruktor} few {instruktorów} many {instruktorów} other {instruktorów}}",
+    "enterpriseCount": "{count} {count, plural, one {partner} few {partnerów} many {partnerów} other {partnerów}}",
+    "instructorsSection": "Instruktorzy",
+    "enterprisesSection": "Partnerzy",
+    "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później.",
+    "type": {
+      "all": "Wszystko",
+      "instructors": "Instruktorzy",
+      "enterprises": "Partnerzy"
+    },
+    "enterprises": "Partnerzy",
+    "instructors": "Instruktorzy"
   },
   "Help": {
     "title": "Centrum Pomocy",
@@ -1102,5 +1117,42 @@
     "markAllAsRead": "Oznacz wszystkie jako przeczytane",
     "noNotifications": "Brak powiadomień",
     "unread": "nieprzeczytane"
+  },
+  "EnterpriseProfile": {
+    "amenities": "Udogodnienia",
+    "gallery": "Galeria",
+    "backToListing": "Powrót do listy",
+    "contact": "Kontakt",
+    "website": "Strona internetowa",
+    "social": "Media społecznościowe",
+    "reviews": "opinie",
+    "ourInstructors": "Nasi instruktorzy",
+    "news": "Aktualności",
+    "readMore": "Czytaj dalej",
+    "categories": {
+      "DANCE_SCHOOL": "Szkoła Tańca",
+      "FITNESS_CLUB": "Klub Fitness",
+      "YOGA_STUDIO": "Studio Jogi",
+      "GYM": "Siłownia",
+      "SWIMMING_POOL": "Basen / Szkoła Pływania",
+      "MARTIAL_ARTS": "Sztuki Walki",
+      "OTHER": "Inne"
+    }
+  },
+  "EnterpriseCard": {
+    "verified": "Zweryfikowany",
+    "viewProfile": "Zobacz profil",
+    "partner": "Partner",
+    "instructor": "instruktor",
+    "instructors": "instruktorów",
+    "categories": {
+      "DANCE_SCHOOL": "Szkoła Tańca",
+      "FITNESS_CLUB": "Klub Fitness",
+      "YOGA_STUDIO": "Studio Jogi",
+      "GYM": "Siłownia",
+      "SWIMMING_POOL": "Basen / Szkoła Pływania",
+      "MARTIAL_ARTS": "Sztuki Walki",
+      "OTHER": "Inne"
+    }
   }
 }

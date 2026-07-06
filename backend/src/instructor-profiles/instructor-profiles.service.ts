@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorProfileDto } from './dto/create-instructor-profile.dto';
 import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto';
 import { StaticConfigService } from '../config/config.service';
+import { getInstructorOrderBy } from '../common/sort-utils';
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -19,6 +20,7 @@ export interface PaginatedResult<T> {
 }
 
 interface InstructorFilters {
+  q?: string;
   city?: string;
   specialization?: string;
   tags?: string[];
@@ -26,6 +28,7 @@ interface InstructorFilters {
   minRating?: number;
   priceMin?: number;
   priceMax?: number;
+  sortBy?: string;
   page?: number;
   limit?: number;
 }
@@ -80,6 +83,19 @@ export class InstructorProfilesService {
       isDraft: false,
     };
 
+    if (filters.q) {
+      where.OR = [
+        { user: { firstName: { contains: filters.q, mode: 'insensitive' } } },
+        { user: { lastName: { contains: filters.q, mode: 'insensitive' } } },
+        { user: { username: { contains: filters.q, mode: 'insensitive' } } },
+        { bio: { contains: filters.q, mode: 'insensitive' } },
+        { tagline: { contains: filters.q, mode: 'insensitive' } },
+        { tags: { has: filters.q } },
+        { specializations: { has: filters.q } },
+        { city: { contains: filters.q, mode: 'insensitive' } },
+      ];
+    }
+
     if (filters.city) {
       where.city = {
         contains: filters.city,
@@ -125,6 +141,8 @@ export class InstructorProfilesService {
     if (filters.minRating !== undefined) {
       // Use raw SQL to find instructor IDs that meet the minRating threshold
       // (at least 5 reviews with average rating >= minRating)
+      // NOTE: booking.instructorId = user.id, and profile.userId = user.id,
+      // so we filter by profile.userId using the qualifying IDs from the subquery
       const qualifyingInstructorIds = await this.prisma.$queryRaw<
         Array<{ instructor_id: string }>
       >`
@@ -146,6 +164,8 @@ export class InstructorProfilesService {
       where.userId = { in: Array.from(qualifyingIds) };
     }
 
+    const orderBy = getInstructorOrderBy(filters.sortBy);
+
     const [profiles, total] = await Promise.all([
       this.prisma.instructorProfile.findMany({
         where,
@@ -162,9 +182,7 @@ export class InstructorProfilesService {
             },
           },
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy,
       }),
       this.prisma.instructorProfile.count({ where }),
     ]);

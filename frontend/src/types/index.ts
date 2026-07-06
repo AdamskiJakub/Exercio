@@ -4,6 +4,7 @@ export enum UserRole {
   CLIENT = "CLIENT",
   INSTRUCTOR = "INSTRUCTOR",
   ADMIN = "ADMIN",
+  ENTERPRISE = "ENTERPRISE",
 }
 
 export interface User {
@@ -164,7 +165,9 @@ export type NotificationType =
   | "FAVORITE"
   | "NEW_BOOKING"
   | "NEW_REVIEW"
-  | "BOOKING_CANCELLED";
+  | "BOOKING_CANCELLED"
+  | "ENTERPRISE_INVITATION"
+  | "ENTERPRISE_INVITATION_ACCEPTED";
 
 export interface Notification {
   id: string;

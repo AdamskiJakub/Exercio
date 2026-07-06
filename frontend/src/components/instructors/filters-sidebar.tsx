@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useTags, useGoals, getTagName, getGoalName } from "@/hooks/useConfig";
 import type { FiltersSidebarProps } from "./types";
-import type { InstructorFilters } from "@/types/filters";
+import type { InstructorFilters, SearchFilters } from "@/types/filters";
 
 export function FiltersSidebar({
   filters,
@@ -60,6 +60,53 @@ export function FiltersSidebar({
         </div>
 
         <div className="space-y-6">
+          {/* Type filter - All / Instructors / Enterprises */}
+          <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-lg p-5">
+            <label
+              htmlFor="type-select"
+              className="text-base font-semibold text-white mb-4 block cursor-pointer"
+            >
+              {t("filters.type")}
+            </label>
+            <Select
+              value={filters.type || "instructors"}
+              onValueChange={(value) =>
+                updateFilter("type", value as SearchFilters["type"])
+              }
+            >
+              <SelectTrigger
+                id="type-select"
+                className="w-full h-12 text-base bg-slate-800 border-slate-700 text-white focus-visible:border-orange-500 px-4 cursor-pointer"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent
+                position="popper"
+                sideOffset={8}
+                className="bg-slate-900 border-slate-700 w-(--radix-select-trigger-width)"
+              >
+                <SelectItem
+                  value="all"
+                  className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
+                >
+                  {t("type.all")}
+                </SelectItem>
+                <SelectItem
+                  value="instructors"
+                  className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
+                >
+                  {t("type.instructors")}
+                </SelectItem>
+                <SelectItem
+                  value="enterprises"
+                  className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
+                >
+                  {t("type.enterprises")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Tags section - Global tags sorted by relevance */}
           {availableTags.length > 0 && (
             <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-800 rounded-lg p-5">

@@ -3,6 +3,7 @@ export interface SearchFilters {
   specialization: string;
   tags?: string[];
   search?: string;
+  type?: "all" | "instructors" | "enterprises";
 }
 
 export interface InstructorFilters extends SearchFilters {
@@ -19,7 +20,9 @@ export interface InstructorFilters extends SearchFilters {
     | "price-desc"
     | "rating"
     | "most-reviewed"
-    | "newest";
+    | "newest"
+    | "name-asc"
+    | "name-desc";
   page?: number;
   limit?: number;
 }

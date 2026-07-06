@@ -6,9 +6,7 @@ import { InstructorsPageHeader } from "@/components/instructors/page-header";
 import { FiltersSidebar } from "@/components/instructors/filters-sidebar";
 import { ResultsSection } from "@/components/instructors/results-section";
 import { useInstructorFilters } from "@/hooks/useInstructorFilters";
-import { useInstructors } from "@/hooks/useInstructors";
-import { applyClientSideFilters } from "@/lib/utils/client-side-filters";
-import { filterAndSortInstructors } from "@/lib/utils/instructor-filters";
+import { useSearch } from "@/hooks/useSearch";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useTranslations } from "next-intl";
 
@@ -26,26 +24,29 @@ export default function InstructorsPage() {
 
   const t = useTranslations("InstructorsPage");
 
-  const { instructors, total, page, totalPages, isLoading, error } =
-    useInstructors({
-      city: filters.city,
-      specialization: filters.specialization,
-      tags: filters.tags,
-      goals: filters.goals,
-      priceMin: filters.priceMin,
-      priceMax: filters.priceMax,
+  // Unified search hook — handles all modes (all / instructors / enterprises)
+  const { items, total, enterpriseTotal, page, totalPages, isLoading, error } =
+    useSearch({
+      ...filters,
       page: filters.page || 1,
       limit: PAGE_SIZE,
     });
 
-  const filteredInstructors = useMemo(() => {
-    return applyClientSideFilters(instructors, filters);
-  }, [instructors, filters]);
+  // Extract instructors and enterprises from unified items for ResultsSection
+  const instructors = useMemo(
+    () =>
+      items
+        .filter((item) => item.type === "instructor")
+        .map((item) => item.data),
+    [items],
+  );
 
-  // Apply sorting
-  const sortedInstructors = useMemo(
-    () => filterAndSortInstructors(filteredInstructors, filters),
-    [filteredInstructors, filters],
+  const enterprises = useMemo(
+    () =>
+      items
+        .filter((item) => item.type === "enterprise")
+        .map((item) => item.data),
+    [items],
   );
 
   const handlePageChange = useCallback(
@@ -100,10 +101,12 @@ export default function InstructorsPage() {
 
           {!isLoading && !error && (
             <ResultsSection
-              instructors={sortedInstructors}
+              instructors={instructors}
+              enterprises={enterprises}
               filters={filters}
               updateFilter={updateFilter}
               total={total}
+              enterpriseTotal={enterpriseTotal}
               page={page}
               totalPages={totalPages}
               onPageChange={handlePageChange}

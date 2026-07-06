@@ -18,6 +18,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ProfileViewsModule } from './profile-views/profile-views.module';
+import { EnterpriseModule } from './enterprise/enterprise.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -46,6 +48,8 @@ import { ProfileViewsModule } from './profile-views/profile-views.module';
     FavoritesModule,
     NotificationsModule,
     ProfileViewsModule,
+    EnterpriseModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [
