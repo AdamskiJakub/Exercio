@@ -34,7 +34,10 @@ export class EnterpriseInvitationsController {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    return this.invitationsService.create(id, user.id, dto);
+    const language = (req.headers['accept-language'] || 'pl').startsWith('en')
+      ? 'en'
+      : 'pl';
+    return this.invitationsService.create(id, user.id, dto, language);
   }
 
   @Get(':id/instructors')

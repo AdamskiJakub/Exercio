@@ -1,0 +1,396 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useMyEnterpriseProfile } from "@/hooks/useEnterpriseProfile";
+import {
+  useEnterpriseInstructors,
+  useSearchInstructors,
+  useRemoveInstructor,
+} from "@/hooks/useEnterpriseInstructors";
+import { useSendInvitation } from "@/hooks/useEnterpriseInvitations";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { BottomNavBar } from "@/components/ui/bottom-nav-bar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import {
+  Users,
+  Search,
+  UserPlus,
+  X,
+  Check,
+  Trash2,
+  Mail,
+  AlertCircle,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import type {
+  SearchInstructorResult,
+  EnterpriseInstructorWithProfile,
+} from "@/types/enterprise";
+
+export default function EnterpriseInstructorsPage() {
+  const t = useTranslations("Dashboard.enterprise");
+  const { isChecking, user } = useAuthGuard({ requireAuth: true });
+  const { data: profile, isLoading: profileLoading } = useMyEnterpriseProfile();
+  const queryClient = useQueryClient();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [removeConfirmId, setRemoveConfirmId] = useState<string | null>(null);
+
+  const enterpriseId = profile?.id || "";
+  const { data: instructors, isLoading: instructorsLoading } =
+    useEnterpriseInstructors(enterpriseId);
+  const { data: searchResults, isLoading: searchLoading } =
+    useSearchInstructors(enterpriseId, searchQuery, profile?.city || undefined);
+
+  const sendInvitation = useSendInvitation(enterpriseId);
+  const removeInstructor = useRemoveInstructor(enterpriseId);
+
+  if (isChecking || !user || profileLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (user.role !== "ENTERPRISE") {
+    return (
+      <div className="min-h-screen bg-slate-900 p-4 md:p-8 flex items-center justify-center">
+        <p className="text-slate-400 text-lg">{t("noAccess")}</p>
+      </div>
+    );
+  }
+
+  const handleSendInvitation = async (instructorId: string) => {
+    try {
+      await sendInvitation.mutateAsync({ instructorId });
+      toast.success(t("invitationSent"));
+      setSearchQuery("");
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      toast.error(t("invitationFailed"), {
+        description: err.response?.data?.message || err.message,
+      });
+    }
+  };
+
+  const handleRemoveInstructor = async (instructorId: string) => {
+    try {
+      await removeInstructor.mutateAsync(instructorId);
+      toast.success(t("removeSuccess"));
+      setRemoveConfirmId(null);
+    } catch (error: unknown) {
+      const err = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+      toast.error(t("removeFailed"), {
+        description: err.response?.data?.message || err.message,
+      });
+    }
+  };
+
+  const activeInstructors = instructors?.filter(
+    (inv) => inv.status === "ACCEPTED",
+  );
+  const pendingInstructors = instructors?.filter(
+    (inv) => inv.status === "PENDING",
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-900 p-4 md:p-8 pb-32">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="space-y-4">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">
+              {t("instructors")}
+            </h1>
+            <p className="text-slate-400 text-base">
+              {t("instructorsDescription")}
+            </p>
+          </div>
+        </div>
+
+        {/* Search Instructors Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-500/10 rounded-lg">
+                <UserPlus className="w-5 h-5 text-emerald-400" />
+              </div>
+              <h2 className="text-lg font-semibold text-white">
+                {t("inviteInstructor")}
+              </h2>
+            </div>
+          </div>
+
+          <div className="relative mb-4">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+              aria-hidden="true"
+            />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("searchInstructors")}
+              className="pl-10 h-11"
+              aria-label={t("searchInstructors")}
+            />
+          </div>
+
+          <div
+            aria-live="polite"
+            aria-busy={searchLoading}
+            role="region"
+            aria-label={t("searchResults") || "Search results"}
+          >
+            {searchLoading && (
+              <div className="flex items-center justify-center py-8">
+                <LoadingSpinner />
+              </div>
+            )}
+
+            {searchResults && searchResults.length > 0 && (
+              <ul className="space-y-2 max-h-64 overflow-y-auto" role="list">
+                {(searchResults as SearchInstructorResult[]).map(
+                  (instructor) => (
+                    <li key={instructor.id} role="listitem">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-700/50 hover:bg-slate-700 border border-transparent transition-colors">
+                        <div className="flex items-center gap-3">
+                          <UserAvatar
+                            photoUrl={instructor.photoUrl}
+                            avatarUrl={instructor.user?.avatarUrl}
+                            firstName={instructor.user?.firstName}
+                            lastName={instructor.user?.lastName}
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-slate-200">
+                              {instructor.user?.firstName}{" "}
+                              {instructor.user?.lastName}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {instructor.city || ""}
+                              {instructor.specializations?.length > 0 &&
+                                ` • ${instructor.specializations.slice(0, 2).join(", ")}`}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => handleSendInvitation(instructor.id)}
+                          disabled={sendInvitation.isPending}
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                          aria-label={`${t("sendInvitation")} ${instructor.user?.firstName || ""} ${instructor.user?.lastName || ""}`}
+                        >
+                          <Mail className="w-4 h-4 mr-1" />
+                          {t("sendInvitation")}
+                        </Button>
+                      </div>
+                    </li>
+                  ),
+                )}
+              </ul>
+            )}
+
+            {searchQuery.length >= 2 &&
+              searchResults &&
+              searchResults.length === 0 &&
+              !searchLoading && (
+                <div className="text-center py-8 text-slate-400">
+                  <AlertCircle
+                    className="w-8 h-8 mx-auto mb-2"
+                    aria-hidden="true"
+                  />
+                  <p>{t("noResults") || "No instructors found"}</p>
+                </div>
+              )}
+
+            {searchQuery.length < 2 && (
+              <p className="text-sm text-slate-400 text-center py-4">
+                {t("searchMinChars") || "Type at least 2 characters to search"}
+              </p>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Active Instructors */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-emerald-500/10 rounded-lg">
+              <Users className="w-5 h-5 text-emerald-400" aria-hidden="true" />
+            </div>
+            <h2 className="text-2xl font-semibold text-white">
+              {t("activeInstructors")}
+              <span className="text-sm font-normal text-slate-400 ml-2">
+                ({activeInstructors?.length || 0})
+              </span>
+            </h2>
+          </div>
+
+          {instructorsLoading ? (
+            <LoadingSpinner />
+          ) : activeInstructors && activeInstructors.length > 0 ? (
+            <ul className="space-y-3" role="list">
+              {(activeInstructors as EnterpriseInstructorWithProfile[]).map(
+                (inv) => (
+                  <li key={inv.id} role="listitem">
+                    <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          photoUrl={inv.instructor?.photoUrl}
+                          avatarUrl={inv.instructor?.user?.avatarUrl}
+                          firstName={inv.instructor?.user?.firstName}
+                          lastName={inv.instructor?.user?.lastName}
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-slate-200">
+                            {inv.instructor?.user?.firstName}{" "}
+                            {inv.instructor?.user?.lastName}
+                          </p>
+                          <p className="text-xs text-slate-400 flex items-center gap-1">
+                            <Check
+                              className="w-3 h-3 text-emerald-400"
+                              aria-hidden="true"
+                            />
+                            {t("activeInstructors")}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {removeConfirmId === inv.instructorId ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-red-400">
+                              {t("confirmRemoveInstructor")}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                handleRemoveInstructor(inv.instructorId)
+                              }
+                              disabled={removeInstructor.isPending}
+                              size="sm"
+                              variant="destructive"
+                              className="bg-red-500 hover:bg-red-600 text-white"
+                            >
+                              {t("removeInstructor")}
+                            </Button>
+                            <Button
+                              onClick={() => setRemoveConfirmId(null)}
+                              size="sm"
+                              variant="outline"
+                              className="border-slate-600 text-slate-300"
+                            >
+                              {t("cancel") || "Cancel"}
+                            </Button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setRemoveConfirmId(inv.instructorId)}
+                            className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                            aria-label={`${t("removeInstructor")} ${inv.instructor?.user?.firstName || ""} ${inv.instructor?.user?.lastName || ""}`}
+                          >
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ),
+              )}
+            </ul>
+          ) : (
+            <div className="text-center py-8">
+              <Users
+                className="w-12 h-12 text-slate-600 mx-auto mb-3"
+                aria-hidden="true"
+              />
+              <p className="text-slate-300 mb-2">{t("noInstructorsYet")}</p>
+              <p className="text-sm text-slate-400 mb-4">
+                {t("noInstructorsDescription")}
+              </p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Pending Invitations */}
+        {pendingInstructors && pendingInstructors.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-yellow-500/10 rounded-lg">
+                <Mail className="w-5 h-5 text-yellow-400" aria-hidden="true" />
+              </div>
+              <h2 className="text-2xl font-semibold text-white">
+                {t("pendingInvitations")}
+                <span className="text-sm font-normal text-slate-400 ml-2">
+                  ({pendingInstructors.length})
+                </span>
+              </h2>
+            </div>
+
+            <ul className="space-y-3" role="list">
+              {(pendingInstructors as EnterpriseInstructorWithProfile[]).map(
+                (inv) => (
+                  <li key={inv.id} role="listitem">
+                    <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          photoUrl={inv.instructor?.photoUrl}
+                          avatarUrl={inv.instructor?.user?.avatarUrl}
+                          firstName={inv.instructor?.user?.firstName}
+                          lastName={inv.instructor?.user?.lastName}
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-slate-200">
+                            {inv.instructor?.user?.firstName}{" "}
+                            {inv.instructor?.user?.lastName}
+                          </p>
+                          <p className="text-xs text-yellow-400">
+                            {t("pendingInvitations")}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => handleRemoveInstructor(inv.instructorId)}
+                        disabled={removeInstructor.isPending}
+                        size="sm"
+                        variant="ghost"
+                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        aria-label={`${t("cancelInvitation") || "Cancel"} ${inv.instructor?.user?.firstName || ""} ${inv.instructor?.user?.lastName || ""}`}
+                      >
+                        <X className="w-4 h-4 mr-1" aria-hidden="true" />
+                        {t("cancelInvitation") || "Cancel"}
+                      </Button>
+                    </div>
+                  </li>
+                ),
+              )}
+            </ul>
+          </motion.div>
+        )}
+      </div>
+
+      <BottomNavBar
+        backText={t("backToDashboard") || "Back to Dashboard"}
+        backHref="/dashboard"
+      />
+    </div>
+  );
+}

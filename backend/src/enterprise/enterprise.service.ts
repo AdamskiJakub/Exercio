@@ -1,18 +1,25 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  ConflictException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnterpriseBaseService } from './enterprise-base.service';
 import type { UpdateEnterpriseProfileDto } from './dto/update-enterprise-profile.dto';
 
 @Injectable()
-export class EnterpriseService {
+export class EnterpriseService extends EnterpriseBaseService {
   private readonly logger = new Logger(EnterpriseService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(prisma: PrismaService) {
+    super(prisma);
+  }
+
+  /**
+   * Return minimal data for all active enterprises (used for sitemap).
+   */
+  async findAllActive(): Promise<{ slug: string; updatedAt: Date }[]> {
+    return this.prisma.enterpriseProfile.findMany({
+      where: { status: 'ACTIVE' },
+      select: { slug: true, updatedAt: true },
+    });
+  }
 
   async findByUserId(userId: string) {
     return this.prisma.enterpriseProfile.findUnique({
@@ -122,51 +129,11 @@ export class EnterpriseService {
     userId: string,
     dto: UpdateEnterpriseProfileDto,
   ) {
-    const profile = await this.prisma.enterpriseProfile.findUnique({
-      where: { id: profileId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException('Enterprise profile not found');
-    }
-
-    if (profile.userId !== userId) {
-      throw new ForbiddenException(
-        'You can only update your own enterprise profile',
-      );
-    }
+    await this.verifyOwnership(profileId, userId, 'update the profile');
 
     return this.prisma.enterpriseProfile.update({
       where: { id: profileId },
       data: dto,
     });
-  }
-
-  async verifyOwnership(userId: string, enterpriseId: string) {
-    const profile = await this.prisma.enterpriseProfile.findUnique({
-      where: { id: enterpriseId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException('Enterprise profile not found');
-    }
-
-    if (profile.userId !== userId) {
-      throw new ForbiddenException('You do not own this enterprise profile');
-    }
-
-    return profile;
-  }
-
-  async findEnterpriseProfileByUserIdOrThrow(userId: string) {
-    const profile = await this.prisma.enterpriseProfile.findUnique({
-      where: { userId },
-    });
-
-    if (!profile) {
-      throw new NotFoundException('Enterprise profile not found');
-    }
-
-    return profile;
   }
 }

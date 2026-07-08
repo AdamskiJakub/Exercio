@@ -38,10 +38,16 @@ export function useRegisterForm({ intent }: UseRegisterFormOptions) {
 
       const locale = window.location.pathname.split("/")[1];
 
+      // Determine role based on intent
+      let role: string | undefined;
+      if (intent === "instructor") {
+        role = "INSTRUCTOR";
+      }
+
       await apiClient.post(`/auth/register?lang=${locale}`, {
         ...registerData,
         username,
-        role: intent === "instructor" ? "INSTRUCTOR" : undefined,
+        role,
       });
 
       // Save signup intent before redirecting to verify-email

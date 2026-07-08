@@ -24,16 +24,22 @@ export function EnterpriseInstructors({
   }
 
   return (
-    <section className="space-y-6">
-      <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-        <Users className="w-6 h-6 text-orange-500" />
+    <section className="space-y-6" aria-labelledby="instructors-heading">
+      <h2
+        id="instructors-heading"
+        className="text-2xl font-bold text-white flex items-center gap-2"
+      >
+        <Users className="w-6 h-6 text-emerald-500" aria-hidden="true" />
         {t("ourInstructors")}
         <span className="text-base font-normal text-slate-400">
           ({instructors.length})
         </span>
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        role="list"
+      >
         {instructors.map((member) => {
           const { instructor } = member;
           const fullName =
@@ -49,11 +55,12 @@ export function EnterpriseInstructors({
             <Link
               key={member.id}
               href={`/${locale}/instructors/${instructor.user.username}`}
-              className="block group"
+              className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-xl"
+              role="listitem"
             >
-              <Card className="bg-slate-900/50 border-slate-800 hover:border-orange-500/50 transition-all duration-300 p-4">
+              <Card className="bg-slate-900/50 border-slate-800 hover:border-emerald-500/50 transition-all duration-300 p-4">
                 <div className="flex items-center gap-4">
-                  <Avatar className="w-14 h-14 border-2 border-slate-700 group-hover:border-orange-500 transition-colors">
+                  <Avatar className="w-14 h-14 border-2 border-slate-700 group-hover:border-emerald-500 transition-colors">
                     <AvatarImage
                       src={getMediaUrl(instructor.photoUrl)}
                       alt={fullName}
@@ -64,7 +71,7 @@ export function EnterpriseInstructors({
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold group-hover:text-orange-500 transition-colors truncate">
+                    <p className="text-white font-semibold group-hover:text-emerald-500 transition-colors truncate">
                       {fullName}
                     </p>
                     {instructor.tagline && (
@@ -72,17 +79,17 @@ export function EnterpriseInstructors({
                         {instructor.tagline}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-400">
                       {instructor.city && (
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
+                          <MapPin className="w-3 h-3" aria-hidden="true" />
                           {instructor.city}
                         </span>
                       )}
                       {instructor.verified && (
                         <Badge
                           variant="outline"
-                          className="border-orange-500/30 text-orange-500 text-[10px] px-1.5 py-0"
+                          className="border-emerald-500/30 text-emerald-500 text-[10px] px-1.5 py-0"
                         >
                           ✓
                         </Badge>
@@ -93,7 +100,7 @@ export function EnterpriseInstructors({
 
                 {member.role && (
                   <div className="mt-3 pt-3 border-t border-slate-800">
-                    <span className="text-xs text-slate-500 uppercase tracking-wider">
+                    <span className="text-xs text-slate-400 uppercase tracking-wider">
                       {member.role}
                     </span>
                   </div>

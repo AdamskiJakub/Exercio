@@ -18,6 +18,14 @@ import type { AuthenticatedUser } from '../types/express';
 export class EnterpriseController {
   constructor(private enterpriseService: EnterpriseService) {}
 
+  /**
+   * List all active enterprises (minimal data for sitemap).
+   */
+  @Get()
+  async findAllActive() {
+    return this.enterpriseService.findAllActive();
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMyProfile(@Req() req: Request) {

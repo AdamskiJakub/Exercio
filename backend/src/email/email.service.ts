@@ -9,6 +9,7 @@ import {
   CancellationByClientDetails,
   CancellationByInstructorDetails,
   ClientAcceptedManualBookingDetails,
+  EnterpriseLeadDetails,
 } from './email.types';
 
 import {
@@ -18,6 +19,8 @@ import {
   buildPasswordResetTemplate,
   buildReviewInvitationTemplate,
   buildVerificationTemplate,
+  buildEnterpriseLeadNotificationTemplate,
+  buildEnterpriseAccountActivationTemplate,
 } from './email-templates';
 
 import {
@@ -27,6 +30,8 @@ import {
   PASSWORD_RESET_TEXTS,
   REVIEW_INVITATION_TEXTS,
   VERIFICATION_TEXTS,
+  ENTERPRISE_LEAD_TEXTS,
+  ENTERPRISE_ACTIVATION_TEXTS,
 } from './email.translations';
 
 @Injectable()
@@ -211,6 +216,32 @@ export class EmailService {
     const texts = REVIEW_INVITATION_TEXTS[language];
     const textsWithInstructor = { ...texts, instructorName };
     const html = buildReviewInvitationTemplate(textsWithInstructor, reviewUrl);
+    return this.sendEmail(email, texts.title, html);
+  }
+
+  /**
+   * Send notification to admin about a new enterprise lead
+   */
+  async sendEnterpriseLeadNotification(
+    adminEmail: string,
+    language: Language,
+    details: EnterpriseLeadDetails,
+  ) {
+    const texts = ENTERPRISE_LEAD_TEXTS[language];
+    const html = buildEnterpriseLeadNotificationTemplate(texts, details);
+    return this.sendEmail(adminEmail, texts.title, html);
+  }
+
+  /**
+   * Send activation email to the partner when their lead is approved
+   */
+  async sendEnterpriseAccountActivation(
+    email: string,
+    language: Language,
+    activationUrl: string,
+  ) {
+    const texts = ENTERPRISE_ACTIVATION_TEXTS[language];
+    const html = buildEnterpriseAccountActivationTemplate(texts, activationUrl);
     return this.sendEmail(email, texts.title, html);
   }
 }

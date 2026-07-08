@@ -32,6 +32,16 @@ export class UpdateEnterpriseProfileDto {
 
   @IsString()
   @IsOptional()
+  coverUrl?: string;
+
+  @IsOptional()
+  openingHours?: Record<string, string>;
+
+  @IsOptional()
+  highlights?: { label: string; value: string }[];
+
+  @IsString()
+  @IsOptional()
   facebookUrl?: string;
 
   @IsString()

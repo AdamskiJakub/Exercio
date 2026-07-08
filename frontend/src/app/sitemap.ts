@@ -8,6 +8,11 @@ interface InstructorProfile {
   updatedAt: string;
 }
 
+interface EnterpriseItem {
+  slug: string;
+  updatedAt: string;
+}
+
 const staticRoutes = [
   // Polish routes
   {
@@ -57,6 +62,18 @@ const staticRoutes = [
     lastModified: new Date(),
     changeFrequency: "yearly" as const,
     priority: 0.3,
+  },
+  {
+    url: `${BASE_URL}/pl/dla-firm`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
+  },
+  {
+    url: `${BASE_URL}/pl/dla-firm/aplikuj`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
   },
   {
     url: `${BASE_URL}/pl/onboarding/instruktor`,
@@ -114,6 +131,18 @@ const staticRoutes = [
     priority: 0.3,
   },
   {
+    url: `${BASE_URL}/en/partner`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  },
+  {
+    url: `${BASE_URL}/en/enterprise/apply`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.4,
+  },
+  {
     url: `${BASE_URL}/en/onboarding/instructor`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
@@ -123,6 +152,7 @@ const staticRoutes = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let instructorRoutes: MetadataRoute.Sitemap = [];
+  let enterpriseRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const response = await fetch(`${API_URL}/instructor-profiles`, {
@@ -151,5 +181,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to fetch instructors for sitemap:", error);
   }
 
-  return [...staticRoutes, ...instructorRoutes];
+  try {
+    const response = await fetch(`${API_URL}/enterprise`, {
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (response.ok) {
+      const enterprises: EnterpriseItem[] = await response.json();
+
+      enterpriseRoutes = enterprises.flatMap((ent) => [
+        {
+          url: `${BASE_URL}/pl/enterprise/${ent.slug}`,
+          lastModified: new Date(ent.updatedAt),
+          changeFrequency: "weekly" as const,
+          priority: 0.7,
+        },
+        {
+          url: `${BASE_URL}/en/enterprise/${ent.slug}`,
+          lastModified: new Date(ent.updatedAt),
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+        },
+      ]);
+    }
+  } catch (error) {
+    console.error("Failed to fetch enterprises for sitemap:", error);
+  }
+
+  return [...staticRoutes, ...instructorRoutes, ...enterpriseRoutes];
 }

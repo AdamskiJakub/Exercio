@@ -38,6 +38,9 @@ export interface EnterpriseProfile {
   phone: string | null;
   website: string | null;
   logoUrl: string | null;
+  coverUrl: string | null;
+  openingHours: Record<string, string> | null;
+  highlights: { label: string; value: string }[] | null;
   facebookUrl: string | null;
   instagramUrl: string | null;
   youtubeUrl: string | null;
@@ -91,6 +94,7 @@ export interface EnterpriseInstructorWithProfile extends EnterpriseInstructor {
       firstName: string | null;
       lastName: string | null;
       role: string;
+      avatarUrl?: string | null;
     };
   };
 }
@@ -98,6 +102,7 @@ export interface EnterpriseInstructorWithProfile extends EnterpriseInstructor {
 export interface EnterpriseNews {
   id: string;
   enterpriseId: string;
+  type: string;
   url: string;
   title: string | null;
   description: string | null;
@@ -142,6 +147,8 @@ export interface CreateEnterpriseLeadDto {
   phone?: string;
   website?: string;
   message?: string;
+  businessType?: string;
+  instructorCount?: string;
 }
 
 export interface UpdateEnterpriseProfileDto {
@@ -152,6 +159,9 @@ export interface UpdateEnterpriseProfileDto {
   phone?: string;
   website?: string;
   logoUrl?: string;
+  coverUrl?: string;
+  openingHours?: Record<string, string>;
+  highlights?: { label: string; value: string }[];
   facebookUrl?: string;
   instagramUrl?: string;
   youtubeUrl?: string;
@@ -166,6 +176,26 @@ export interface UpdateEnterpriseProfileDto {
   videos?: string[];
   partners?: string[];
   certificates?: string[];
+}
+
+export interface SearchInstructorResult {
+  id: string;
+  userId: string;
+  photoUrl: string | null;
+  tagline: string | null;
+  city: string | null;
+  specializations: string[];
+  specializationSlugs: string[];
+  verified: boolean;
+  isDraft: boolean;
+  user: {
+    id: string;
+    username: string;
+    firstName: string | null;
+    lastName: string | null;
+    role: string;
+    avatarUrl?: string | null;
+  };
 }
 
 export interface CreateInvitationDto {

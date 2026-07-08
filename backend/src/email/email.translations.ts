@@ -5,6 +5,8 @@ import {
   PasswordResetEmailContent,
   VerificationEmailContent,
   ReviewInvitationEmailContent,
+  EnterpriseLeadNotificationContent,
+  EnterpriseAccountActivationContent,
 } from './email.types';
 
 export const VERIFICATION_TEXTS: Record<'pl' | 'en', VerificationEmailContent> =
@@ -283,5 +285,59 @@ export const REVIEW_INVITATION_TEXTS: Record<
     minutes: 'min',
     reviewButton: 'Leave a Review',
     footer: 'Thank you for using Trainly!',
+  },
+};
+
+export const ENTERPRISE_LEAD_TEXTS: Record<
+  'pl' | 'en',
+  EnterpriseLeadNotificationContent
+> = {
+  pl: {
+    title: 'Nowe zgłoszenie partnerskie 🏢',
+    subtitle: 'Firma wypełniła formularz partnerski na Trainly.',
+    companyLabel: 'Nazwa firmy',
+    emailLabel: 'Email',
+    phoneLabel: 'Telefon',
+    websiteLabel: 'Strona WWW',
+    cityLabel: 'Miasto',
+    messageLabel: 'Wiadomość',
+    leadIdLabel: 'ID zgłoszenia',
+    approveHint: 'Aby zatwierdzić, uruchom: npm run enterprise:approve',
+    footer: 'Otrzymano z formularza partnerskiego Trainly.',
+  },
+  en: {
+    title: 'New Enterprise Lead 🏢',
+    subtitle: 'A company has submitted a partner inquiry on Trainly.',
+    companyLabel: 'Company Name',
+    emailLabel: 'Email',
+    phoneLabel: 'Phone',
+    websiteLabel: 'Website',
+    cityLabel: 'City',
+    messageLabel: 'Message',
+    leadIdLabel: 'Lead ID',
+    approveHint: 'To approve, run: npm run enterprise:approve',
+    footer: 'Received from Trainly partner inquiry form.',
+  },
+};
+
+export const ENTERPRISE_ACTIVATION_TEXTS: Record<
+  'pl' | 'en',
+  EnterpriseAccountActivationContent
+> = {
+  pl: {
+    title: 'Twoje konto zostało zaakceptowane! 🎉',
+    subtitle:
+      'Twoje zgłoszenie partnerskie zostało zaakceptowane. Kliknij poniższy przycisk, aby ustawić hasło i aktywować konto.',
+    activateButton: 'Aktywuj konto',
+    footer:
+      'Link aktywacyjny wygasa za 48 godzin. Jeśli nie oczekiwałeś tej wiadomości, zignoruj ją.',
+  },
+  en: {
+    title: 'Your Account Has Been Approved! 🎉',
+    subtitle:
+      'Your partner inquiry has been approved. Click the button below to set your password and activate your account.',
+    activateButton: 'Activate Account',
+    footer:
+      'This activation link expires in 48 hours. If you did not expect this email, please ignore it.',
   },
 };

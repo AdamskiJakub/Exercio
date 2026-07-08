@@ -37,8 +37,8 @@ import { useSpecializations } from "@/hooks/useConfig";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { scrollToSection } from "@/lib/utils/scroll";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { getInstructorName } from "@/lib/utils/user";
-import { getMediaUrl } from "@/lib/utils/media";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { format, isToday, parseISO, isThisWeek } from "date-fns";
@@ -179,6 +179,7 @@ export function ClientDashboard() {
           subtitle={t("nextWeek")}
           delay={0}
           onClick={() => scrollToSection("upcoming-sessions")}
+          hoverColor="hover:border-violet-500"
         />
         <StatsCard
           icon={TrendingUp}
@@ -189,6 +190,7 @@ export function ClientDashboard() {
           subtitle={t("allTime")}
           delay={1}
           onClick={() => scrollToSection("booking-history")}
+          hoverColor="hover:border-violet-500"
         />
         <StatsCard
           icon={Star}
@@ -199,6 +201,7 @@ export function ClientDashboard() {
           subtitle={t("reviewsToGive")}
           delay={2}
           onClick={() => scrollToSection("my-reviews")}
+          hoverColor="hover:border-violet-500"
         />
         <StatsCard
           icon={Heart}
@@ -209,6 +212,7 @@ export function ClientDashboard() {
           subtitle={t("saved")}
           delay={3}
           href="/instructors"
+          hoverColor="hover:border-violet-500"
         />
       </div>
 
@@ -218,6 +222,7 @@ export function ClientDashboard() {
         <div id="upcoming-sessions">
           <DashboardCard
             icon={Calendar}
+            hoverColor="hover:border-violet-500"
             iconColor="text-blue-500"
             iconBgColor="bg-blue-500/10"
             title={t("upcomingSessions")}
@@ -243,6 +248,7 @@ export function ClientDashboard() {
         <div id="my-reviews">
           <DashboardCard
             icon={Star}
+            hoverColor="hover:border-violet-500"
             iconColor="text-amber-500"
             iconBgColor="bg-amber-500/10"
             title={t("myReviews")}
@@ -255,6 +261,7 @@ export function ClientDashboard() {
         {/* Favorite Trainers */}
         <DashboardCard
           icon={Heart}
+          hoverColor="hover:border-violet-500"
           iconColor="text-pink-500"
           iconBgColor="bg-pink-500/10"
           title={t("favoriteTrainers")}
@@ -266,6 +273,7 @@ export function ClientDashboard() {
         {/* Recently Viewed Trainers */}
         <DashboardCard
           icon={Clock}
+          hoverColor="hover:border-violet-500"
           iconColor="text-cyan-500"
           iconBgColor="bg-cyan-500/10"
           title={t("recentlyViewed")}
@@ -282,9 +290,6 @@ export function ClientDashboard() {
                   [instructor.firstName, instructor.lastName]
                     .filter(Boolean)
                     .join(" ") || instructor.username;
-                const avatarSrc = getMediaUrl(
-                  instructor.photoUrl || instructor.avatarUrl,
-                );
                 const primarySpecId = instructor.specializations?.[0];
                 const primarySpec = primarySpecId
                   ? specializations.find((s) => s.id === primarySpecId)
@@ -300,23 +305,14 @@ export function ClientDashboard() {
                     href={`/instructors/${instructor.username}`}
                     className="flex items-center gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500/50 rounded-xl overflow-hidden transition-colors duration-300 group p-4"
                   >
-                    <div className="size-14 rounded-full overflow-hidden bg-slate-700 shrink-0 border-2 border-slate-600">
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt={name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg bg-slate-700">
-                          {name
-                            .split(" ")
-                            .map((n: string) => n[0])
-                            .join("")
-                            .toUpperCase()}
-                        </div>
-                      )}
-                    </div>
+                    <UserAvatar
+                      photoUrl={instructor.photoUrl}
+                      avatarUrl={instructor.avatarUrl}
+                      firstName={instructor.firstName}
+                      lastName={instructor.lastName}
+                      size="md"
+                      alt={name}
+                    />
                     <div className="flex-1 min-w-0 text-left">
                       <h4 className="text-sm font-semibold text-white truncate">
                         {name}
@@ -350,8 +346,9 @@ export function ClientDashboard() {
         {/* Become Instructor CTA */}
         <DashboardCard
           icon={Rocket}
-          iconColor="text-purple-500"
-          iconBgColor="bg-purple-500/10"
+          hoverColor="hover:border-violet-500"
+          iconColor="text-orange-500"
+          iconBgColor="bg-orange-500/10"
           title={t("becomeInstructor")}
           delay={8}
         >
@@ -370,6 +367,7 @@ export function ClientDashboard() {
       <div id="booking-history" className="scroll-mt-20">
         <DashboardCard
           icon={FileText}
+          hoverColor="hover:border-violet-500"
           iconColor="text-slate-400"
           title={t("bookingHistory")}
           delay={8}

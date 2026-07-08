@@ -47,6 +47,9 @@ export function useAcceptInvitation() {
       queryClient.invalidateQueries({
         queryKey: ["my-enterprise-invitations"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["my-enterprise-profile"],
+      });
     },
   });
 }
