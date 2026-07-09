@@ -41,7 +41,6 @@ jobs:
             exit 0
           fi
 
-          # Build context file with full file contents
           CONTEXT_FILE="/tmp/review_context.txt"
           FILES_LIST_FILE="/tmp/review_filelist.txt"
           : > "$CONTEXT_FILE"
@@ -50,15 +49,13 @@ jobs:
           while IFS= read -r file; do
             if [ -f "$file" ]; then
               echo "$file" >> "$FILES_LIST_FILE"
-              echo "" >> "$CONTEXT_FILE"
-              echo "=== $file ===" >> "$CONTEXT_FILE"
-              echo '```'" >> "$CONTEXT_FILE"
+              printf "\n\n=== %s ===\n" "$file" >> "$CONTEXT_FILE"
+              printf '```\n' >> "$CONTEXT_FILE"
               cat "$file" >> "$CONTEXT_FILE"
-              echo '```'" >> "$CONTEXT_FILE"
+              printf '\n```\n' >> "$CONTEXT_FILE"
             fi
           done <<< "$FILES"
 
-          # Build JSON payload using jq --rawfile (reads from file, no arg limits)
           jq -n \
             --rawfile context /tmp/review_context.txt \
             --rawfile files_list /tmp/review_filelist.txt \
