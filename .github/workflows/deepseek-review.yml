@@ -59,8 +59,33 @@ jobs:
             fi
           done <<< "$FILES"
 
+          export FILE_COUNT
+
+          # Write system prompt to file to avoid quoting issues
+          cat > /tmp/system_prompt.txt << 'PROMPT_EOF'
+You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.
+
+For each issue, ALWAYS include the file path and line number. Be specific and actionable.
+
+CHECKLIST (check every item for every file):
+1. Unused imports/variables - are there imports or variables declared but never referenced?
+2. any type usage - flag any ":any" or "as any" - these defeat type safety
+3. Dead code - variables assigned but never read, unreachable branches
+4. Hardcoded strings that should use i18n - text visible to users should use t() from next-intl
+5. Hardcoded locale - e.g. "pl" === "pl" instead of useLocale()
+6. Missing "use client" directive - components using hooks need the directive
+7. Accessibility issues - missing aria labels, incorrect roles, missing keyboard handlers
+8. Error handling - try/catch with empty catch blocks, unhandled promise rejections
+9. Performance - unnecessary re-renders, inline functions in props, large useEffect deps
+10. Type safety - incorrect types, missing null checks, unsafe casts
+11. Code duplication - repeated JSX patterns that could be extracted
+12. Logic errors - incorrect conditions, off-by-one, wrong comparison operators
+
+Format: **file/path.ts:line** - description. Be concise but complete.
+PROMPT_EOF
+
           # Build JSON payload using Python (avoids jq "Argument list too long")
-          python3 -c "
+          python3 - << 'PYEOF'
 import json, os
 
 with open('/tmp/review_context.txt', 'r') as f:
@@ -69,25 +94,10 @@ with open('/tmp/review_context.txt', 'r') as f:
 with open('/tmp/review_filelist.txt', 'r') as f:
     file_list = f.read()
 
-system_prompt = '''You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.
+with open('/tmp/system_prompt.txt', 'r') as f:
+    system_prompt = f.read()
 
-For each issue, ALWAYS include the file path and line number. Be specific and actionable.
-
-CHECKLIST (check every item for every file):
-1. Unused imports/variables - are there imports or variables declared but never referenced?
-2. any type usage - flag any :any or as any - these defeat type safety
-3. Dead code - variables assigned but never read, unreachable branches
-4. Hardcoded strings that should use i18n - text visible to users should use t() from next-intl
-5. Hardcoded locale - e.g. \"pl\" === \"pl\" instead of useLocale()
-6. Missing \"use client\" directive - components using hooks need the directive
-7. Accessibility issues - missing aria labels, incorrect roles, missing keyboard handlers
-8. Error handling - try/catch with empty catch blocks, unhandled promise rejections
-9. Performance - unnecessary re-renders, inline functions in props, large useEffect deps
-10. Type safety - incorrect types, missing null checks, unsafe casts
-11. Code duplication - repeated JSX patterns that could be extracted
-12. Logic errors - incorrect conditions, off-by-one, wrong comparison operators
-
-Format: **file/path.ts:line** - description. Be concise but complete.'''
+file_count = os.environ.get('FILE_COUNT', '0')
 
 payload = {
     'model': 'deepseek-chat',
@@ -95,13 +105,13 @@ payload = {
     'temperature': 0.5,
     'messages': [
         {'role': 'system', 'content': system_prompt},
-        {'role': 'user', 'content': 'Number of files changed: ' + str($FILE_COUNT) + '\n\nFiles changed:\n' + file_list + '\n\nFull file contents:\n' + context}
+        {'role': 'user', 'content': 'Number of files changed: ' + file_count + '\n\nFiles changed:\n' + file_list + '\n\nFull file contents:\n' + context}
     ]
 }
 
 with open('/tmp/payload.json', 'w') as f:
     json.dump(payload, f)
-"
+PYEOF
 
           echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
