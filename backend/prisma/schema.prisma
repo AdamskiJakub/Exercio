@@ -348,11 +348,27 @@ model EnterpriseProfile {
   openingHours    Json?
   highlights      Json?
 
+  aboutImage      String?
   gallery         String[]
   videos          String[]
 
   partners        String[]
   certificates    String[]
+
+  businessType    String?
+  targetAudience  String[]
+  disciplines     String[]
+  languages       String[]
+
+  hasParking          Boolean?
+  hasShower           Boolean?
+  hasLockerRoom       Boolean?
+  hasAirConditioning  Boolean?
+  hasDisabledAccess   Boolean?
+  hasFreeTrial        Boolean?
+
+  pricing         Json?
+  faq             Json?
 
   subscriptionId  String?
   subscriptionStatus String? @default("incomplete")

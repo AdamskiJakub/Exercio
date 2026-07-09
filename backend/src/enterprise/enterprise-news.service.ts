@@ -35,6 +35,7 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
         title: dto.title,
         url: dto.url ?? '',
         description: dto.description ?? null,
+        thumbnailUrl: dto.thumbnailUrl ?? null,
       },
     });
   }

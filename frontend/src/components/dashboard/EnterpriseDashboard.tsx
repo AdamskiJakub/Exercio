@@ -43,7 +43,7 @@ export function EnterpriseDashboard() {
       <DashboardHeader
         greeting={`${t("welcomeBack")}, ${profile?.companyName || user?.email?.split("@")[0] || ""}!`}
         subtitle={t("manageProfile")}
-        avatarUrl={profile?.logoUrl || null}
+        avatarUrl={getMediaUrl(profile?.logoUrl) || null}
         actionLinks={[
           {
             href: "/dashboard/enterprise/profile",
@@ -56,27 +56,31 @@ export function EnterpriseDashboard() {
             href: `/enterprise/${profile?.slug}?from=dashboard`,
             icon: <ExternalLink className="h-4 w-4" />,
             label: t("viewPublicProfile"),
+            className:
+              "px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg",
           },
           {
             href: "/dashboard/settings",
             icon: <Settings className="h-4 w-4" />,
             label: t("accountSettings"),
+            className:
+              "px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg",
           },
         ]}
       />
 
       {/* Profile Status Banner */}
-      {profile && !isApproved && (
-        <div
-          className={`rounded-lg border p-4 ${
-            isPending
-              ? "bg-yellow-500/10 border-yellow-500/30 text-yellow-400"
-              : "bg-red-500/10 border-red-500/30 text-red-400"
-          }`}
-        >
+      {isPending && (
+        <div className="rounded-lg border p-4 bg-yellow-500/10 border-yellow-500/30 text-yellow-400">
           <p className="font-semibold">
-            {t(isPending ? "pending" : "rejected")} —{" "}
-            {t(isPending ? "pendingDescription" : "rejectedDescription")}
+            {t("pending")} — {t("pendingDescription")}
+          </p>
+        </div>
+      )}
+      {isRejected && (
+        <div className="rounded-lg border p-4 bg-red-500/10 border-red-500/30 text-red-400">
+          <p className="font-semibold">
+            {t("rejected")} — {t("rejectedDescription")}
           </p>
         </div>
       )}
@@ -197,14 +201,26 @@ export function EnterpriseDashboard() {
               {profile.news.slice(0, 5).map((newsItem: any) => (
                 <NextLink
                   key={newsItem.id}
-                  href={newsItem.url || "#"}
-                  target={newsItem.url ? "_blank" : undefined}
-                  rel={newsItem.url ? "noopener noreferrer" : undefined}
+                  href={
+                    newsItem.type === "post"
+                      ? "/dashboard/enterprise/news"
+                      : newsItem.url || "#"
+                  }
+                  target={
+                    newsItem.type === "post" || !newsItem.url
+                      ? undefined
+                      : "_blank"
+                  }
+                  rel={
+                    newsItem.type === "post" || !newsItem.url
+                      ? undefined
+                      : "noopener noreferrer"
+                  }
                   className="flex items-start gap-3 p-3 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
                 >
                   {newsItem.thumbnailUrl ? (
                     <img
-                      src={newsItem.thumbnailUrl}
+                      src={getMediaUrl(newsItem.thumbnailUrl)}
                       alt=""
                       className="w-10 h-10 rounded object-cover shrink-0"
                     />

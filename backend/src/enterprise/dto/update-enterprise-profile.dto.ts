@@ -1,4 +1,10 @@
-import { IsOptional, IsString, IsArray, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
 import { EnterpriseCategory } from '@prisma/client';
 
 export class UpdateEnterpriseProfileDto {
@@ -33,6 +39,10 @@ export class UpdateEnterpriseProfileDto {
   @IsString()
   @IsOptional()
   coverUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  aboutImage?: string;
 
   @IsOptional()
   openingHours?: Record<string, string>;
@@ -101,4 +111,53 @@ export class UpdateEnterpriseProfileDto {
   @IsString({ each: true })
   @IsOptional()
   certificates?: string[];
+
+  @IsString()
+  @IsOptional()
+  businessType?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  targetAudience?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  disciplines?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  languages?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  hasParking?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasShower?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasLockerRoom?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasAirConditioning?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasDisabledAccess?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  hasFreeTrial?: boolean;
+
+  @IsOptional()
+  pricing?: { label: string; price: number }[];
+
+  @IsOptional()
+  faq?: { question: string; answer: string }[];
 }

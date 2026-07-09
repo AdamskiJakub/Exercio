@@ -16,4 +16,8 @@ export class CreateEnterpriseNewsDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  thumbnailUrl?: string;
 }

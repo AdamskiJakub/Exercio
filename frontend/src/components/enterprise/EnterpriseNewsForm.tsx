@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Newspaper, Link as LinkIcon, FileText, ImageIcon } from "lucide-react";
+import { Newspaper } from "lucide-react";
 import { useOGPreview } from "@/hooks/useOGPreview";
+import { NewsTypeToggle } from "./NewsTypeToggle";
+import { LinkPreviewSection } from "./LinkPreviewSection";
+import { ThumbnailSection } from "./ThumbnailSection";
 import type { EnterpriseNews } from "@/types/enterprise";
 
 interface NewsFormData {
@@ -16,6 +19,7 @@ interface NewsFormData {
   title: string;
   url: string;
   description: string;
+  thumbnailUrl: string;
 }
 
 interface EnterpriseNewsFormProps {
@@ -40,9 +44,32 @@ export function EnterpriseNewsForm({
     title: editingNews?.title || "",
     url: editingNews?.url || "",
     description: editingNews?.description || "",
+    thumbnailUrl: editingNews?.thumbnailUrl || "",
   });
 
-  const { ogPreview } = useOGPreview(form.url, form.type);
+  const { ogPreview, isFetchingOg, fetchFailed } = useOGPreview(
+    form.url,
+    form.type,
+  );
+
+  // Auto-fill title and description from OG preview (only on first successful fetch for new items)
+  const hasAutoFilled = useRef(false);
+  useEffect(() => {
+    if (
+      ogPreview &&
+      !hasAutoFilled.current &&
+      !editingNews &&
+      form.type === "link"
+    ) {
+      hasAutoFilled.current = true;
+      setForm((prev) => ({
+        ...prev,
+        title: prev.title || ogPreview.title,
+        description: prev.description || ogPreview.description,
+        thumbnailUrl: prev.thumbnailUrl || ogPreview.image || "",
+      }));
+    }
+  }, [ogPreview, editingNews, form.type]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,12 +77,15 @@ export function EnterpriseNewsForm({
   };
 
   const setType = (type: "link" | "post") => {
+    hasAutoFilled.current = false;
     setForm((prev) => ({ ...prev, type }));
   };
 
   const updateField = (field: keyof NewsFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  const isSocialUrl = form.type === "link" && isSocialMediaUrl(form.url);
 
   return (
     <motion.form
@@ -83,45 +113,23 @@ export function EnterpriseNewsForm({
         </button>
       </div>
 
-      {/* Post Type Toggle */}
-      <div
-        className="flex gap-3"
-        role="radiogroup"
-        aria-label={t("newsType") || "News type"}
-      >
-        <button
-          type="button"
-          role="radio"
-          aria-checked={form.type === "link"}
-          onClick={() => setType("link")}
-          className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
-            form.type === "link"
-              ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-              : "bg-slate-700/30 border-slate-600 text-slate-400 hover:border-slate-500"
-          }`}
-        >
-          <LinkIcon className="w-4 h-4" aria-hidden="true" />
-          <span className="text-sm font-medium">
-            {t("newsTypeLink") || "Link"}
-          </span>
-        </button>
-        <button
-          type="button"
-          role="radio"
-          aria-checked={form.type === "post"}
-          onClick={() => setType("post")}
-          className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border transition-all ${
-            form.type === "post"
-              ? "bg-emerald-500/10 border-emerald-500/50 text-emerald-400"
-              : "bg-slate-700/30 border-slate-600 text-slate-400 hover:border-slate-500"
-          }`}
-        >
-          <FileText className="w-4 h-4" aria-hidden="true" />
-          <span className="text-sm font-medium">
-            {t("newsTypePost") || "Post"}
-          </span>
-        </button>
-      </div>
+      <NewsTypeToggle
+        type={form.type}
+        onChange={setType}
+        linkLabel={t("newsTypeLink") || "Link"}
+        postLabel={t("newsTypePost") || "Post"}
+      />
+
+      {form.type === "link" && (
+        <LinkPreviewSection
+          url={form.url}
+          onUrlChange={(url) => updateField("url", url)}
+          isFetchingOg={isFetchingOg}
+          fetchFailed={fetchFailed}
+          ogPreview={ogPreview}
+          isSocialUrl={isSocialUrl}
+        />
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="form-title" className="text-base font-medium">
@@ -137,50 +145,6 @@ export function EnterpriseNewsForm({
           className="h-11"
         />
       </div>
-
-      {form.type === "link" && (
-        <div className="space-y-2">
-          <Label htmlFor="form-url" className="text-base font-medium">
-            URL
-          </Label>
-          <Input
-            type="url"
-            name="url"
-            id="form-url"
-            value={form.url}
-            onChange={(e) => updateField("url", e.target.value)}
-            placeholder="https://..."
-            className="h-11"
-          />
-          {/* Link Preview */}
-          {ogPreview && (
-            <div className="mt-2 p-3 bg-slate-700/30 rounded-lg border border-slate-600 flex items-start gap-3">
-              <div className="w-12 h-12 rounded bg-slate-700 flex items-center justify-center shrink-0 overflow-hidden">
-                {ogPreview.image ? (
-                  <img
-                    src={ogPreview.image}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <LinkIcon
-                    className="w-5 h-5 text-slate-500"
-                    aria-hidden="true"
-                  />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-200 truncate">
-                  {ogPreview.title}
-                </p>
-                <p className="text-xs text-slate-400 truncate mt-0.5">
-                  {ogPreview.description}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       <div className="space-y-2">
         <Label htmlFor="form-description" className="text-base font-medium">
@@ -200,6 +164,11 @@ export function EnterpriseNewsForm({
         />
       </div>
 
+      <ThumbnailSection
+        thumbnailUrl={form.thumbnailUrl}
+        onThumbnailChange={(url) => updateField("thumbnailUrl", url)}
+      />
+
       <div className="flex gap-3 pt-2">
         <Button
           type="submit"
@@ -211,12 +180,31 @@ export function EnterpriseNewsForm({
         <Button
           type="button"
           onClick={onCancel}
-          variant="outline"
-          className="border-slate-600 text-slate-300 h-11 px-8"
+          variant="destructive"
+          className="h-11 px-8"
         >
           {t("cancel") || "Cancel"}
         </Button>
       </div>
     </motion.form>
   );
+}
+
+function isSocialMediaUrl(url: string): boolean {
+  const FACEBOOK_DOMAINS = [
+    "facebook.com",
+    "www.facebook.com",
+    "fb.com",
+    "m.facebook.com",
+    "instagram.com",
+    "www.instagram.com",
+  ];
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return FACEBOOK_DOMAINS.some(
+      (domain) => hostname === domain || hostname.endsWith("." + domain),
+    );
+  } catch {
+    return false;
+  }
 }

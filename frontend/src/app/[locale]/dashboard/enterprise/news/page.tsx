@@ -53,6 +53,7 @@ export default function EnterpriseNewsPage() {
     title: string;
     url: string;
     description: string;
+    thumbnailUrl: string;
   }) => {
     if (!profile) return;
 
@@ -61,6 +62,7 @@ export default function EnterpriseNewsPage() {
       const payload = {
         ...form,
         url: form.type === "post" ? "" : form.url,
+        thumbnailUrl: form.thumbnailUrl || null,
       };
 
       if (editingNews) {

@@ -39,6 +39,7 @@ export interface EnterpriseProfile {
   website: string | null;
   logoUrl: string | null;
   coverUrl: string | null;
+  aboutImage: string | null;
   openingHours: Record<string, string> | null;
   highlights: { label: string; value: string }[] | null;
   facebookUrl: string | null;
@@ -55,6 +56,18 @@ export interface EnterpriseProfile {
   videos: string[];
   partners: string[];
   certificates: string[];
+  businessType: string | null;
+  targetAudience: string[];
+  disciplines: string[];
+  languages: string[];
+  hasParking: boolean | null;
+  hasShower: boolean | null;
+  hasLockerRoom: boolean | null;
+  hasAirConditioning: boolean | null;
+  hasDisabledAccess: boolean | null;
+  hasFreeTrial: boolean | null;
+  pricing: { label: string; price: number }[] | null;
+  faq: { question: string; answer: string }[] | null;
   subscriptionId: string | null;
   subscriptionStatus: string | null;
   subscribedAt: string | null;
@@ -151,6 +164,30 @@ export interface CreateEnterpriseLeadDto {
   instructorCount?: string;
 }
 
+/**
+ * A single highlight item (label + value pair).
+ */
+export interface HighlightItem {
+  label: string;
+  value: string;
+}
+
+/**
+ * A single pricing item (label + price).
+ */
+export interface PricingItem {
+  label: string;
+  price: number;
+}
+
+/**
+ * A single FAQ item (question + answer).
+ */
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface UpdateEnterpriseProfileDto {
   companyName?: string;
   shortDescription?: string;
@@ -160,6 +197,7 @@ export interface UpdateEnterpriseProfileDto {
   website?: string;
   logoUrl?: string;
   coverUrl?: string;
+  aboutImage?: string;
   openingHours?: Record<string, string>;
   highlights?: { label: string; value: string }[];
   facebookUrl?: string;
@@ -176,6 +214,34 @@ export interface UpdateEnterpriseProfileDto {
   videos?: string[];
   partners?: string[];
   certificates?: string[];
+  businessType?: string;
+  targetAudience?: string[];
+  disciplines?: string[];
+  languages?: string[];
+  hasParking?: boolean;
+  hasShower?: boolean;
+  hasLockerRoom?: boolean;
+  hasAirConditioning?: boolean;
+  hasDisabledAccess?: boolean;
+  hasFreeTrial?: boolean;
+  pricing?: { label: string; price: number }[];
+  faq?: { question: string; answer: string }[];
+}
+
+export interface MediaField {
+  url: string;
+  isUploading: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUrlChange: (value: string) => void;
+  onRemove: () => void;
+}
+
+export interface GalleryField {
+  items: string[];
+  isUploading: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onAdd: (url: string) => void;
+  onRemove: (index: number) => void;
 }
 
 export interface SearchInstructorResult {

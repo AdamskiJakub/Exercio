@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ProfileViewsModule } from './profile-views/profile-views.module';
 import { EnterpriseModule } from './enterprise/enterprise.module';
 import { SearchModule } from './search/search.module';
+import { OGPreviewModule } from './og-preview/og-preview.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { SearchModule } from './search/search.module';
     ProfileViewsModule,
     EnterpriseModule,
     SearchModule,
+    OGPreviewModule,
   ],
   controllers: [AppController],
   providers: [

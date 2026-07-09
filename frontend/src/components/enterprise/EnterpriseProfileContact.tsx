@@ -3,40 +3,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Phone, Globe, MapPin, Link as LinkIcon } from "lucide-react";
 
-interface EnterpriseProfileContactProps {
+interface ContactInfo {
   email: string;
   phone: string;
   website: string;
   city: string;
   address: string;
   postalCode: string;
+}
+
+interface SocialLinks {
   facebookUrl: string;
   instagramUrl: string;
   youtubeUrl: string;
   tiktokUrl: string;
+}
+
+interface EnterpriseProfileContactProps {
+  contact: ContactInfo;
+  social: SocialLinks;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
 }
 
 export function EnterpriseProfileContact({
-  email,
-  phone,
-  website,
-  city,
-  address,
-  postalCode,
-  facebookUrl,
-  instagramUrl,
-  youtubeUrl,
-  tiktokUrl,
+  contact,
+  social,
   onChange,
 }: EnterpriseProfileContactProps) {
   const t = useTranslations("Dashboard.enterprise");
 
   return (
     <div>
-      {/* Contact Info */}
       <div className="flex items-center gap-3 mb-2 pt-4 border-t border-slate-700">
         <div className="p-2 bg-blue-500/10 rounded-lg">
           <Phone className="w-5 h-5 text-blue-400" aria-hidden="true" />
@@ -55,7 +54,7 @@ export function EnterpriseProfileContact({
             type="email"
             name="email"
             id="email"
-            value={email}
+            value={contact.email}
             onChange={onChange}
             className="h-11"
           />
@@ -69,7 +68,7 @@ export function EnterpriseProfileContact({
             type="tel"
             name="phone"
             id="phone"
-            value={phone}
+            value={contact.phone}
             onChange={onChange}
             className="h-11"
           />
@@ -89,7 +88,7 @@ export function EnterpriseProfileContact({
             inputMode="url"
             name="website"
             id="website"
-            value={website}
+            value={contact.website}
             onChange={onChange}
             className="h-11"
             placeholder={t("websitePlaceholder")}
@@ -107,7 +106,7 @@ export function EnterpriseProfileContact({
             type="text"
             name="city"
             id="city"
-            value={city}
+            value={contact.city}
             onChange={onChange}
             className="h-11"
           />
@@ -123,7 +122,7 @@ export function EnterpriseProfileContact({
             type="text"
             name="address"
             id="address"
-            value={address}
+            value={contact.address}
             onChange={onChange}
             className="h-11"
           />
@@ -137,14 +136,13 @@ export function EnterpriseProfileContact({
             type="text"
             name="postalCode"
             id="postalCode"
-            value={postalCode}
+            value={contact.postalCode}
             onChange={onChange}
             className="h-11"
           />
         </div>
       </div>
 
-      {/* Social Links */}
       <div className="flex items-center gap-3 mb-2 pt-4 border-t border-slate-700">
         <div className="p-2 bg-purple-500/10 rounded-lg">
           <LinkIcon className="w-5 h-5 text-purple-400" aria-hidden="true" />
@@ -164,7 +162,7 @@ export function EnterpriseProfileContact({
             inputMode="url"
             name="facebookUrl"
             id="facebookUrl"
-            value={facebookUrl}
+            value={social.facebookUrl}
             onChange={onChange}
             className="h-11"
             placeholder="https://facebook.com/..."
@@ -180,7 +178,7 @@ export function EnterpriseProfileContact({
             inputMode="url"
             name="instagramUrl"
             id="instagramUrl"
-            value={instagramUrl}
+            value={social.instagramUrl}
             onChange={onChange}
             className="h-11"
             placeholder="https://instagram.com/..."
@@ -198,7 +196,7 @@ export function EnterpriseProfileContact({
             inputMode="url"
             name="youtubeUrl"
             id="youtubeUrl"
-            value={youtubeUrl}
+            value={social.youtubeUrl}
             onChange={onChange}
             className="h-11"
             placeholder="https://youtube.com/..."
@@ -214,7 +212,7 @@ export function EnterpriseProfileContact({
             inputMode="url"
             name="tiktokUrl"
             id="tiktokUrl"
-            value={tiktokUrl}
+            value={social.tiktokUrl}
             onChange={onChange}
             className="h-11"
             placeholder="https://tiktok.com/..."
