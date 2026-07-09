@@ -1,40 +1,127 @@
-name: Code Review
+name: DeepSeek Code Review
+
+permissions:
+  contents: read
+  pull-requests: write
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-permissions:
-  pull-requests: write
-
 jobs:
   code-review:
-    timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - name: DeepSeek Code Review
-        uses: hustcer/deepseek-review@v1
+      - uses: actions/checkout@v4
         with:
-          chat-token: ${{ secrets.DEEPSEEK_API_KEY }}
-          model: deepseek-chat
-          temperature: 0.5
-          sys-prompt: |
-            You are a senior code reviewer. Review the FULL source code of changed files (not just the diff). For each issue, ALWAYS include the file path where it occurs.
+          fetch-depth: 0
 
-            CHECKLIST:
-            1. Unused imports/variables
-            2. any type usage - flag ":any" or "as any"
-            3. Dead code - variables assigned but never read
-            4. Hardcoded strings that should use i18n (t() from next-intl)
-            5. Hardcoded locale - e.g. "pl" === "pl" instead of useLocale()
-            6. Missing "use client" directive
-            7. Accessibility issues - missing aria labels, incorrect roles
-            8. Error handling - empty catch blocks, unhandled rejections
-            9. Performance - unnecessary re-renders, missing memoization
-            10. Type safety - incorrect types, missing null checks, unsafe casts
-            11. Code duplication - repeated JSX patterns
-            12. Logic errors - incorrect conditions, wrong operators
+      - name: Get changed files
+        id: files
+        run: |
+          FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
+            ':!*.lock' ':!*.toml' \
+            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
+            ':!**/node_modules/**' 2>/dev/null || true)
 
-            Format: **file/path.ts:line** - description. Be concise.
-            If nothing important, say: No significant issues found.
-          exclude-patterns: pnpm-lock.yaml,package-lock.json,*.lock,*.svg,*.png,*.jpg,*.jpeg,*.toml
+          echo "FILES<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Call DeepSeek API
+        id: review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          FILES="${{ steps.files.outputs.FILES }}"
+
+          if [ -z "$FILES" ]; then
+            echo "No code changes to review." > /tmp/review_comment.txt
+            exit 0
+          fi
+
+          # Build context file with full file contents
+          CONTEXT_FILE="/tmp/review_context.txt"
+          FILES_LIST_FILE="/tmp/review_filelist.txt"
+          : > "$CONTEXT_FILE"
+          : > "$FILES_LIST_FILE"
+
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              echo "$file" >> "$FILES_LIST_FILE"
+              echo "" >> "$CONTEXT_FILE"
+              echo "=== $file ===" >> "$CONTEXT_FILE"
+              echo '```'" >> "$CONTEXT_FILE"
+              cat "$file" >> "$CONTEXT_FILE"
+              echo '```'" >> "$CONTEXT_FILE"
+            fi
+          done <<< "$FILES"
+
+          # Build JSON payload using jq --rawfile (reads from file, no arg limits)
+          jq -n \
+            --rawfile context /tmp/review_context.txt \
+            --rawfile files_list /tmp/review_filelist.txt \
+            '{
+              model: "deepseek-chat",
+              max_tokens: 8192,
+              temperature: 0.5,
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a senior code reviewer. You have the FULL source code of every changed file in this PR. Review ONLY the changed files listed below.
+
+        CHECKLIST:
+        1. Unused imports/variables - declared but never referenced
+        2. any type usage - flag :any or as any
+        3. Dead code - assigned but never read, unreachable branches
+        4. Hardcoded strings that should use i18n (t() from next-intl)
+        5. Hardcoded locale - e.g. \"pl\" === \"pl\" instead of useLocale()
+        6. Missing error handling - empty catch blocks, unhandled rejections
+        7. Type safety issues - incorrect types, missing null checks, unsafe casts
+        8. Code duplication - repeated JSX patterns that could be extracted
+        9. Logic errors - incorrect conditions, wrong operators
+        10. Security issues - XSS, hardcoded secrets, injection vectors
+        11. Performance - unnecessary re-renders, missing cleanup in useEffect
+        12. Accessibility - missing aria labels, incorrect roles, missing keyboard handlers
+
+        IMPORTANT: Do NOT report missing \"use client\" directive - these files are part of a Next.js app directory where \"use client\" is already handled correctly.
+
+        Format: **file/path.ts:line** - description. Be concise.
+        If nothing important, say: No significant issues found."
+                },
+                {
+                  role: "user",
+                  content: "Files changed:\n" + $files_list + "\n\nFull file contents:\n" + $context
+                }
+              ]
+            }' > /tmp/payload.json
+
+          echo 'Calling DeepSeek API...'
+          RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+            -d @/tmp/payload.json)
+
+          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "API error"')
+
+          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // ""')
+          if [ -n "$ERROR" ]; then
+            COMMENT="API Error: $ERROR"
+          fi
+
+          echo "$COMMENT" > /tmp/review_comment.txt
+
+      - name: Post comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT=$(cat /tmp/review_comment.txt)
+
+          if [ -n "$COMMENT" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "## 🤖 DeepSeek Code Review
+
+          $COMMENT
+
+          ---
+          *Powered by DeepSeek AI*"
+          fi

@@ -4,6 +4,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import type { CreateEnterpriseLeadDto } from './dto/create-enterprise-lead.dto';
@@ -19,6 +20,7 @@ export class EnterpriseLeadsService {
   constructor(
     private prisma: PrismaService,
     private emailService: EmailService,
+    private configService: ConfigService,
   ) {}
 
   async create(dto: CreateEnterpriseLeadDto) {
@@ -53,9 +55,17 @@ export class EnterpriseLeadsService {
 
     // Send email notification to admin
     try {
-      await this.emailService.sendEnterpriseLeadNotification(
+      const adminEmail = this.configService.get<string>(
+        'ADMIN_EMAIL',
         'burguntowy@gmail.com',
+      );
+      const defaultLocale = this.configService.get<string>(
+        'DEFAULT_LOCALE',
         'pl',
+      ) as Language;
+      await this.emailService.sendEnterpriseLeadNotification(
+        adminEmail,
+        defaultLocale,
         {
           id: lead.id,
           companyName: dto.companyName,
@@ -181,9 +191,13 @@ export class EnterpriseLeadsService {
     // Send activation email to the partner with activation link
     try {
       const activationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/activate?token=${activationToken}`;
+      const approveLocale = this.configService.get<string>(
+        'DEFAULT_LOCALE',
+        'pl',
+      ) as Language;
       await this.emailService.sendEnterpriseAccountActivation(
         lead.email,
-        'pl',
+        approveLocale,
         activationUrl,
       );
       this.logger.log(
