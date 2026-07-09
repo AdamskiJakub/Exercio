@@ -28,8 +28,10 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Build context file
-        id: context
+      - name: DeepSeek Code Review
+        id: review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           FILES="${{ steps.files.outputs.FILES }}"
 
@@ -38,6 +40,7 @@ jobs:
             exit 0
           fi
 
+          # Build context file (avoids shell argument length limits)
           CONTEXT_FILE="/tmp/review_context.txt"
           FILE_LIST_FILE="/tmp/review_filelist.txt"
           > "$CONTEXT_FILE"
@@ -56,35 +59,8 @@ jobs:
             fi
           done <<< "$FILES"
 
-          echo "FILE_COUNT=$FILE_COUNT" >> $GITHUB_OUTPUT
-
-      - name: Write system prompt
-        run: |
-          cat > /tmp/system_prompt.txt << PROMPT_EOF
-          You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.
-
-          For each issue, ALWAYS include the file path and line number. Be specific and actionable.
-
-          CHECKLIST (check every item for every file):
-          1. Unused imports/variables - are there imports or variables declared but never referenced?
-          2. any type usage - flag any :any or as any - these defeat type safety
-          3. Dead code - variables assigned but never read, unreachable branches
-          4. Hardcoded strings that should use i18n - text visible to users should use t() from next-intl
-          5. Hardcoded locale - e.g. "pl" === "pl" instead of useLocale()
-          6. Missing "use client" directive - components using hooks need the directive
-          7. Accessibility issues - missing aria labels, incorrect roles, missing keyboard handlers
-          8. Error handling - try/catch with empty catch blocks, unhandled promise rejections
-          9. Performance - unnecessary re-renders, inline functions in props, large useEffect deps
-          10. Type safety - incorrect types, missing null checks, unsafe casts
-          11. Code duplication - repeated JSX patterns that could be extracted
-          12. Logic errors - incorrect conditions, off-by-one, wrong comparison operators
-
-          Format: **file/path.ts:line** - description. Be concise but complete.
-          PROMPT_EOF
-
-      - name: Write Python script
-        run: |
-          cat > /tmp/build_payload.py << PYEOF
+          # Build JSON payload using Python (avoids jq "Argument list too long")
+          python3 -c "
 import json, os
 
 with open('/tmp/review_context.txt', 'r') as f:
@@ -93,10 +69,25 @@ with open('/tmp/review_context.txt', 'r') as f:
 with open('/tmp/review_filelist.txt', 'r') as f:
     file_list = f.read()
 
-with open('/tmp/system_prompt.txt', 'r') as f:
-    system_prompt = f.read()
+system_prompt = '''You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.
 
-file_count = os.environ.get('FILE_COUNT', '0')
+For each issue, ALWAYS include the file path and line number. Be specific and actionable.
+
+CHECKLIST (check every item for every file):
+1. Unused imports/variables - are there imports or variables declared but never referenced?
+2. any type usage - flag any :any or as any - these defeat type safety
+3. Dead code - variables assigned but never read, unreachable branches
+4. Hardcoded strings that should use i18n - text visible to users should use t() from next-intl
+5. Hardcoded locale - e.g. \"pl\" === \"pl\" instead of useLocale()
+6. Missing \"use client\" directive - components using hooks need the directive
+7. Accessibility issues - missing aria labels, incorrect roles, missing keyboard handlers
+8. Error handling - try/catch with empty catch blocks, unhandled promise rejections
+9. Performance - unnecessary re-renders, inline functions in props, large useEffect deps
+10. Type safety - incorrect types, missing null checks, unsafe casts
+11. Code duplication - repeated JSX patterns that could be extracted
+12. Logic errors - incorrect conditions, off-by-one, wrong comparison operators
+
+Format: **file/path.ts:line** - description. Be concise but complete.'''
 
 payload = {
     'model': 'deepseek-chat',
@@ -104,25 +95,13 @@ payload = {
     'temperature': 0.5,
     'messages': [
         {'role': 'system', 'content': system_prompt},
-        {'role': 'user', 'content': 'Number of files changed: ' + file_count + '\n\nFiles changed:\n' + file_list + '\n\nFull file contents:\n' + context}
+        {'role': 'user', 'content': 'Number of files changed: ' + str($FILE_COUNT) + '\n\nFiles changed:\n' + file_list + '\n\nFull file contents:\n' + context}
     ]
 }
 
 with open('/tmp/payload.json', 'w') as f:
     json.dump(payload, f)
-PYEOF
-
-      - name: Call DeepSeek API
-        id: review
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          FILE_COUNT: ${{ steps.context.outputs.FILE_COUNT }}
-        run: |
-          if [ -f /tmp/review_comment.txt ]; then
-            exit 0
-          fi
-
-          python3 /tmp/build_payload.py
+"
 
           echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
