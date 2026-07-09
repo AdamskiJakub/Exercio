@@ -28,10 +28,8 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Generate full file contents for review
-        id: review
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      - name: Build context file
+        id: context
         run: |
           FILES="${{ steps.files.outputs.FILES }}"
 
@@ -40,62 +38,81 @@ jobs:
             exit 0
           fi
 
-          # Build context: include ALL files, no truncation
-          CONTEXT=""
-          FILE_COUNT=0
+          CONTEXT_FILE="/tmp/review_context.txt"
+          FILE_LIST_FILE="/tmp/review_filelist.txt"
+          > "$CONTEXT_FILE"
+          > "$FILE_LIST_FILE"
 
+          FILE_COUNT=0
           while IFS= read -r file; do
             if [ -f "$file" ]; then
-              FILE_CONTENT=$(cat "$file")
-              CONTEXT="${CONTEXT}\n\n=== $file ===\n\`\`\`\n$FILE_CONTENT\n\`\`\`"
+              echo "$file" >> "$FILE_LIST_FILE"
+              echo "" >> "$CONTEXT_FILE"
+              echo "=== $file ===" >> "$CONTEXT_FILE"
+              echo '```' >> "$CONTEXT_FILE"
+              cat "$file" >> "$CONTEXT_FILE"
+              echo '```' >> "$CONTEXT_FILE"
               FILE_COUNT=$((FILE_COUNT + 1))
             fi
           done <<< "$FILES"
 
-          jq -n \
-            --arg context "$CONTEXT" \
-            --arg files "$FILES" \
-            --arg count "$FILE_COUNT" '{
-            model: "deepseek-chat",
-            max_tokens: 8192,
-            temperature: 0.5,
-            messages: [
-              {
-                role: "system",
-                content: "You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.\n\nFor each issue, ALWAYS include the file path and line number. Be specific and actionable.\n\nCHECKLIST (check every item for every file):\n1. **Unused imports/variables** — are there imports or variables declared but never referenced?\n2. **`any` type usage** — flag any `: any` or `as any` — these defeat type safety\n3. **Dead code** — variables assigned but never read, unreachable branches\n4. **Hardcoded strings that should use i18n** — text visible to users should use `t()` from next-intl\n5. **Hardcoded locale** — e.g. `\"pl\" === \"pl\"` instead of `useLocale()`\n6. **Missing `\"use client\"`** — components using hooks (useState, useTranslations, etc.) need the directive\n7. **Accessibility issues** — missing aria labels, incorrect roles, missing keyboard handlers\n8. **Error handling** — try/catch with empty catch blocks, unhandled promise rejections\n9. **Performance** — unnecessary re-renders, inline functions in props, large useEffect deps\n10. **Type safety** — incorrect types, missing null checks, unsafe casts\n11. **Code duplication** — repeated JSX patterns that could be extracted\n12. **Logic errors** — incorrect conditions, off-by-one, wrong comparison operators\n\nFormat: `**file/path.ts:line**` — description. Be concise but complete."
-              },
-              {
-                role: "user",
-                content: ("Number of files changed: " + $count + "\n\nFiles changed:\n" + $files + "\n\nFull file contents:\n" + $context)
-              }
-            ]
-          }' > /tmp/payload.json
+          echo "FILE_COUNT=$FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "Context built: $FILE_COUNT files"
 
-          # Check payload size — if too large for one request, split
-          PAYLOAD_SIZE=$(wc -c < /tmp/payload.json)
-          echo "Payload size: $PAYLOAD_SIZE bytes"
+      - name: Call DeepSeek API
+        id: review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          if [ ! -f /tmp/review_comment.txt ]; then
+            FILE_LIST=$(cat /tmp/review_filelist.txt)
+            FILE_COUNT=${{ steps.context.outputs.FILE_COUNT }}
 
-          # DeepSeek context window is ~64k tokens ≈ 240k chars for input
-          # If payload is too large, we still send it — the API will handle truncation
-          # But we warn in the comment
-          if [ "$PAYLOAD_SIZE" -gt 200000 ]; then
-            echo "⚠️ Large payload (${PAYLOAD_SIZE} bytes), may exceed context window"
+            # Build JSON payload using Python to avoid shell arg limits
+            python3 -c "
+import json, sys
+
+with open('/tmp/review_context.txt', 'r') as f:
+    context = f.read()
+
+with open('/tmp/review_filelist.txt', 'r') as f:
+    file_list = f.read()
+
+payload = {
+    'model': 'deepseek-chat',
+    'max_tokens': 8192,
+    'temperature': 0.5,
+    'messages': [
+        {
+            'role': 'system',
+            'content': 'You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.\n\nFor each issue, ALWAYS include the file path and line number. Be specific and actionable.\n\nCHECKLIST (check every item for every file):\n1. **Unused imports/variables** — are there imports or variables declared but never referenced?\n2. **\`any\` type usage** — flag any \`: any\` or \`as any\` — these defeat type safety\n3. **Dead code** — variables assigned but never read, unreachable branches\n4. **Hardcoded strings that should use i18n** — text visible to users should use \`t()\` from next-intl\n5. **Hardcoded locale** — e.g. \`\"pl\" === \"pl\"\` instead of \`useLocale()\`\n6. **Missing \`\"use client\"\`** — components using hooks (useState, useTranslations, etc.) need the directive\n7. **Accessibility issues** — missing aria labels, incorrect roles, missing keyboard handlers\n8. **Error handling** — try/catch with empty catch blocks, unhandled promise rejections\n9. **Performance** — unnecessary re-renders, inline functions in props, large useEffect deps\n10. **Type safety** — incorrect types, missing null checks, unsafe casts\n11. **Code duplication** — repeated JSX patterns that could be extracted\n12. **Logic errors** — incorrect conditions, off-by-one, wrong comparison operators\n\nFormat: \`**file/path.ts:line**\` — description. Be concise but complete.'
+        },
+        {
+            'role': 'user',
+            'content': f'Number of files changed: {FILE_COUNT}\n\nFiles changed:\n{file_list}\n\nFull file contents:\n{context}'
+        }
+    ]
+}
+
+with open('/tmp/payload.json', 'w') as f:
+    json.dump(payload, f)
+"
+
+            echo 'Calling DeepSeek API...'
+            RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+              -d @/tmp/payload.json)
+
+            COMMENT=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['choices'][0]['message']['content'])" 2>/dev/null || echo "❌ API error")
+
+            ERROR=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('error',{}).get('message',''))" 2>/dev/null)
+            if [ -n "$ERROR" ]; then
+              COMMENT="❌ API Error: $ERROR"
+            fi
+
+            echo "$COMMENT" > /tmp/review_comment.txt
           fi
-
-          RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
-            -d @/tmp/payload.json)
-
-          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "❌ API error"')
-
-          # Check if there was an error
-          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
-          if [ -n "$ERROR" ]; then
-            COMMENT="❌ API Error: $ERROR"
-          fi
-
-          echo "$COMMENT" > /tmp/review_comment.txt
 
       - name: Post comment on PR
         env:
