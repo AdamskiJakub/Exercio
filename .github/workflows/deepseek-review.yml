@@ -28,10 +28,8 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: DeepSeek Code Review
-        id: review
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      - name: Build review context
+        id: context
         run: |
           FILES="${{ steps.files.outputs.FILES }}"
 
@@ -40,11 +38,10 @@ jobs:
             exit 0
           fi
 
-          # Build context file (avoids shell argument length limits)
           CONTEXT_FILE="/tmp/review_context.txt"
           FILE_LIST_FILE="/tmp/review_filelist.txt"
-          > "$CONTEXT_FILE"
-          > "$FILE_LIST_FILE"
+          : > "$CONTEXT_FILE"
+          : > "$FILE_LIST_FILE"
 
           FILE_COUNT=0
           while IFS= read -r file; do
@@ -59,9 +56,10 @@ jobs:
             fi
           done <<< "$FILES"
 
-          export FILE_COUNT
+          echo "FILE_COUNT=$FILE_COUNT" >> $GITHUB_OUTPUT
 
-          # Write system prompt to file to avoid quoting issues
+      - name: Write system prompt
+        run: |
           cat > /tmp/system_prompt.txt << 'PROMPT_EOF'
 You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.
 
@@ -84,8 +82,9 @@ CHECKLIST (check every item for every file):
 Format: **file/path.ts:line** - description. Be concise but complete.
 PROMPT_EOF
 
-          # Build JSON payload using Python (avoids jq "Argument list too long")
-          python3 - << 'PYEOF'
+      - name: Write Python payload builder
+        run: |
+          cat > /tmp/build_payload.py << 'PYEOF'
 import json, os
 
 with open('/tmp/review_context.txt', 'r') as f:
@@ -112,6 +111,18 @@ payload = {
 with open('/tmp/payload.json', 'w') as f:
     json.dump(payload, f)
 PYEOF
+
+      - name: Call DeepSeek API
+        id: review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          FILE_COUNT: ${{ steps.context.outputs.FILE_COUNT }}
+        run: |
+          if [ -f /tmp/review_comment.txt ]; then
+            exit 0
+          fi
+
+          python3 /tmp/build_payload.py
 
           echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
