@@ -41,24 +41,22 @@ jobs:
             exit 0
           fi
 
-          CONTEXT_FILE="/tmp/review_context.txt"
-          FILES_LIST_FILE="/tmp/review_filelist.txt"
-          : > "$CONTEXT_FILE"
-          : > "$FILES_LIST_FILE"
+          CONTEXT_FILE=$(mktemp)
+          FILES_LIST_FILE=$(mktemp)
 
           while IFS= read -r file; do
             if [ -f "$file" ]; then
-              echo "$file" >> "$FILES_LIST_FILE"
-              printf "\n\n=== %s ===\n" "$file" >> "$CONTEXT_FILE"
-              printf '```\n' >> "$CONTEXT_FILE"
+              printf '%s\n' "$file" >> "$FILES_LIST_FILE"
+              printf '\n\n=== %s ===\n' "$file" >> "$CONTEXT_FILE"
+              printf '\`\`\`\n' >> "$CONTEXT_FILE"
               cat "$file" >> "$CONTEXT_FILE"
-              printf '\n```\n' >> "$CONTEXT_FILE"
+              printf '\n\`\`\`\n' >> "$CONTEXT_FILE"
             fi
           done <<< "$FILES"
 
           jq -n \
-            --rawfile context /tmp/review_context.txt \
-            --rawfile files_list /tmp/review_filelist.txt \
+            --rawfile files "$FILES_LIST_FILE" \
+            --rawfile context "$CONTEXT_FILE" \
             '{
               model: "deepseek-chat",
               max_tokens: 8192,
@@ -66,14 +64,16 @@ jobs:
               messages: [
                 {
                   role: "system",
-                  content: "You are a senior code reviewer. You have the FULL source code of every changed file in this PR. Review ONLY the changed files listed below.\n\nCHECKLIST:\n- Unused imports/variables - declared but never referenced\n- any type usage - flag :any or as any\n- Dead code - assigned but never read, unreachable branches\n- Hardcoded strings that should use i18n (t() from next-intl)\n- Hardcoded locale - e.g. \"pl\" instead of useLocale()\n- Missing error handling - empty catch blocks, unhandled rejections\n- Type safety issues - incorrect types, missing null checks, unsafe casts\n- Code duplication - repeated JSX patterns that could be extracted\n- Logic errors - incorrect conditions, wrong operators\n- Security issues - XSS, hardcoded secrets, injection vectors\n- Performance - unnecessary re-renders, missing cleanup in useEffect\n- Accessibility - missing aria labels, incorrect roles, missing keyboard handlers\n\nIMPORTANT: Do NOT report missing \"use client\" directive - these files are part of a Next.js app directory where \"use client\" is already handled correctly.\n\nFormat: **file/path.ts:line** - description. Be concise.\nIf nothing important, say: No significant issues found."
+                  content: "You are a senior code reviewer. You have the FULL source code of every changed file in this PR. Review ONLY the changed files listed below. CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility. IMPORTANT: Do NOT report missing use client directive. Format: **file/path.ts:line** - description. If nothing important, say: No significant issues found."
                 },
                 {
                   role: "user",
-                  content: "Files changed:\n" + $files_list + "\n\nFull file contents:\n" + $context
+                  content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
                 }
               ]
             }' > /tmp/payload.json
+
+          rm -f "$CONTEXT_FILE" "$FILES_LIST_FILE"
 
           echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
