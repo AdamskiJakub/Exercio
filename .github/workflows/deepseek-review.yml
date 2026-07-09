@@ -28,8 +28,10 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Build review context
-        id: context
+      - name: Call DeepSeek API
+        id: review
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           FILES="${{ steps.files.outputs.FILES }}"
 
@@ -38,73 +40,46 @@ jobs:
             exit 0
           fi
 
+          # Build context: for each changed file, include its FULL content
           CONTEXT_FILE="/tmp/review_context.txt"
-          FILE_LIST_FILE="/tmp/review_filelist.txt"
+          FILES_LIST_FILE="/tmp/review_filelist.txt"
           : > "$CONTEXT_FILE"
-          : > "$FILE_LIST_FILE"
+          : > "$FILES_LIST_FILE"
 
-          FILE_COUNT=0
           while IFS= read -r file; do
             if [ -f "$file" ]; then
-              echo "$file" >> "$FILE_LIST_FILE"
+              echo "$file" >> "$FILES_LIST_FILE"
               echo "" >> "$CONTEXT_FILE"
               echo "=== $file ===" >> "$CONTEXT_FILE"
               echo '```' >> "$CONTEXT_FILE"
               cat "$file" >> "$CONTEXT_FILE"
               echo '```' >> "$CONTEXT_FILE"
-              FILE_COUNT=$((FILE_COUNT + 1))
             fi
           done <<< "$FILES"
 
-          echo "FILE_COUNT=$FILE_COUNT" >> $GITHUB_OUTPUT
-
-      - name: Write system prompt
-        run: |
-          cat > /tmp/system_prompt.txt << 'PROMPT_EOF'
-You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.
-
-For each issue, ALWAYS include the file path and line number. Be specific and actionable.
-
-CHECKLIST (check every item for every file):
-1. Unused imports/variables - are there imports or variables declared but never referenced?
-2. any type usage - flag any ":any" or "as any" - these defeat type safety
-3. Dead code - variables assigned but never read, unreachable branches
-4. Hardcoded strings that should use i18n - text visible to users should use t() from next-intl
-5. Hardcoded locale - e.g. "pl" === "pl" instead of useLocale()
-6. Missing "use client" directive - components using hooks need the directive
-7. Accessibility issues - missing aria labels, incorrect roles, missing keyboard handlers
-8. Error handling - try/catch with empty catch blocks, unhandled promise rejections
-9. Performance - unnecessary re-renders, inline functions in props, large useEffect deps
-10. Type safety - incorrect types, missing null checks, unsafe casts
-11. Code duplication - repeated JSX patterns that could be extracted
-12. Logic errors - incorrect conditions, off-by-one, wrong comparison operators
-
-Format: **file/path.ts:line** - description. Be concise but complete.
-PROMPT_EOF
-
-      - name: Write Python payload builder
-        run: |
-          cat > /tmp/build_payload.py << 'PYEOF'
-import json, os
+          # Build JSON payload using Python (avoids jq "Argument list too long")
+          python3 - << 'PYEOF'
+import json
 
 with open('/tmp/review_context.txt', 'r') as f:
     context = f.read()
 
 with open('/tmp/review_filelist.txt', 'r') as f:
-    file_list = f.read()
-
-with open('/tmp/system_prompt.txt', 'r') as f:
-    system_prompt = f.read()
-
-file_count = os.environ.get('FILE_COUNT', '0')
+    files_list = f.read()
 
 payload = {
-    'model': 'deepseek-chat',
-    'max_tokens': 8192,
-    'temperature': 0.5,
-    'messages': [
-        {'role': 'system', 'content': system_prompt},
-        {'role': 'user', 'content': 'Number of files changed: ' + file_count + '\n\nFiles changed:\n' + file_list + '\n\nFull file contents:\n' + context}
+    "model": "deepseek-chat",
+    "max_tokens": 8192,
+    "temperature": 0.5,
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a senior code reviewer. Review the FULL source code of changed files (not just the diff). For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety, unused imports/variables, incorrect logic, any type usage, dead code, hardcoded locale, missing use client directive, accessibility issues. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say No significant issues found. IMPORTANT: You have the FULL file contents, not just a diff. Use this to check for unused imports, unused variables, and logic errors that span across changed and unchanged lines."
+        },
+        {
+            "role": "user",
+            "content": "Files changed:\n" + files_list + "\n\nFull file contents:\n" + context
+        }
     ]
 }
 
@@ -112,24 +87,14 @@ with open('/tmp/payload.json', 'w') as f:
     json.dump(payload, f)
 PYEOF
 
-      - name: Call DeepSeek API
-        id: review
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          FILE_COUNT: ${{ steps.context.outputs.FILE_COUNT }}
-        run: |
-          if [ -f /tmp/review_comment.txt ]; then
-            exit 0
-          fi
-
-          python3 /tmp/build_payload.py
-
+          # Call DeepSeek API
           echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
             -d @/tmp/payload.json)
 
+          # Extract comment from response
           COMMENT=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['choices'][0]['message']['content'])" 2>/dev/null || echo "API error")
 
           ERROR=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('error',{}).get('message',''))" 2>/dev/null)
