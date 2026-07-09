@@ -20,9 +20,12 @@ const allowedImageTypes = [
 ];
 const allowedVideoTypes = ['video/mp4', 'video/webm'];
 
+const MAX_FILE_SIZE =
+  parseInt(process.env.MAX_FILE_SIZE_BYTES ?? '', 10) || 5 * 1024 * 1024; // 5MB default
+
 const createMulterOptions = (allowedTypes: string[], errorMessage: string) => ({
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB max file size
+    fileSize: MAX_FILE_SIZE,
   },
   fileFilter: (_req: any, file: Express.Multer.File, callback: any) => {
     if (!allowedTypes.includes(file.mimetype)) {

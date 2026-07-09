@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Info,
-  Sparkles,
-  Building2,
-  DollarSign,
-  Image as ImageIcon,
-  Users,
-  Calendar,
-  type LucideIcon,
-} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface NavItem {
   id: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Phone,
   Mail,
@@ -23,6 +23,7 @@ export function EnterpriseProfileSidebar({
   enterprise,
 }: EnterpriseProfileSidebarProps) {
   const t = useTranslations("EnterpriseProfile");
+  const locale = useLocale();
 
   const openingHours = enterprise.openingHours as Record<string, string> | null;
   const hasHours =
@@ -163,7 +164,7 @@ export function EnterpriseProfileSidebar({
           <div className="space-y-1">
             {DAYS_OF_WEEK.map((day) => {
               const hours = openingHours?.[day];
-              const today = new Date().toLocaleDateString("en-US", {
+              const today = new Date().toLocaleDateString(locale, {
                 weekday: "long",
               });
               const isToday = today.toLowerCase() === t(day).toLowerCase();

@@ -22,6 +22,21 @@ export class EnterpriseInvitationsService {
     private configService: StaticConfigService,
   ) {}
 
+  private buildInvitationNotification(
+    companyName: string,
+    language: string,
+  ): { title: string; message: string } {
+    const title =
+      language === 'pl'
+        ? `Zaproszenie od ${companyName}`
+        : `Invitation from ${companyName}`;
+    const message =
+      language === 'pl'
+        ? `Otrzymałeś zaproszenie do dołączenia do ${companyName} jako instruktor.`
+        : `You have been invited to join ${companyName} as a partner instructor.`;
+    return { title, message };
+  }
+
   /**
    * Translate specialization slugs to display labels using the config service.
    * Falls back to the slug if no translation is found.
@@ -98,14 +113,10 @@ export class EnterpriseInvitationsService {
         });
 
         // Send notification to instructor
-        const title =
-          language === 'pl'
-            ? `Zaproszenie od ${invitation.enterprise.companyName}`
-            : `Invitation from ${invitation.enterprise.companyName}`;
-        const message =
-          language === 'pl'
-            ? `Otrzymałeś zaproszenie do dołączenia do ${invitation.enterprise.companyName} jako instruktor.`
-            : `You have been invited to join ${invitation.enterprise.companyName} as a partner instructor.`;
+        const { title, message } = this.buildInvitationNotification(
+          invitation.enterprise.companyName,
+          language,
+        );
 
         await this.notificationsService.createNotification({
           userId: instructor.userId,
@@ -145,14 +156,10 @@ export class EnterpriseInvitationsService {
     });
 
     // Send notification to instructor
-    const title =
-      language === 'pl'
-        ? `Zaproszenie od ${invitation.enterprise.companyName}`
-        : `Invitation from ${invitation.enterprise.companyName}`;
-    const message =
-      language === 'pl'
-        ? `Otrzymałeś zaproszenie do dołączenia do ${invitation.enterprise.companyName} jako instruktor.`
-        : `You have been invited to join ${invitation.enterprise.companyName} as a partner instructor.`;
+    const { title, message } = this.buildInvitationNotification(
+      invitation.enterprise.companyName,
+      language,
+    );
 
     await this.notificationsService.createNotification({
       userId: instructor.userId,

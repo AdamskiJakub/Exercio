@@ -46,6 +46,8 @@ export class EnterpriseLeadsService {
         phone: dto.phone,
         website: dto.website,
         message: dto.message,
+        businessType: dto.businessType,
+        instructorCount: dto.instructorCount,
       },
     });
 
@@ -190,7 +192,11 @@ export class EnterpriseLeadsService {
 
     // Send activation email to the partner with activation link
     try {
-      const activationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/activate?token=${activationToken}`;
+      const frontendUrl = this.configService.get<string>(
+        'FRONTEND_URL',
+        'http://localhost:3000',
+      );
+      const activationUrl = `${frontendUrl}/activate?token=${activationToken}`;
       const approveLocale = this.configService.get<string>(
         'DEFAULT_LOCALE',
         'pl',
