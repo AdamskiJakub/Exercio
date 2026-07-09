@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -156,7 +156,8 @@ function SocialShare({ copied, onCopyLink }: SocialShareProps) {
 
 function PostDetailModal({ selectedPost, onClose }: PostDetailModalProps) {
   const t = useTranslations("EnterpriseProfile");
-  const dateLocale = "pl" === "pl" ? pl : undefined;
+  const locale = useLocale();
+  const dateLocale = locale === "pl" ? pl : undefined;
   const [copied, setCopied] = useState(false);
 
   const formatDate = (dateStr: string) => {
@@ -265,7 +266,7 @@ export function EnterpriseNews({ news }: EnterpriseNewsProps) {
   if (!news || news.length === 0) return null;
 
   const sortedNews = [...news].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    (a, b) => parseISO(b.createdAt).getTime() - parseISO(a.createdAt).getTime(),
   );
 
   const filteredNews =

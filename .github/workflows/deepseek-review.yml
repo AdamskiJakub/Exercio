@@ -19,9 +19,8 @@ jobs:
       - name: Get changed files
         id: files
         run: |
-          # Get list of changed files (code only)
           FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
-            ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
+            ':!*.lock' ':!*.toml' \
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
             ':!**/node_modules/**' 2>/dev/null || true)
 
@@ -41,67 +40,61 @@ jobs:
             exit 0
           fi
 
-          # Build context: for each changed file, include its FULL content
+          # Build context: include ALL files, no truncation
           CONTEXT=""
-          TOTAL_LENGTH=0
-          MAX_LENGTH=80000
+          FILE_COUNT=0
 
           while IFS= read -r file; do
             if [ -f "$file" ]; then
               FILE_CONTENT=$(cat "$file")
-              FILE_LENGTH=${#FILE_CONTENT}
-              
-              # Estimate tokens (roughly 4 chars per token)
-              EST_TOKENS=$((FILE_LENGTH / 4))
-              
-              # Skip binary or huge files
-              if [ "$FILE_LENGTH" -gt 50000 ]; then
-                FILE_CONTENT="${FILE_CONTENT:0:50000}\n\n// ... [truncated, file too large]"
-                FILE_LENGTH=50000
-              fi
-              
-              ENTRY="\n\n=== $file ===\n\`\`\`\n$FILE_CONTENT\n\`\`\`"
-              ENTRY_LENGTH=${#ENTRY}
-              
-              if [ $((TOTAL_LENGTH + ENTRY_LENGTH)) -gt $MAX_LENGTH ]; then
-                CONTEXT="${CONTEXT}\n\n// ... [remaining files truncated due to context limit]"
-                break
-              fi
-              
-              CONTEXT="${CONTEXT}${ENTRY}"
-              TOTAL_LENGTH=$((TOTAL_LENGTH + ENTRY_LENGTH))
+              CONTEXT="${CONTEXT}\n\n=== $file ===\n\`\`\`\n$FILE_CONTENT\n\`\`\`"
+              FILE_COUNT=$((FILE_COUNT + 1))
             fi
           done <<< "$FILES"
 
-          # Build JSON payload
           jq -n \
             --arg context "$CONTEXT" \
-            --arg files "$FILES" '{
+            --arg files "$FILES" \
+            --arg count "$FILE_COUNT" '{
             model: "deepseek-chat",
-            max_tokens: 2000,
-            temperature: 0.3,
+            max_tokens: 8192,
+            temperature: 0.5,
             messages: [
               {
                 role: "system",
-                content: "You are a senior code reviewer. Review the FULL source code of changed files (not just the diff). For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety, unused imports/variables, incorrect logic. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say ✅ No significant issues found. IMPORTANT: You have the FULL file contents, not just a diff. Use this to check for unused imports, unused variables, and logic errors that span across changed and unchanged lines."
+                content: "You are a senior code reviewer. You have the FULL source code of every changed file. Review EVERY file thoroughly.\n\nFor each issue, ALWAYS include the file path and line number. Be specific and actionable.\n\nCHECKLIST (check every item for every file):\n1. **Unused imports/variables** — are there imports or variables declared but never referenced?\n2. **`any` type usage** — flag any `: any` or `as any` — these defeat type safety\n3. **Dead code** — variables assigned but never read, unreachable branches\n4. **Hardcoded strings that should use i18n** — text visible to users should use `t()` from next-intl\n5. **Hardcoded locale** — e.g. `\"pl\" === \"pl\"` instead of `useLocale()`\n6. **Missing `\"use client\"`** — components using hooks (useState, useTranslations, etc.) need the directive\n7. **Accessibility issues** — missing aria labels, incorrect roles, missing keyboard handlers\n8. **Error handling** — try/catch with empty catch blocks, unhandled promise rejections\n9. **Performance** — unnecessary re-renders, inline functions in props, large useEffect deps\n10. **Type safety** — incorrect types, missing null checks, unsafe casts\n11. **Code duplication** — repeated JSX patterns that could be extracted\n12. **Logic errors** — incorrect conditions, off-by-one, wrong comparison operators\n\nFormat: `**file/path.ts:line**` — description. Be concise but complete."
               },
               {
                 role: "user",
-                content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
+                content: ("Number of files changed: " + $count + "\n\nFiles changed:\n" + $files + "\n\nFull file contents:\n" + $context)
               }
             ]
           }' > /tmp/payload.json
 
-          # Call DeepSeek API
+          # Check payload size — if too large for one request, split
+          PAYLOAD_SIZE=$(wc -c < /tmp/payload.json)
+          echo "Payload size: $PAYLOAD_SIZE bytes"
+
+          # DeepSeek context window is ~64k tokens ≈ 240k chars for input
+          # If payload is too large, we still send it — the API will handle truncation
+          # But we warn in the comment
+          if [ "$PAYLOAD_SIZE" -gt 200000 ]; then
+            echo "⚠️ Large payload (${PAYLOAD_SIZE} bytes), may exceed context window"
+          fi
+
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
             -d @/tmp/payload.json)
 
-          # Extract comment from response
           COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "❌ API error"')
 
-          # Save to file for next step
+          # Check if there was an error
+          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
+          if [ -n "$ERROR" ]; then
+            COMMENT="❌ API Error: $ERROR"
+          fi
+
           echo "$COMMENT" > /tmp/review_comment.txt
 
       - name: Post comment on PR

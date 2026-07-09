@@ -23,6 +23,10 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import NextLink from "next/link";
+import type {
+  EnterpriseInstructorWithProfile,
+  EnterpriseNews,
+} from "@/types/enterprise";
 
 export function EnterpriseDashboard() {
   const t = useTranslations("Dashboard.enterprise");
@@ -127,44 +131,46 @@ export function EnterpriseDashboard() {
         >
           {profile?.instructors && profile.instructors.length > 0 ? (
             <div className="space-y-3">
-              {profile.instructors.slice(0, 5).map((inv: any) => (
-                <NextLink
-                  key={inv.id}
-                  href={`/instructors/${inv.instructor?.user?.username}`}
-                  className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {getMediaUrl(
-                      inv.instructor?.photoUrl ||
-                        inv.instructor?.user?.avatarUrl,
-                    ) ? (
-                      <img
-                        src={getMediaUrl(
-                          inv.instructor?.photoUrl ||
-                            inv.instructor?.user?.avatarUrl,
-                        )}
-                        alt=""
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm text-slate-300">
-                        {inv.instructor?.user?.firstName?.[0] || "?"}
+              {profile.instructors
+                .slice(0, 5)
+                .map((inv: EnterpriseInstructorWithProfile) => (
+                  <NextLink
+                    key={inv.id}
+                    href={`/instructors/${inv.instructor?.user?.username}`}
+                    className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {getMediaUrl(
+                        inv.instructor?.photoUrl ||
+                          inv.instructor?.user?.avatarUrl,
+                      ) ? (
+                        <img
+                          src={getMediaUrl(
+                            inv.instructor?.photoUrl ||
+                              inv.instructor?.user?.avatarUrl,
+                          )}
+                          alt=""
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm text-slate-300">
+                          {inv.instructor?.user?.firstName?.[0] || "?"}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-medium text-slate-200">
+                          {inv.instructor?.user?.firstName}{" "}
+                          {inv.instructor?.user?.lastName}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {inv.status === "ACCEPTED"
+                            ? t("activeInstructors")
+                            : t("pendingInvitations")}
+                        </p>
                       </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-slate-200">
-                        {inv.instructor?.user?.firstName}{" "}
-                        {inv.instructor?.user?.lastName}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        {inv.status === "ACCEPTED"
-                          ? t("activeInstructors")
-                          : t("pendingInvitations")}
-                      </p>
                     </div>
-                  </div>
-                </NextLink>
-              ))}
+                  </NextLink>
+                ))}
               <Link
                 href="/dashboard/enterprise/instructors"
                 className="block text-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors mt-2"
@@ -198,7 +204,7 @@ export function EnterpriseDashboard() {
         >
           {profile?.news && profile.news.length > 0 ? (
             <div className="space-y-3">
-              {profile.news.slice(0, 5).map((newsItem: any) => (
+              {profile.news.slice(0, 5).map((newsItem: EnterpriseNews) => (
                 <NextLink
                   key={newsItem.id}
                   href={

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Calendar, ArrowRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format, parseISO } from "date-fns";
@@ -20,7 +20,8 @@ export function NewsCardContent({
   isLink,
 }: NewsCardContentProps) {
   const t = useTranslations("EnterpriseProfile");
-  const dateLocale = "pl" === "pl" ? pl : undefined;
+  const locale = useLocale();
+  const dateLocale = locale === "pl" ? pl : undefined;
 
   const formatDate = (dateStr: string) => {
     try {

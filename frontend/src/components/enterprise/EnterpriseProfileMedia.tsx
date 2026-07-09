@@ -25,16 +25,22 @@ function MediaPreview({
   onRemove: () => void;
   label: string;
 }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden border border-slate-600 relative group">
-      <img
-        src={getMediaUrl(url)}
-        alt={label}
-        className="w-full h-full object-cover"
-        onError={(e) => {
-          (e.target as HTMLImageElement).style.display = "none";
-        }}
-      />
+      {imgError ? (
+        <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+          <Image className="w-6 h-6 text-slate-600" aria-hidden="true" />
+        </div>
+      ) : (
+        <img
+          src={getMediaUrl(url)}
+          alt={label}
+          className="w-full h-full object-cover"
+          onError={() => setImgError(true)}
+        />
+      )}
       <button
         type="button"
         onClick={onRemove}
@@ -144,14 +150,14 @@ export function EnterpriseProfileMedia({
         <MediaUploadRow
           field={logo}
           inputId="logoUrl"
-          accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+          accept="image/jpeg,image/png,image/webp"
           uploadLabel={t("logoUrl") || "Logo"}
           previewLabel={t("logoPreview") || "Logo preview"}
         />
         <MediaUploadRow
           field={cover}
           inputId="coverUrl"
-          accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+          accept="image/jpeg,image/png,image/webp"
           uploadLabel={t("coverUrl") || "Cover Photo"}
           previewLabel={t("coverPreview") || "Cover preview"}
         />
