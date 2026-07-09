@@ -37,5 +37,4 @@ jobs:
 
             Format: **file/path.ts:line** - description. Be concise.
             If nothing important, say: No significant issues found.
-          exclude-patterns: |
-            pnpm-lock.yaml,package-lock.json,*.lock,*.svg,*.png,*.jpg,*.jpeg,*.toml
+          exclude-patterns: pnpm-lock.yaml,package-lock.json,*.lock,*.svg,*.png,*.jpg,*.jpeg,*.toml
