@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { format, addDays, parseISO, isPast, isToday } from "date-fns";
 import { Calendar, Play } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
+import { useAuthStore } from "@/stores/auth-store";
 import { InstructorHero } from "./InstructorHero";
 import { TrainlyHighlights } from "./TrainlyHighlights";
 import { QuickAvailability } from "./QuickAvailability";
@@ -34,6 +35,7 @@ export function NewPublicInstructorProfile({
 }: NewPublicInstructorProfileProps) {
   const t = useTranslations("InstructorProfile");
   const router = useRouter();
+  const { user } = useAuthStore();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -73,7 +75,10 @@ export function NewPublicInstructorProfile({
   };
 
   const shouldShowBookingButton =
-    profile.user?.username && profile.isBookingEnabled && !isOwnProfile;
+    profile.user?.username &&
+    profile.isBookingEnabled &&
+    !isOwnProfile &&
+    user?.role !== "ENTERPRISE";
 
   const handleBookingClick = () => {
     if (!profile.user?.username) return;
@@ -118,8 +123,8 @@ export function NewPublicInstructorProfile({
         {/* SECTION 2: Trainly Highlights */}
         <TrainlyHighlights profile={profile} />
 
-        {/* SECTION 3: Quick Availability */}
-        {profile.isBookingEnabled && (
+        {/* SECTION 3: Quick Availability - hidden for enterprise accounts */}
+        {profile.isBookingEnabled && user?.role !== "ENTERPRISE" && (
           <QuickAvailability
             instructorProfileId={profile.id}
             username={profile.user?.username || ""}

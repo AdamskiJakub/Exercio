@@ -256,8 +256,8 @@ export function InstructorHero({
               </div>
             )}
 
-            {/* CTA */}
-            {profile.isBookingEnabled && (
+            {/* CTA - hidden for enterprise accounts */}
+            {profile.isBookingEnabled && user?.role !== "ENTERPRISE" && (
               <Button
                 onClick={onBookClick}
                 className="cursor-pointer w-full py-6 text-lg font-bold bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl shadow-lg shadow-orange-500/20"
@@ -267,11 +267,13 @@ export function InstructorHero({
             )}
 
             {/* Favorite Button — below CTA (hidden on own profile) */}
-            {profile.isBookingEnabled && !isOwnProfile && (
-              <div className="mt-3">
-                <FavoriteButton instructorProfileId={profile.id} />
-              </div>
-            )}
+            {profile.isBookingEnabled &&
+              user?.role !== "ENTERPRISE" &&
+              !isOwnProfile && (
+                <div className="mt-3">
+                  <FavoriteButton instructorProfileId={profile.id} />
+                </div>
+              )}
           </div>
         </div>
       </div>

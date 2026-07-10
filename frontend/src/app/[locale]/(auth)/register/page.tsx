@@ -65,7 +65,7 @@ export default async function RegisterPage({ params }: Props) {
 
           {/* INSTRUCTOR CARD */}
           <RoleCard
-            href={`/${locale}/register/instructor?intent=instructor`}
+            href="/register/instructor"
             ariaLabel={t("registerAsInstructor")}
             icon={Dumbbell}
             iconColor="text-orange-500"
