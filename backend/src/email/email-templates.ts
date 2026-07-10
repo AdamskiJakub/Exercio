@@ -168,6 +168,7 @@ export const buildBookingTemplate = (
     instructorName?: string;
   },
   cancelLink?: string,
+  locale: string = 'pl',
 ): string => {
   const hasDashboard = !!content.dashboardUrl;
   const hasCancel = !!cancelLink && !!content.cancelButton;
@@ -185,7 +186,7 @@ export const buildBookingTemplate = (
               <a href="${content.dashboardUrl}" style="display:inline-block;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${content.cancelButton}</a>
             </td>
             <td>
-              <a href="${encodeURI(cancelLink!)}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${content.cancelButton === 'Przejdź do panelu' ? 'Anuluj sesję' : 'Cancel Session'}</a>
+              <a href="${encodeURI(cancelLink!)}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${locale === 'pl' ? 'Anuluj sesję' : 'Cancel Session'}</a>
             </td>
           </tr>
         </table>

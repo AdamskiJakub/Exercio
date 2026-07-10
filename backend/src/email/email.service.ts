@@ -122,7 +122,12 @@ export class EmailService {
     cancellationUrl: string,
   ) {
     const texts = BOOKING_TEXTS.guestConfirmation[language];
-    const html = buildBookingTemplate(texts, details, cancellationUrl);
+    const html = buildBookingTemplate(
+      texts,
+      details,
+      cancellationUrl,
+      language,
+    );
     return this.sendEmail(email, texts.title, html);
   }
 
@@ -135,7 +140,7 @@ export class EmailService {
   ) {
     const baseTexts = BOOKING_TEXTS.clientConfirmation[language];
     const texts = { ...baseTexts, dashboardUrl };
-    const html = buildBookingTemplate(texts, details, cancelLink);
+    const html = buildBookingTemplate(texts, details, cancelLink, language);
     return this.sendEmail(email, texts.title, html);
   }
 
@@ -146,7 +151,12 @@ export class EmailService {
     cancellationUrl: string,
   ) {
     const texts = INFO_EMAIL_TEXTS.manualBookingCreatedGuest[language];
-    const html = buildBookingTemplate(texts, details, cancellationUrl);
+    const html = buildBookingTemplate(
+      texts,
+      details,
+      cancellationUrl,
+      language,
+    );
     return this.sendEmail(email, texts.title, html);
   }
 
@@ -159,7 +169,12 @@ export class EmailService {
   ) {
     const texts = INFO_EMAIL_TEXTS.manualBooking[language];
     const textsWithDashboard = { ...texts, dashboardUrl };
-    const html = buildBookingTemplate(textsWithDashboard, details, cancelLink);
+    const html = buildBookingTemplate(
+      textsWithDashboard,
+      details,
+      cancelLink,
+      language,
+    );
     return this.sendEmail(email, texts.title, html);
   }
 

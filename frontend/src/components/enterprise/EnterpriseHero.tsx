@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   MapPin,
   Star,
@@ -33,9 +33,10 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
     ? t(`categories.${enterprise.businessType}`)
     : null;
 
+  const locale = useLocale();
   const openingHours = enterprise.openingHours as Record<string, string> | null;
   const todayKey = new Date()
-    .toLocaleDateString("en-US", { weekday: "long" })
+    .toLocaleDateString(locale, { weekday: "long" })
     .toLowerCase();
   const todayHours = openingHours?.[todayKey]?.trim();
 

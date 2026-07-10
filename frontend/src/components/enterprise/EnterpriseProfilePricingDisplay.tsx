@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { DollarSign, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ export function EnterpriseProfilePricingDisplay({
   pricing,
 }: EnterpriseProfilePricingDisplayProps) {
   const t = useTranslations("EnterpriseProfile");
+  const locale = useLocale();
 
   if (!pricing || pricing.length === 0) return null;
 
@@ -45,7 +46,10 @@ export function EnterpriseProfilePricingDisplay({
             </p>
             <p className="text-3xl font-bold text-emerald-500 mt-2">
               {typeof item.price === "number"
-                ? `${item.price.toFixed(2)} zł`
+                ? new Intl.NumberFormat(locale, {
+                    style: "currency",
+                    currency: "PLN",
+                  }).format(item.price)
                 : item.price}
             </p>
             <div className="mt-auto pt-4">
