@@ -30,15 +30,20 @@ export function EnterpriseCard({
     .toUpperCase()
     .slice(0, 2);
 
+  const hasLogo = !!enterprise.logoUrl;
+
   const cardContent = (
     <Card className="bg-slate-900/30 border-emerald-500/20 hover:border-emerald-500/50 transition-all duration-300 overflow-hidden">
       <div className="flex flex-col sm:flex-row gap-6 p-6">
         {/* Logo Section */}
         <div className="shrink-0">
-          <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-emerald-500/30 group-hover:border-emerald-500 transition-colors rounded-xl">
+          <Avatar
+            className={`w-24 h-24 sm:w-28 sm:h-28 border-2 border-emerald-500/30 group-hover:border-emerald-500 transition-colors rounded-xl ${hasLogo ? "bg-white p-1" : ""}`}
+          >
             <AvatarImage
               src={getMediaUrl(enterprise.logoUrl)}
               alt={enterprise.companyName}
+              className={hasLogo ? "object-contain rounded-lg" : ""}
             />
             <AvatarFallback className="bg-emerald-900/30 text-emerald-300 text-2xl font-bold rounded-xl">
               {initials}
