@@ -6,6 +6,9 @@ import {
   VerificationEmailContent,
   ReviewInvitationEmailContent,
   BuildInfoDetails,
+  EnterpriseLeadDetails,
+  EnterpriseLeadNotificationContent,
+  EnterpriseAccountActivationContent,
 } from './email.types';
 
 const escapeHtml = (text: string | undefined | null): string => {
@@ -165,6 +168,7 @@ export const buildBookingTemplate = (
     instructorName?: string;
   },
   cancelLink?: string,
+  locale: string = 'pl',
 ): string => {
   const hasDashboard = !!content.dashboardUrl;
   const hasCancel = !!cancelLink && !!content.cancelButton;
@@ -182,7 +186,7 @@ export const buildBookingTemplate = (
               <a href="${content.dashboardUrl}" style="display:inline-block;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${content.cancelButton}</a>
             </td>
             <td>
-              <a href="${encodeURI(cancelLink!)}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${content.cancelButton === 'Przejdź do panelu' ? 'Anuluj sesję' : 'Cancel Session'}</a>
+              <a href="${encodeURI(cancelLink!)}" style="display:inline-block;background:#dc2626;color:white;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:14px;">${locale === 'pl' ? 'Anuluj sesję' : 'Cancel Session'}</a>
             </td>
           </tr>
         </table>
@@ -312,6 +316,68 @@ export const buildReviewInvitationTemplate = (
 </div>
 <p style="color:#cbd5e1;font-size:14px;margin-bottom:20px;">${content.reviewButton}</p>
 <a href="${reviewUrl}" style="display:inline-block;background:linear-gradient(135deg,#f97316 0%,#dc2626 100%);color:white;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:16px;">${content.reviewButton}</a>
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+export const buildEnterpriseLeadNotificationTemplate = (
+  content: EnterpriseLeadNotificationContent,
+  details: EnterpriseLeadDetails,
+): string => {
+  const phoneRow = details.phone
+    ? `<tr><td style="padding:6px 0;color:#94a3b8;">${content.phoneLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.phone)}</td></tr>`
+    : '';
+  const websiteRow = details.website
+    ? `<tr><td style="padding:6px 0;color:#94a3b8;">${content.websiteLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.website)}</td></tr>`
+    : '';
+  const cityRow = details.city
+    ? `<tr><td style="padding:6px 0;color:#94a3b8;">${content.cityLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.city)}</td></tr>`
+    : '';
+  const messageRow = details.message
+    ? `<tr><td style="padding:6px 0;color:#94a3b8;" colspan="2">${content.messageLabel}</td></tr><tr><td style="padding:6px 0;color:#cbd5e1;font-size:14px;line-height:1.6;" colspan="2">${escapeHtml(details.message)}</td></tr>`
+    : '';
+
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;">${content.subtitle}</p>
+${detailsTable(`
+<tr><td style="padding:6px 0;color:#94a3b8;">${content.companyLabel}</td><td align="right" style="color:#f1f5f9;font-weight:600;">${escapeHtml(details.companyName)}</td></tr>
+<tr><td style="padding:6px 0;color:#94a3b8;">${content.emailLabel}</td><td align="right" style="color:#f1f5f9;"><a href="mailto:${escapeHtml(details.email)}" style="color:#f97316;">${escapeHtml(details.email)}</a></td></tr>
+${phoneRow}
+${websiteRow}
+${cityRow}
+${messageRow}
+<tr><td style="padding:6px 0;color:#94a3b8;">${content.leadIdLabel}</td><td align="right" style="color:#10b981;font-family:monospace;font-weight:600;">${escapeHtml(details.id)}</td></tr>
+`)}
+<div style="margin-top:24px;padding:16px;background:#1e293b;border-radius:8px;border:1px solid #334155;">
+<p style="margin:0;color:#cbd5e1;font-size:14px;">${content.approveHint} <code style="display:inline-block;margin-top:8px;padding:8px 12px;background:#0f172a;border-radius:4px;color:#10b981;font-family:monospace;font-size:13px;">npm run enterprise:approve ${escapeHtml(details.id)}</code></p>
+</div>
+</td>
+</tr>
+`,
+    content.footer,
+  );
+};
+
+export const buildEnterpriseAccountActivationTemplate = (
+  content: EnterpriseAccountActivationContent,
+  activationUrl: string,
+): string => {
+  return buildLayout(
+    `
+<tr>
+<td style="padding:40px 30px;">
+<h2 style="color:#f1f5f9;">${content.title}</h2>
+<p style="color:#cbd5e1;font-size:16px;line-height:1.6;">${content.subtitle}</p>
+<div style="text-align:center;margin-top:30px;">
+<a href="${activationUrl}" style="display:inline-block;background:linear-gradient(135deg,#10b981 0%,#0d9488 100%);color:white;text-decoration:none;padding:16px 36px;border-radius:8px;font-weight:600;font-size:16px;">${content.activateButton}</a>
+</div>
 </td>
 </tr>
 `,

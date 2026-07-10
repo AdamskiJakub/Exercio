@@ -27,8 +27,10 @@ import {
   User,
   MapPin,
   UserCheck,
+  Building2,
+  X,
+  Check,
 } from "lucide-react";
-import { getMediaUrl } from "@/lib/utils/media";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
 import { EmptyStateCard } from "./EmptyStateCard";
@@ -44,8 +46,15 @@ import { useClearHistory } from "@/hooks/useClearHistory";
 import { useMyFavorites } from "@/hooks/useFavorites";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useSpecializations } from "@/hooks/useConfig";
+import {
+  useMyEnterpriseInvitations,
+  useAcceptInvitation,
+  useRejectInvitation,
+} from "@/hooks/useEnterpriseInvitations";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { getInstructorName } from "@/lib/utils/user";
+import { getMediaUrl } from "@/lib/utils/media";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 export function InstructorDashboard() {
   const t = useTranslations("Dashboard.instructor");
@@ -65,6 +74,9 @@ export function InstructorDashboard() {
   const { data: recentlyViewed, isLoading: recentlyViewedLoading } =
     useRecentlyViewed();
   const { specializations } = useSpecializations();
+  const { data: enterpriseInvitations } = useMyEnterpriseInvitations();
+  const acceptInvitation = useAcceptInvitation();
+  const rejectInvitation = useRejectInvitation();
 
   // Review flow state & handlers
   const {
@@ -208,9 +220,62 @@ export function InstructorDashboard() {
         </p>
       </div>
 
+      {/* Enterprise Invitations — inline banner, only when pending (above profile status) */}
+      {enterpriseInvitations && enterpriseInvitations.length > 0 && (
+        <div className="space-y-3">
+          {enterpriseInvitations
+            .filter((inv: any) => inv.status === "PENDING")
+            .map((inv: any) => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between gap-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
+                    <Building2 className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white truncate">
+                      {t("enterpriseInvitationTitle", {
+                        company: inv.enterprise?.companyName || "",
+                      })}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {t("enterpriseInvitationDescription")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => acceptInvitation.mutate(inv.id)}
+                    disabled={acceptInvitation.isPending}
+                    className="p-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                    title={t("accept")}
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => rejectInvitation.mutate(inv.id)}
+                    disabled={rejectInvitation.isPending}
+                    className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                    title={t("reject")}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+
       {/* Profile Status */}
       {profile && (
-        <DashboardCard title={t("profileStatus")} delay={0} hoverable={true}>
+        <DashboardCard
+          title={t("profileStatus")}
+          delay={0}
+          hoverable={true}
+          hoverColor="hover:border-orange-500"
+        >
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-2">
               {profile.isDraft ? (
@@ -258,6 +323,7 @@ export function InstructorDashboard() {
           value={stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "—"}
           subtitle={`${stats.totalReviews} ${t("reviews")}`}
           delay={1}
+          hoverColor="hover:border-orange-500"
         />
         <StatsCard
           icon={Calendar}
@@ -267,6 +333,7 @@ export function InstructorDashboard() {
           value={stats.totalSessions}
           subtitle={t("allTime")}
           delay={2}
+          hoverColor="hover:border-orange-500"
         />
         <StatsCard
           icon={Users}
@@ -276,6 +343,7 @@ export function InstructorDashboard() {
           value={stats.activeClients}
           subtitle={t("thisMonth")}
           delay={3}
+          hoverColor="hover:border-orange-500"
         />
         <StatsCard
           icon={TrendingUp}
@@ -284,6 +352,7 @@ export function InstructorDashboard() {
           title={t("profileViews")}
           value="—"
           subtitle={t("thisMonth")}
+          hoverColor="hover:border-orange-500"
           delay={4}
         />
       </div>
@@ -293,6 +362,7 @@ export function InstructorDashboard() {
         <div id="upcoming-sections" className="scroll-mt-20">
           <DashboardCard
             icon={Calendar}
+            hoverColor="hover:border-orange-500"
             iconColor="text-orange-500"
             iconBgColor="bg-orange-500/10"
             title={t("upcomingBookings")}
@@ -316,6 +386,7 @@ export function InstructorDashboard() {
 
         <DashboardCard
           icon={Star}
+          hoverColor="hover:border-orange-500"
           iconColor="text-yellow-500"
           iconBgColor="bg-yellow-500/10"
           title={t("recentReviews")}
@@ -344,6 +415,7 @@ export function InstructorDashboard() {
           <div id="my-client-upcoming" className="scroll-mt-20">
             <DashboardCard
               icon={Calendar}
+              hoverColor="hover:border-orange-500"
               iconColor="text-pink-500"
               iconBgColor="bg-pink-500/10"
               title={t("myUpcomingSessions")}
@@ -368,6 +440,7 @@ export function InstructorDashboard() {
           {/* Favorite Trainers */}
           <DashboardCard
             icon={Heart}
+            hoverColor="hover:border-orange-500"
             iconColor="text-pink-500"
             iconBgColor="bg-pink-500/10"
             title={t("favoriteTrainers")}
@@ -379,6 +452,7 @@ export function InstructorDashboard() {
           {/* Recently Viewed Trainers */}
           <DashboardCard
             icon={Clock}
+            hoverColor="hover:border-orange-500"
             iconColor="text-cyan-500"
             iconBgColor="bg-cyan-500/10"
             title={t("recentlyViewed")}
@@ -395,9 +469,6 @@ export function InstructorDashboard() {
                     [instructor.firstName, instructor.lastName]
                       .filter(Boolean)
                       .join(" ") || instructor.username;
-                  const avatarSrc = getMediaUrl(
-                    instructor.photoUrl || instructor.avatarUrl,
-                  );
                   const primarySpecId = instructor.specializations?.[0];
                   const primarySpec = primarySpecId
                     ? specializations.find((s) => s.id === primarySpecId)
@@ -413,23 +484,14 @@ export function InstructorDashboard() {
                       href={`/instructors/${instructor.username}` as any}
                       className="flex items-center gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500/50 rounded-xl overflow-hidden transition-colors duration-300 group p-4"
                     >
-                      <div className="size-14 rounded-full overflow-hidden bg-slate-700 shrink-0 border-2 border-slate-600">
-                        {avatarSrc ? (
-                          <img
-                            src={avatarSrc}
-                            alt={name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg bg-slate-700">
-                            {name
-                              .split(" ")
-                              .map((n: string) => n[0])
-                              .join("")
-                              .toUpperCase()}
-                          </div>
-                        )}
-                      </div>
+                      <UserAvatar
+                        photoUrl={instructor.photoUrl}
+                        avatarUrl={instructor.avatarUrl}
+                        firstName={instructor.firstName}
+                        lastName={instructor.lastName}
+                        size="md"
+                        alt={name}
+                      />
                       <div className="flex-1 min-w-0 text-left">
                         <h4 className="text-sm font-semibold text-white truncate">
                           {name}
@@ -464,6 +526,7 @@ export function InstructorDashboard() {
           <div id="my-client-history" className="scroll-mt-20 md:col-span-2">
             <DashboardCard
               icon={FileText}
+              hoverColor="hover:border-orange-500"
               iconColor="text-slate-400"
               title={t("bookingHistory")}
               delay={10}

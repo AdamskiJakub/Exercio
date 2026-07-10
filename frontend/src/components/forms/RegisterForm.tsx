@@ -13,6 +13,27 @@ interface RegisterFormProps {
   intent: "client" | "instructor";
 }
 
+const roleConfig = {
+  instructor: {
+    titleSuffix: "instructorRole",
+    subtitle: "instructorRoleDesc",
+    buttonGradient:
+      "bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600",
+    switchHref: "/register/client",
+    switchKey: "registerAsClientInstead",
+    switchColor: "text-violet-400 hover:text-violet-300",
+  },
+  client: {
+    titleSuffix: "clientRole",
+    subtitle: "clientRoleDesc",
+    buttonGradient:
+      "bg-linear-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700",
+    switchHref: "/register/instructor",
+    switchKey: "areYouInstructor",
+    switchColor: "text-orange-400 hover:text-orange-300",
+  },
+} as const;
+
 export default function RegisterForm({ intent }: RegisterFormProps) {
   const t = useTranslations("auth");
   const { form, isLoading, error, onSubmit } = useRegisterForm({ intent });
@@ -22,22 +43,29 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
   } = form;
 
   const isInstructor = intent === "instructor";
+  const config = roleConfig[intent];
 
   return (
     <div className="flex items-center justify-center py-16 px-4">
       <div className="max-w-md w-full">
         <AuthHeader
-          title={`${t("createAccount")} - ${isInstructor ? t("instructorRole") : t("clientRole")}`}
-          subtitle={
-            isInstructor ? t("instructorRoleDesc") : t("clientRoleDesc")
-          }
+          title={`${t("createAccount")} - ${t(config.titleSuffix)}`}
+          subtitle={t(config.subtitle)}
         />
 
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl space-y-6">
           {/* Form */}
-          <form className="space-y-6" onSubmit={onSubmit} noValidate>
+          <form
+            className="space-y-6"
+            onSubmit={onSubmit}
+            noValidate
+            aria-label={t("createAccount")}
+          >
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/50 p-4">
+              <div
+                className="rounded-lg bg-red-500/10 border border-red-500/50 p-4"
+                role="alert"
+              >
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
@@ -51,12 +79,20 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 <Input
                   id="firstName"
                   type="text"
+                  autoComplete="given-name"
                   {...register("firstName")}
                   placeholder={t("firstNamePlaceholder")}
                   aria-invalid={errors.firstName ? "true" : "false"}
+                  aria-describedby={
+                    errors.firstName ? "firstName-error" : undefined
+                  }
                 />
                 {errors.firstName && (
-                  <p className="text-sm text-red-500">
+                  <p
+                    id="firstName-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
                     {errors.firstName.message as string}
                   </p>
                 )}
@@ -70,12 +106,20 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 <Input
                   id="lastName"
                   type="text"
+                  autoComplete="family-name"
                   {...register("lastName")}
                   placeholder={t("lastNamePlaceholder")}
                   aria-invalid={errors.lastName ? "true" : "false"}
+                  aria-describedby={
+                    errors.lastName ? "lastName-error" : undefined
+                  }
                 />
                 {errors.lastName && (
-                  <p className="text-sm text-red-500">
+                  <p
+                    id="lastName-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
                     {errors.lastName.message as string}
                   </p>
                 )}
@@ -89,12 +133,18 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 <Input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   {...register("email")}
                   placeholder={t("emailPlaceholder")}
                   aria-invalid={errors.email ? "true" : "false"}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-500">
+                  <p
+                    id="email-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
                     {errors.email.message as string}
                   </p>
                 )}
@@ -115,12 +165,18 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 <Input
                   id="phone"
                   type="tel"
+                  autoComplete="tel"
                   {...register("phone")}
                   placeholder="123456789"
                   aria-invalid={errors.phone ? "true" : "false"}
+                  aria-describedby={errors.phone ? "phone-error" : undefined}
                 />
                 {errors.phone && (
-                  <p className="text-sm text-red-500">
+                  <p
+                    id="phone-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
                     {errors.phone.message as string}
                   </p>
                 )}
@@ -134,12 +190,20 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="new-password"
                   {...register("password")}
                   placeholder={t("passwordHint")}
                   aria-invalid={errors.password ? "true" : "false"}
+                  aria-describedby={
+                    errors.password ? "password-error" : undefined
+                  }
                 />
                 {errors.password && (
-                  <p className="text-sm text-red-500">
+                  <p
+                    id="password-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
                     {errors.password.message as string}
                   </p>
                 )}
@@ -153,11 +217,19 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 <Input
                   id="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   {...register("confirmPassword")}
                   aria-invalid={errors.confirmPassword ? "true" : "false"}
+                  aria-describedby={
+                    errors.confirmPassword ? "confirmPassword-error" : undefined
+                  }
                 />
                 {errors.confirmPassword && (
-                  <p className="text-sm text-red-500">
+                  <p
+                    id="confirmPassword-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
                     {errors.confirmPassword.message as string}
                   </p>
                 )}
@@ -168,11 +240,7 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
             <Button
               type="submit"
               disabled={isLoading}
-              className={`w-full text-white font-semibold ${
-                isInstructor
-                  ? "bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                  : "bg-linear-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-              }`}
+              className={`w-full text-white font-semibold ${config.buttonGradient}`}
             >
               {isLoading ? t("creatingAccount") : t("createAccount")}
             </Button>
@@ -185,21 +253,12 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
 
           {/* Footer links */}
           <div className="text-center mt-6 space-y-3">
-            {isInstructor ? (
-              <Link
-                href="/register/client"
-                className="text-sm text-orange-400 hover:text-orange-300 transition-colors block"
-              >
-                {t("registerAsClientInstead")}
-              </Link>
-            ) : (
-              <Link
-                href="/register/instructor"
-                className="text-sm text-purple-400 hover:text-purple-300 transition-colors block"
-              >
-                {t("areYouInstructor")}
-              </Link>
-            )}
+            <Link
+              href={config.switchHref}
+              className={`text-sm transition-colors block ${config.switchColor}`}
+            >
+              {t(config.switchKey)}
+            </Link>
             <p className="text-sm text-slate-400">
               {t("haveAccount")}{" "}
               <Link

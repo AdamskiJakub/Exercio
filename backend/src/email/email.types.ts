@@ -125,3 +125,34 @@ export interface ReviewInvitationEmailContent {
   reviewButton: string;
   footer: string;
 }
+
+export interface EnterpriseLeadDetails {
+  id: string;
+  companyName: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  city?: string;
+  message?: string;
+}
+
+export interface EnterpriseLeadNotificationContent {
+  title: string;
+  subtitle: string;
+  companyLabel: string;
+  emailLabel: string;
+  phoneLabel: string;
+  websiteLabel: string;
+  cityLabel: string;
+  messageLabel: string;
+  leadIdLabel: string;
+  approveHint: string;
+  footer: string;
+}
+
+export interface EnterpriseAccountActivationContent {
+  title: string;
+  subtitle: string;
+  activateButton: string;
+  footer: string;
+}

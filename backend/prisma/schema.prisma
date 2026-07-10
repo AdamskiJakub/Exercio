@@ -19,6 +19,8 @@ model User {
   providerId           String?            // OAuth provider user ID
   isEmailVerified      Boolean            @default(false)   // Auto-true for OAuth
   avatarUrl            String?            // Profile picture from OAuth provider
+  activationToken      String?            @unique // Token for enterprise account activation
+  activationExpires    DateTime?          // Expiry for activation token
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   instructorProfile    InstructorProfile?
@@ -328,6 +330,7 @@ model EnterpriseProfile {
   phone           String?
   website         String?
   logoUrl         String?
+  coverUrl        String?
 
   facebookUrl     String?
   instagramUrl    String?
@@ -342,12 +345,30 @@ model EnterpriseProfile {
   tags            String[]
 
   amenities       String[]
+  openingHours    Json?
+  highlights      Json?
 
+  aboutImage      String?
   gallery         String[]
   videos          String[]
 
   partners        String[]
   certificates    String[]
+
+  businessType    String?
+  targetAudience  String[]
+  disciplines     String[]
+  languages       String[]
+
+  hasParking          Boolean?
+  hasShower           Boolean?
+  hasLockerRoom       Boolean?
+  hasAirConditioning  Boolean?
+  hasDisabledAccess   Boolean?
+  hasFreeTrial        Boolean?
+
+  pricing         Json?
+  faq             Json?
 
   subscriptionId  String?
   subscriptionStatus String? @default("incomplete")
@@ -395,6 +416,7 @@ model EnterpriseNews {
   id              String            @id @default(uuid())
 
   enterpriseId    String
+  type            String            @default("link")
   url             String
   title           String?
   description     String?
@@ -418,6 +440,8 @@ model EnterpriseLead {
   phone           String?
   website         String?
   message         String?
+  businessType    String?           // e.g. "dance_school", "gym", "yoga_studio"
+  instructorCount String?           // e.g. "1-5", "6-20", "20+"
 
   status          String            @default("new")
   notes           String?

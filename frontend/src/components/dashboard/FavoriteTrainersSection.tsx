@@ -6,8 +6,8 @@ import { useToggleFavorite } from "@/hooks/useFavorites";
 import { useSpecializations } from "@/hooks/useConfig";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { getMediaUrl } from "@/lib/utils/media";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { motion } from "framer-motion";
 import { cardVariants } from "@/lib/animations";
 import type { FavoriteInstructor } from "@/types";
@@ -125,23 +125,13 @@ function FavoriteCard({
         className="flex items-center gap-4 p-4"
       >
         {/* Avatar */}
-        <div className="size-14 rounded-full overflow-hidden bg-slate-700 shrink-0 border-2 border-slate-600">
-          {favorite.photoUrl ? (
-            <img
-              src={getMediaUrl(favorite.photoUrl)}
-              alt={fullName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg bg-slate-700">
-              {fullName
-                .split(" ")
-                .map((n: string) => n[0])
-                .join("")
-                .toUpperCase()}
-            </div>
-          )}
-        </div>
+        <UserAvatar
+          photoUrl={favorite.photoUrl}
+          firstName={favorite.user?.firstName}
+          lastName={favorite.user?.lastName}
+          size="md"
+          alt={fullName}
+        />
 
         {/* Info */}
         <div className="flex-1 min-w-0 text-left">

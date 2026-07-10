@@ -33,11 +33,13 @@ export function DashboardHeader({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <img
-            src={avatarUrl}
-            alt="Profile"
-            className="w-32 h-32 rounded-full object-cover border-4 border-slate-700 shadow-2xl"
-          />
+          <div className="w-32 h-32 rounded-full bg-white p-1.5 shadow-2xl border-4 border-slate-700">
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="w-full h-full rounded-full object-cover"
+            />
+          </div>
         </motion.div>
       )}
       <div className="space-y-3">

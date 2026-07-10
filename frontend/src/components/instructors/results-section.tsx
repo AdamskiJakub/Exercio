@@ -140,8 +140,11 @@ export function ResultsSection({
               <>
                 {/* Instructors section — primary results */}
                 {instructors.length > 0 && (
-                  <section>
-                    <h3 className="text-base font-bold text-orange-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <section aria-labelledby="instructors-section-heading">
+                    <h3
+                      id="instructors-section-heading"
+                      className="text-base font-bold text-orange-400 uppercase tracking-wider mb-4 flex items-center gap-2"
+                    >
                       <Users className="w-5 h-5 text-orange-400" />
                       {t("instructorsSection")}
                     </h3>
@@ -158,9 +161,12 @@ export function ResultsSection({
 
                 {/* Enterprises section — secondary, partner suggestions */}
                 {hasEnterprises && (
-                  <section>
-                    <h3 className="text-base font-bold text-violet-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <Building2 className="w-5 h-5 text-violet-400" />
+                  <section aria-labelledby="enterprises-section-heading">
+                    <h3
+                      id="enterprises-section-heading"
+                      className="text-base font-bold text-emerald-400 uppercase tracking-wider mb-4 flex items-center gap-2"
+                    >
+                      <Building2 className="w-5 h-5 text-emerald-400" />
                       {t("enterprisesSection")}
                     </h3>
                     <div className="space-y-4">
@@ -194,8 +200,13 @@ export function ResultsSection({
           </>
         ) : (
           /* No results */
-          <div className="bg-slate-900/30 border-2 border-dashed border-slate-700 rounded-xl p-12 text-center">
-            <div className="text-6xl mb-4">🔍</div>
+          <div
+            className="bg-slate-900/30 border-2 border-dashed border-slate-700 rounded-xl p-12 text-center"
+            role="status"
+          >
+            <div className="text-6xl mb-4" aria-hidden="true">
+              🔍
+            </div>
             <h3 className="text-2xl font-bold text-white mb-2">
               {t("noResults")}
             </h3>

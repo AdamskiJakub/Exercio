@@ -15,6 +15,7 @@ interface StatsCardProps {
   delay?: number;
   href?: string;
   onClick?: () => void;
+  hoverColor?: string;
 }
 
 export function StatsCard({
@@ -27,6 +28,7 @@ export function StatsCard({
   delay = 0,
   href,
   onClick,
+  hoverColor = "hover:border-emerald-500",
 }: StatsCardProps) {
   const content = (
     <motion.div
@@ -34,7 +36,7 @@ export function StatsCard({
       initial="hidden"
       animate="visible"
       custom={delay}
-      className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500 rounded-xl p-6 cursor-pointer transition-colors duration-300"
+      className={`bg-slate-800/50 backdrop-blur-sm border border-slate-700 ${hoverColor} rounded-xl p-6 cursor-pointer transition-colors duration-300`}
       onClick={onClick}
     >
       <div className="flex items-center gap-3 mb-3">

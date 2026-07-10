@@ -30,17 +30,22 @@ export function EnterpriseCard({
     .toUpperCase()
     .slice(0, 2);
 
+  const hasLogo = !!enterprise.logoUrl;
+
   const cardContent = (
-    <Card className="bg-slate-900/30 border-violet-500/20 hover:border-violet-500/50 transition-all duration-300 overflow-hidden">
+    <Card className="bg-slate-900/30 border-emerald-500/20 hover:border-emerald-500/50 transition-all duration-300 overflow-hidden">
       <div className="flex flex-col sm:flex-row gap-6 p-6">
         {/* Logo Section */}
         <div className="shrink-0">
-          <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-2 border-violet-500/30 group-hover:border-violet-500 transition-colors rounded-xl">
+          <Avatar
+            className={`w-24 h-24 sm:w-28 sm:h-28 border-2 border-emerald-500/30 group-hover:border-emerald-500 transition-colors rounded-xl ${hasLogo ? "bg-white p-1" : ""}`}
+          >
             <AvatarImage
               src={getMediaUrl(enterprise.logoUrl)}
               alt={enterprise.companyName}
+              className={hasLogo ? "object-contain rounded-lg" : ""}
             />
-            <AvatarFallback className="bg-violet-900/30 text-violet-300 text-2xl font-bold rounded-xl">
+            <AvatarFallback className="bg-emerald-900/30 text-emerald-300 text-2xl font-bold rounded-xl">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -51,12 +56,12 @@ export function EnterpriseCard({
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-xl font-bold text-white group-hover:text-violet-400 transition-colors flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-violet-400" />
+              <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-emerald-400" />
                 {enterprise.companyName}
                 {enterprise.verified && (
                   <span
-                    className="text-violet-400"
+                    className="text-emerald-400"
                     title={t("verified")}
                     aria-label={t("verified")}
                   >
@@ -72,7 +77,7 @@ export function EnterpriseCard({
                 )}
                 <Badge
                   variant="secondary"
-                  className="bg-violet-500/10 text-violet-300 border-violet-500/30 text-xs"
+                  className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 text-xs"
                 >
                   {t("partner")}
                 </Badge>
@@ -91,8 +96,8 @@ export function EnterpriseCard({
           <div className="flex flex-wrap items-center gap-3 text-sm">
             {/* Rating */}
             {enterprise.averageRating && (
-              <div className="flex items-center gap-1 text-violet-400">
-                <StarIcon className="w-4 h-4 fill-violet-400" />
+              <div className="flex items-center gap-1 text-emerald-400">
+                <StarIcon className="w-4 h-4 fill-emerald-400" />
                 <span className="font-semibold">
                   {enterprise.averageRating.toFixed(1)}
                 </span>
@@ -145,7 +150,7 @@ export function EnterpriseCard({
 
           {!disableLink && (
             <div className="flex justify-end">
-              <span className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors">
+              <span className="text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors">
                 {t("viewProfile")} →
               </span>
             </div>
@@ -162,7 +167,7 @@ export function EnterpriseCard({
   return (
     <Link
       href={`/${locale}/enterprise/${enterprise.slug}`}
-      className="block group"
+      className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-xl"
     >
       {cardContent}
     </Link>

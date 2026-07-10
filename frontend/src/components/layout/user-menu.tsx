@@ -28,6 +28,8 @@ import {
   Star,
   XCircle,
   Heart,
+  Building2,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api";
@@ -179,8 +181,8 @@ export function UserMenu() {
   const handleLogout = async () => {
     try {
       await apiClient.post("/auth/logout");
-    } catch (err) {
-      console.error("Logout error:", err);
+    } catch {
+      // Silently fail — user will be logged out locally anyway
     } finally {
       queryClient.clear();
       logout();
@@ -216,7 +218,11 @@ export function UserMenu() {
                 )}
               />
               {notificationCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                <span
+                  className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
                   {notificationCount > 9 ? "9+" : notificationCount}
                 </span>
               )}
@@ -325,7 +331,7 @@ export function UserMenu() {
                 />
               )}
 
-              {/* System notifications (favorites, etc.) — mixed into the same list */}
+              {/* System notifications (favorites, enterprise invitations, etc.) */}
               {systemNotifications?.data
                 ?.filter((n) => !n.read)
                 .slice(0, 5)
@@ -333,40 +339,60 @@ export function UserMenu() {
                   const data = notification.data as
                     | Record<string, unknown>
                     | undefined;
-                  const title =
-                    notification.type === "FAVORITE"
-                      ? tNotifications("favoriteTitle")
-                      : notification.title;
-                  const description =
-                    notification.type === "FAVORITE"
-                      ? tNotifications("favoriteMessage", {
-                          name: (data?.displayName as string) || "",
-                        })
-                      : notification.message;
+                  const isFavorite = notification.type === "FAVORITE";
+                  const isEnterpriseInvitation =
+                    notification.type === "ENTERPRISE_INVITATION";
+
+                  const title = isFavorite
+                    ? tNotifications("favoriteTitle")
+                    : notification.title;
+                  const description = isFavorite
+                    ? tNotifications("favoriteMessage", {
+                        name: (data?.displayName as string) || "",
+                      })
+                    : notification.message;
+
+                  let iconBg = "bg-pink-500/10";
+                  let iconColor = "text-pink-400";
+                  let Icon = Heart;
+
+                  if (isEnterpriseInvitation) {
+                    iconBg = "bg-emerald-500/10";
+                    iconColor = "text-emerald-400";
+                    Icon = Building2;
+                  } else if (isFavorite) {
+                    iconBg = "bg-pink-500/10";
+                    iconColor = "text-pink-400";
+                    Icon = Heart;
+                  }
 
                   return (
                     <NotificationItem
                       key={notification.id}
                       icon={
-                        <div className="p-1.5 rounded-full bg-pink-500/10">
-                          <Heart className="w-4 h-4 text-pink-400" />
+                        <div className={`p-1.5 rounded-full ${iconBg}`}>
+                          <Icon className={`w-4 h-4 ${iconColor}`} />
                         </div>
                       }
                       title={title}
                       description={description}
                       onClick={() => {
                         markAsRead.mutate(notification.id);
-                        const username =
-                          (data?.favoritedByUsername as string) ||
-                          (data?.instructorUsername as string) ||
-                          undefined;
-                        if (username) {
-                          router.push({
-                            pathname: "/instructors/[username]",
-                            params: { username },
-                          });
-                        } else {
+                        if (isEnterpriseInvitation) {
                           router.push("/dashboard");
+                        } else {
+                          const username =
+                            (data?.favoritedByUsername as string) ||
+                            (data?.instructorUsername as string) ||
+                            undefined;
+                          if (username) {
+                            router.push({
+                              pathname: "/instructors/[username]",
+                              params: { username },
+                            });
+                          } else {
+                            router.push("/dashboard");
+                          }
                         }
                       }}
                     />
@@ -449,6 +475,31 @@ export function UserMenu() {
                     label={t("editProfile")}
                   />
                 </DropdownMenuItem>
+              )}
+
+              {user.role === "ENTERPRISE" && (
+                <>
+                  <DropdownMenuItem
+                    asChild
+                    className="cursor-pointer text-slate-200"
+                  >
+                    <NavItem
+                      href="/dashboard/enterprise/profile"
+                      icon={<Building2 className="h-4 w-4" />}
+                      label={t("editProfile")}
+                    />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    asChild
+                    className="cursor-pointer text-slate-200"
+                  >
+                    <NavItem
+                      href="/dashboard/enterprise/instructors"
+                      icon={<Users className="h-4 w-4" />}
+                      label={t("instructors")}
+                    />
+                  </DropdownMenuItem>
+                </>
               )}
 
               <DropdownMenuSeparator className="bg-slate-700" />
@@ -539,14 +590,37 @@ export function UserMenu() {
                     {t("editProfile")}
                   </Link>
                 )}
+
+                {user.role === "ENTERPRISE" && (
+                  <>
+                    <Link
+                      href="/dashboard/enterprise/profile"
+                      className="flex items-center justify-start gap-3 text-slate-300 hover:text-emerald-500 transition-colors text-base font-medium px-4 py-3 rounded-lg hover:bg-slate-800"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Building2 className="h-5 w-5" />
+                      {t("editProfile")}
+                    </Link>
+                    <Link
+                      href="/dashboard/enterprise/instructors"
+                      className="flex items-center justify-start gap-3 text-slate-300 hover:text-emerald-500 transition-colors text-base font-medium px-4 py-3 rounded-lg hover:bg-slate-800"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Users className="h-5 w-5" />
+                      {t("instructors")}
+                    </Link>
+                  </>
+                )}
               </div>
 
               <div className="p-4 border-t border-slate-700">
                 <button
+                  type="button"
                   onClick={handleLogout}
                   className="flex items-center gap-3 w-full px-4 py-3 text-red-400 hover:bg-red-900/30 hover:text-red-300 rounded-lg transition-colors"
+                  aria-label={t("logout")}
                 >
-                  <LogOut className="h-5 w-5" />
+                  <LogOut className="h-5 w-5" aria-hidden="true" />
                   <span className="font-semibold">{t("logout")}</span>
                 </button>
               </div>

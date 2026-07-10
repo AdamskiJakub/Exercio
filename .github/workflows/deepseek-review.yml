@@ -7,6 +7,7 @@ permissions:
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   code-review:
@@ -19,9 +20,8 @@ jobs:
       - name: Get changed files
         id: files
         run: |
-          # Get list of changed files (code only)
           FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
-            ':!*.json' ':!*.md' ':!*.lock' ':!*.toml' \
+            ':!*.lock' ':!*.toml' \
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
             ':!**/node_modules/**' 2>/dev/null || true)
 
@@ -29,7 +29,7 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Generate full file contents for review
+      - name: Call DeepSeek API
         id: review
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
@@ -37,71 +37,57 @@ jobs:
           FILES="${{ steps.files.outputs.FILES }}"
 
           if [ -z "$FILES" ]; then
-            echo "✅ No code changes to review." > /tmp/review_comment.txt
+            echo "No code changes to review." > /tmp/review_comment.txt
             exit 0
           fi
 
-          # Build context: for each changed file, include its FULL content
-          CONTEXT=""
-          TOTAL_LENGTH=0
-          MAX_LENGTH=80000
+          CONTEXT_FILE=$(mktemp)
+          FILES_LIST_FILE=$(mktemp)
 
           while IFS= read -r file; do
             if [ -f "$file" ]; then
-              FILE_CONTENT=$(cat "$file")
-              FILE_LENGTH=${#FILE_CONTENT}
-              
-              # Estimate tokens (roughly 4 chars per token)
-              EST_TOKENS=$((FILE_LENGTH / 4))
-              
-              # Skip binary or huge files
-              if [ "$FILE_LENGTH" -gt 50000 ]; then
-                FILE_CONTENT="${FILE_CONTENT:0:50000}\n\n// ... [truncated, file too large]"
-                FILE_LENGTH=50000
-              fi
-              
-              ENTRY="\n\n=== $file ===\n\`\`\`\n$FILE_CONTENT\n\`\`\`"
-              ENTRY_LENGTH=${#ENTRY}
-              
-              if [ $((TOTAL_LENGTH + ENTRY_LENGTH)) -gt $MAX_LENGTH ]; then
-                CONTEXT="${CONTEXT}\n\n// ... [remaining files truncated due to context limit]"
-                break
-              fi
-              
-              CONTEXT="${CONTEXT}${ENTRY}"
-              TOTAL_LENGTH=$((TOTAL_LENGTH + ENTRY_LENGTH))
+              printf '%s\n' "$file" >> "$FILES_LIST_FILE"
+              printf '\n\n=== %s ===\n' "$file" >> "$CONTEXT_FILE"
+              printf '\`\`\`\n' >> "$CONTEXT_FILE"
+              cat "$file" >> "$CONTEXT_FILE"
+              printf '\n\`\`\`\n' >> "$CONTEXT_FILE"
             fi
           done <<< "$FILES"
 
-          # Build JSON payload
           jq -n \
-            --arg context "$CONTEXT" \
-            --arg files "$FILES" '{
-            model: "deepseek-chat",
-            max_tokens: 2000,
-            temperature: 0.3,
-            messages: [
-              {
-                role: "system",
-                content: "You are a senior code reviewer. Review the FULL source code of changed files (not just the diff). For each issue, ALWAYS include the file path where it occurs. Focus on: bugs, security, performance, error handling, type safety, unused imports/variables, incorrect logic. Be concise. Use markdown bullet points with format: **file/path.ts** - description. If nothing important, say ✅ No significant issues found. IMPORTANT: You have the FULL file contents, not just a diff. Use this to check for unused imports, unused variables, and logic errors that span across changed and unchanged lines."
-              },
-              {
-                role: "user",
-                content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
-              }
-            ]
-          }' > /tmp/payload.json
+            --rawfile files "$FILES_LIST_FILE" \
+            --rawfile context "$CONTEXT_FILE" \
+            '{
+              model: "deepseek-chat",
+              max_tokens: 8192,
+              temperature: 0.5,
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a senior code reviewer. You have the FULL source code of every changed file in this PR. Review ONLY the changed files listed below. CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility. IMPORTANT: Do NOT report missing use client directive. Format: **file/path.ts:line** - description. If nothing important, say: No significant issues found."
+                },
+                {
+                  role: "user",
+                  content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
+                }
+              ]
+            }' > /tmp/payload.json
 
-          # Call DeepSeek API
+          rm -f "$CONTEXT_FILE" "$FILES_LIST_FILE"
+
+          echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
             -d @/tmp/payload.json)
 
-          # Extract comment from response
-          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "❌ API error"')
+          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "API error"')
 
-          # Save to file for next step
+          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // ""')
+          if [ -n "$ERROR" ]; then
+            COMMENT="API Error: $ERROR"
+          fi
+
           echo "$COMMENT" > /tmp/review_comment.txt
 
       - name: Post comment on PR

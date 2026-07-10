@@ -9,6 +9,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/dto/create-notification.dto';
+import { StaticConfigService } from '../config/config.service';
 import type { CreateInvitationDto } from './dto/create-invitation.dto';
 
 @Injectable()
@@ -18,9 +19,46 @@ export class EnterpriseInvitationsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
+    private configService: StaticConfigService,
   ) {}
 
-  async create(enterpriseId: string, userId: string, dto: CreateInvitationDto) {
+  private buildInvitationNotification(
+    companyName: string,
+    language: string,
+  ): { title: string; message: string } {
+    const title =
+      language === 'pl'
+        ? `Zaproszenie od ${companyName}`
+        : `Invitation from ${companyName}`;
+    const message =
+      language === 'pl'
+        ? `Otrzymałeś zaproszenie do dołączenia do ${companyName} jako instruktor.`
+        : `You have been invited to join ${companyName} as a partner instructor.`;
+    return { title, message };
+  }
+
+  /**
+   * Translate specialization slugs to display labels using the config service.
+   * Falls back to the slug if no translation is found.
+   */
+  private translateSpecializations(
+    specializations: string[],
+    language: string = 'pl',
+  ): string[] {
+    const allSpecs = this.configService.getAllSpecializations();
+    return specializations.map((slug) => {
+      const spec = allSpecs.find((s) => s.id === slug);
+      if (!spec) return slug;
+      return language === 'pl' ? spec.namePl : spec.nameEn;
+    });
+  }
+
+  async create(
+    enterpriseId: string,
+    userId: string,
+    dto: CreateInvitationDto,
+    language: string = 'pl',
+  ) {
     // Verify ownership
     const enterprise = await this.prisma.enterpriseProfile.findUnique({
       where: { id: enterpriseId },
@@ -55,6 +93,49 @@ export class EnterpriseInvitationsService {
     });
 
     if (existing) {
+      // If the invitation was previously removed, re-activate it
+      if (existing.status === 'REMOVED') {
+        const invitation = await this.prisma.enterpriseInstructor.update({
+          where: { id: existing.id },
+          data: {
+            status: 'PENDING',
+            role: dto.role,
+            removedAt: null,
+            invitedAt: new Date(),
+            acceptedAt: null,
+            rejectedAt: null,
+          },
+          include: {
+            enterprise: {
+              select: { companyName: true },
+            },
+          },
+        });
+
+        // Send notification to instructor
+        const { title, message } = this.buildInvitationNotification(
+          invitation.enterprise.companyName,
+          language,
+        );
+
+        await this.notificationsService.createNotification({
+          userId: instructor.userId,
+          type: NotificationType.ENTERPRISE_INVITATION,
+          title,
+          message,
+          data: {
+            enterpriseId,
+            invitationId: invitation.id,
+          },
+        });
+
+        this.logger.log(
+          `Invitation re-activated: ${invitation.id} (${enterprise.companyName} → ${instructor.user.email})`,
+        );
+
+        return invitation;
+      }
+
       throw new BadRequestException(
         `Invitation already exists with status "${existing.status}"`,
       );
@@ -75,11 +156,16 @@ export class EnterpriseInvitationsService {
     });
 
     // Send notification to instructor
+    const { title, message } = this.buildInvitationNotification(
+      invitation.enterprise.companyName,
+      language,
+    );
+
     await this.notificationsService.createNotification({
       userId: instructor.userId,
       type: NotificationType.ENTERPRISE_INVITATION,
-      title: `Invitation from ${invitation.enterprise.companyName}`,
-      message: `You have been invited to join ${invitation.enterprise.companyName} as a partner instructor.`,
+      title,
+      message,
       data: {
         enterpriseId,
         invitationId: invitation.id,
@@ -253,7 +339,6 @@ export class EnterpriseInvitationsService {
     return this.prisma.enterpriseInstructor.findMany({
       where: {
         enterpriseId,
-        status: 'ACCEPTED',
       },
       include: {
         instructor: {
@@ -265,6 +350,7 @@ export class EnterpriseInvitationsService {
                 firstName: true,
                 lastName: true,
                 role: true,
+                avatarUrl: true,
               },
             },
           },
@@ -274,10 +360,13 @@ export class EnterpriseInvitationsService {
   }
 
   async searchInstructors(enterpriseId: string, query: string, city?: string) {
-    // Find instructors not already invited/accepted in this enterprise
+    // Find instructors not already invited/accepted/removed in this enterprise
     const existingIds = (
       await this.prisma.enterpriseInstructor.findMany({
-        where: { enterpriseId },
+        where: {
+          enterpriseId,
+          status: { notIn: ['REMOVED'] },
+        },
         select: { instructorId: true },
       })
     ).map((e) => e.instructorId);
@@ -307,7 +396,7 @@ export class EnterpriseInvitationsService {
       where.city = { contains: city, mode: 'insensitive' };
     }
 
-    return this.prisma.instructorProfile.findMany({
+    const instructors = await this.prisma.instructorProfile.findMany({
       where,
       include: {
         user: {
@@ -317,10 +406,20 @@ export class EnterpriseInvitationsService {
             firstName: true,
             lastName: true,
             role: true,
+            avatarUrl: true,
           },
         },
       },
       take: 20,
     });
+
+    // Translate specializations and add display-friendly labels
+    return instructors.map((instructor) => ({
+      ...instructor,
+      specializations: this.translateSpecializations(
+        instructor.specializations || [],
+      ),
+      specializationSlugs: instructor.specializations || [],
+    }));
   }
 }

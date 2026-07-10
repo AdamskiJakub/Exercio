@@ -33,6 +33,14 @@ export const routing = defineRouting({
       pl: "/rejestracja/instruktor",
       en: "/register/instructor",
     },
+    "/partner": {
+      pl: "/dla-firm",
+      en: "/partner",
+    },
+    "/enterprise/apply": {
+      pl: "/dla-firm/aplikuj",
+      en: "/enterprise/apply",
+    },
     "/forgot-password": {
       pl: "/zapomnialem-hasla",
       en: "/forgot-password",
@@ -73,6 +81,26 @@ export const routing = defineRouting({
       pl: "/panel/kalendarz",
       en: "/dashboard/calendar",
     },
+    "/dashboard/enterprise": {
+      pl: "/panel/firma",
+      en: "/dashboard/enterprise",
+    },
+    "/dashboard/enterprise/profile": {
+      pl: "/panel/firma/profil",
+      en: "/dashboard/enterprise/profile",
+    },
+    "/dashboard/enterprise/instructors": {
+      pl: "/panel/firma/instruktorzy",
+      en: "/dashboard/enterprise/instructors",
+    },
+    "/dashboard/enterprise/news": {
+      pl: "/panel/firma/aktualnosci",
+      en: "/dashboard/enterprise/news",
+    },
+    "/dashboard/enterprise/settings": {
+      pl: "/panel/firma/ustawienia",
+      en: "/dashboard/enterprise/settings",
+    },
     "/instructors": {
       pl: "/instruktorzy",
       en: "/instructors",
@@ -112,6 +140,10 @@ export const routing = defineRouting({
     "/cookies": {
       pl: "/polityka-cookies",
       en: "/cookies",
+    },
+    "/activate": {
+      pl: "/aktywuj",
+      en: "/activate",
     },
     "/onboarding/instructor": {
       pl: "/onboarding/instruktor",

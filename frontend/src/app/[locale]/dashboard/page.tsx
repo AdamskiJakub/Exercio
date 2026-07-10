@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { useAuthGuard } from '@/hooks/useAuthGuard';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { useTranslations } from 'next-intl';
-import { InstructorDashboard } from '@/components/dashboard/InstructorDashboard';
-import { ClientDashboard } from '@/components/dashboard/ClientDashboard';
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useTranslations } from "next-intl";
+import { InstructorDashboard } from "@/components/dashboard/InstructorDashboard";
+import { ClientDashboard } from "@/components/dashboard/ClientDashboard";
+import { EnterpriseDashboard } from "@/components/dashboard/EnterpriseDashboard";
 
 export default function DashboardPage() {
-  const t = useTranslations('Dashboard');
+  const t = useTranslations("Dashboard");
   const { isChecking, user } = useAuthGuard({
     requireAuth: true,
   });
@@ -20,8 +21,10 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-slate-900 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Role-based Dashboard */}
-        {user.role === 'INSTRUCTOR' ? (
+        {user.role === "INSTRUCTOR" ? (
           <InstructorDashboard />
+        ) : user.role === "ENTERPRISE" ? (
+          <EnterpriseDashboard />
         ) : (
           <ClientDashboard />
         )}

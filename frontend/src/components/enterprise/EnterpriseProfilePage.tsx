@@ -1,11 +1,32 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { EnterpriseHero } from "./EnterpriseHero";
 import { EnterpriseInstructors } from "./EnterpriseInstructors";
 import { EnterpriseNews } from "./EnterpriseNews";
+import { EnterpriseProfileAbout } from "./EnterpriseProfileAbout";
+import { EnterpriseProfileHighlightsDisplay } from "./EnterpriseProfileHighlightsDisplay";
+import { EnterpriseProfileOffer } from "./EnterpriseProfileOffer";
+import { EnterpriseProfilePricingDisplay } from "./EnterpriseProfilePricingDisplay";
+import { EnterpriseProfileAmenitiesDisplay } from "./EnterpriseProfileAmenitiesDisplay";
+import { EnterpriseProfileFaqDisplay } from "./EnterpriseProfileFaqDisplay";
+import { EnterpriseProfileSidebar } from "./EnterpriseProfileSidebar";
+import { EnterpriseProfileGallery } from "./EnterpriseProfileGallery";
+import { EnterpriseProfileNav } from "./EnterpriseProfileNav";
 import { BottomNavBar } from "@/components/ui/bottom-nav-bar";
+import { SECTION_IDS } from "@/constants/enterprise";
 import type { EnterpriseProfile } from "@/types/enterprise";
+import {
+  Info,
+  Sparkles,
+  Building2,
+  DollarSign,
+  Image as ImageIcon,
+  Users,
+  Calendar,
+} from "lucide-react";
 
 interface EnterpriseProfilePageProps {
   enterprise: EnterpriseProfile;
@@ -15,63 +36,88 @@ export function EnterpriseProfilePage({
   enterprise,
 }: EnterpriseProfilePageProps) {
   const t = useTranslations("EnterpriseProfile");
+  const searchParams = useSearchParams();
+  const fromDashboard = searchParams.get("from") === "dashboard";
+  const [activeSection, setActiveSection] = useState<string>("");
+
+  const navItems = [
+    { id: SECTION_IDS.about, label: t("about"), icon: Info },
+    { id: SECTION_IDS.instructors, label: t("ourInstructors"), icon: Users },
+    { id: SECTION_IDS.news, label: t("news"), icon: Calendar },
+    { id: SECTION_IDS.whyUs, label: t("whyUs"), icon: Sparkles },
+    { id: SECTION_IDS.offer, label: t("offer"), icon: Building2 },
+    { id: SECTION_IDS.pricing, label: t("pricing"), icon: DollarSign },
+    { id: SECTION_IDS.gallery, label: t("gallery"), icon: ImageIcon },
+  ];
+
+  const scrollToSection = (id: string) => {
+    setActiveSection(id);
+    const el = document.getElementById(id);
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-        {/* Hero Section */}
-        <EnterpriseHero enterprise={enterprise} />
+      <EnterpriseHero enterprise={enterprise} />
 
-        {/* Instructors Section */}
-        {enterprise.instructors && enterprise.instructors.length > 0 && (
-          <EnterpriseInstructors instructors={enterprise.instructors} />
-        )}
+      <EnterpriseProfileNav
+        items={navItems}
+        activeSection={activeSection}
+        onNavigate={scrollToSection}
+      />
 
-        {/* News Section */}
-        {enterprise.news && enterprise.news.length > 0 && (
-          <EnterpriseNews news={enterprise.news} />
-        )}
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
+          {/* Left column (70%) */}
+          <div className="space-y-16 min-w-0">
+            {/* 1. About — who you are */}
+            <EnterpriseProfileAbout enterprise={enterprise} />
 
-        {/* Amenities */}
-        {enterprise.amenities && enterprise.amenities.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-white">{t("amenities")}</h2>
-            <div className="flex flex-wrap gap-2">
-              {enterprise.amenities.map((amenity) => (
-                <span
-                  key={amenity}
-                  className="bg-slate-800/50 border border-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm"
-                >
-                  {amenity}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
+            {/* 2. Instructors — people buy from people (trust building) */}
+            {enterprise.instructors && enterprise.instructors.length > 0 && (
+              <EnterpriseInstructors instructors={enterprise.instructors} />
+            )}
 
-        {/* Gallery */}
-        {enterprise.gallery && enterprise.gallery.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-2xl font-bold text-white">{t("gallery")}</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {enterprise.gallery.map((url, index) => (
-                <div
-                  key={index}
-                  className="aspect-square rounded-xl overflow-hidden bg-slate-800"
-                >
-                  <img
-                    src={url}
-                    alt={`${enterprise.companyName} gallery ${index + 1}`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+            {/* 3. News — shows the profile is alive (hot news, workshops, events) */}
+            {enterprise.news && enterprise.news.length > 0 && (
+              <EnterpriseNews news={enterprise.news} />
+            )}
+
+            {/* 4. Why Us (Highlights) — why choose you */}
+            <EnterpriseProfileHighlightsDisplay
+              highlights={enterprise.highlights || []}
+            />
+
+            {/* 5. Offer — what you offer */}
+            <EnterpriseProfileOffer enterprise={enterprise} />
+
+            {/* 6. Pricing — how much (critical decision point) */}
+            <EnterpriseProfilePricingDisplay
+              pricing={enterprise.pricing || []}
+            />
+
+            {/* 7. Amenities */}
+            <EnterpriseProfileAmenitiesDisplay enterprise={enterprise} />
+
+            {/* 8. Gallery — visual confirmation of professionalism */}
+            <EnterpriseProfileGallery enterprise={enterprise} />
+
+            {/* 9. FAQ — technical questions for almost-decided users */}
+            <EnterpriseProfileFaqDisplay faq={enterprise.faq || []} />
+          </div>
+
+          {/* Right sidebar (30%) */}
+          <EnterpriseProfileSidebar enterprise={enterprise} />
+        </div>
       </div>
 
-      <BottomNavBar backText={t("backToListing")} backHref="/instructors" />
+      <BottomNavBar
+        backText={fromDashboard ? t("backToDashboard") : t("backToListing")}
+        backHref={fromDashboard ? "/dashboard" : "/instructors"}
+      />
     </div>
   );
 }

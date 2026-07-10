@@ -24,4 +24,12 @@ export class CreateEnterpriseLeadDto {
   @IsString()
   @IsOptional()
   message?: string;
+
+  @IsString()
+  @IsOptional()
+  businessType?: string;
+
+  @IsString()
+  @IsOptional()
+  instructorCount?: string;
 }

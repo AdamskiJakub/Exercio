@@ -23,17 +23,54 @@ async function getEnterpriseProfile(
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const enterprise = await getEnterpriseProfile(slug);
 
   if (!enterprise) {
     return { title: "Not Found" };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://trainly.pl";
+  const title = `${enterprise.companyName} — Trainly`;
+  const description =
+    enterprise.shortDescription || `${enterprise.companyName} on Trainly`;
+
   return {
-    title: `${enterprise.companyName} — Trainly`,
-    description:
-      enterprise.shortDescription || `${enterprise.companyName} on Trainly`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      locale: locale === "pl" ? "pl_PL" : "en_US",
+      siteName: "Trainly",
+      url: `${siteUrl}/${locale}/enterprise/${slug}`,
+      images: enterprise.logoUrl
+        ? [
+            {
+              url: `${API_BASE_URL}/files/${enterprise.logoUrl}`,
+              width: 800,
+              height: 800,
+              alt: `${enterprise.companyName} logo`,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: enterprise.logoUrl
+        ? [`${API_BASE_URL}/files/${enterprise.logoUrl}`]
+        : undefined,
+    },
+    alternates: {
+      canonical: `${siteUrl}/${locale}/enterprise/${slug}`,
+      languages: {
+        pl: `${siteUrl}/pl/enterprise/${slug}`,
+        en: `${siteUrl}/en/enterprise/${slug}`,
+      },
+    },
   };
 }
 
@@ -45,5 +82,47 @@ export default async function EnterprisePage({ params }: Props) {
     notFound();
   }
 
-  return <EnterpriseProfilePage enterprise={enterprise} />;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://trainly.pl";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: enterprise.companyName,
+    description: enterprise.shortDescription || undefined,
+    url: `${siteUrl}/enterprise/${slug}`,
+    logo: enterprise.logoUrl
+      ? `${API_BASE_URL}/files/${enterprise.logoUrl}`
+      : undefined,
+    image: enterprise.coverUrl
+      ? `${API_BASE_URL}/files/${enterprise.coverUrl}`
+      : undefined,
+    email: enterprise.email || undefined,
+    telephone: enterprise.phone || undefined,
+    address: enterprise.address
+      ? {
+          "@type": "PostalAddress",
+          streetAddress: enterprise.address,
+          postalCode: enterprise.postalCode || undefined,
+          addressLocality: enterprise.city || undefined,
+          addressCountry: "PL",
+        }
+      : undefined,
+    sameAs: [
+      enterprise.facebookUrl,
+      enterprise.instagramUrl,
+      enterprise.youtubeUrl,
+      enterprise.tiktokUrl,
+    ].filter(Boolean),
+    knowsAbout: enterprise.tags,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <EnterpriseProfilePage enterprise={enterprise} />
+    </>
+  );
 }
