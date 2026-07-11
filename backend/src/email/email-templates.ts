@@ -35,14 +35,14 @@ export const buildLayout = (content: string, footer: string): string => `
 <table role="presentation" style="max-width:600px;width:100%;background:#1e293b;border-radius:12px;overflow:hidden;">
 <tr>
 <td style="background:linear-gradient(135deg,#f97316 0%,#dc2626 100%);padding:40px 20px;text-align:center;">
-<h1 style="margin:0;color:white;font-size:32px;font-weight:bold;">💪 Trainly</h1>
+<h1 style="margin:0;color:white;font-size:32px;font-weight:bold;">💪 Exercio</h1>
 </td>
 </tr>
 ${content}
 <tr>
 <td style="padding:30px;background:#0f172a;text-align:center;">
 <p style="margin:0;color:#64748b;font-size:12px;">${footer}</p>
-<p style="margin-top:10px;color:#475569;font-size:12px;">© 2026 Trainly. All rights reserved.</p>
+<p style="margin-top:10px;color:#475569;font-size:12px;">© 2026 Exercio. All rights reserved.</p>
 </td>
 </tr>
 </table>
@@ -269,7 +269,7 @@ export const buildContactEmailTemplate = (data: {
 </td>
 </tr>
 `,
-    'Otrzymano z formularza kontaktowego Trainly',
+    'Otrzymano z formularza kontaktowego Exercio',
   );
 };
 

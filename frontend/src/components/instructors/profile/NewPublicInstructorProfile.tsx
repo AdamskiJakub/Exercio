@@ -7,7 +7,7 @@ import { Calendar, Play } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
 import { useAuthStore } from "@/stores/auth-store";
 import { InstructorHero } from "./InstructorHero";
-import { TrainlyHighlights } from "./TrainlyHighlights";
+import { ExercioHighlights } from "./ExercioHighlights";
 import { QuickAvailability } from "./QuickAvailability";
 import { FeaturedReview } from "./FeaturedReview";
 import { AboutSection } from "./AboutSection";
@@ -120,8 +120,8 @@ export function NewPublicInstructorProfile({
           nearestSlot={nearestSlot}
         />
 
-        {/* SECTION 2: Trainly Highlights */}
-        <TrainlyHighlights profile={profile} />
+        {/* SECTION 2: Exercio Highlights */}
+        <ExercioHighlights profile={profile} />
 
         {/* SECTION 3: Quick Availability - hidden for enterprise accounts */}
         {profile.isBookingEnabled && user?.role !== "ENTERPRISE" && (

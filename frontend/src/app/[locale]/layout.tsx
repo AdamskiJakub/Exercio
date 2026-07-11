@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trainly - Find Your Perfect Trainer",
+  title: "Exercio - Find Your Perfect Trainer",
   description:
     "Marketplace for personal trainers, fitness instructors, and wellness professionals",
 };

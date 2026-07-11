@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://trainly.pl";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
 
   return {
     rules: [

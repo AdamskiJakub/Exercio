@@ -47,7 +47,7 @@ export function DashboardHeader({
           variants={titleVariants}
           initial="hidden"
           animate="visible"
-          className="text-5xl md:text-6xl font-bold text-gradient-trainly"
+          className="text-5xl md:text-6xl font-bold text-gradient-exercio"
         >
           {greeting}
         </motion.h1>

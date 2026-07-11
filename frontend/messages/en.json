@@ -49,7 +49,7 @@
     "instructors": "Instructors",
     "settings": "Settings",
     "menu": "Menu",
-    "homeAriaLabel": "Trainly - home page",
+    "homeAriaLabel": "Exercio - home page",
     "changeLanguage": "Change language. Current language",
     "loading": "Loading...",
     "notifications": "Notifications",
@@ -151,8 +151,8 @@
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "signUp": "Sign up",
-    "registerAs": "Join Trainly as:",
-    "chooseRoleDescription": "Join the Trainly community and choose the account that fits your needs.",
+    "registerAs": "Join Exercio as:",
+    "chooseRoleDescription": "Join the Exercio community and choose the account that fits your needs.",
     "clientRole": "Client",
     "clientRoleDesc": "Find the perfect instructor for you",
     "clientFeature1": "Book sessions and manage reservations",
@@ -205,10 +205,10 @@
     "businessFeature3": "Publish events and news",
     "checkOffer": "Check the offer",
     "businessBadge": "I run a school or club",
-    "whyTrainlyTitle": "Why Trainly?",
-    "whyTrainlyFeature1": "Verified instructor profiles",
-    "whyTrainlyFeature2": "Companies can build their own trainer teams",
-    "whyTrainlyFeature3": "Everything in one place — instructors, schools and clients",
+    "whyExercioTitle": "Why Exercio?",
+    "whyExercioFeature1": "Verified instructor profiles",
+    "whyExercioFeature2": "Companies can build their own trainer teams",
+    "whyExercioFeature3": "Everything in one place — instructors, schools and clients",
     "activationTitle": "Activate Account",
     "activationSubtitle": "Set your password to activate your partner account",
     "activationInvalidToken": "No activation token found in the link.",
@@ -581,7 +581,7 @@
       "welcomeFree": "No sessions planned yet. Time to find a new trainer and get in shape! 🏋️",
       "becomeInstructor": "Become an Instructor",
       "becomeInstructorDesc": "Want to share your knowledge? Switch to an instructor account and start leading your own training sessions!",
-      "becomeInstructorBannerTitle": "Become a Trainly Instructor",
+      "becomeInstructorBannerTitle": "Become a Exercio Instructor",
       "becomeInstructorBannerDesc": "Share your profile, accept bookings, and grow your personal brand.",
       "dismissBanner": "Dismiss",
       "learnMore": "Learn more"
@@ -913,10 +913,10 @@
     "title": "Contact",
     "comingSoon": "Page coming soon",
     "heroTitle": "Need Help?",
-    "heroSubtitle": "Trainly connects people with trusted fitness professionals and makes finding the right trainer simple and transparent. Have a question, encountered a problem, or have an idea for improving the platform? We'd love to hear from you.",
+    "heroSubtitle": "Exercio connects people with trusted fitness professionals and makes finding the right trainer simple and transparent. Have a question, encountered a problem, or have an idea for improving the platform? We'd love to hear from you.",
     "selectCategory": "Select a category",
     "faqTitle": "Frequently Asked Questions",
-    "faqSubtitle": "Quick answers to common questions about Trainly",
+    "faqSubtitle": "Quick answers to common questions about Exercio",
     "faq": {
       "bookTrainer": {
         "question": "How do I book a trainer?",
@@ -927,7 +927,7 @@
         "answer": "Yes, you can cancel a booking free of charge up to the specified notice period (usually 24 hours before the session). Go to your dashboard, find the booking, and click \"Cancel\". For guest bookings, use the cancellation link from your confirmation email."
       },
       "becomeTrainer": {
-        "question": "How do I become a trainer on Trainly?",
+        "question": "How do I become a trainer on Exercio?",
         "answer": "You can register directly as an instructor when creating an account. If you already have a client account, there's no need to create a new one — go to your client dashboard and click \"Become an Instructor\". Fill in your profile with experience, specializations, and availability. Once published, clients will be able to find and book you."
       },
       "profileNotVisible": {
@@ -939,7 +939,7 @@
         "answer": "Trainers can accept various payment methods including cash, card payments, BLIK, and bank transfers. The available options are set by each trainer and displayed on their profile. Payment is arranged directly between you and the trainer."
       },
       "contactSupport": {
-        "question": "How can I contact Trainly support?",
+        "question": "How can I contact Exercio support?",
         "answer": "Use the contact form on this page to send us a message. Select the appropriate category so we can route your inquiry to the right team. We typically respond within 24 hours during business days."
       },
       "manualBooking": {
@@ -948,11 +948,11 @@
       },
       "trainWithoutAccount": {
         "question": "Can I train people who don't have an account?",
-        "answer": "Yes, you can train with anyone regardless of whether they have a Trainly account. You can manually add sessions for them through your calendar, and they will receive email confirmations and reminders."
+        "answer": "Yes, you can train with anyone regardless of whether they have a Exercio account. You can manually add sessions for them through your calendar, and they will receive email confirmations and reminders."
       },
       "guestReview": {
         "question": "Can I leave a review as a guest?",
-        "answer": "Yes, after a completed session, you will receive an email with a link to leave a review. This allows guests to share their experience even without creating an account on Trainly."
+        "answer": "Yes, after a completed session, you will receive an email with a link to leave a review. This allows guests to share their experience even without creating an account on Exercio."
       },
       "guestCancellation": {
         "question": "Can I cancel a session as a guest?",
@@ -1025,7 +1025,7 @@
     "comingSoon": "Page coming soon"
   },
   "CookieBanner": {
-    "title": "🍪 Welcome to Trainly!",
+    "title": "🍪 Welcome to Exercio!",
     "description": "We use cookies to provide you with the best experience on our platform. Necessary cookies are always active, and you can customize the rest.",
     "acceptAll": "Accept All",
     "acceptNecessary": "Only Necessary",
@@ -1051,7 +1051,7 @@
   },
   "Cookies": {
     "title": "Cookie Policy",
-    "intro": "This Cookie Policy explains how Trainly uses cookies and similar tracking technologies on our platform. It explains what cookies are, why we use them, and how you can control their use.",
+    "intro": "This Cookie Policy explains how Exercio uses cookies and similar tracking technologies on our platform. It explains what cookies are, why we use them, and how you can control their use.",
     "whatAreCookies": "What Are Cookies?",
     "whatAreCookiesDesc": "Cookies are small text files that are stored on your device (computer, tablet, or mobile) when you visit a website. They are widely used to make websites work more efficiently and provide information to the website owners.",
     "howWeUse": "How We Use Cookies",
@@ -1483,7 +1483,7 @@
     }
   },
   "EnterpriseApply": {
-    "title": "Join Trainly as a Partner",
+    "title": "Join Exercio as a Partner",
     "subtitle": "Fill out the form and we'll get back to you within 24 hours to discuss partnership opportunities.",
     "whyEnterprise": "Why become a Partner?",
     "benefits": {
@@ -1501,7 +1501,7 @@
       },
       "brand": {
         "title": "Greater Visibility",
-        "description": "Your company will appear alongside instructors in Trainly search results."
+        "description": "Your company will appear alongside instructors in Exercio search results."
       }
     },
     "howItWorks": {
@@ -1540,7 +1540,7 @@
       "city": "e.g. New York",
       "phone": "+1 234 567 890",
       "website": "https://yourwebsite.com",
-      "message": "Describe your business and what you expect from partnering with Trainly.",
+      "message": "Describe your business and what you expect from partnering with Exercio.",
       "businessType": "Select business type",
       "instructorCount": "Select count"
     },
@@ -1562,7 +1562,7 @@
   "PartnerPage": {
     "badge": "For Businesses",
     "heroTitle": "Showcase your business where clients find instructors",
-    "heroSubtitle": "Create a professional company profile, present your instructors, add photos and media, and increase your visibility in Trainly search.",
+    "heroSubtitle": "Create a professional company profile, present your instructors, add photos and media, and increase your visibility in Exercio search.",
     "ctaButton": "Start partnership",
     "backToRegister": "Back to registration",
     "benefitsTitle": "What you get",
@@ -1574,7 +1574,7 @@
     "benefitMediaTitle": "Photos, videos & social media",
     "benefitMediaDesc": "Add photos, videos, and links to events or your social media channels.",
     "benefitSearchTitle": "Reach people looking for classes in your area",
-    "benefitSearchDesc": "Your company will appear alongside instructors in Trainly search results.",
+    "benefitSearchDesc": "Your company will appear alongside instructors in Exercio search results.",
     "howItWorksTitle": "How it works",
     "howItWorksSubtitle": "Get started in 4 simple steps.",
     "step1Title": "Submit your application",
@@ -1585,8 +1585,8 @@
     "step3Desc": "You'll receive an activation link to set up your account password.",
     "step4Title": "Publish your profile and invite instructors",
     "step4Desc": "Invite instructors and start attracting clients.",
-    "forWhomTitle": "Who is Trainly Business for?",
-    "forWhomSubtitle": "Whether you run a gym, yoga studio, or sports academy — Trainly helps you reach new clients.",
+    "forWhomTitle": "Who is Exercio Business for?",
+    "forWhomSubtitle": "Whether you run a gym, yoga studio, or sports academy — Exercio helps you reach new clients.",
     "forWhomGym": "Gyms",
     "forWhomDance": "Dance Schools",
     "forWhomSwim": "Swimming Schools",
@@ -1595,7 +1595,7 @@
     "forWhomTennis": "Tennis Academies",
     "forWhomSports": "Sports Academies",
     "ctaSectionTitle": "Ready to grow your business?",
-    "ctaSectionSubtitle": "Fill out the form and we'll contact you within 24 hours to discuss how Trainly can help your business.",
+    "ctaSectionSubtitle": "Fill out the form and we'll contact you within 24 hours to discuss how Exercio can help your business.",
     "contactUs": "Contact us instead"
   }
 }

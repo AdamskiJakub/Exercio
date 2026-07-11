@@ -12,13 +12,13 @@ import {
 export const VERIFICATION_TEXTS: Record<'pl' | 'en', VerificationEmailContent> =
   {
     pl: {
-      title: 'Witaj w Trainly! 🎉',
+      title: 'Witaj w Exercio! 🎉',
       subtitle: 'Twój kod weryfikacyjny:',
       expires: 'Kod wygasa za 10 minut.',
       footer: 'Jeśli nie zakładałeś konta, zignoruj tego emaila.',
     },
     en: {
-      title: 'Welcome to Trainly! 🎉',
+      title: 'Welcome to Exercio! 🎉',
       subtitle: 'Your verification code:',
       expires: 'Code expires in 10 minutes.',
       footer: "If you didn't create an account, please ignore this email.",
@@ -60,7 +60,7 @@ export const BOOKING_TEXTS = {
       cancelInfo:
         'Jeśli nie możesz wziąć udziału, anuluj sesję klikając przycisk poniżej.',
       cancelButton: 'Anuluj sesję',
-      footer: 'Dziękujemy za skorzystanie z Trainly!',
+      footer: 'Dziękujemy za skorzystanie z Exercio!',
     },
     en: {
       title: 'Booking Confirmed! 🎉',
@@ -73,7 +73,7 @@ export const BOOKING_TEXTS = {
       cancelInfo:
         'If you cannot attend, cancel the session by clicking the button below.',
       cancelButton: 'Cancel Session',
-      footer: 'Thank you for using Trainly!',
+      footer: 'Thank you for using Exercio!',
     },
   },
 
@@ -88,7 +88,7 @@ export const BOOKING_TEXTS = {
       minutes: 'min',
       cancelInfo: 'Aby zarządzać sesją, przejdź do swojego panelu.',
       cancelButton: 'Przejdź do panelu',
-      footer: 'Dziękujemy za skorzystanie z Trainly!',
+      footer: 'Dziękujemy za skorzystanie z Exercio!',
     },
     en: {
       title: 'Booking Confirmed! 🎉',
@@ -100,7 +100,7 @@ export const BOOKING_TEXTS = {
       minutes: 'min',
       cancelInfo: 'To manage your session, go to your dashboard.',
       cancelButton: 'Go to Dashboard',
-      footer: 'Thank you for using Trainly!',
+      footer: 'Thank you for using Exercio!',
     },
   },
 };
@@ -113,7 +113,7 @@ export const CANCELLATION_TEXTS = {
       dateLabel: 'Data',
       timeLabel: 'Godzina',
       reasonLabel: 'Powód',
-      footer: 'Możesz zarezerwować nowy termin na Trainly.',
+      footer: 'Możesz zarezerwować nowy termin na Exercio.',
     },
     en: {
       title: 'Session Cancelled by Instructor',
@@ -121,7 +121,7 @@ export const CANCELLATION_TEXTS = {
       dateLabel: 'Date',
       timeLabel: 'Time',
       reasonLabel: 'Reason',
-      footer: 'You can book a new session on Trainly.',
+      footer: 'You can book a new session on Exercio.',
     },
   },
 
@@ -132,7 +132,7 @@ export const CANCELLATION_TEXTS = {
       dateLabel: 'Data',
       timeLabel: 'Godzina',
       reasonLabel: 'Powód',
-      footer: 'Sprawdź swój kalendarz na Trainly.',
+      footer: 'Sprawdź swój kalendarz na Exercio.',
     },
     en: {
       title: 'Session Cancelled by Client',
@@ -140,7 +140,7 @@ export const CANCELLATION_TEXTS = {
       dateLabel: 'Date',
       timeLabel: 'Time',
       reasonLabel: 'Reason',
-      footer: 'Check your calendar on Trainly.',
+      footer: 'Check your calendar on Exercio.',
     },
   },
 };
@@ -159,7 +159,7 @@ export const INFO_EMAIL_TEXTS = {
       cancelInfo:
         'Możesz potwierdzić lub odrzucić tę sesję w swoim panelu użytkownika.',
       cancelButton: 'Przejdź do panelu',
-      footer: 'Dziękujemy za skorzystanie z Trainly!',
+      footer: 'Dziękujemy za skorzystanie z Exercio!',
     },
     en: {
       title: 'New Session from Instructor 📅',
@@ -172,7 +172,7 @@ export const INFO_EMAIL_TEXTS = {
       minutes: 'min',
       cancelInfo: 'You can confirm or reject this session in your dashboard.',
       cancelButton: 'Go to Dashboard',
-      footer: 'Thank you for using Trainly!',
+      footer: 'Thank you for using Exercio!',
     },
   },
 
@@ -188,7 +188,7 @@ export const INFO_EMAIL_TEXTS = {
       cancelInfo:
         'Jeśli nie możesz wziąć udziału, anuluj sesję klikając przycisk poniżej.',
       cancelButton: 'Anuluj sesję',
-      footer: 'Dziękujemy za skorzystanie z Trainly!',
+      footer: 'Dziękujemy za skorzystanie z Exercio!',
     },
     en: {
       title: 'New Session from Instructor 📅',
@@ -201,7 +201,7 @@ export const INFO_EMAIL_TEXTS = {
       cancelInfo:
         'If you cannot attend, cancel the session by clicking the button below.',
       cancelButton: 'Cancel Session',
-      footer: 'Thank you for using Trainly!',
+      footer: 'Thank you for using Exercio!',
     },
   },
 
@@ -214,7 +214,7 @@ export const INFO_EMAIL_TEXTS = {
       durationLabel: 'Czas trwania',
       priceLabel: 'Cena',
       minutes: 'min',
-      footer: 'Sprawdź swój kalendarz na Trainly.',
+      footer: 'Sprawdź swój kalendarz na Exercio.',
       clientLabel: 'Klient',
     },
     en: {
@@ -225,7 +225,7 @@ export const INFO_EMAIL_TEXTS = {
       durationLabel: 'Duration',
       priceLabel: 'Price',
       minutes: 'min',
-      footer: 'Check your calendar on Trainly.',
+      footer: 'Check your calendar on Exercio.',
       clientLabel: 'Client',
     },
   },
@@ -239,7 +239,7 @@ export const INFO_EMAIL_TEXTS = {
       durationLabel: 'Czas trwania',
       priceLabel: 'Cena',
       minutes: 'min',
-      footer: 'Sprawdź swój kalendarz na Trainly.',
+      footer: 'Sprawdź swój kalendarz na Exercio.',
       clientLabel: 'Klient',
       clientEmailLabel: 'Email klienta',
     },
@@ -251,7 +251,7 @@ export const INFO_EMAIL_TEXTS = {
       durationLabel: 'Duration',
       priceLabel: 'Price',
       minutes: 'min',
-      footer: 'Check your calendar on Trainly.',
+      footer: 'Check your calendar on Exercio.',
       clientLabel: 'Client',
       clientEmailLabel: 'Client email',
     },
@@ -272,7 +272,7 @@ export const REVIEW_INVITATION_TEXTS: Record<
     durationLabel: 'Czas trwania',
     minutes: 'min',
     reviewButton: 'Wystaw opinię',
-    footer: 'Dziękujemy za skorzystanie z Trainly!',
+    footer: 'Dziękujemy za skorzystanie z Exercio!',
   },
   en: {
     title: 'Session Completed — Leave a Review! ⭐',
@@ -284,7 +284,7 @@ export const REVIEW_INVITATION_TEXTS: Record<
     durationLabel: 'Duration',
     minutes: 'min',
     reviewButton: 'Leave a Review',
-    footer: 'Thank you for using Trainly!',
+    footer: 'Thank you for using Exercio!',
   },
 };
 
@@ -294,7 +294,7 @@ export const ENTERPRISE_LEAD_TEXTS: Record<
 > = {
   pl: {
     title: 'Nowe zgłoszenie partnerskie 🏢',
-    subtitle: 'Firma wypełniła formularz partnerski na Trainly.',
+    subtitle: 'Firma wypełniła formularz partnerski na Exercio.',
     companyLabel: 'Nazwa firmy',
     emailLabel: 'Email',
     phoneLabel: 'Telefon',
@@ -303,11 +303,11 @@ export const ENTERPRISE_LEAD_TEXTS: Record<
     messageLabel: 'Wiadomość',
     leadIdLabel: 'ID zgłoszenia',
     approveHint: 'Aby zatwierdzić, uruchom: npm run enterprise:approve',
-    footer: 'Otrzymano z formularza partnerskiego Trainly.',
+    footer: 'Otrzymano z formularza partnerskiego Exercio.',
   },
   en: {
     title: 'New Enterprise Lead 🏢',
-    subtitle: 'A company has submitted a partner inquiry on Trainly.',
+    subtitle: 'A company has submitted a partner inquiry on Exercio.',
     companyLabel: 'Company Name',
     emailLabel: 'Email',
     phoneLabel: 'Phone',
@@ -316,7 +316,7 @@ export const ENTERPRISE_LEAD_TEXTS: Record<
     messageLabel: 'Message',
     leadIdLabel: 'Lead ID',
     approveHint: 'To approve, run: npm run enterprise:approve',
-    footer: 'Received from Trainly partner inquiry form.',
+    footer: 'Received from Exercio partner inquiry form.',
   },
 };
 

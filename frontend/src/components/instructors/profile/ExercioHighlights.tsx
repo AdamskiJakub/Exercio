@@ -4,11 +4,11 @@ import { useTranslations } from "next-intl";
 import { Star, CheckCircle2, Clock, ThumbsUp } from "lucide-react";
 import type { InstructorProfile } from "@/types";
 
-interface TrainlyHighlightsProps {
+interface ExercioHighlightsProps {
   profile: InstructorProfile;
 }
 
-export function TrainlyHighlights({ profile }: TrainlyHighlightsProps) {
+export function ExercioHighlights({ profile }: ExercioHighlightsProps) {
   const t = useTranslations("InstructorProfile");
 
   const items: Array<{ icon: React.ReactNode; label: string }> = [];

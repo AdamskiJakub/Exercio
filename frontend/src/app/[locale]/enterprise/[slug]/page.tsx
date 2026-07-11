@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Not Found" };
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://trainly.pl";
-  const title = `${enterprise.companyName} — Trainly`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
+  const title = `${enterprise.companyName} — Exercio`;
   const description =
-    enterprise.shortDescription || `${enterprise.companyName} on Trainly`;
+    enterprise.shortDescription || `${enterprise.companyName} on Exercio`;
 
   return {
     title,
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "profile",
       locale: locale === "pl" ? "pl_PL" : "en_US",
-      siteName: "Trainly",
+      siteName: "Exercio",
       url: `${siteUrl}/${locale}/enterprise/${slug}`,
       images: enterprise.logoUrl
         ? [

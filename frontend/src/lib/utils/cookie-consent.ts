@@ -13,10 +13,10 @@ export interface CookieConsent {
   version: number;
 }
 
-const CONSENT_KEY = "trainly_cookie_consent";
+const CONSENT_KEY = "exercio_cookie_consent";
 const CONSENT_VERSION = 1;
 
-const CONSENT_COOKIE_FLAG = "trainly_consent";
+const CONSENT_COOKIE_FLAG = "exercio_consent";
 
 const DEFAULT_CONSENT: CookieConsent = {
   accepted: false,

@@ -45,7 +45,7 @@ export class EmailService {
 
     this.fromEmail =
       this.configService.get<string>('RESEND_FROM_EMAIL') ??
-      '"Trainly" <onboarding@resend.dev>';
+      '"Exercio" <onboarding@resend.dev>';
 
     if (apiKey) {
       this.resend = new Resend(apiKey);

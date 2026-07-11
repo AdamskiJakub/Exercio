@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>()(
         })),
     }),
     {
-      name: "trainly-auth",
+      name: "exercio-auth",
       version: 1,
       migrate: (persistedState: any, version: number) => {
         if (version === 0) {

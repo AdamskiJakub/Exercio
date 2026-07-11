@@ -37,7 +37,7 @@ export class ContactService {
 
       await this.emailService.sendRawEmail(
         'burguntowy@gmail.com',
-        `[Trainly] Nowa wiadomość kontaktowa - ${dto.category}`,
+        `[Exercio] Nowa wiadomość kontaktowa - ${dto.category}`,
         html,
       );
 

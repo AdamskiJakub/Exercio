@@ -129,48 +129,48 @@
   }
 }
 
-/* 🎨 TRAINLY CUSTOM COLORS */
+/* 🎨 EXERCIO CUSTOM COLORS */
 @layer theme {
   :root {
-    --color-trainly-orange: oklch(0.7 0.18 35);
-    --color-trainly-coral: oklch(0.75 0.15 40);
-    --color-trainly-blue: oklch(0.45 0.15 250);
-    --color-trainly-purple: oklch(0.6 0.18 290);
-    --color-trainly-green: oklch(0.65 0.18 150);
+    --color-exercio-orange: oklch(0.7 0.18 35);
+    --color-exercio-coral: oklch(0.75 0.15 40);
+    --color-exercio-blue: oklch(0.45 0.15 250);
+    --color-exercio-purple: oklch(0.6 0.18 290);
+    --color-exercio-green: oklch(0.65 0.18 150);
   }
 
   .dark {
-    --color-trainly-orange: oklch(0.75 0.2 35);
-    --color-trainly-coral: oklch(0.8 0.18 40);
-    --color-trainly-blue: oklch(0.55 0.18 250);
-    --color-trainly-purple: oklch(0.68 0.2 290);
-    --color-trainly-green: oklch(0.7 0.2 150);
+    --color-exercio-orange: oklch(0.75 0.2 35);
+    --color-exercio-coral: oklch(0.8 0.18 40);
+    --color-exercio-blue: oklch(0.55 0.18 250);
+    --color-exercio-purple: oklch(0.68 0.2 290);
+    --color-exercio-green: oklch(0.7 0.2 150);
   }
 }
 
-/* 🎯 TRAINLY UTILITY CLASSES */
+/* 🎯 EXERCIO UTILITY CLASSES */
 @layer utilities {
-  .gradient-trainly-primary {
+  .gradient-exercio-primary {
     background: linear-gradient(
       to right,
-      var(--color-trainly-orange),
-      var(--color-trainly-coral)
+      var(--color-exercio-orange),
+      var(--color-exercio-coral)
     );
   }
 
-  .gradient-trainly-premium {
+  .gradient-exercio-premium {
     background: linear-gradient(
       to right,
-      var(--color-trainly-purple),
-      var(--color-trainly-blue)
+      var(--color-exercio-purple),
+      var(--color-exercio-blue)
     );
   }
 
-  .text-gradient-trainly {
+  .text-gradient-exercio {
     background: linear-gradient(
       to right,
-      var(--color-trainly-orange),
-      var(--color-trainly-purple)
+      var(--color-exercio-orange),
+      var(--color-exercio-purple)
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -178,7 +178,7 @@
   }
 }
 
-/* 🎬 TRAINLY ANIMATIONS */
+/* 🎬 EXERCIO ANIMATIONS */
 @layer utilities {
   @keyframes pulse-slow {
     0%,

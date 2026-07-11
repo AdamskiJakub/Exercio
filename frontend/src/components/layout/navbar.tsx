@@ -41,7 +41,7 @@ export function Navbar() {
               aria-hidden="true"
             />
             <span className="text-3xl font-bold bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-              Trainly
+              Exercio
             </span>
           </Link>
 
@@ -111,7 +111,7 @@ export function Navbar() {
                       <SheetHeader className="border-b border-slate-800 p-6">
                         <SheetTitle className="text-white text-lg flex items-center gap-2">
                           <DumbbellIcon className="size-5 text-orange-500" />
-                          Trainly
+                          Exercio
                         </SheetTitle>
                       </SheetHeader>
 

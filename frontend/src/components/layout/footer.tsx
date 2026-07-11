@@ -23,7 +23,7 @@ export function Footer() {
                 aria-hidden="true"
               />
               <span className="text-2xl font-bold bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                Trainly
+                Exercio
               </span>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed">
@@ -107,7 +107,7 @@ export function Footer() {
         <div className="pt-8 border-t border-slate-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-slate-500 text-sm">
-              © {currentYear} Trainly. {t("allRightsReserved")}
+              © {currentYear} Exercio. {t("allRightsReserved")}
             </p>
 
             <div
