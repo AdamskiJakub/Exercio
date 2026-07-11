@@ -247,7 +247,6 @@
   }
 }
 
-/* 🔧 TRAINLY FORM OVERRIDES - Fix Shadcn dark mode backgrounds */
 @layer components {
   /* Override Input and Textarea dark backgrounds */
   .dark input[data-slot="input"],
