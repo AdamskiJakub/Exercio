@@ -1,4 +1,4 @@
-# 🏋️ Trainly
+# 🏋️ Exercio
 
 > Platform connecting fitness & wellness professionals with clients
 
@@ -8,9 +8,10 @@ Modern web application for booking training sessions, managing schedules, and gr
 
 ## 🎯 Overview
 
-Trainly is a marketplace platform designed for the fitness and wellness industry. It enables trainers, instructors, and coaches to showcase their services, manage availability, and accept bookings from clients.
+Exercio is a marketplace platform designed for the fitness and wellness industry. It enables trainers, instructors, and coaches to showcase their services, manage availability, and accept bookings from clients.
 
 **Target Users:**
+
 - 👨‍🏫 Personal trainers, yoga instructors, dance teachers
 - 💆 Massage therapists, physiotherapists, wellness coaches
 - 🏃 Clients looking for professional training services
@@ -31,12 +32,14 @@ Trainly is a marketplace platform designed for the fitness and wellness industry
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **NestJS** - Progressive Node.js framework
 - **Prisma ORM** - Type-safe database access with PostgreSQL
 - **JWT** - Authentication & authorization
 - **TypeScript** - Type safety across the stack
 
 ### Frontend
+
 - **Next.js 15** - React framework with App Router
 - **Tailwind CSS** - Utility-first styling
 - **shadcn/ui** - High-quality UI components
@@ -44,6 +47,7 @@ Trainly is a marketplace platform designed for the fitness and wellness industry
 - **next-intl** - i18n solution
 
 ### Infrastructure
+
 - **Docker Compose** - Local development environment
 - **PostgreSQL** - Relational database
 
@@ -60,30 +64,34 @@ Trainly is a marketplace platform designed for the fitness and wellness industry
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
-   git clone https://github.com/AdamskiJakub/trainly.git
-   cd trainly
+   git clone https://github.com/AdamskiJakub/exercio.git
+   cd exercio
    ```
 
 2. **Start the database**
+
    ```bash
    docker-compose up -d
    ```
 
 3. **Backend setup**
+
    ```bash
    cd backend
    pnpm install
-   
+
    # Setup database
    pnpm run prisma:generate
    pnpm run prisma:migrate:dev
-   
+
    # Start development server
    pnpm run start:dev
    ```
 
 4. **Frontend setup** (in new terminal)
+
    ```bash
    cd frontend
    pnpm install
@@ -100,7 +108,7 @@ Trainly is a marketplace platform designed for the fitness and wellness industry
 ## 📁 Project Structure
 
 ```
-trainly/
+exercio/
 ├── backend/              # NestJS REST API
 │   ├── src/
 │   │   ├── auth/        # Authentication module
@@ -128,6 +136,7 @@ trainly/
 Create `.env` files in backend and frontend directories:
 
 **Backend (.env)**
+
 ```env
 DATABASE_URL="postgresql://..."
 JWT_SECRET="your-secret-key"
@@ -135,6 +144,7 @@ CORS_ORIGIN="http://localhost:3000"
 ```
 
 **Frontend (.env.local)**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```

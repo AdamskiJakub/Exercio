@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api";
 
 export interface BookingUser {
   id: string;
@@ -24,24 +24,28 @@ export interface Booking {
   clientId: string | null;
   startTime: string;
   endTime: string;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED';
+  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "EXPIRED";
   notes: string | null;
   guestName: string | null;
   guestEmail: string | null;
   guestPhone: string | null;
   cancelledBy: string | null;
   cancellationReason: string | null;
+  cancelledAt: string | null;
   createdAt: string;
   updatedAt: string;
+  isManualBooking: boolean;
   client: BookingUser | null;
   instructorUser: InstructorUser;
 }
 
-export function useMyBookings(role: 'client' | 'instructor') {
+export function useMyBookings(role: "client" | "instructor") {
   return useQuery({
-    queryKey: ['bookings', 'my', role],
+    queryKey: ["bookings", "my", role],
     queryFn: async () => {
-      const response = await apiClient.get<Booking[]>(`/bookings/my?role=${role}`);
+      const response = await apiClient.get<Booking[]>(
+        `/bookings/my?role=${role}`,
+      );
       return response.data;
     },
   });

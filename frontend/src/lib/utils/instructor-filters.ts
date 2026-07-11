@@ -1,31 +1,30 @@
-import type { InstructorListing } from '@/types';
-import type { InstructorFilters } from '@/types/filters';
-
+import type { InstructorListing } from "@/types";
+import type { InstructorFilters } from "@/types/filters";
 
 export function filterAndSortInstructors(
   instructors: InstructorListing[],
-  filters: InstructorFilters
+  filters: InstructorFilters,
 ): InstructorListing[] {
   const result = [...instructors];
 
   switch (filters.sortBy) {
-    case 'price-asc':
+    case "price-asc":
       return result.sort((a, b) => {
         const priceA = a.hourlyRate ?? Infinity;
         const priceB = b.hourlyRate ?? Infinity;
-        if (priceA === priceB) return 0; // Handle both null/undefined
+        if (priceA === priceB) return 0;
         return priceA - priceB;
       });
 
-    case 'price-desc':
+    case "price-desc":
       return result.sort((a, b) => {
         const priceA = a.hourlyRate ?? -Infinity;
         const priceB = b.hourlyRate ?? -Infinity;
-        if (priceA === priceB) return 0; // Handle both null/undefined
+        if (priceA === priceB) return 0;
         return priceB - priceA;
       });
 
-    case 'rating':
+    case "rating":
       return result.sort((a, b) => {
         const ratingA = a.averageRating ?? 0;
         const ratingB = b.averageRating ?? 0;
@@ -33,7 +32,19 @@ export function filterAndSortInstructors(
         return (b.reviewCount ?? 0) - (a.reviewCount ?? 0);
       });
 
-    case 'relevance':
+    case "most-reviewed":
+      return result.sort((a, b) => {
+        return (b.reviewCount ?? 0) - (a.reviewCount ?? 0);
+      });
+
+    case "newest":
+      return result.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        return dateB - dateA;
+      });
+
+    case "relevance":
     default:
       return result;
   }

@@ -1,5 +1,5 @@
-import { LucideIcon } from 'lucide-react';
-import { ReactNode } from 'react';
+import { LucideIcon } from "lucide-react";
+import { ReactNode } from "react";
 
 export interface DashboardCardProps {
   icon?: LucideIcon;
@@ -10,4 +10,5 @@ export interface DashboardCardProps {
   delay?: number;
   className?: string;
   hoverable?: boolean;
+  hoverColor?: string;
 }

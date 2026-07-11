@@ -1,68 +1,97 @@
-'use client';
+"use client";
 
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
-import { useLoginForm } from '@/hooks/useLoginForm';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
-import { AuthHeader } from '@/components/ui/auth-header';
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
+import { useLoginForm } from "@/hooks/useLoginForm";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
+import { AuthHeader } from "@/components/ui/auth-header";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+
+const OAUTH_PROVIDER_CONFLICT_REGEX =
+  /^This email is already registered with (\w+)\. Please use \1 to login\.$/;
+
+function parseOAuthError(error: string | null): {
+  type: "provider_conflict" | "unknown";
+  provider?: string;
+} {
+  if (!error) return { type: "unknown" };
+  const match = error.match(OAUTH_PROVIDER_CONFLICT_REGEX);
+  if (match) {
+    return { type: "provider_conflict", provider: match[1] };
+  }
+  return { type: "unknown" };
+}
 
 export default function LoginPage() {
-  const t = useTranslations('auth');
-  const { form, isLoading, error, onSubmit, clearServerError } = useLoginForm();
-  const { register, formState: { errors } } = form;
+  const t = useTranslations("auth");
+  const searchParams = useSearchParams();
+  const oauthError = useMemo(() => searchParams.get("error"), [searchParams]);
+  const parsedOAuthError = useMemo(
+    () => parseOAuthError(oauthError),
+    [oauthError],
+  );
+
+  const {
+    form,
+    isLoading,
+    error,
+    emailForVerification,
+    onSubmit,
+    clearServerError,
+  } = useLoginForm();
+  const {
+    register,
+    formState: { errors },
+  } = form;
 
   return (
     <div className="flex items-center justify-center py-16 px-4">
       <div className="w-full max-w-md">
-        <AuthHeader
-          title={t('login')}
-          subtitle={t('loginSubtitle')}
-        />
+        <AuthHeader title={t("login")} subtitle={t("loginSubtitle")} />
 
         {/* Form Card */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 shadow-2xl">
           <form onSubmit={onSubmit} noValidate className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email">{t('email')}</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input
-                {...register('email', {
+                {...register("email", {
                   onChange: clearServerError,
                 })}
                 id="email"
                 type="email"
                 placeholder="you@example.com"
-                aria-invalid={errors.email ? 'true' : 'false'}
+                aria-invalid={errors.email ? "true" : "false"}
               />
               {errors.email && errors.email.message && (
-                <p className="text-sm text-red-500">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t('password')}</Label>
+                <Label htmlFor="password">{t("password")}</Label>
                 <Link
                   href="/forgot-password"
                   className="text-sm text-orange-500 hover:text-orange-400 font-medium transition-colors"
                 >
-                  {t('forgotPassword')}
+                  {t("forgotPassword")}
                 </Link>
               </div>
               <Input
-                {...register('password', {
+                {...register("password", {
                   onChange: clearServerError,
                 })}
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                aria-invalid={errors.password ? 'true' : 'false'}
+                aria-invalid={errors.password ? "true" : "false"}
               />
               {errors.password && errors.password.message && (
                 <p className="text-sm text-red-500">
@@ -71,10 +100,35 @@ export default function LoginPage() {
               )}
             </div>
 
+            {/* OAuth Error — shown when redirect from failed OAuth login */}
+            {oauthError && (
+              <div
+                className="bg-red-500/10 border border-red-500/50 rounded-lg p-3"
+                role="alert"
+              >
+                <p className="text-red-400 text-sm">
+                  {parsedOAuthError.type === "provider_conflict" &&
+                  parsedOAuthError.provider
+                    ? t("oauthProviderConflict", {
+                        provider: parsedOAuthError.provider,
+                      })
+                    : oauthError}
+                </p>
+              </div>
+            )}
+
             {/* Server Error */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3">
                 <p className="text-red-400 text-sm">{error}</p>
+                {emailForVerification && (
+                  <a
+                    href={`/pl/verify-email?email=${encodeURIComponent(emailForVerification)}`}
+                    className="text-orange-400 hover:text-orange-300 font-semibold text-sm mt-2 block underline"
+                  >
+                    {t("verifyEmailNow")}
+                  </a>
+                )}
               </div>
             )}
 
@@ -84,7 +138,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full bg-linear-to-r from-orange-500 to-red-500 text-white font-semibold hover:from-orange-600 hover:to-red-600"
             >
-              {isLoading ? t('loggingIn') : t('login')}
+              {isLoading ? t("loggingIn") : t("login")}
             </Button>
           </form>
 
@@ -95,12 +149,12 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-slate-300 text-base">
-              {t('noAccount')}{' '}
+              {t("noAccount")}{" "}
               <Link
                 href="/register"
                 className="text-orange-500 hover:text-orange-400 font-semibold transition-colors"
               >
-                {t('signUp')}
+                {t("signUp")}
               </Link>
             </p>
           </div>

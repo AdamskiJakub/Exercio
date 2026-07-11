@@ -1,8 +1,8 @@
 {
-  "name": "trainly-monorepo",
+  "name": "exercio-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "Trainly - Marketplace for personal trainers and fitness instructors",
+  "description": "Exercio - Marketplace for personal trainers and fitness instructors",
   "scripts": {
     "dev": "concurrently -n \"backend,frontend\" -c \"bgBlue.bold,bgMagenta.bold\" \"pnpm --filter backend start:dev\" \"pnpm --filter frontend dev\"",
     "dev:backend": "pnpm --filter backend start:dev",

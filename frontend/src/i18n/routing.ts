@@ -1,125 +1,153 @@
-import { defineRouting } from 'next-intl/routing';
-import { createNavigation } from 'next-intl/navigation';
+import { defineRouting } from "next-intl/routing";
+import { createNavigation } from "next-intl/navigation";
 
 export const routing = defineRouting({
   // A list of all locales that are supported
-  locales: ['pl', 'en'],
+  locales: ["pl", "en"],
 
   // Used when no locale matches
-  defaultLocale: 'pl',
-  
+  defaultLocale: "pl",
+
   // Always show locale prefix in URL
-  localePrefix: 'always',
-  
+  localePrefix: "always",
+
   // Localized pathnames (folder names stay in English!)
   pathnames: {
-    '/': {
-      pl: '/',
-      en: '/',
+    "/": {
+      pl: "/",
+      en: "/",
     },
-    '/login': {
-      pl: '/logowanie',
-      en: '/login',
+    "/login": {
+      pl: "/logowanie",
+      en: "/login",
     },
-    '/register': {
-      pl: '/rejestracja',
-      en: '/register',
+    "/register": {
+      pl: "/rejestracja",
+      en: "/register",
     },
-    '/register/client': {
-      pl: '/rejestracja/klient',
-      en: '/register/client',
+    "/register/client": {
+      pl: "/rejestracja/klient",
+      en: "/register/client",
     },
-    '/register/instructor': {
-      pl: '/rejestracja/instruktor',
-      en: '/register/instructor',
+    "/register/instructor": {
+      pl: "/rejestracja/instruktor",
+      en: "/register/instructor",
     },
-    '/forgot-password': {
-      pl: '/zapomnialem-hasla',
-      en: '/forgot-password',
+    "/partner": {
+      pl: "/dla-firm",
+      en: "/partner",
     },
-    '/reset-password': {
-      pl: '/resetowanie-hasla',
-      en: '/reset-password',
+    "/enterprise/apply": {
+      pl: "/dla-firm/aplikuj",
+      en: "/enterprise/apply",
     },
-    '/verify-email': {
-      pl: '/weryfikacja-email',
-      en: '/verify-email',
+    "/forgot-password": {
+      pl: "/zapomnialem-hasla",
+      en: "/forgot-password",
     },
-    '/auth/callback': {
-      pl: '/auth/callback',
-      en: '/auth/callback',
+    "/reset-password": {
+      pl: "/resetowanie-hasla",
+      en: "/reset-password",
     },
-    '/dashboard': {
-      pl: '/panel',
-      en: '/dashboard',
+    "/verify-email": {
+      pl: "/weryfikacja-email",
+      en: "/verify-email",
     },
-    '/dashboard/profile': {
-      pl: '/panel/profil',
-      en: '/dashboard/profile',
+    "/auth/callback": {
+      pl: "/auth/callback",
+      en: "/auth/callback",
     },
-    '/dashboard/profile/edit': {
-      pl: '/panel/profil/edycja',
-      en: '/dashboard/profile/edit',
+    "/dashboard": {
+      pl: "/panel",
+      en: "/dashboard",
     },
-    '/dashboard/profile/preview': {
-      pl: '/panel/profil/podglad',
-      en: '/dashboard/profile/preview',
+    "/dashboard/profile": {
+      pl: "/panel/profil",
+      en: "/dashboard/profile",
     },
-    '/dashboard/settings': {
-      pl: '/panel/ustawienia',
-      en: '/dashboard/settings',
+    "/dashboard/profile/edit": {
+      pl: "/panel/profil/edycja",
+      en: "/dashboard/profile/edit",
     },
-    '/dashboard/calendar': {
-      pl: '/panel/kalendarz',
-      en: '/dashboard/calendar',
+    "/dashboard/profile/preview": {
+      pl: "/panel/profil/podglad",
+      en: "/dashboard/profile/preview",
     },
-    '/instructors': {
-      pl: '/instruktorzy',
-      en: '/instructors',
+    "/dashboard/settings": {
+      pl: "/panel/ustawienia",
+      en: "/dashboard/settings",
     },
-    '/instructors/[username]': {
-      pl: '/instruktorzy/[username]',
-      en: '/instructors/[username]',
+    "/dashboard/calendar": {
+      pl: "/panel/kalendarz",
+      en: "/dashboard/calendar",
     },
-    '/instructors/[username]/book': {
-      pl: '/instruktorzy/[username]/rezerwacja',
-      en: '/instructors/[username]/book',
+    "/dashboard/enterprise": {
+      pl: "/panel/firma",
+      en: "/dashboard/enterprise",
     },
-    '/how-it-works': {
-      pl: '/jak-to-dziala',
-      en: '/how-it-works',
+    "/dashboard/enterprise/profile": {
+      pl: "/panel/firma/profil",
+      en: "/dashboard/enterprise/profile",
     },
-    '/pricing': {
-      pl: '/cennik',
-      en: '/pricing',
+    "/dashboard/enterprise/instructors": {
+      pl: "/panel/firma/instruktorzy",
+      en: "/dashboard/enterprise/instructors",
     },
-    '/help': {
-      pl: '/pomoc',
-      en: '/help',
+    "/dashboard/enterprise/news": {
+      pl: "/panel/firma/aktualnosci",
+      en: "/dashboard/enterprise/news",
     },
-    '/contact': {
-      pl: '/kontakt',
-      en: '/contact',
+    "/dashboard/enterprise/settings": {
+      pl: "/panel/firma/ustawienia",
+      en: "/dashboard/enterprise/settings",
     },
-    '/faq': {
-      pl: '/faq',
-      en: '/faq',
+    "/instructors": {
+      pl: "/instruktorzy",
+      en: "/instructors",
     },
-    '/safety': {
-      pl: '/bezpieczenstwo',
-      en: '/safety',
+    "/instructors/[username]": {
+      pl: "/instruktorzy/[username]",
+      en: "/instructors/[username]",
     },
-    '/privacy': {
-      pl: '/polityka-prywatnosci',
-      en: '/privacy',
+    "/instructors/[username]/book": {
+      pl: "/instruktorzy/[username]/rezerwacja",
+      en: "/instructors/[username]/book",
     },
-    '/terms': {
-      pl: '/regulamin',
-      en: '/terms',
+    "/help": {
+      pl: "/pomoc",
+      en: "/help",
     },
-    '/cookies': {
-      pl: '/polityka-cookies',
-      en: '/cookies',
+    "/contact": {
+      pl: "/kontakt",
+      en: "/contact",
+    },
+    "/safety": {
+      pl: "/bezpieczenstwo",
+      en: "/safety",
+    },
+    "/privacy": {
+      pl: "/polityka-prywatnosci",
+      en: "/privacy",
+    },
+    "/terms": {
+      pl: "/regulamin",
+      en: "/terms",
+    },
+    "/review": {
+      pl: "/opinia",
+      en: "/review",
+    },
+    "/cookies": {
+      pl: "/polityka-cookies",
+      en: "/cookies",
+    },
+    "/activate": {
+      pl: "/aktywuj",
+      en: "/activate",
+    },
+    "/onboarding/instructor": {
+      pl: "/onboarding/instruktor",
+      en: "/onboarding/instructor",
     },
   },
 });

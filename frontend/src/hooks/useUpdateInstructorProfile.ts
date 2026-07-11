@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api';
-import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export interface UpdateInstructorProfileData {
   bio?: string | null;
@@ -26,30 +26,46 @@ export interface UpdateInstructorProfileData {
   showPhone?: boolean;
   showEmail?: boolean;
   contactMessage?: string | null;
+  // Booking settings
+  isBookingEnabled?: boolean;
+  sessionDuration?: number;
+  sessionPrice?: number | null;
+  minNoticeHours?: number;
 }
 
 interface UseUpdateInstructorProfileOptions {
   showToast?: boolean;
 }
 
-export function useUpdateInstructorProfile(options: UseUpdateInstructorProfileOptions = { showToast: false }) {
+export function useUpdateInstructorProfile(
+  options: UseUpdateInstructorProfileOptions = { showToast: false },
+) {
   const queryClient = useQueryClient();
-  const t = useTranslations('Dashboard.profileForm');
+  const t = useTranslations("Dashboard.profileForm");
 
   return useMutation({
-    mutationFn: async ({ profileId, data }: { profileId: string; data: UpdateInstructorProfileData }) => {
-      const response = await apiClient.patch(`/instructor-profiles/${profileId}`, data);
+    mutationFn: async ({
+      profileId,
+      data,
+    }: {
+      profileId: string;
+      data: UpdateInstructorProfileData;
+    }) => {
+      const response = await apiClient.patch(
+        `/instructor-profiles/${profileId}`,
+        data,
+      );
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['instructor-profile', 'me'] });
-      queryClient.invalidateQueries({ queryKey: ['instructors'] });
+      queryClient.invalidateQueries({ queryKey: ["instructor-profile", "me"] });
+      queryClient.invalidateQueries({ queryKey: ["instructors"] });
       if (options.showToast) {
-        toast.success(t('updateSuccess'));
+        toast.success(t("updateSuccess"));
       }
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || t('updateError');
+      const message = error.response?.data?.message || t("updateError");
       if (options.showToast) {
         toast.error(message);
       }

@@ -1,18 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
-import { useRouter } from '@/i18n/routing';
-import { useLocale } from 'next-intl';
-import { toast } from 'sonner';
-import { createVerifyEmailSchema, type VerifyEmailFormData } from '@/lib/validations/verify-email';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
+import { useLocale } from "next-intl";
+import { toast } from "sonner";
+import { useAuthStore } from "@/stores/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api";
+import {
+  createVerifyEmailSchema,
+  type VerifyEmailFormData,
+} from "@/lib/validations/verify-email";
 
 export function useVerifyEmailForm(initialEmail?: string) {
-  const t = useTranslations('auth');
+  const t = useTranslations("auth");
   const router = useRouter();
   const locale = useLocale();
+  const queryClient = useQueryClient();
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -20,42 +28,54 @@ export function useVerifyEmailForm(initialEmail?: string) {
 
   const form = useForm<VerifyEmailFormData>({
     resolver: zodResolver(createVerifyEmailSchema(t)),
-    mode: 'onSubmit',
+    mode: "onSubmit",
     defaultValues: {
-      email: initialEmail || '',
+      email: initialEmail || "",
     },
   });
 
-  const emailValue = form.watch('email');
+  const emailValue = form.watch("email");
 
   const onSubmit = async (data: VerifyEmailFormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-email?lang=${locale}`,
+      const response = await apiClient.post(
+        `/auth/verify-email?lang=${locale}`,
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: data.email,
-            code: data.code,
-          }),
-        }
+          email: data.email,
+          code: data.code,
+        },
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to verify email');
+      const result = response.data;
+
+      // Auto-login: save user data to auth store
+      if (result.user) {
+        setAuth(result.user);
       }
 
       setSuccess(true);
+
+      // Check if user registered as instructor — redirect to profile edit
+      const signupIntent = sessionStorage.getItem("signupIntent");
+      sessionStorage.removeItem("signupIntent");
+
+      // Redirect after 2 seconds
       setTimeout(() => {
-        router.push('/login');
+        queryClient.clear();
+        const locale = window.location.pathname.split("/")[1];
+        if (signupIntent === "instructor") {
+          window.location.href = `/${locale}/dashboard/profile/edit`;
+        } else {
+          window.location.href = `/${locale}/dashboard`;
+        }
       }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('verificationFailed'));
+    } catch (err: any) {
+      const errorMessage =
+        err?.response?.data?.message || err?.message || t("verificationFailed");
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +83,7 @@ export function useVerifyEmailForm(initialEmail?: string) {
 
   const handleResendCode = async () => {
     if (!emailValue) {
-      setError(t('emailRequired'));
+      setError(t("emailRequired"));
       return;
     }
 
@@ -71,22 +91,13 @@ export function useVerifyEmailForm(initialEmail?: string) {
     setError(null);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/send-verification?lang=${locale}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailValue }),
-        }
-      );
+      await apiClient.post(`/auth/send-verification?lang=${locale}`, {
+        email: emailValue,
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to resend code');
-      }
-
-      toast.success(t('codeResent'));
+      toast.success(t("codeResent"));
     } catch (err) {
-      setError(t('resendFailed'));
+      setError(t("resendFailed"));
     } finally {
       setIsResending(false);
     }

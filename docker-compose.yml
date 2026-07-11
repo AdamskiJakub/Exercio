@@ -1,28 +1,28 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: trainly-db
+    container_name: exercio-db
     restart: always
     environment:
-      POSTGRES_USER: trainly_user
-      POSTGRES_PASSWORD: trainly_password
-      POSTGRES_DB: trainly_db
+      POSTGRES_USER: exercio_user
+      POSTGRES_PASSWORD: exercio_password
+      POSTGRES_DB: exercio_db
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: trainly-pgadmin
+    container_name: exercio-pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@trainly.com
+      PGADMIN_DEFAULT_EMAIL: admin@exercio.app
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - '5050:80'
+      - "5050:80"
     depends_on:
       - postgres
 

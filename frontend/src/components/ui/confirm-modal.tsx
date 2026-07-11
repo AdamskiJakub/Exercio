@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Dialog,
@@ -6,8 +6,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ interface ConfirmModalProps {
   cancelText: string;
   isLoading?: boolean;
   loadingText?: string;
-  variant?: 'default' | 'danger';
+  variant?: "default" | "danger";
   children?: React.ReactNode;
 }
 
@@ -33,7 +33,7 @@ export function ConfirmModal({
   cancelText,
   isLoading = false,
   loadingText,
-  variant = 'default',
+  variant = "default",
   children,
 }: ConfirmModalProps) {
   const handleClose = () => {
@@ -42,31 +42,35 @@ export function ConfirmModal({
     }
   };
 
-  const confirmButtonClass = variant === 'danger' 
-    ? 'bg-red-500 hover:bg-red-600 text-white'
-    : 'bg-orange-500 hover:bg-orange-600 text-white';
+  const confirmButtonClass =
+    variant === "danger"
+      ? "bg-red-500 hover:bg-red-600 text-white"
+      : "bg-orange-500 hover:bg-orange-600 text-white";
 
-  const headerClass = variant === 'danger'
-    ? 'bg-gradient-to-r from-red-500 to-rose-500 -mx-4 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl'
-    : 'bg-gradient-to-r from-orange-500 to-red-500 -mx-4 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl';
+  const headerClass =
+    variant === "danger"
+      ? "bg-gradient-to-r from-red-600 to-rose-600 -mx-4 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl"
+      : "bg-gradient-to-r from-orange-600 to-red-600 -mx-4 -mt-6 px-6 pt-6 pb-4 mb-4 rounded-t-xl";
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-125 bg-slate-800 border-slate-700" aria-describedby={description ? undefined : 'dialog-description'}>
+      <DialogContent
+        className="sm:max-w-125 bg-slate-800 border-slate-700"
+        aria-describedby={description ? undefined : "dialog-description"}
+      >
         <DialogHeader className={headerClass}>
-          <DialogTitle className="text-xl text-white">
+          <DialogTitle className="text-xl text-white drop-shadow-sm">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-white/80" id="dialog-description">
-            {description || ' '}
+          <DialogDescription
+            className="text-white drop-shadow-sm"
+            id="dialog-description"
+          >
+            {description || " "}
           </DialogDescription>
         </DialogHeader>
 
-        {children && (
-          <div className="py-4">
-            {children}
-          </div>
-        )}
+        {children && <div className="py-4">{children}</div>}
 
         <div className="flex justify-end gap-3">
           <Button
@@ -82,7 +86,7 @@ export function ConfirmModal({
             disabled={isLoading}
             className={confirmButtonClass}
           >
-            {isLoading ? (loadingText || 'Processing...') : confirmText}
+            {isLoading ? loadingText || "Processing..." : confirmText}
           </Button>
         </div>
       </DialogContent>

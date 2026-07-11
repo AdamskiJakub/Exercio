@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AvailabilityService } from './availability.service';
-import { CreateAvailabilityDto } from './dto/create-availability.dto';
+import { InstructorProfilesService } from '../instructor-profiles/instructor-profiles.service';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { CreateAvailabilityExceptionDto } from './dto/create-availability-exception.dto';
 import { UpdateAvailabilityExceptionDto } from './dto/update-availability-exception.dto';
@@ -21,7 +21,10 @@ import { SetWeeklyAvailabilityDto } from './dto/set-weekly-availability.dto';
 
 @Controller('availability')
 export class AvailabilityController {
-  constructor(private readonly availabilityService: AvailabilityService) {}
+  constructor(
+    private readonly availabilityService: AvailabilityService,
+    private readonly instructorProfilesService: InstructorProfilesService,
+  ) {}
 
   // ==================== WEEKLY AVAILABILITY ====================
 
@@ -34,7 +37,10 @@ export class AvailabilityController {
   async getMyWeeklyAvailability(@Request() req) {
     try {
       // Find instructor profile by userId
-      const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+      const profile =
+        await this.instructorProfilesService.findInstructorProfileByUserIdOrThrow(
+          req.user.id,
+        );
       return this.availabilityService.getWeeklyAvailability(profile.id);
     } catch (error) {
       // If profile not found, return empty array
@@ -65,7 +71,10 @@ export class AvailabilityController {
     @Body() body: SetWeeklyAvailabilityDto,
   ) {
     // Find instructor profile by userId
-    const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+    const profile =
+      await this.instructorProfilesService.findInstructorProfileByUserIdOrThrow(
+        req.user.id,
+      );
     return this.availabilityService.setWeeklySchedule(
       req.user.id,
       profile.id,
@@ -98,10 +107,7 @@ export class AvailabilityController {
   @UseGuards(JwtAuthGuard)
   @Delete('weekly/:id')
   async deleteWeeklyAvailability(@Request() req, @Param('id') id: string) {
-    return this.availabilityService.deleteWeeklyAvailability(
-      req.user.id,
-      id,
-    );
+    return this.availabilityService.deleteWeeklyAvailability(req.user.id, id);
   }
 
   // ==================== AVAILABILITY EXCEPTIONS ====================
@@ -118,7 +124,10 @@ export class AvailabilityController {
     @Query('endDate') endDate?: string,
   ) {
     try {
-      const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+      const profile =
+        await this.instructorProfilesService.findInstructorProfileByUserIdOrThrow(
+          req.user.id,
+        );
       const start = startDate ? new Date(startDate) : undefined;
       const end = endDate ? new Date(endDate) : undefined;
 
@@ -166,7 +175,10 @@ export class AvailabilityController {
     @Request() req,
     @Body() dto: CreateAvailabilityExceptionDto,
   ) {
-    const profile = await this.availabilityService.findInstructorProfileByUserId(req.user.id);
+    const profile =
+      await this.instructorProfilesService.findInstructorProfileByUserIdOrThrow(
+        req.user.id,
+      );
     return this.availabilityService.createAvailabilityException(
       req.user.id,
       profile.id,
@@ -205,4 +217,3 @@ export class AvailabilityController {
     );
   }
 }
-

@@ -1,249 +1,418 @@
-'use client';
+"use client";
 
-import { Link } from '@/i18n/routing';
-import { useTranslations } from 'next-intl';
-import { useAuthStore } from '@/stores/auth-store';
-import { useMyBookings } from '@/hooks/useMyBookings';
-import { motion } from 'framer-motion';
-import { titleVariants } from '@/lib/animations';
-import { 
-  Calendar, 
-  Heart, 
-  MessageSquare, 
-  Star, 
-  Search,
+import { useTranslations, useLocale } from "next-intl";
+import { useAuthStore } from "@/stores/auth-store";
+import { useMyBookings } from "@/hooks/useMyBookings";
+import { usePendingReviews } from "@/hooks/useReviews";
+import { useReviewFlow } from "@/hooks/useReviewFlow";
+import {
+  Calendar,
+  Heart,
+  MessageSquare,
+  Star,
   FileText,
   TrendingUp,
-  Settings
-} from 'lucide-react';
-import { StatsCard } from './StatsCard';
-import { DashboardCard } from './DashboardCard';
-import { EmptyStateCard } from './EmptyStateCard';
-import { BookingsList } from '@/components/bookings/BookingsList';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { useClearHistory } from '@/hooks/useClearHistory';
-import { useState } from 'react';
-import { ConfirmModal } from '@/components/ui/confirm-modal';
+  Settings,
+  Clock,
+  UserCheck,
+  MapPin,
+  Rocket,
+} from "lucide-react";
+import { StatsCard } from "./StatsCard";
+import { DashboardCard } from "./DashboardCard";
+import { EmptyStateCard } from "./EmptyStateCard";
+import { DashboardHeader } from "./DashboardHeader";
+import { PendingReviewsSection } from "./PendingReviewsSection";
+import { BecomeInstructorBanner } from "./BecomeInstructorBanner";
+import { MyReviewsSection } from "./MyReviewsSection";
+import { BookingHistorySection } from "./BookingHistorySection";
+import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
+import { BookingsList } from "@/components/bookings/BookingsList";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useClearHistory } from "@/hooks/useClearHistory";
+import { useMyFavorites } from "@/hooks/useFavorites";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { useState, useMemo } from "react";
+import { useSpecializations } from "@/hooks/useConfig";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { scrollToSection } from "@/lib/utils/scroll";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { getInstructorName } from "@/lib/utils/user";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { format, isToday, parseISO, isThisWeek } from "date-fns";
+import { pl } from "date-fns/locale";
 
 export function ClientDashboard() {
-  const t = useTranslations('Dashboard.client');
+  const t = useTranslations("Dashboard.client");
+  const locale = useLocale();
+  const { specializations } = useSpecializations();
+  const tb = useTranslations("Booking");
   const { user } = useAuthStore();
-  const { data: bookings, isLoading: bookingsLoading } = useMyBookings('client');
+  const { data: bookings, isLoading: bookingsLoading } =
+    useMyBookings("client");
+  const { data: pendingReviews, isLoading: pendingReviewsLoading } =
+    usePendingReviews();
+  const { data: favorites } = useMyFavorites();
+  const { data: recentlyViewed, isLoading: recentlyViewedLoading } =
+    useRecentlyViewed();
   const clearHistory = useClearHistory();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // Filter upcoming bookings (pending or confirmed, in the future)
-  const now = new Date();
-  const upcomingBookings = bookings?.filter(booking => 
-    (booking.status === 'PENDING' || booking.status === 'CONFIRMED') &&
-    new Date(booking.startTime) > now
-  ) || [];
+  // Review flow state & handlers
+  const {
+    reviewFormOpen,
+    selectedBookingForReview,
+    reviewIndex,
+    handleOpenReview,
+    handleReviewSuccess,
+    handleReviewClose,
+  } = useReviewFlow();
 
-  const completedBookings = bookings?.filter(booking => 
-    booking.status === 'COMPLETED'
-  ) || [];
+  // Filter bookings
+  // Use a function to get current time on each render to avoid stale "now" values
+  const upcomingBookings = useMemo(
+    () =>
+      bookings?.filter(
+        (booking) =>
+          (booking.status === "PENDING" || booking.status === "CONFIRMED") &&
+          new Date(booking.startTime) > new Date(),
+      ) || [],
+    [bookings],
+  );
 
-  const pastBookings = bookings?.filter(booking => 
-    booking.status === 'COMPLETED' || booking.status === 'CANCELLED'
-  ) || [];
+  const completedBookings = useMemo(
+    () => bookings?.filter((booking) => booking.status === "COMPLETED") || [],
+    [bookings],
+  );
 
-  // Placeholder stats - will be real data when we add bookings
+  const pastBookings = useMemo(
+    () =>
+      bookings?.filter(
+        (booking) =>
+          booking.status === "COMPLETED" || booking.status === "CANCELLED",
+      ) || [],
+    [bookings],
+  );
+
+  const pendingReviewCount = pendingReviews?.length || 0;
+
   const stats = {
     upcomingBookings: upcomingBookings.length,
     completedSessions: completedBookings.length,
-    favoriteTrainers: 0,
+    favoriteTrainers: favorites?.length || 0,
+    pendingReviews: pendingReviewCount,
   };
 
+  // Dynamic welcome subtitle — three states: today, this week, or free
+  const welcomeSubtitle = useMemo(() => {
+    if (upcomingBookings.length === 0) {
+      return t("welcomeFree");
+    }
+
+    const nextBooking = upcomingBookings[0];
+    const bookingDate = parseISO(nextBooking.startTime);
+    const bookingTime = format(bookingDate, "HH:mm");
+    const dateLocale = locale === "pl" ? pl : undefined;
+
+    // State 1: Training TODAY
+    if (isToday(bookingDate)) {
+      return t("welcomeToday", {
+        name: user?.firstName || "",
+        trainer: getInstructorName(nextBooking),
+        time: bookingTime,
+      });
+    }
+
+    // State 2: Training THIS WEEK
+    if (isThisWeek(bookingDate)) {
+      const dayName = format(bookingDate, "EEEE", { locale: dateLocale });
+      return t("welcomeThisWeek", {
+        count: upcomingBookings.length,
+        day: dayName,
+        time: bookingTime,
+      });
+    }
+
+    // State 3: No plans in the near future
+    return t("welcomeFree");
+  }, [upcomingBookings, t, locale, user?.firstName]);
+
   return (
-    <div className="space-y-4">
-      {/* Welcome Header - Clean Design with Animation */}
-      <div className="text-center space-y-6 py-8">
-        <div className="space-y-3">
-          <motion.h1 
-            variants={titleVariants}
-            initial="hidden"
-            animate="visible"
-            className="text-5xl md:text-6xl font-bold text-gradient-trainly"
-          >
-            {t('welcomeBack')}{user?.firstName ? `, ${user.firstName}` : ''}!
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto"
-          >
-            {t('findAndBook')}
-          </motion.p>
-        </div>
-        <motion.div 
-          className="flex flex-wrap items-center justify-center gap-3 pt-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-        >
-          <Link
-            href="/dashboard/settings"
-            className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-all hover:scale-105 flex items-center gap-2 font-medium shadow-lg"
-          >
-            <Settings className="w-5 h-5" />
-            {t('accountSettings')}
-          </Link>
-        </motion.div>
-      </div>
+    <div className="space-y-6">
+      {/* Welcome Header */}
+      <DashboardHeader
+        greeting={`${t("welcomeBack")}${user?.firstName ? `, ${user.firstName}` : ""} 👋`}
+        subtitle={welcomeSubtitle}
+        actionLinks={[
+          {
+            href: "/dashboard/settings",
+            icon: <Settings className="w-5 h-5" />,
+            label: t("accountSettings"),
+          },
+        ]}
+      />
+
+      {/* Become Instructor Banner — premium CTA for CLIENT role */}
+      <BecomeInstructorBanner />
+
+      {/* Review Banner */}
+      {pendingReviewCount > 0 && pendingReviews && pendingReviews[0] && (
+        <PendingReviewsSection
+          pendingReviews={pendingReviews}
+          isLoading={false}
+          onOpenReview={handleOpenReview}
+          t={t}
+          variant="client"
+        />
+      )}
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatsCard
           icon={Calendar}
           iconColor="text-blue-500"
           iconBgColor="bg-blue-500/10"
-          title={t('upcomingBookings')}
+          title={t("upcomingBookings")}
           value={stats.upcomingBookings}
-          subtitle={t('nextWeek')}
+          subtitle={t("nextWeek")}
           delay={0}
+          onClick={() => scrollToSection("upcoming-sessions")}
+          hoverColor="hover:border-violet-500"
         />
         <StatsCard
           icon={TrendingUp}
-          iconColor="text-green-500"
-          iconBgColor="bg-green-500/10"
-          title={t('completedSessions')}
+          iconColor="text-emerald-500"
+          iconBgColor="bg-emerald-500/10"
+          title={t("completedSessions")}
           value={stats.completedSessions}
-          subtitle={t('allTime')}
+          subtitle={t("allTime")}
           delay={1}
+          onClick={() => scrollToSection("booking-history")}
+          hoverColor="hover:border-violet-500"
+        />
+        <StatsCard
+          icon={Star}
+          iconColor="text-amber-500"
+          iconBgColor="bg-amber-500/10"
+          title={t("pendingReviews")}
+          value={stats.pendingReviews}
+          subtitle={t("reviewsToGive")}
+          delay={2}
+          onClick={() => scrollToSection("my-reviews")}
+          hoverColor="hover:border-violet-500"
         />
         <StatsCard
           icon={Heart}
           iconColor="text-pink-500"
           iconBgColor="bg-pink-500/10"
-          title={t('favoriteTrainers')}
+          title={t("favoriteTrainers")}
           value={stats.favoriteTrainers}
-          subtitle={t('saved')}
-          delay={2}
+          subtitle={t("saved")}
+          delay={3}
+          href="/instructors"
+          hoverColor="hover:border-violet-500"
         />
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Upcoming Sessions */}
+        <div id="upcoming-sessions">
+          <DashboardCard
+            icon={Calendar}
+            hoverColor="hover:border-violet-500"
+            iconColor="text-blue-500"
+            iconBgColor="bg-blue-500/10"
+            title={t("upcomingSessions")}
+            delay={4}
+          >
+            {bookingsLoading ? (
+              <div className="flex justify-center py-8">
+                <LoadingSpinner />
+              </div>
+            ) : upcomingBookings.length > 0 ? (
+              <BookingsList bookings={upcomingBookings} role="client" />
+            ) : (
+              <EmptyStateCard
+                icon={Calendar}
+                title={t("noUpcomingSessions")}
+                description={t("sessionsComingSoon")}
+              />
+            )}
+          </DashboardCard>
+        </div>
+
+        {/* My Reviews (already written) */}
+        <div id="my-reviews">
+          <DashboardCard
+            icon={Star}
+            hoverColor="hover:border-violet-500"
+            iconColor="text-amber-500"
+            iconBgColor="bg-amber-500/10"
+            title={t("myReviews")}
+            delay={5}
+          >
+            <MyReviewsSection />
+          </DashboardCard>
+        </div>
+
+        {/* Favorite Trainers */}
         <DashboardCard
-          icon={Calendar}
-          iconColor="text-blue-500"
-          iconBgColor="bg-blue-500/10"
-          title={t('upcomingSessions')}
-          delay={3}
+          icon={Heart}
+          hoverColor="hover:border-violet-500"
+          iconColor="text-pink-500"
+          iconBgColor="bg-pink-500/10"
+          title={t("favoriteTrainers")}
+          delay={6}
         >
-          {bookingsLoading ? (
+          <FavoriteTrainersSection favorites={favorites} isLoading={false} />
+        </DashboardCard>
+
+        {/* Recently Viewed Trainers */}
+        <DashboardCard
+          icon={Clock}
+          hoverColor="hover:border-violet-500"
+          iconColor="text-cyan-500"
+          iconBgColor="bg-cyan-500/10"
+          title={t("recentlyViewed")}
+          delay={7}
+        >
+          {recentlyViewedLoading ? (
             <div className="flex justify-center py-8">
               <LoadingSpinner />
             </div>
-          ) : upcomingBookings.length > 0 ? (
-            <BookingsList bookings={upcomingBookings} role="client" />
+          ) : recentlyViewed && recentlyViewed.length > 0 ? (
+            <div className="space-y-2">
+              {recentlyViewed.map((instructor) => {
+                const name =
+                  [instructor.firstName, instructor.lastName]
+                    .filter(Boolean)
+                    .join(" ") || instructor.username;
+                const primarySpecId = instructor.specializations?.[0];
+                const primarySpec = primarySpecId
+                  ? specializations.find((s) => s.id === primarySpecId)
+                  : undefined;
+                const primarySpecName = primarySpec
+                  ? locale === "pl"
+                    ? primarySpec.namePl
+                    : primarySpec.nameEn
+                  : null;
+                return (
+                  <Link
+                    key={instructor.id}
+                    href={`/instructors/${instructor.username}`}
+                    className="flex items-center gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500/50 rounded-xl overflow-hidden transition-colors duration-300 group p-4"
+                  >
+                    <UserAvatar
+                      photoUrl={instructor.photoUrl}
+                      avatarUrl={instructor.avatarUrl}
+                      firstName={instructor.firstName}
+                      lastName={instructor.lastName}
+                      size="md"
+                      alt={name}
+                    />
+                    <div className="flex-1 min-w-0 text-left">
+                      <h4 className="text-sm font-semibold text-white truncate">
+                        {name}
+                      </h4>
+                      {primarySpecName && (
+                        <p className="text-xs text-slate-400 mt-0.5 truncate">
+                          {primarySpecName}
+                        </p>
+                      )}
+                      {instructor.city && (
+                        <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
+                          <MapPin className="size-3" />
+                          <span>{instructor.city}</span>
+                        </div>
+                      )}
+                    </div>
+                    <Clock className="w-4 h-4 text-slate-500 shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
           ) : (
             <EmptyStateCard
-              icon={Calendar}
-              title={t('noUpcomingSessions')}
-              description={t('sessionsComingSoon')}
+              icon={UserCheck}
+              title={t("noRecentlyViewed")}
+              description={t("recentlyViewedDescription")}
             />
           )}
         </DashboardCard>
 
-        {/* Reviews to Give */}
+        {/* Become Instructor CTA */}
         <DashboardCard
-          icon={Star}
-          iconColor="text-yellow-500"
-          iconBgColor="bg-yellow-500/10"
-          title={t('reviewsToGive')}
-          delay={4}
-        >
-          <EmptyStateCard
-            icon={Star}
-            title={t('noSessionsToReview')}
-            description={t('reviewsComingSoon')}
-          />
-        </DashboardCard>
-
-        {/* Messages */}
-        <DashboardCard
-          icon={MessageSquare}
-          iconColor="text-purple-500"
-          iconBgColor="bg-purple-500/10"
-          title={t('messages')}
-          delay={5}
-        >
-          <EmptyStateCard
-            icon={MessageSquare}
-            title={t('noMessages')}
-            description={t('messagesComingSoon')}
-          />
-        </DashboardCard>
-
-        {/* Find Trainers CTA - Moved to bottom right */}
-        <DashboardCard
-          icon={Search}
+          icon={Rocket}
+          hoverColor="hover:border-violet-500"
           iconColor="text-orange-500"
           iconBgColor="bg-orange-500/10"
-          title={t('findTrainers')}
-          delay={6}
+          title={t("becomeInstructor")}
+          delay={8}
         >
-          <>
-            <p className="text-slate-400 mb-auto">
-              {t('browseDescription')}
-            </p>
-            <Link
-              href="/instructors"
-              className="inline-block px-6 py-3 text-center bg-linear-to-r from-orange-500 to-red-500 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all mt-4"
-            >
-              {t('browseTrainers')}
+          <div className="text-center py-4">
+            <p className="text-slate-300 mb-4">{t("becomeInstructorDesc")}</p>
+            <Link href="/onboarding/instructor">
+              <Button variant="premium" size="xl">
+                🚀 {t("becomeInstructor")}
+              </Button>
             </Link>
-          </>
+          </div>
         </DashboardCard>
       </div>
 
-      {/* History */}
-      <DashboardCard
-        icon={FileText}
-        iconColor="text-slate-400"
-        title={t('bookingHistory')}
-        delay={7}
-      >
-        {bookingsLoading ? (
-          <div className="flex justify-center py-8">
-            <LoadingSpinner />
-          </div>
-        ) : pastBookings.length > 0 ? (
-          <>
-            <div className="flex justify-end mb-4">
-              <button
-                className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm"
-                onClick={() => setConfirmOpen(true)}
-              >
-                {t('clearHistory')}
-              </button>
-            </div>
-            <BookingsList bookings={pastBookings} role="client" />
-          </>
-        ) : (
-          <EmptyStateCard
-            icon={FileText}
-            title={t('noHistory')}
-            description={t('historyDescription')}
+      {/* Booking History */}
+      <div id="booking-history" className="scroll-mt-20">
+        <DashboardCard
+          icon={FileText}
+          hoverColor="hover:border-violet-500"
+          iconColor="text-slate-400"
+          title={t("bookingHistory")}
+          delay={8}
+        >
+          <BookingHistorySection
+            bookings={pastBookings}
+            isLoading={bookingsLoading}
+            pendingReviews={pendingReviews}
+            onOpenReview={handleOpenReview}
+            getInstructorName={getInstructorName}
+            onClearHistory={() => setConfirmOpen(true)}
+            tb={tb}
+            emptyTitle={t("noHistory")}
+            emptyDescription={t("historyDescription")}
+            leaveReviewLabel={t("leaveReview")}
+            clearHistoryLabel={t("clearHistory")}
           />
-        )}
+        </DashboardCard>
+      </div>
 
-        <ConfirmModal
-          isOpen={confirmOpen}
-          onClose={() => setConfirmOpen(false)}
-          onConfirm={async () => {
-            await clearHistory.mutateAsync();
-            setConfirmOpen(false);
-          }}
-          title={t('clearHistory')}
-          description={t('clearHistoryDescription')}
-          confirmText={t('clear')}
-          cancelText={t('cancel')}
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={async () => {
+          await clearHistory.mutateAsync();
+          setConfirmOpen(false);
+        }}
+        title={t("clearHistory")}
+        description={t("clearHistoryDescription")}
+        confirmText={t("clear")}
+        cancelText={t("cancel")}
+      />
+
+      {/* Review Form Modal */}
+      {selectedBookingForReview && (
+        <ReviewForm
+          bookingId={selectedBookingForReview.id}
+          instructorName={selectedBookingForReview.instructorName}
+          isOpen={reviewFormOpen}
+          onClose={handleReviewClose}
+          onSuccess={() => handleReviewSuccess(pendingReviews)}
+          reviewIndex={reviewIndex}
+          totalReviews={pendingReviews?.length || 0}
         />
-      </DashboardCard>
+      )}
     </div>
   );
 }

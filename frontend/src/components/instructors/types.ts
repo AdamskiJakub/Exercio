@@ -1,5 +1,5 @@
-import type { InstructorListing } from '@/types';
-import type { InstructorFilters } from '@/types/filters';
+import type { InstructorListing } from "@/types";
+import type { InstructorFilters } from "@/types/filters";
 
 export interface InstructorCardProps {
   instructor: InstructorListing;
@@ -19,7 +19,7 @@ export interface FiltersSidebarProps {
   filters: InstructorFilters;
   updateFilter: <K extends keyof InstructorFilters>(
     key: K,
-    value: InstructorFilters[K]
+    value: InstructorFilters[K],
   ) => void;
   toggleTag: (tagId: string) => void;
   toggleGoal: (goalId: string) => void;
@@ -29,11 +29,17 @@ export interface FiltersSidebarProps {
 
 export interface ResultsSectionProps {
   instructors: InstructorListing[];
+  enterprises?: import("@/types/enterprise").EnterpriseListing[];
   filters: InstructorFilters;
   updateFilter: <K extends keyof InstructorFilters>(
     key: K,
-    value: InstructorFilters[K]
+    value: InstructorFilters[K],
   ) => void;
+  total?: number;
+  enterpriseTotal?: number;
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 // Base props shared by both variants
@@ -46,7 +52,7 @@ interface BaseMediaUploadProps {
 
 // Avatar variant - single file upload
 interface AvatarMediaUploadProps extends BaseMediaUploadProps {
-  variant: 'avatar';
+  variant: "avatar";
   currentMediaUrl?: string | null;
   onMediaChange: (url: string) => void;
   onUpload: (file: File) => Promise<string>;
@@ -54,7 +60,7 @@ interface AvatarMediaUploadProps extends BaseMediaUploadProps {
 
 // Gallery variant - multiple file upload
 interface GalleryMediaUploadProps extends BaseMediaUploadProps {
-  variant: 'gallery';
+  variant: "gallery";
   currentMediaUrls?: string[];
   maxFiles?: number;
   onMediaChange: (urls: string[]) => void;

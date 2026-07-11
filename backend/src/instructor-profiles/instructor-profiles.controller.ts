@@ -25,6 +25,7 @@ export class InstructorProfilesController {
 
   @Get()
   async findAll(
+    @Query('q') q?: string,
     @Query('city') city?: string,
     @Query('specialization') specialization?: string,
     @Query('tags') tags?: string | string[],
@@ -32,6 +33,9 @@ export class InstructorProfilesController {
     @Query('minRating') minRating?: string,
     @Query('priceMin') priceMin?: string,
     @Query('priceMax') priceMax?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     const parseNumeric = (value?: string): number | undefined => {
       if (!value) return undefined;
@@ -40,13 +44,17 @@ export class InstructorProfilesController {
     };
 
     const filters = {
+      q,
       city,
       specialization,
       tags: Array.isArray(tags) ? tags : tags ? [tags] : undefined,
       goals: Array.isArray(goals) ? goals : goals ? [goals] : undefined,
-      // minRating: parseNumeric(minRating), // TODO: Will be implemented with reviews/ratings
+      minRating: parseNumeric(minRating),
       priceMin: parseNumeric(priceMin),
       priceMax: parseNumeric(priceMax),
+      sortBy,
+      page: parseNumeric(page),
+      limit: parseNumeric(limit),
     };
     return this.profilesService.findAll(filters);
   }
@@ -55,11 +63,11 @@ export class InstructorProfilesController {
   @UseGuards(JwtAuthGuard)
   async getMyProfile(@Req() req: Request) {
     const user = req.user as AuthenticatedUser;
-    
+
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }
-    
+
     return this.profilesService.findByUserId(user.id);
   }
 
@@ -67,7 +75,9 @@ export class InstructorProfilesController {
   async findByUsername(@Param('username') username: string) {
     const profile = await this.profilesService.findByUsername(username);
     if (!profile) {
-      throw new NotFoundException(`Instructor with username "${username}" not found`);
+      throw new NotFoundException(
+        `Instructor with username "${username}" not found`,
+      );
     }
     return profile;
   }
@@ -76,7 +86,7 @@ export class InstructorProfilesController {
   @UseGuards(JwtAuthGuard)
   async create(@Body() dto: CreateInstructorProfileDto, @Req() req: Request) {
     const user = req.user as AuthenticatedUser;
-    
+
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }
@@ -95,10 +105,10 @@ export class InstructorProfilesController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateInstructorProfileDto,
-    @Req() req: Request
+    @Req() req: Request,
   ) {
     const user = req.user as AuthenticatedUser;
-    
+
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }
@@ -108,12 +118,9 @@ export class InstructorProfilesController {
 
   @Patch(':id/publish')
   @UseGuards(JwtAuthGuard)
-  async publish(
-    @Param('id') id: string,
-    @Req() req: Request
-  ) {
+  async publish(@Param('id') id: string, @Req() req: Request) {
     const user = req.user as AuthenticatedUser;
-    
+
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }

@@ -1,9 +1,10 @@
-import type { PaymentMethod } from '@/constants/payment';
+import type { PaymentMethod } from "@/constants/payment";
 
 export enum UserRole {
-  CLIENT = 'CLIENT',
-  INSTRUCTOR = 'INSTRUCTOR',
-  ADMIN = 'ADMIN',
+  CLIENT = "CLIENT",
+  INSTRUCTOR = "INSTRUCTOR",
+  ADMIN = "ADMIN",
+  ENTERPRISE = "ENTERPRISE",
 }
 
 export interface User {
@@ -66,12 +67,16 @@ export interface InstructorProfile {
   updatedAt: string;
   averageRating?: number;
   reviewCount?: number;
+  favoriteCount?: number;
 }
 
-export interface InstructorListing extends Omit<InstructorProfile, 'user' | 'availability'> {
+export interface InstructorListing extends Omit<
+  InstructorProfile,
+  "user" | "availability"
+> {
   username: string;
   fullName: string;
-  availability: 'online' | 'in-person' | 'both';
+  availability: "online" | "in-person" | "both";
   primarySpecialization: string;
   videoUrl: string | null;
   user?: UserBasic; // Use UserBasic instead of User (no phone, createdAt, updatedAt)
@@ -91,10 +96,10 @@ export interface Service {
 }
 
 export enum BookingStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
 }
 
 export interface Booking {
@@ -111,6 +116,18 @@ export interface Booking {
   createdAt: string;
   updatedAt: string;
   review?: Review;
+}
+
+export interface FavoriteInstructor {
+  id: string;
+  userId: string;
+  user: UserBasic;
+  photoUrl: string | null;
+  tagline: string | null;
+  city: string | null;
+  specializations: string[];
+  verified: boolean;
+  favoritedAt: string;
 }
 
 export interface Review {
@@ -142,4 +159,30 @@ export interface RegisterDto {
 export interface AuthResponse {
   access_token: string;
   user: User;
+}
+
+export type NotificationType =
+  | "FAVORITE"
+  | "NEW_BOOKING"
+  | "NEW_REVIEW"
+  | "BOOKING_CANCELLED"
+  | "ENTERPRISE_INVITATION"
+  | "ENTERPRISE_INVITATION_ACCEPTED";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  data?: Record<string, unknown>;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface PaginatedNotifications {
+  data: Notification[];
+  totalCount: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
 }

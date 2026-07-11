@@ -13,6 +13,14 @@ import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { StaticConfigModule } from './config/config.module';
+import { ContactModule } from './contact/contact.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ProfileViewsModule } from './profile-views/profile-views.module';
+import { EnterpriseModule } from './enterprise/enterprise.module';
+import { SearchModule } from './search/search.module';
+import { OGPreviewModule } from './og-preview/og-preview.module';
 
 @Module({
   imports: [
@@ -22,10 +30,12 @@ import { StaticConfigModule } from './config/config.module';
     ScheduleModule.forRoot(),
     // Global rate limit: 100 req/min allows normal browsing/polling
     // Stricter limits on write operations (e.g., booking creation: 3/10min)
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     PrismaModule,
     AuthModule,
     InstructorProfilesModule,
@@ -34,6 +44,14 @@ import { StaticConfigModule } from './config/config.module';
     BookingsModule,
     AvailabilityModule,
     StaticConfigModule,
+    ContactModule,
+    ReviewsModule,
+    FavoritesModule,
+    NotificationsModule,
+    ProfileViewsModule,
+    EnterpriseModule,
+    SearchModule,
+    OGPreviewModule,
   ],
   controllers: [AppController],
   providers: [

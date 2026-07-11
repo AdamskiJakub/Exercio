@@ -7,23 +7,100 @@ permissions:
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   code-review:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: DeepSeek AI Code Review
-        uses: Louis-7/ai-code-review@main
+      - name: Get changed files
+        id: files
+        run: |
+          FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
+            ':!*.lock' ':!*.toml' \
+            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
+            ':!**/node_modules/**' 2>/dev/null || true)
+
+          echo "FILES<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Call DeepSeek API
+        id: review
         env:
-          ENGINE: "deepseek"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          DEEPSEEK_BASE_URL: "https://api.deepseek.com"
-          MODEL: "deepseek-chat"
-          LANGUAGE: "English"
-          PATH_TO_EXCLUDE: "**/pnpm-lock.yaml, **/node_modules/**, **/*.json, **/*.md"
+        run: |
+          FILES="${{ steps.files.outputs.FILES }}"
+
+          if [ -z "$FILES" ]; then
+            echo "No code changes to review." > /tmp/review_comment.txt
+            exit 0
+          fi
+
+          CONTEXT_FILE=$(mktemp)
+          FILES_LIST_FILE=$(mktemp)
+
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              printf '%s\n' "$file" >> "$FILES_LIST_FILE"
+              printf '\n\n=== %s ===\n' "$file" >> "$CONTEXT_FILE"
+              printf '\`\`\`\n' >> "$CONTEXT_FILE"
+              cat "$file" >> "$CONTEXT_FILE"
+              printf '\n\`\`\`\n' >> "$CONTEXT_FILE"
+            fi
+          done <<< "$FILES"
+
+          jq -n \
+            --rawfile files "$FILES_LIST_FILE" \
+            --rawfile context "$CONTEXT_FILE" \
+            '{
+              model: "deepseek-chat",
+              max_tokens: 8192,
+              temperature: 0.5,
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a senior code reviewer. You have the FULL source code of every changed file in this PR. Review ONLY the changed files listed below. CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility. IMPORTANT: Do NOT report missing use client directive. Format: **file/path.ts:line** - description. If nothing important, say: No significant issues found."
+                },
+                {
+                  role: "user",
+                  content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
+                }
+              ]
+            }' > /tmp/payload.json
+
+          rm -f "$CONTEXT_FILE" "$FILES_LIST_FILE"
+
+          echo 'Calling DeepSeek API...'
+          RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+            -d @/tmp/payload.json)
+
+          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "API error"')
+
+          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // ""')
+          if [ -n "$ERROR" ]; then
+            COMMENT="API Error: $ERROR"
+          fi
+
+          echo "$COMMENT" > /tmp/review_comment.txt
+
+      - name: Post comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENT=$(cat /tmp/review_comment.txt)
+
+          if [ -n "$COMMENT" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "## 🤖 DeepSeek Code Review
+
+          $COMMENT
+
+          ---
+          *Powered by DeepSeek AI*"
+          fi
