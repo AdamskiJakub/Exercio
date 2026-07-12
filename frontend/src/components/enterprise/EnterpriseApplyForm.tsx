@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEnterpriseApply } from "@/hooks/useEnterpriseApply";
+import { LegalCheckbox } from "@/components/ui/legal-checkbox";
 import type { CreateEnterpriseLeadDto } from "@/types/enterprise";
 
 const BUSINESS_TYPES = [
@@ -45,6 +46,9 @@ export function EnterpriseApplyForm() {
     instructorCount: "",
   });
 
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [agreeError, setAgreeError] = useState<string | undefined>();
+
   const [errors, setErrors] = useState<
     Partial<Record<keyof CreateEnterpriseLeadDto, string>>
   >({});
@@ -63,7 +67,14 @@ export function EnterpriseApplyForm() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (!agreeToTerms) {
+      setAgreeError(t("validation.required"));
+    } else {
+      setAgreeError(undefined);
+    }
+
+    return Object.keys(newErrors).length === 0 && agreeToTerms;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -263,6 +274,16 @@ export function EnterpriseApplyForm() {
             placeholder={t("placeholders.message")}
           />
         </div>
+
+        {/* Legal Checkbox */}
+        <LegalCheckbox
+          checked={agreeToTerms}
+          onChange={(checked) => {
+            setAgreeToTerms(checked);
+            if (checked) setAgreeError(undefined);
+          }}
+          error={agreeError}
+        />
 
         {error && (
           <div

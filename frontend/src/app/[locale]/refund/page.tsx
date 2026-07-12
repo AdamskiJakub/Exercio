@@ -2,8 +2,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { privacyContent } from "@/content/privacy";
-import { privacyContentEn } from "@/content/privacy-en";
+import { refundContent } from "@/content/refund";
+import { refundContentEn } from "@/content/refund-en";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -11,7 +11,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Privacy" });
+  const t = await getTranslations({ locale, namespace: "Refund" });
 
   return {
     title: t("title"),
@@ -19,10 +19,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function PrivacyPage() {
-  const t = useTranslations("Privacy");
+export default function RefundPage() {
+  const t = useTranslations("Refund");
   const locale = useLocale();
-  const content = locale === "en" ? privacyContentEn : privacyContent;
+  const content = locale === "en" ? refundContentEn : refundContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">

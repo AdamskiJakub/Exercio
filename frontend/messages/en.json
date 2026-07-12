@@ -222,7 +222,8 @@
     "goToLogin": "Go to Login",
     "goHome": "Home",
     "passwordsDoNotMatch": "Passwords do not match",
-    "passwordMinLength": "Password must be at least 8 characters"
+    "passwordMinLength": "Password must be at least 8 characters",
+    "agreeToTermsRequired": "You must accept the Terms of Service and Privacy Policy"
   },
   "Dashboard": {
     "welcomeBack": "Welcome back",
@@ -830,7 +831,11 @@
       "title": "Legal",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "cookies": "Cookie Policy"
+      "cookies": "Cookie Policy",
+      "enterpriseTerms": "Enterprise Terms",
+      "refund": "Refund Policy",
+      "acceptableUse": "Acceptable Use Policy",
+      "dpa": "Data Processing Agreement"
     },
     "allRightsReserved": "All rights reserved."
   },
@@ -1009,6 +1014,7 @@
       "sending": "Sending...",
       "successTitle": "Message Sent!",
       "successDescription": "Thank you for reaching out. We'll get back to you as soon as possible. We usually respond within 24 hours.",
+      "agreeToTermsRequired": "You must accept the Terms of Service and Privacy Policy",
       "errorGeneric": "Something went wrong. Please try again later."
     }
   },
@@ -1018,11 +1024,21 @@
   },
   "Privacy": {
     "title": "Privacy Policy",
+    "description": "Exercio Privacy Policy — learn how we collect, process, and protect your personal data in accordance with GDPR.",
     "comingSoon": "Page coming soon"
   },
   "Terms": {
     "title": "Terms of Service",
+    "description": "Exercio Terms of Service — rules for using the platform, user obligations, booking rules, and complaint procedures.",
     "comingSoon": "Page coming soon"
+  },
+  "Legal": {
+    "agreeToTerms": "I accept the",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "termsShort": "Terms of Service",
+    "privacyShort": "Privacy Policy",
+    "required": "You must accept the Terms of Service and Privacy Policy"
   },
   "CookieBanner": {
     "title": "🍪 Welcome to Exercio!",
@@ -1051,6 +1067,7 @@
   },
   "Cookies": {
     "title": "Cookie Policy",
+    "description": "Exercio Cookie Policy — learn about the cookies and tracking technologies we use on our platform.",
     "intro": "This Cookie Policy explains how Exercio uses cookies and similar tracking technologies on our platform. It explains what cookies are, why we use them, and how you can control their use.",
     "whatAreCookies": "What Are Cookies?",
     "whatAreCookiesDesc": "Cookies are small text files that are stored on your device (computer, tablet, or mobile) when you visit a website. They are widely used to make websites work more efficiently and provide information to the website owners.",
@@ -1073,6 +1090,22 @@
     "contact": "Contact Us",
     "contactDesc": "If you have any questions about our use of cookies, please contact us at: support@exercio.app",
     "lastUpdated": "Last updated: June 2026"
+  },
+  "EnterpriseTerms": {
+    "title": "Enterprise Terms",
+    "description": "Exercio Enterprise Terms — terms and conditions for business partners, including subscription, instructor management, and billing."
+  },
+  "Refund": {
+    "title": "Refund Policy",
+    "description": "Exercio Refund Policy — rules for refunds, cancellations, and complaints regarding bookings and services."
+  },
+  "AcceptableUse": {
+    "title": "Acceptable Use Policy",
+    "description": "Exercio Acceptable Use Policy — rules for using the platform, prohibited content, and moderation guidelines."
+  },
+  "Dpa": {
+    "title": "Data Processing Agreement",
+    "description": "Exercio Data Processing Agreement — terms for data processing between Exercio and business partners, in compliance with GDPR."
   },
   "InstructorProfile": {
     "previewBanner": "This is a preview of how your profile will look when published",
@@ -1197,7 +1230,8 @@
       "phoneRequired": "Phone number is required",
       "phoneInvalid": "Invalid phone number (9 digits, optionally with +48)",
       "guestPhoneLabel": "Client phone number *",
-      "guestPhonePlaceholder": "+48 123 456 789"
+      "guestPhonePlaceholder": "+48 123 456 789",
+      "agreeToTermsRequired": "You must accept the Terms of Service and Privacy Policy"
     },
     "legend": {
       "title": "Legend",
