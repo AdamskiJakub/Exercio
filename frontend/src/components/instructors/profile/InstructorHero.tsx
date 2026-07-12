@@ -150,7 +150,7 @@ export function InstructorHero({
             {/* Enterprise Organization */}
             {profile.enterpriseMemberships?.[0]?.enterprise &&
               (() => {
-                const org = profile.enterpriseMemberships![0].enterprise;
+                const org = profile.enterpriseMemberships[0].enterprise;
                 return (
                   <div className="flex justify-center lg:justify-start">
                     <span
