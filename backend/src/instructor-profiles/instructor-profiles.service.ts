@@ -181,6 +181,19 @@ export class InstructorProfilesService {
               role: true,
             },
           },
+          enterpriseMemberships: {
+            where: { status: 'ACCEPTED' },
+            include: {
+              enterprise: {
+                select: {
+                  id: true,
+                  companyName: true,
+                  slug: true,
+                  logoUrl: true,
+                },
+              },
+            },
+          },
         },
         orderBy,
       }),
@@ -240,6 +253,19 @@ export class InstructorProfilesService {
             role: true,
             email: true,
             phone: true,
+          },
+        },
+        enterpriseMemberships: {
+          where: { status: 'ACCEPTED' },
+          include: {
+            enterprise: {
+              select: {
+                id: true,
+                companyName: true,
+                slug: true,
+                logoUrl: true,
+              },
+            },
           },
         },
       },
@@ -359,6 +385,19 @@ export class InstructorProfilesService {
             lastName: true,
             phone: true,
             role: true,
+          },
+        },
+        enterpriseMemberships: {
+          where: { status: 'ACCEPTED' },
+          include: {
+            enterprise: {
+              select: {
+                id: true,
+                companyName: true,
+                slug: true,
+                logoUrl: true,
+              },
+            },
           },
         },
       },

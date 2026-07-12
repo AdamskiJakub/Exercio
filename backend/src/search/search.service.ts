@@ -107,6 +107,19 @@ export class SearchService {
               role: true,
             },
           },
+          enterpriseMemberships: {
+            where: { status: 'ACCEPTED' },
+            include: {
+              enterprise: {
+                select: {
+                  id: true,
+                  companyName: true,
+                  slug: true,
+                  logoUrl: true,
+                },
+              },
+            },
+          },
         },
         orderBy,
       }),

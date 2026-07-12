@@ -298,7 +298,9 @@
       "enterpriseInvitationTitle": "Invitation from {company}",
       "enterpriseInvitationDescription": "You've been invited to join as a partner instructor",
       "accept": "Accept",
-      "reject": "Reject"
+      "reject": "Reject",
+      "affiliatedEnterprise": "Affiliation",
+      "instructorAt": "Instructor at"
     },
     "enterprise": {
       "welcomeBack": "Welcome back",
@@ -851,7 +853,8 @@
       "yearsExp": "{count}+ years exp.",
       "online": "Online",
       "inPerson": "In-person",
-      "both": "Online & In-person"
+      "both": "Online & In-person",
+      "instructorAt": "Instructor at"
     },
     "filters": {
       "title": "Filters",
@@ -1163,6 +1166,7 @@
     "backToListing": "Back to Listing",
     "loadingProfile": "Loading profile...",
     "verifiedInstructor": "Verified Instructor",
+    "instructorAt": "Instructor at",
     "respondsWithin": "Usually responds within 24h",
     "memberSince": "Member since",
     "chooseTerm": "Choose a time",

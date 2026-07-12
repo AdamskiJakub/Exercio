@@ -313,6 +313,48 @@ export function InstructorDashboard() {
         </DashboardCard>
       )}
 
+      {/* Enterprise Affiliation — show if instructor belongs to an organization */}
+      {profile?.enterpriseMemberships?.[0]?.enterprise &&
+        (() => {
+          const org = profile.enterpriseMemberships![0].enterprise;
+          return (
+            <DashboardCard
+              title={t("affiliatedEnterprise")}
+              delay={0}
+              hoverable={true}
+              hoverColor="hover:border-orange-500"
+            >
+              <Link
+                href={`/enterprise/${org.slug}` as any}
+                className="flex items-center gap-4 group"
+              >
+                {org.logoUrl ? (
+                  <span className="w-12 h-12 rounded-xl overflow-hidden border border-slate-600 bg-white shrink-0">
+                    <img
+                      src={getMediaUrl(org.logoUrl)}
+                      alt={org.companyName}
+                      className="w-full h-full object-cover"
+                    />
+                  </span>
+                ) : (
+                  <span className="w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center shrink-0">
+                    <Building2 className="w-6 h-6 text-slate-400" />
+                  </span>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">
+                    {t("instructorAt")}
+                  </p>
+                  <p className="text-base font-semibold text-white group-hover:text-orange-400 transition-colors truncate">
+                    {org.companyName}
+                  </p>
+                </div>
+                <Building2 className="w-5 h-5 text-slate-500 group-hover:text-orange-400 transition-colors shrink-0" />
+              </Link>
+            </DashboardCard>
+          );
+        })()}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard

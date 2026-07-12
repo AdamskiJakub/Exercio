@@ -30,6 +30,13 @@ export interface UserBasic {
   role: string; // Note: backend returns string, not enum
 }
 
+export interface EnterpriseOrgInfo {
+  id: string;
+  companyName: string;
+  slug: string;
+  logoUrl: string | null;
+}
+
 export interface InstructorProfile {
   id: string;
   userId: string;
@@ -68,6 +75,12 @@ export interface InstructorProfile {
   averageRating?: number;
   reviewCount?: number;
   favoriteCount?: number;
+  // Enterprise memberships (organizations this instructor belongs to)
+  enterpriseMemberships?: Array<{
+    id: string;
+    status: string;
+    enterprise: EnterpriseOrgInfo;
+  }>;
 }
 
 export interface InstructorListing extends Omit<
