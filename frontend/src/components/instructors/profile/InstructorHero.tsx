@@ -1,7 +1,15 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { MapPin, Globe, Star, BadgeCheck, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  MapPin,
+  Globe,
+  Star,
+  BadgeCheck,
+  Shield,
+  Building2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getMediaUrl } from "@/lib/utils/media";
@@ -25,6 +33,7 @@ export function InstructorHero({
   nearestSlot,
 }: InstructorHeroProps) {
   const { user } = useAuthStore();
+  const router = useRouter();
   const t = useTranslations("InstructorProfile");
   const locale = useLocale();
   const dateLocale = locale === "pl" ? pl : undefined;
@@ -137,6 +146,42 @@ export function InstructorHero({
                 </Badge>
               </div>
             )}
+
+            {/* Enterprise Organization */}
+            {profile.enterpriseMemberships?.[0]?.enterprise &&
+              (() => {
+                const org = profile.enterpriseMemberships[0].enterprise;
+                return (
+                  <div className="flex justify-center lg:justify-start">
+                    <span
+                      onClick={() =>
+                        router.push(`/${locale}/enterprise/${org.slug}`)
+                      }
+                      className="flex flex-col lg:flex-row lg:items-center items-center gap-1 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer group"
+                    >
+                      <span className="text-sm font-medium text-slate-400">
+                        {t("instructorAt")}:
+                      </span>
+                      <span className="inline-flex items-center gap-2">
+                        {org.logoUrl ? (
+                          <span className="w-8 h-8 rounded-full overflow-hidden border border-slate-600 bg-white shrink-0 inline-block">
+                            <img
+                              src={getMediaUrl(org.logoUrl)}
+                              alt={org.companyName}
+                              className="w-full h-full object-cover"
+                            />
+                          </span>
+                        ) : (
+                          <Building2 className="size-5 shrink-0 text-slate-400 group-hover:text-orange-400" />
+                        )}
+                        <span className="text-base font-semibold text-slate-200">
+                          {org.companyName}
+                        </span>
+                      </span>
+                    </span>
+                  </div>
+                );
+              })()}
           </div>
         </div>
 

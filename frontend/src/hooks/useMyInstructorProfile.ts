@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api';
-import type { InstructorListing } from '@/types';
-import { useAuthStore } from '@/stores/auth-store';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api";
+import type { InstructorListing, EnterpriseMembershipStatus } from "@/types";
+import { useAuthStore } from "@/stores/auth-store";
 
 interface InstructorProfileResponse {
   id: string;
@@ -45,19 +45,32 @@ interface InstructorProfileResponse {
     phone: string | null;
     role: string;
   };
+  enterpriseMemberships?: Array<{
+    id: string;
+    status: EnterpriseMembershipStatus;
+    enterprise: {
+      id: string;
+      companyName: string;
+      slug: string;
+      logoUrl: string | null;
+    };
+  }>;
 }
 
-function transformToInstructorListing(profile: InstructorProfileResponse): InstructorListing {
-  const fullName = [profile.user.firstName, profile.user.lastName]
-    .filter(Boolean)
-    .join(' ') || profile.user.username;
-  
+function transformToInstructorListing(
+  profile: InstructorProfileResponse,
+): InstructorListing {
+  const fullName =
+    [profile.user.firstName, profile.user.lastName].filter(Boolean).join(" ") ||
+    profile.user.username;
+
   return {
     ...profile,
     username: profile.user.username,
     fullName,
-    primarySpecialization: profile.specializations[0] || 'personal-training',
-    availability: (profile.availability as 'online' | 'in-person' | 'both') || 'both',
+    primarySpecialization: profile.specializations[0] || "personal-training",
+    availability:
+      (profile.availability as "online" | "in-person" | "both") || "both",
     videoUrl: null,
     averageRating: undefined,
     reviewCount: undefined,
@@ -74,12 +87,14 @@ function transformToInstructorListing(profile: InstructorProfileResponse): Instr
 }
 
 export function useMyInstructorProfile(options?: { enabled?: boolean }) {
-  const { user } = useAuthStore();
-  
+  const userId = useAuthStore((state) => state.user?.id);
+
   return useQuery({
-    queryKey: ['instructor-profile', 'me', user?.id],
+    queryKey: ["instructor-profile", "me", userId],
     queryFn: async () => {
-      const response = await apiClient.get<InstructorProfileResponse>('/instructor-profiles/me');
+      const response = await apiClient.get<InstructorProfileResponse>(
+        "/instructor-profiles/me",
+      );
       return transformToInstructorListing(response.data);
     },
     retry: false,

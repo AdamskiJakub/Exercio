@@ -30,6 +30,25 @@ export interface UserBasic {
   role: string; // Note: backend returns string, not enum
 }
 
+export type EnterpriseMembershipStatus =
+  | "ACCEPTED"
+  | "PENDING"
+  | "REJECTED"
+  | "CANCELLED";
+
+export interface EnterpriseOrgInfo {
+  id: string;
+  companyName: string;
+  slug: string;
+  logoUrl: string | null;
+}
+
+export interface EnterpriseMembership {
+  id: string;
+  status: EnterpriseMembershipStatus;
+  enterprise: EnterpriseOrgInfo;
+}
+
 export interface InstructorProfile {
   id: string;
   userId: string;
@@ -68,6 +87,8 @@ export interface InstructorProfile {
   averageRating?: number;
   reviewCount?: number;
   favoriteCount?: number;
+  // Enterprise memberships (organizations this instructor belongs to)
+  enterpriseMemberships?: EnterpriseMembership[];
 }
 
 export interface InstructorListing extends Omit<

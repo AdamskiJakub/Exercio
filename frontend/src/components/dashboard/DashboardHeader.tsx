@@ -33,7 +33,7 @@ export function DashboardHeader({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="w-32 h-32 rounded-full bg-white p-1.5 shadow-2xl border-4 border-slate-700">
+          <div className="w-32 h-32 rounded-full bg-white shadow-2xl border-4 border-slate-700">
             <img
               src={avatarUrl}
               alt="Profile"
