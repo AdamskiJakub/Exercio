@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SocialLoginButtons } from "@/components/auth/SocialLoginButtons";
 import { AuthHeader } from "@/components/ui/auth-header";
+import { LegalCheckbox } from "@/components/ui/legal-checkbox";
 
 interface RegisterFormProps {
   intent: "client" | "instructor";
@@ -39,11 +40,14 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
   const { form, isLoading, error, onSubmit } = useRegisterForm({ intent });
   const {
     register,
+    setValue,
+    watch,
     formState: { errors },
   } = form;
 
   const isInstructor = intent === "instructor";
   const config = roleConfig[intent];
+  const agreeToTerms = watch("agreeToTerms");
 
   return (
     <div className="flex items-center justify-center py-16 px-4">
@@ -235,6 +239,15 @@ export default function RegisterForm({ intent }: RegisterFormProps) {
                 )}
               </div>
             </div>
+
+            {/* Legal Checkbox */}
+            <LegalCheckbox
+              checked={!!agreeToTerms}
+              onChange={(checked) =>
+                setValue("agreeToTerms", checked, { shouldValidate: true })
+              }
+              error={errors.agreeToTerms?.message as string | undefined}
+            />
 
             {/* Submit Button */}
             <Button

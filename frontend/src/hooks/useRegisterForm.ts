@@ -31,7 +31,7 @@ export function useRegisterForm({ intent }: UseRegisterFormOptions) {
     setError(null);
 
     try {
-      const { confirmPassword, ...registerData } = data;
+      const { confirmPassword, agreeToTerms, ...registerData } = data;
 
       // Auto-generate username from email with proper validation
       const username = generateUsernameFromEmail(registerData.email);

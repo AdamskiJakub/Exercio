@@ -222,7 +222,8 @@
     "goToLogin": "Przejdź do logowania",
     "goHome": "Strona główna",
     "passwordsDoNotMatch": "Hasła nie są identyczne",
-    "passwordMinLength": "Hasło musi mieć minimum 8 znaków"
+    "passwordMinLength": "Hasło musi mieć minimum 8 znaków",
+    "agreeToTermsRequired": "Musisz zaakceptować Regulamin i Politykę Prywatności"
   },
   "Dashboard": {
     "welcomeBack": "Witaj ponownie",
@@ -830,7 +831,11 @@
       "title": "Informacje Prawne",
       "privacy": "Polityka Prywatności",
       "terms": "Regulamin",
-      "cookies": "Polityka Cookies"
+      "cookies": "Polityka Cookies",
+      "enterpriseTerms": "Regulamin Enterprise",
+      "refund": "Polityka Zwrotów",
+      "acceptableUse": "Zasady Korzystania",
+      "dpa": "Umowa Powierzenia Danych"
     },
     "allRightsReserved": "Wszelkie prawa zastrzeżone."
   },
@@ -1009,6 +1014,7 @@
       "sending": "Wysyłanie...",
       "successTitle": "Wiadomość wysłana!",
       "successDescription": "Dziękujemy za kontakt. Odpowiemy najszybciej jak to możliwe. Zwykle odpowiadamy w ciągu 24 godzin.",
+      "agreeToTermsRequired": "Musisz zaakceptować Regulamin i Politykę Prywatności",
       "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie później."
     }
   },
@@ -1018,11 +1024,19 @@
   },
   "Privacy": {
     "title": "Polityka Prywatności",
-    "comingSoon": "Strona w przygotowaniu"
+    "description": "Polityka prywatności Exercio — dowiedz się, jak zbieramy, przetwarzamy i chronimy Twoje dane osobowe zgodnie z RODO."
   },
   "Terms": {
     "title": "Regulamin",
-    "comingSoon": "Strona w przygotowaniu"
+    "description": "Regulamin Exercio — zasady korzystania z platformy, obowiązki użytkowników, zasady rezerwacji i procedury reklamacyjne."
+  },
+  "Legal": {
+    "agreeToTerms": "Akceptuję",
+    "terms": "Regulamin świadczenia usług drogą elektroniczną",
+    "privacy": "Politykę Prywatności",
+    "termsShort": "Regulamin",
+    "privacyShort": "Politykę Prywatności",
+    "required": "Musisz zaakceptować Regulamin i Politykę Prywatności"
   },
   "CookieBanner": {
     "title": "🍪 Witamy na Exercio!",
@@ -1051,6 +1065,7 @@
   },
   "Cookies": {
     "title": "Polityka Cookies",
+    "description": "Polityka cookies Exercio — dowiedz się o plikach cookie i technologiach śledzących, których używamy na naszej platformie.",
     "intro": "Niniejsza Polityka Cookies wyjaśnia, w jaki sposób Exercio używa plików cookie i podobnych technologii śledzących na naszej platformie. Wyjaśnia, czym są pliki cookie, dlaczego ich używamy i jak możesz kontrolować ich użycie.",
     "whatAreCookies": "Czym są pliki cookie?",
     "whatAreCookiesDesc": "Pliki cookie to małe pliki tekstowe przechowywane na Twoim urządzeniu (komputerze, tablecie lub telefonie) podczas odwiedzania strony internetowej. Są powszechnie używane do poprawy wydajności stron i dostarczania informacji właścicielom witryn.",
@@ -1071,8 +1086,24 @@
     "security": "Bezpieczeństwo i ochrona danych",
     "securityDesc": "Wszystkie pliki cookie używane na naszej platformie są przesyłane bezpiecznie przez HTTPS. Nie używamy plików cookie do zbierania danych osobowych poza tym, co jest niezbędne do celów opisanych powyżej. Aby uzyskać więcej informacji o tym, jak przetwarzamy Twoje dane, zapoznaj się z naszą Polityką Prywatności.",
     "contact": "Kontakt",
-    "contactDesc": "Jeśli masz jakiekolwiek pytania dotyczące używania przez nas plików cookie, skontaktuj się z nami: support@trainly.app",
+    "contactDesc": "Jeśli masz jakiekolwiek pytania dotyczące używania przez nas plików cookie, skontaktuj się z nami: support@exercio.app",
     "lastUpdated": "Ostatnia aktualizacja: czerwiec 2026"
+  },
+  "EnterpriseTerms": {
+    "title": "Regulamin Enterprise",
+    "description": "Regulamin Enterprise Exercio — warunki współpracy dla partnerów biznesowych, w tym subskrypcja, zarządzanie instruktorami i płatności."
+  },
+  "Refund": {
+    "title": "Polityka Zwrotów",
+    "description": "Polityka zwrotów Exercio — zasady zwrotów, anulowania rezerwacji i reklamacji dotyczących usług."
+  },
+  "AcceptableUse": {
+    "title": "Zasady Korzystania",
+    "description": "Zasady korzystania z Exercio — reguły użytkowania platformy, zakazane treści i wytyczne dotyczące moderacji."
+  },
+  "Dpa": {
+    "title": "Umowa Powierzenia Danych",
+    "description": "Umowa powierzenia danych Exercio — warunki przetwarzania danych między Exercio a partnerami biznesowymi, zgodnie z RODO."
   },
   "InstructorProfile": {
     "previewBanner": "To jest podgląd tego, jak Twój profil będzie wyglądał po opublikowaniu",
@@ -1198,7 +1229,8 @@
       "phoneRequired": "Numer telefonu jest wymagany",
       "phoneInvalid": "Nieprawidłowy numer telefonu (9 cyfr, opcjonalnie z +48)",
       "guestPhoneLabel": "Telefon klienta *",
-      "guestPhonePlaceholder": "+48 123 456 789"
+      "guestPhonePlaceholder": "+48 123 456 789",
+      "agreeToTermsRequired": "Musisz zaakceptować Regulamin i Politykę Prywatności"
     },
     "legend": {
       "title": "Legenda",

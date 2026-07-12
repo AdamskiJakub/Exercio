@@ -28,6 +28,12 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Internal planning documents (private - not for GitHub)
+/plans/
+
+# Legal source documents (internal reference only)
+/legal/
 *~
 
 # Testing

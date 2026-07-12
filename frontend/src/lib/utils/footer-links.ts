@@ -13,6 +13,10 @@ export const footerLinks = {
     { href: "/privacy", translationKey: "legal.privacy" },
     { href: "/terms", translationKey: "legal.terms" },
     { href: "/cookies", translationKey: "legal.cookies" },
+    { href: "/enterprise-terms", translationKey: "legal.enterpriseTerms" },
+    { href: "/refund", translationKey: "legal.refund" },
+    { href: "/acceptable-use", translationKey: "legal.acceptableUse" },
+    { href: "/dpa", translationKey: "legal.dpa" },
   ],
 } as const;
 

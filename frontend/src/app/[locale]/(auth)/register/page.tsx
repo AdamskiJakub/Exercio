@@ -112,10 +112,10 @@ export default async function RegisterPage({ params }: Props) {
           />
         </div>
 
-        {/* WHY TRAINLY SECTION */}
+        {/* WHY EXERCIO SECTION */}
         <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-8">
           <h2 className="text-xl font-bold text-white text-center mb-6">
-            {t("whyTrainlyTitle")}
+            {t("whyExercioTitle")}
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="flex items-start gap-3">
@@ -126,7 +126,7 @@ export default async function RegisterPage({ params }: Props) {
                 />
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">
-                {t("whyTrainlyFeature1")}
+                {t("whyExercioFeature1")}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -137,7 +137,7 @@ export default async function RegisterPage({ params }: Props) {
                 />
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">
-                {t("whyTrainlyFeature2")}
+                {t("whyExercioFeature2")}
               </p>
             </div>
             <div className="flex items-start gap-3">
@@ -148,7 +148,7 @@ export default async function RegisterPage({ params }: Props) {
                 />
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">
-                {t("whyTrainlyFeature3")}
+                {t("whyExercioFeature3")}
               </p>
             </div>
           </div>

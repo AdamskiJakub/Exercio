@@ -82,7 +82,7 @@ export default async function EnterprisePage({ params }: Props) {
     notFound();
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://trainly.pl";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
 
   const jsonLd = {
     "@context": "https://schema.org",
