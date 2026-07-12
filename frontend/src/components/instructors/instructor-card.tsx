@@ -111,7 +111,7 @@ export function InstructorCard({
                     <span className="w-5 h-5 rounded-full overflow-hidden bg-white shrink-0 inline-block border border-slate-700">
                       <img
                         src={getMediaUrl(enterpriseOrg.logoUrl)}
-                        alt=""
+                        alt={enterpriseOrg.companyName}
                         className="w-full h-full object-cover"
                       />
                     </span>
