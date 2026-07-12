@@ -66,7 +66,15 @@ export class AuthService {
         },
       });
 
-      await this.sendVerificationCode(dto.email, language);
+      // Send verification email — swallow errors in dev so registration still works
+      try {
+        await this.sendVerificationCode(dto.email, language);
+      } catch (emailError) {
+        console.warn(
+          `[AuthService] Failed to send verification email to ${dto.email}:`,
+          emailError instanceof Error ? emailError.message : emailError,
+        );
+      }
 
       return {
         message:

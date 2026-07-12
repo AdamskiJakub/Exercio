@@ -2,8 +2,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { termsContent } from "@/content/terms";
-import { termsContentEn } from "@/content/terms-en";
+import { enterpriseTermsContent } from "@/content/enterprise-terms";
+import { enterpriseTermsContentEn } from "@/content/enterprise-terms-en";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -11,7 +11,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "Terms" });
+  const t = await getTranslations({ locale, namespace: "EnterpriseTerms" });
 
   return {
     title: t("title"),
@@ -19,10 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function TermsPage() {
-  const t = useTranslations("Terms");
+export default function EnterpriseTermsPage() {
+  const t = useTranslations("EnterpriseTerms");
   const locale = useLocale();
-  const content = locale !== "pl" ? termsContentEn : termsContent;
+  const content =
+    locale !== "pl" ? enterpriseTermsContentEn : enterpriseTermsContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">

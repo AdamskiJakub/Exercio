@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { LegalCheckbox } from "@/components/ui/legal-checkbox";
 import {
   createContactFormSchema,
   type ContactFormData,
@@ -32,6 +33,7 @@ export function ContactForm({ preselectedCategory }: ContactFormProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ContactFormData>({
     resolver: zodResolver(createContactFormSchema(t)),
@@ -40,6 +42,7 @@ export function ContactForm({ preselectedCategory }: ContactFormProps) {
       email: "",
       category: preselectedCategory || "",
       message: "",
+      agreeToTerms: false,
     },
   });
 
@@ -50,15 +53,13 @@ export function ContactForm({ preselectedCategory }: ContactFormProps) {
     }
   }, [preselectedCategory, setValue]);
 
+  const agreeToTerms = watch("agreeToTerms");
+
   const onSubmit = async (data: ContactFormData) => {
     setSubmitError(null);
     try {
-      await apiClient.post("/contact", {
-        name: data.name,
-        email: data.email,
-        category: data.category,
-        message: data.message,
-      });
+      const { agreeToTerms: _, ...payload } = data;
+      await apiClient.post("/contact", payload);
       setIsSubmitted(true);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.message) {
@@ -193,6 +194,15 @@ export function ContactForm({ preselectedCategory }: ContactFormProps) {
                   <p className="text-sm text-red-400">{submitError}</p>
                 </div>
               )}
+
+              {/* Legal checkbox */}
+              <LegalCheckbox
+                checked={!!agreeToTerms}
+                onChange={(checked) =>
+                  setValue("agreeToTerms", checked, { shouldValidate: true })
+                }
+                error={errors.agreeToTerms?.message as string | undefined}
+              />
 
               {/* Submit */}
               <Button

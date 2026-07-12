@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Validation schema for guest booking form
@@ -8,23 +8,28 @@ export const createGuestBookingSchema = (t: (key: string) => string) =>
     name: z
       .string()
       .trim()
-      .min(1, { message: t('nameRequired') }),
+      .min(1, { message: t("nameRequired") }),
     email: z
       .string()
       .trim()
-      .min(1, { message: t('emailRequired') })
-      .email({ message: t('emailInvalid') }),
+      .min(1, { message: t("emailRequired") })
+      .email({ message: t("emailInvalid") }),
     phone: z
       .string()
       .trim()
-      .min(1, { message: t('phoneRequired') })
+      .min(1, { message: t("phoneRequired") })
       .refine(
         (val) => {
-          const digitsOnly = val.replace(/[\s-]/g, '');
+          const digitsOnly = val.replace(/[\s-]/g, "");
           return /^(\+48)?[0-9]{9}$/.test(digitsOnly);
         },
-        { message: t('phoneInvalid') }
+        { message: t("phoneInvalid") },
       ),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: t("agreeToTermsRequired"),
+    }),
   });
 
-export type GuestBookingFormData = z.infer<ReturnType<typeof createGuestBookingSchema>>;
+export type GuestBookingFormData = z.infer<
+  ReturnType<typeof createGuestBookingSchema>
+>;

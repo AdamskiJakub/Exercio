@@ -9,6 +9,14 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+env:
+  SYSTEM_PROMPT: |
+    You are a senior code reviewer. Review ONLY the git diff provided.
+    CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
+    IMPORTANT: Do NOT report missing use client directive.
+    Format: **file/path.ts:line** - description. Be concise.
+    If everything looks good, just say "No issues found."
+
 jobs:
   code-review:
     runs-on: ubuntu-latest
@@ -17,9 +25,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get changed files
-        id: files
+      - name: Get git diff
+        id: diff
         run: |
+          DIFF=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . \
+            ':!*.lock' ':!*.toml' \
+            ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
+            ':!**/node_modules/**' 2>/dev/null || true)
+
+          echo "$DIFF" > /tmp/git_diff.txt
+
           FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
             ':!*.lock' ':!*.toml' \
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
@@ -29,51 +44,126 @@ jobs:
           echo "$FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Call DeepSeek API
+      - name: Call DeepSeek API (chunked)
         id: review
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          FILES="${{ steps.files.outputs.FILES }}"
+          FILES="${{ steps.diff.outputs.FILES }}"
+          FILE_COUNT=$(echo "$FILES" | grep -c '[^[:space:]]' || true)
 
-          if [ -z "$FILES" ]; then
+          if [ "$FILE_COUNT" -eq 0 ]; then
             echo "No code changes to review." > /tmp/review_comment.txt
             exit 0
           fi
 
-          CONTEXT_FILE=$(mktemp)
-          FILES_LIST_FILE=$(mktemp)
+          DIFF_CONTENT=$(cat /tmp/git_diff.txt)
+          DIFF_SIZE=${#DIFF_CONTENT}
 
-          while IFS= read -r file; do
-            if [ -f "$file" ]; then
-              printf '%s\n' "$file" >> "$FILES_LIST_FILE"
-              printf '\n\n=== %s ===\n' "$file" >> "$CONTEXT_FILE"
-              printf '\`\`\`\n' >> "$CONTEXT_FILE"
-              cat "$file" >> "$CONTEXT_FILE"
-              printf '\n\`\`\`\n' >> "$CONTEXT_FILE"
+          # Build system prompt file to avoid jq quoting issues
+          cat > /tmp/system_prompt.txt << 'PROMPT_EOF'
+          You are a senior code reviewer. Review ONLY the git diff provided.
+          CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
+          IMPORTANT: Do NOT report missing use client directive.
+          Format: **file/path.ts:line** - description. Be concise.
+          If everything looks good, just say "No issues found."
+          PROMPT_EOF
+
+          SYSTEM_PROMPT=$(cat /tmp/system_prompt.txt)
+
+          # If diff is small enough, do a single review
+          if [ "$DIFF_SIZE" -lt 15000 ]; then
+            echo "Single review (diff size: $DIFF_SIZE bytes)"
+
+            jq -n \
+              --arg system "$SYSTEM_PROMPT" \
+              --arg files "$FILES" \
+              --arg diff "$DIFF_CONTENT" \
+              '{
+                model: "deepseek-chat",
+                max_tokens: 4096,
+                temperature: 0.1,
+                messages: [
+                  {
+                    role: "system",
+                    content: $system
+                  },
+                  {
+                    role: "user",
+                    content: ("Files changed:\n" + $files + "\n\nGit diff:\n```diff\n" + $diff + "\n```")
+                  }
+                ]
+              }' > /tmp/payload.json
+          else
+            echo "Chunked review (diff size: $DIFF_SIZE bytes)"
+
+            CHUNK_FILE=$(mktemp)
+            echo "$FILES" > "$CHUNK_FILE"
+
+            REVIEWS=""
+            CHUNK_NUM=1
+            while true; do
+              CHUNK_FILES=$(sed -n '1,5p' "$CHUNK_FILE")
+              sed -i '1,5d' "$CHUNK_FILE"
+
+              if [ -z "$CHUNK_FILES" ]; then
+                break
+              fi
+
+              CHUNK_DIFF=$(echo "$CHUNK_FILES" | while IFS= read -r file; do
+                git diff "origin/${{ github.base_ref }}...HEAD" -- "$file" 2>/dev/null
+              done)
+
+              if [ -z "$CHUNK_DIFF" ]; then
+                continue
+              fi
+
+              echo "Reviewing chunk $CHUNK_NUM..."
+
+              jq -n \
+                --arg system "$SYSTEM_PROMPT" \
+                --arg files "$CHUNK_FILES" \
+                --arg diff "$CHUNK_DIFF" \
+                '{
+                  model: "deepseek-chat",
+                  max_tokens: 4096,
+                  temperature: 0.1,
+                  messages: [
+                    {
+                      role: "system",
+                      content: $system
+                    },
+                    {
+                      role: "user",
+                      content: ("Files changed:\n" + $files + "\n\nGit diff:\n```diff\n" + $diff + "\n```")
+                    }
+                  ]
+                }' > /tmp/payload_chunk.json
+
+              RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
+                -H "Content-Type: application/json" \
+                -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+                -d @/tmp/payload_chunk.json)
+
+              CHUNK_REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // ""')
+
+              if [ -n "$CHUNK_REVIEW" ] && [ "$CHUNK_REVIEW" != "No issues found." ]; then
+                REVIEWS="${REVIEWS}\n\n### Chunk ${CHUNK_NUM}\n${CHUNK_REVIEW}"
+              fi
+
+              CHUNK_NUM=$((CHUNK_NUM + 1))
+            done
+
+            rm -f "$CHUNK_FILE"
+
+            if [ -z "$REVIEWS" ]; then
+              REVIEWS="No issues found."
             fi
-          done <<< "$FILES"
 
-          jq -n \
-            --rawfile files "$FILES_LIST_FILE" \
-            --rawfile context "$CONTEXT_FILE" \
-            '{
-              model: "deepseek-chat",
-              max_tokens: 8192,
-              temperature: 0.5,
-              messages: [
-                {
-                  role: "system",
-                  content: "You are a senior code reviewer. You have the FULL source code of every changed file in this PR. Review ONLY the changed files listed below. CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility. IMPORTANT: Do NOT report missing use client directive. Format: **file/path.ts:line** - description. If nothing important, say: No significant issues found."
-                },
-                {
-                  role: "user",
-                  content: ("Files changed:\n" + $files + "\n\nFull file contents:\n" + $context)
-                }
-              ]
-            }' > /tmp/payload.json
-
-          rm -f "$CONTEXT_FILE" "$FILES_LIST_FILE"
+            echo "$REVIEWS" > /tmp/review_comment.txt
+            rm -f /tmp/payload.json /tmp/payload_chunk.json
+            exit 0
+          fi
 
           echo 'Calling DeepSeek API...'
           RESPONSE=$(curl -s https://api.deepseek.com/chat/completions \
@@ -89,6 +179,7 @@ jobs:
           fi
 
           echo "$COMMENT" > /tmp/review_comment.txt
+          rm -f /tmp/payload.json
 
       - name: Post comment on PR
         env:

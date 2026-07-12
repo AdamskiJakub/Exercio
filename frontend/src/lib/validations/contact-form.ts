@@ -29,6 +29,9 @@ export const createContactFormSchema = (t: (key: string) => string) =>
       .trim()
       .min(10, { message: t("form.messageMin") })
       .max(2000, { message: t("form.messageMax") }),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: t("form.agreeToTermsRequired"),
+    }),
   });
 
 export type ContactFormData = z.infer<

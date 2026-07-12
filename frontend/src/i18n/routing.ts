@@ -149,6 +149,22 @@ export const routing = defineRouting({
       pl: "/onboarding/instruktor",
       en: "/onboarding/instructor",
     },
+    "/enterprise-terms": {
+      pl: "/regulamin-enterprise",
+      en: "/enterprise-terms",
+    },
+    "/refund": {
+      pl: "/zwroty",
+      en: "/refund",
+    },
+    "/acceptable-use": {
+      pl: "/zasady-korzystania",
+      en: "/acceptable-use",
+    },
+    "/dpa": {
+      pl: "/umowa-powierzenia-danych",
+      en: "/dpa",
+    },
   },
 });
 
