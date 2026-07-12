@@ -316,7 +316,7 @@ export function InstructorDashboard() {
       {/* Enterprise Affiliation — show if instructor belongs to an organization */}
       {profile?.enterpriseMemberships?.[0]?.enterprise &&
         (() => {
-          const org = profile.enterpriseMemberships![0].enterprise;
+          const org = profile.enterpriseMemberships[0].enterprise;
           return (
             <DashboardCard
               title={t("affiliatedEnterprise")}

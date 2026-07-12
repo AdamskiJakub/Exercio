@@ -167,7 +167,7 @@ export function InstructorHero({
                           <span className="w-8 h-8 rounded-full overflow-hidden border border-slate-600 bg-white shrink-0 inline-block">
                             <img
                               src={getMediaUrl(org.logoUrl)}
-                              alt=""
+                              alt={org.companyName}
                               className="w-full h-full object-cover"
                             />
                           </span>

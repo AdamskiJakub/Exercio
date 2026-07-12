@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
-import type { InstructorListing } from "@/types";
+import type { InstructorListing, EnterpriseMembershipStatus } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 
 interface InstructorProfileResponse {
@@ -47,7 +47,7 @@ interface InstructorProfileResponse {
   };
   enterpriseMemberships?: Array<{
     id: string;
-    status: string;
+    status: EnterpriseMembershipStatus;
     enterprise: {
       id: string;
       companyName: string;

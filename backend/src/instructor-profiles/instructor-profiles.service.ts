@@ -11,6 +11,23 @@ import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto'
 import { StaticConfigService } from '../config/config.service';
 import { getInstructorOrderBy } from '../common/sort-utils';
 
+// Shared Prisma include for enterprise memberships (used across multiple queries)
+export const enterpriseMembershipsInclude = {
+  enterpriseMemberships: {
+    where: { status: 'ACCEPTED' },
+    include: {
+      enterprise: {
+        select: {
+          id: true,
+          companyName: true,
+          slug: true,
+          logoUrl: true,
+        },
+      },
+    },
+  },
+} as const;
+
 export interface PaginatedResult<T> {
   data: T[];
   total: number;
@@ -181,19 +198,7 @@ export class InstructorProfilesService {
               role: true,
             },
           },
-          enterpriseMemberships: {
-            where: { status: 'ACCEPTED' },
-            include: {
-              enterprise: {
-                select: {
-                  id: true,
-                  companyName: true,
-                  slug: true,
-                  logoUrl: true,
-                },
-              },
-            },
-          },
+          ...enterpriseMembershipsInclude,
         },
         orderBy,
       }),
@@ -255,19 +260,7 @@ export class InstructorProfilesService {
             phone: true,
           },
         },
-        enterpriseMemberships: {
-          where: { status: 'ACCEPTED' },
-          include: {
-            enterprise: {
-              select: {
-                id: true,
-                companyName: true,
-                slug: true,
-                logoUrl: true,
-              },
-            },
-          },
-        },
+        ...enterpriseMembershipsInclude,
       },
     });
 
@@ -387,19 +380,7 @@ export class InstructorProfilesService {
             role: true,
           },
         },
-        enterpriseMemberships: {
-          where: { status: 'ACCEPTED' },
-          include: {
-            enterprise: {
-              select: {
-                id: true,
-                companyName: true,
-                slug: true,
-                logoUrl: true,
-              },
-            },
-          },
-        },
+        ...enterpriseMembershipsInclude,
       },
     });
   }

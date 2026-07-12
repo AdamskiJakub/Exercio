@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { enterpriseMembershipsInclude } from '../instructor-profiles/instructor-profiles.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   getInstructorOrderBy,
@@ -107,19 +108,7 @@ export class SearchService {
               role: true,
             },
           },
-          enterpriseMemberships: {
-            where: { status: 'ACCEPTED' },
-            include: {
-              enterprise: {
-                select: {
-                  id: true,
-                  companyName: true,
-                  slug: true,
-                  logoUrl: true,
-                },
-              },
-            },
-          },
+          ...enterpriseMembershipsInclude,
         },
         orderBy,
       }),
