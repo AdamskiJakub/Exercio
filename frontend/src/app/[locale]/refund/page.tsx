@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function RefundPage() {
   const t = useTranslations("Refund");
   const locale = useLocale();
-  const content = locale === "en" ? refundContentEn : refundContent;
+  const content = locale !== "pl" ? refundContentEn : refundContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">

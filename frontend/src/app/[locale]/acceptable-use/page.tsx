@@ -23,7 +23,7 @@ export default function AcceptableUsePage() {
   const t = useTranslations("AcceptableUse");
   const locale = useLocale();
   const content =
-    locale === "en" ? acceptableUseContentEn : acceptableUseContent;
+    locale !== "pl" ? acceptableUseContentEn : acceptableUseContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">

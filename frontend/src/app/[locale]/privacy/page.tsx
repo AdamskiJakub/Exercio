@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function PrivacyPage() {
   const t = useTranslations("Privacy");
   const locale = useLocale();
-  const content = locale === "en" ? privacyContentEn : privacyContent;
+  const content = locale !== "pl" ? privacyContentEn : privacyContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">

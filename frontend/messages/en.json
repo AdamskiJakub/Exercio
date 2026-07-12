@@ -1024,13 +1024,11 @@
   },
   "Privacy": {
     "title": "Privacy Policy",
-    "description": "Exercio Privacy Policy — learn how we collect, process, and protect your personal data in accordance with GDPR.",
-    "comingSoon": "Page coming soon"
+    "description": "Exercio Privacy Policy — learn how we collect, process, and protect your personal data in accordance with GDPR."
   },
   "Terms": {
     "title": "Terms of Service",
-    "description": "Exercio Terms of Service — rules for using the platform, user obligations, booking rules, and complaint procedures.",
-    "comingSoon": "Page coming soon"
+    "description": "Exercio Terms of Service — rules for using the platform, user obligations, booking rules, and complaint procedures."
   },
   "Legal": {
     "agreeToTerms": "I accept the",

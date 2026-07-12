@@ -23,7 +23,7 @@ export default function EnterpriseTermsPage() {
   const t = useTranslations("EnterpriseTerms");
   const locale = useLocale();
   const content =
-    locale === "en" ? enterpriseTermsContentEn : enterpriseTermsContent;
+    locale !== "pl" ? enterpriseTermsContentEn : enterpriseTermsContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">

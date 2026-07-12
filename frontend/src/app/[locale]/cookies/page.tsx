@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function CookiesPage() {
   const t = useTranslations("Cookies");
   const locale = useLocale();
-  const content = locale === "en" ? cookiesContentEn : cookiesContent;
+  const content = locale !== "pl" ? cookiesContentEn : cookiesContent;
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-16 max-w-4xl">
