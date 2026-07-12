@@ -101,6 +101,19 @@ export function InstructorCard({
               {enterpriseOrg && (
                 <span
                   onClick={handleOrgClick}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      if (enterpriseOrg) {
+                        router.push(
+                          `/${locale}/enterprise/${enterpriseOrg.slug}`,
+                        );
+                      }
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   className="inline-flex items-center gap-1.5 mt-3 text-sm text-slate-400 hover:text-orange-400 transition-colors cursor-pointer"
                 >
                   <Building2 className="size-4 shrink-0 text-slate-400" />
