@@ -298,7 +298,9 @@
       "enterpriseInvitationTitle": "Zaproszenie od {company}",
       "enterpriseInvitationDescription": "Otrzymałeś zaproszenie do dołączenia jako instruktor partnerski",
       "accept": "Akceptuj",
-      "reject": "Odrzuć"
+      "reject": "Odrzuć",
+      "affiliatedEnterprise": "Przynależność",
+      "instructorAt": "Instruktor w"
     },
     "enterprise": {
       "welcomeBack": "Witaj ponownie",
@@ -851,7 +853,8 @@
       "yearsExp": "{count}+ lat doświadczenia",
       "online": "Online",
       "inPerson": "Osobiście",
-      "both": "Online i osobiście"
+      "both": "Online i osobiście",
+      "instructorAt": "Instruktor w"
     },
     "filters": {
       "title": "Filtry",
@@ -1164,6 +1167,7 @@
     "backToListing": "Powrót do listy",
     "loadingProfile": "Ładowanie profilu...",
     "verifiedInstructor": "Zweryfikowany instruktor",
+    "instructorAt": "Instruktor w",
     "respondsWithin": "Odpowiada zwykle w czasie poniżej 24h",
     "memberSince": "Konto aktywne od",
     "chooseTerm": "Wybierz termin",
