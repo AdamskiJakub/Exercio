@@ -9,6 +9,14 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
+env:
+  SYSTEM_PROMPT: |
+    You are a senior code reviewer. Review ONLY the git diff provided.
+    CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
+    IMPORTANT: Do NOT report missing use client directive.
+    Format: **file/path.ts:line** - description. Be concise.
+    If everything looks good, just say "No issues found."
+
 jobs:
   code-review:
     runs-on: ubuntu-latest
@@ -25,10 +33,8 @@ jobs:
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
             ':!**/node_modules/**' 2>/dev/null || true)
 
-          # Store diff in a file (avoids GitHub output size limits)
           echo "$DIFF" > /tmp/git_diff.txt
 
-          # Count changed files
           FILES=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- . \
             ':!*.lock' ':!*.toml' \
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
@@ -54,11 +60,23 @@ jobs:
           DIFF_CONTENT=$(cat /tmp/git_diff.txt)
           DIFF_SIZE=${#DIFF_CONTENT}
 
+          # Build system prompt file to avoid jq quoting issues
+          cat > /tmp/system_prompt.txt << 'PROMPT_EOF'
+          You are a senior code reviewer. Review ONLY the git diff provided.
+          CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
+          IMPORTANT: Do NOT report missing use client directive.
+          Format: **file/path.ts:line** - description. Be concise.
+          If everything looks good, just say "No issues found."
+          PROMPT_EOF
+
+          SYSTEM_PROMPT=$(cat /tmp/system_prompt.txt)
+
           # If diff is small enough, do a single review
           if [ "$DIFF_SIZE" -lt 15000 ]; then
-            echo 'Single review (diff size: '"$DIFF_SIZE"' bytes)'
+            echo "Single review (diff size: $DIFF_SIZE bytes)"
 
             jq -n \
+              --arg system "$SYSTEM_PROMPT" \
               --arg files "$FILES" \
               --arg diff "$DIFF_CONTENT" \
               '{
@@ -68,7 +86,7 @@ jobs:
                 messages: [
                   {
                     role: "system",
-                    content: "You are a senior code reviewer. Review ONLY the git diff provided. CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility. IMPORTANT: Do NOT report missing use client directive. Format: **file/path.ts:line** - description. Be concise. If everything looks good, just say 'No issues found.'"
+                    content: $system
                   },
                   {
                     role: "user",
@@ -77,10 +95,8 @@ jobs:
                 ]
               }' > /tmp/payload.json
           else
-            # Chunk the diff into multiple reviews
             echo "Chunked review (diff size: $DIFF_SIZE bytes)"
 
-            # Split files into chunks of ~5
             CHUNK_FILE=$(mktemp)
             echo "$FILES" > "$CHUNK_FILE"
 
@@ -88,13 +104,12 @@ jobs:
             CHUNK_NUM=1
             while true; do
               CHUNK_FILES=$(sed -n '1,5p' "$CHUNK_FILE")
-              sed -i '' '1,5d' "$CHUNK_FILE" 2>/dev/null || sed -i '1,5d' "$CHUNK_FILE"
+              sed -i '1,5d' "$CHUNK_FILE"
 
               if [ -z "$CHUNK_FILES" ]; then
                 break
               fi
 
-              # Get diff for just these files
               CHUNK_DIFF=$(echo "$CHUNK_FILES" | while IFS= read -r file; do
                 git diff "origin/${{ github.base_ref }}...HEAD" -- "$file" 2>/dev/null
               done)
@@ -106,6 +121,7 @@ jobs:
               echo "Reviewing chunk $CHUNK_NUM..."
 
               jq -n \
+                --arg system "$SYSTEM_PROMPT" \
                 --arg files "$CHUNK_FILES" \
                 --arg diff "$CHUNK_DIFF" \
                 '{
@@ -115,7 +131,7 @@ jobs:
                   messages: [
                     {
                       role: "system",
-                      content: "You are a senior code reviewer. Review ONLY the git diff provided. CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility. IMPORTANT: Do NOT report missing use client directive. Format: **file/path.ts:line** - description. Be concise. If everything looks good, just say 'No issues found.'"
+                      content: $system
                     },
                     {
                       role: "user",
