@@ -32,8 +32,8 @@ export class CreateBookingDto {
   guestEmail?: string;
 
   @IsString()
-  @IsOptional()
-  guestPhone?: string;
+  @IsNotEmpty({ message: 'Phone number is required for guest bookings' })
+  guestPhone: string;
 
   @IsOptional()
   @Type(() => Number)

@@ -3,10 +3,12 @@
 import { UseFormReturn, Controller } from "react-hook-form";
 import { InstructorProfileFormData } from "@/lib/validations/schemas/instructor-profile";
 import { useTranslations } from "next-intl";
-import { Phone, Mail, MessageCircle } from "lucide-react";
+import { Phone, Mail, MessageCircle, Globe } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { SOCIAL_PLATFORMS } from "@/constants/enterprise";
 
 interface ContactSettingsSectionProps {
   form: UseFormReturn<InstructorProfileFormData>;
@@ -20,6 +22,11 @@ export function ContactSettingsSection({
   userEmail,
 }: ContactSettingsSectionProps) {
   const t = useTranslations("Dashboard.profileForm");
+
+  // Filter SOCIAL_PLATFORMS to only include the ones relevant for instructors
+  const instructorSocialPlatforms = SOCIAL_PLATFORMS.filter((p) =>
+    ["instagramUrl", "facebookUrl", "whatsappUrl"].includes(p.key),
+  );
 
   return (
     <div className="bg-slate-900/30 border border-slate-700 rounded-lg p-5 space-y-3">
@@ -138,6 +145,53 @@ export function ContactSettingsSection({
             {form.formState.errors.contactMessage.message}
           </p>
         )}
+      </div>
+
+      {/* Social Media Links */}
+      <div className="pt-3 border-t border-slate-700/50">
+        <h4 className="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+          <Globe className="size-4 text-orange-500" />
+          {t("contactSettings.socialMedia")}
+        </h4>
+
+        {instructorSocialPlatforms.map((platform) => {
+          const platformColors: Record<string, string> = {
+            instagramUrl: "text-pink-500",
+            facebookUrl: "text-blue-500",
+            whatsappUrl: "text-green-500",
+          };
+
+          return (
+            <div key={platform.key} className="space-y-2 mb-3">
+              <Label
+                htmlFor={platform.key}
+                className="text-slate-300 text-sm flex items-center gap-2"
+              >
+                <svg
+                  className={`size-4 ${platformColors[platform.key] || "text-slate-400"}`}
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d={platform.path} />
+                </svg>
+                {platform.label}
+                <span className="text-slate-500 font-normal text-xs">
+                  {t("optional")}
+                </span>
+              </Label>
+              <Input
+                {...form.register(
+                  platform.key as keyof InstructorProfileFormData,
+                )}
+                id={platform.key}
+                type="url"
+                placeholder={`https://${platform.label.toLowerCase()}.com/your-profile`}
+                className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

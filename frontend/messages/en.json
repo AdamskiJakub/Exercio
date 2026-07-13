@@ -775,7 +775,8 @@
         "showEmailHint": "Clients will see your email on your profile",
         "messageLabel": "Additional contact message",
         "messagePlaceholder": "e.g., Best contact via WhatsApp or SMS after 6 PM",
-        "messageHint": "Optional message about your preferred contact method (visible to all visitors to your profile)"
+        "messageHint": "Optional message about your preferred contact method (visible to all visitors to your profile)",
+        "socialMedia": "Social Media"
       },
       "paymentSettings": {
         "title": "Payment Information",
@@ -1150,7 +1151,9 @@
       "email": "Email",
       "sendEmail": "Send Email",
       "callNow": "Call Now",
-      "bookSession": "Book a Session"
+      "bookSession": "Book a Session",
+      "socialMedia": "Social Media",
+      "opensInNewTab": "Opens in new tab"
     },
     "booking": {
       "ctaTitle": "Ready for Change?",

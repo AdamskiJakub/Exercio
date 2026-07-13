@@ -775,7 +775,8 @@
         "showEmailHint": "Klienci zobaczą Twój email na profilu",
         "messageLabel": "Dodatkowa wiadomość kontaktowa",
         "messagePlaceholder": "np. Najlepszy kontakt przez WhatsApp lub SMS po 18:00",
-        "messageHint": "Opcjonalna wiadomość o preferowanym sposobie kontaktu (widoczna dla wszystkich odwiedzających Twój profil)"
+        "messageHint": "Opcjonalna wiadomość o preferowanym sposobie kontaktu (widoczna dla wszystkich odwiedzających Twój profil)",
+        "socialMedia": "Media społecznościowe"
       },
       "paymentSettings": {
         "title": "Informacje o płatności",
@@ -1150,7 +1151,9 @@
       "email": "Email",
       "sendEmail": "Wyślij e-mail",
       "callNow": "Zadzwoń",
-      "bookSession": "Zarezerwuj sesję"
+      "bookSession": "Zarezerwuj sesję",
+      "socialMedia": "Media społecznościowe",
+      "opensInNewTab": "Otwiera w nowej karcie"
     },
     "booking": {
       "ctaTitle": "Gotowy na zmianę?",

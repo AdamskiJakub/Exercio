@@ -242,6 +242,7 @@ export const INFO_EMAIL_TEXTS = {
       footer: 'Sprawdź swój kalendarz na Exercio.',
       clientLabel: 'Klient',
       clientEmailLabel: 'Email klienta',
+      clientPhoneLabel: 'Telefon klienta',
     },
     en: {
       title: 'New Booking! 📅',
@@ -254,6 +255,7 @@ export const INFO_EMAIL_TEXTS = {
       footer: 'Check your calendar on Exercio.',
       clientLabel: 'Client',
       clientEmailLabel: 'Client email',
+      clientPhoneLabel: 'Client phone',
     },
   },
 };

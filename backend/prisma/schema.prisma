@@ -63,6 +63,9 @@ model InstructorProfile {
   contactMessage          String?
   showEmail               Boolean                 @default(false)
   showPhone               Boolean                 @default(false)
+  instagramUrl            String?
+  facebookUrl             String?
+  whatsappUrl             String?
   isBookingEnabled        Boolean                 @default(false)
   minNoticeHours          Int                     @default(48)
   sessionDuration         Int                     @default(60)

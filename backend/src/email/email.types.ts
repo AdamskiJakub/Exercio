@@ -46,6 +46,7 @@ export interface ClientAcceptedManualBookingDetails {
 export interface InstructorBookingNotificationDetails {
   clientName: string;
   clientEmail?: string;
+  clientPhone?: string;
   date: string;
   time: string;
   duration: number;
@@ -94,6 +95,7 @@ export interface InfoEmailContent {
   footer: string;
   clientLabel?: string;
   clientEmailLabel?: string;
+  clientPhoneLabel?: string;
 }
 
 export interface BuildInfoDetails {
@@ -103,6 +105,7 @@ export interface BuildInfoDetails {
   price?: number;
   clientName?: string;
   clientEmail?: string;
+  clientPhone?: string;
 }
 
 export interface CancellationEmailContent {
