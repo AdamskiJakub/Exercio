@@ -5,12 +5,17 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EnterpriseBaseService } from './enterprise-base.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/dto/create-notification.dto';
 import type { CreateEnterpriseNewsDto } from './dto/create-enterprise-news.dto';
 import type { UpdateEnterpriseNewsDto } from './dto/update-enterprise-news.dto';
 
 @Injectable()
 export class EnterpriseNewsService extends EnterpriseBaseService {
-  constructor(prisma: PrismaService) {
+  constructor(
+    prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {
     super(prisma);
   }
 
@@ -28,7 +33,7 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
       throw new BadRequestException('URL is required for link-type news');
     }
 
-    return this.prisma.enterpriseNews.create({
+    const news = await this.prisma.enterpriseNews.create({
       data: {
         enterpriseId,
         type,
@@ -38,6 +43,46 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
         thumbnailUrl: dto.thumbnailUrl ?? null,
       },
     });
+
+    // Fetch enterprise profile info for the notification
+    const enterprise = await this.prisma.enterpriseProfile.findUnique({
+      where: { id: enterpriseId },
+      select: {
+        companyName: true,
+        slug: true,
+      },
+    });
+
+    if (enterprise) {
+      // Fetch all followers of this enterprise
+      const followers = await this.prisma.enterpriseFollow.findMany({
+        where: { enterpriseId },
+        select: { followerId: true },
+      });
+
+      // Create a notification for each follower
+      const notificationPromises = followers.map((follower) =>
+        this.notificationsService.createNotification({
+          userId: follower.followerId,
+          type: NotificationType.ENTERPRISE_NEWS,
+          title: enterprise.companyName,
+          message: dto.title,
+          data: {
+            enterpriseId,
+            enterpriseSlug: enterprise.slug,
+            newsId: news.id,
+            newsType: type,
+            newsTitle: dto.title,
+            newsUrl: dto.url ?? '',
+            companyName: enterprise.companyName,
+          },
+        }),
+      );
+
+      await Promise.all(notificationPromises);
+    }
+
+    return news;
   }
 
   async findAll(enterpriseId: string) {

@@ -17,13 +17,14 @@ export function useEnterpriseProfile(slug: string) {
   });
 }
 
-export function useMyEnterpriseProfile() {
+export function useMyEnterpriseProfile(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["my-enterprise-profile"],
     queryFn: async () => {
       const { data } = await apiClient.get<EnterpriseProfile>("/enterprise/me");
       return data;
     },
+    enabled: options?.enabled,
   });
 }
 

@@ -188,7 +188,9 @@ export type NotificationType =
   | "NEW_REVIEW"
   | "BOOKING_CANCELLED"
   | "ENTERPRISE_INVITATION"
-  | "ENTERPRISE_INVITATION_ACCEPTED";
+  | "ENTERPRISE_INVITATION_ACCEPTED"
+  | "NEW_FOLLOWER"
+  | "ENTERPRISE_NEWS";
 
 export interface Notification {
   id: string;
@@ -206,4 +208,29 @@ export interface PaginatedNotifications {
   page: number;
   limit: number;
   hasMore: boolean;
+}
+
+export interface FollowedEnterprise {
+  id: string;
+  enterpriseId: string;
+  companyName: string;
+  slug: string;
+  logoUrl: string | null;
+  city: string | null;
+  businessType: string | null;
+  shortDescription: string | null;
+  verified: boolean;
+  followedAt: string;
+}
+
+export interface FollowedInstructor {
+  id: string;
+  instructorProfileId: string;
+  user: UserBasic;
+  photoUrl: string | null;
+  tagline: string | null;
+  city: string | null;
+  specializations: string[];
+  verified: boolean;
+  followedAt: string;
 }

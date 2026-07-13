@@ -7,9 +7,11 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DashboardHeader } from "./DashboardHeader";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
-import { EmptyStateCard } from "./EmptyStateCard";
 import { OnboardingChecklist } from "@/components/enterprise/OnboardingChecklist";
 import { getMediaUrl } from "@/lib/utils/media";
+import { useMyFollowedInstructors } from "@/hooks/useFollow";
+import { FollowedInstructorsSection } from "./FollowedInstructorsSection";
+import { EnterpriseInstructorList } from "./EnterpriseInstructorList";
 import {
   Building2,
   Users,
@@ -18,19 +20,18 @@ import {
   ExternalLink,
   Settings,
   Edit,
-  UserPlus,
   Newspaper,
+  Heart,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import NextLink from "next/link";
-import type {
-  EnterpriseInstructorWithProfile,
-  EnterpriseNews,
-} from "@/types/enterprise";
+import type { EnterpriseNews } from "@/types/enterprise";
 
 export function EnterpriseDashboard() {
   const t = useTranslations("Dashboard.enterprise");
   const { data: profile, isLoading } = useMyEnterpriseProfile();
+  const { data: followedInstructors, isLoading: followedInstructorsLoading } =
+    useMyFollowedInstructors();
   const user = useAuthStore((state) => state.user);
 
   if (isLoading) {
@@ -122,6 +123,19 @@ export function EnterpriseDashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Followed Instructors */}
+        <DashboardCard
+          title={t("followedInstructors")}
+          icon={Heart}
+          iconColor="text-pink-400"
+          iconBgColor="bg-pink-500/10"
+        >
+          <FollowedInstructorsSection
+            instructors={followedInstructors}
+            isLoading={followedInstructorsLoading}
+          />
+        </DashboardCard>
+
         {/* Instructors */}
         <DashboardCard
           title={t("instructors")}
@@ -129,70 +143,7 @@ export function EnterpriseDashboard() {
           iconColor="text-emerald-400"
           iconBgColor="bg-emerald-500/10"
         >
-          {profile?.instructors && profile.instructors.length > 0 ? (
-            <div className="space-y-3">
-              {profile.instructors
-                .slice(0, 5)
-                .map((inv: EnterpriseInstructorWithProfile) => (
-                  <NextLink
-                    key={inv.id}
-                    href={`/instructors/${inv.instructor?.user?.username}`}
-                    className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-700/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      {getMediaUrl(
-                        inv.instructor?.photoUrl ||
-                          inv.instructor?.user?.avatarUrl,
-                      ) ? (
-                        <img
-                          src={getMediaUrl(
-                            inv.instructor?.photoUrl ||
-                              inv.instructor?.user?.avatarUrl,
-                          )}
-                          alt=""
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm text-slate-300">
-                          {inv.instructor?.user?.firstName?.[0] || "?"}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-slate-200">
-                          {inv.instructor?.user?.firstName}{" "}
-                          {inv.instructor?.user?.lastName}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          {inv.status === "ACCEPTED"
-                            ? t("activeInstructors")
-                            : t("pendingInvitations")}
-                        </p>
-                      </div>
-                    </div>
-                  </NextLink>
-                ))}
-              <Link
-                href="/dashboard/enterprise/instructors"
-                className="block text-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors mt-2"
-              >
-                {t("manageInstructors")} →
-              </Link>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <UserPlus className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-300 mb-2">{t("noInstructorsYet")}</p>
-              <p className="text-sm text-slate-400 mb-4">
-                {t("noInstructorsDescription")}
-              </p>
-              <Link
-                href="/dashboard/enterprise/instructors"
-                className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors text-sm font-medium"
-              >
-                {t("inviteInstructor")}
-              </Link>
-            </div>
-          )}
+          <EnterpriseInstructorList instructors={profile?.instructors ?? []} />
         </DashboardCard>
 
         {/* News */}
@@ -204,7 +155,7 @@ export function EnterpriseDashboard() {
         >
           {profile?.news && profile.news.length > 0 ? (
             <div className="space-y-3">
-              {profile.news.slice(0, 5).map((newsItem: EnterpriseNews) => (
+              {profile.news.slice(0, 3).map((newsItem: EnterpriseNews) => (
                 <NextLink
                   key={newsItem.id}
                   href={
@@ -245,11 +196,19 @@ export function EnterpriseDashboard() {
                   </div>
                 </NextLink>
               ))}
+              {profile.news.length > 3 && (
+                <Link
+                  href="/dashboard/enterprise/news"
+                  className="block text-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors mt-2"
+                >
+                  {t("showAllNews")} ({profile.news.length}) →
+                </Link>
+              )}
               <Link
                 href="/dashboard/enterprise/news"
-                className="block text-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors mt-2"
+                className="block text-center text-sm text-slate-400 hover:text-slate-300 transition-colors mt-1"
               >
-                {t("manageNews")} →
+                {t("manageNews")}
               </Link>
             </div>
           ) : (

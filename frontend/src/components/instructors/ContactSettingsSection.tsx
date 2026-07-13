@@ -128,7 +128,7 @@ export function ContactSettingsSection({
           id="contactMessage"
           placeholder={t("contactSettings.messagePlaceholder")}
           rows={3}
-          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 resize-none"
+          className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 resize-none focus-visible:border-orange-500 focus-visible:ring-orange-500/50"
         />
         <p className="text-sm text-slate-400">
           {t("contactSettings.messageHint")}

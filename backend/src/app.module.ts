@@ -19,6 +19,7 @@ import { FavoritesModule } from './favorites/favorites.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ProfileViewsModule } from './profile-views/profile-views.module';
 import { EnterpriseModule } from './enterprise/enterprise.module';
+import { FollowModule } from './follow/follow.module';
 import { SearchModule } from './search/search.module';
 import { OGPreviewModule } from './og-preview/og-preview.module';
 
@@ -50,6 +51,7 @@ import { OGPreviewModule } from './og-preview/og-preview.module';
     NotificationsModule,
     ProfileViewsModule,
     EnterpriseModule,
+    FollowModule,
     SearchModule,
     OGPreviewModule,
   ],

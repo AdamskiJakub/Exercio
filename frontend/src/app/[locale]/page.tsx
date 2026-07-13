@@ -2,6 +2,43 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WordCloud } from "@/components/ui/word-cloud";
 import { HeroSearchBar } from "@/components/home/hero-search-bar";
+import type { Metadata } from "next";
+
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+
+  if (locale === "pl") {
+    return {
+      title: "Exercio — Znajdź swojego idealnego trenera",
+      description:
+        "Rynek trenerów personalnych, instruktorów fitness i specjalistów od wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
+      openGraph: {
+        title: "Exercio — Znajdź swojego idealnego trenera",
+        description:
+          "Rynek trenerów personalnych, instruktorów fitness i specjalistów od wellness.",
+        locale: "pl_PL",
+        siteName: "Exercio",
+      },
+    };
+  }
+
+  return {
+    title: "Exercio — Find Your Perfect Trainer",
+    description:
+      "Marketplace for personal trainers, fitness instructors, and wellness professionals. Browse profiles, check availability, and book online training.",
+    openGraph: {
+      title: "Exercio — Find Your Perfect Trainer",
+      description:
+        "Marketplace for personal trainers, fitness instructors, and wellness professionals.",
+      locale: "en_US",
+      siteName: "Exercio",
+    },
+  };
+}
 
 export default function Home() {
   const t = useTranslations("HomePage");

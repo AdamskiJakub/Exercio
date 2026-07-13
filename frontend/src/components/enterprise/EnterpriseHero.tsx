@@ -13,6 +13,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getMediaUrl } from "@/lib/utils/media";
+import { useAuthStore } from "@/stores/auth-store";
+import {
+  useIsFollowingEnterprise,
+  useToggleFollowEnterprise,
+} from "@/hooks/useFollow";
+import { FollowButton } from "@/components/follow/FollowButton";
 import type { EnterpriseProfile } from "@/types/enterprise";
 
 interface EnterpriseHeroProps {
@@ -21,6 +27,12 @@ interface EnterpriseHeroProps {
 
 export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
   const t = useTranslations("EnterpriseProfile");
+  const user = useAuthStore((state) => state.user);
+  const canFollow = user?.role === "CLIENT" || user?.role === "INSTRUCTOR";
+
+  const { data: isFollowing, isLoading: isCheckLoading } =
+    useIsFollowingEnterprise(enterprise.id);
+  const toggleMutation = useToggleFollowEnterprise();
 
   const initials = enterprise.companyName
     .split(" ")
@@ -162,6 +174,19 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
 
               {/* RIGHT: CTA buttons */}
               <div className="hidden sm:flex flex-col gap-2 shrink-0">
+                {canFollow && (
+                  <FollowButton
+                    isFollowing={isFollowing}
+                    isLoading={isCheckLoading}
+                    isPending={toggleMutation.isPending}
+                    onToggle={() =>
+                      toggleMutation.mutate({
+                        enterpriseId: enterprise.id,
+                        isFollowing: !!isFollowing,
+                      })
+                    }
+                  />
+                )}
                 {enterprise.phone && (
                   <a href={`tel:${enterprise.phone}`}>
                     <Button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white gap-2 shadow-lg">
@@ -191,6 +216,21 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
 
       {/* Mobile CTA buttons (visible only on small screens) */}
       <div className="max-w-7xl mx-auto px-8 sm:hidden mt-4">
+        {canFollow && (
+          <div className="mb-2">
+            <FollowButton
+              isFollowing={isFollowing}
+              isLoading={isCheckLoading}
+              isPending={toggleMutation.isPending}
+              onToggle={() =>
+                toggleMutation.mutate({
+                  enterpriseId: enterprise.id,
+                  isFollowing: !!isFollowing,
+                })
+              }
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-2">
           {enterprise.phone && (
             <a href={`tel:${enterprise.phone}`}>

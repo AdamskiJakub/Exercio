@@ -44,6 +44,7 @@ import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { useState, useMemo } from "react";
 import { useClearHistory } from "@/hooks/useClearHistory";
 import { useMyFavorites } from "@/hooks/useFavorites";
+import { useMyFollowedEnterprises } from "@/hooks/useFollow";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useSpecializations } from "@/hooks/useConfig";
 import {
@@ -71,6 +72,8 @@ export function InstructorDashboard() {
   const { data: pendingReviews, isLoading: pendingReviewsLoading } =
     usePendingReviews();
   const { data: favorites } = useMyFavorites();
+  const { data: followedEnterprises, isLoading: followedEnterprisesLoading } =
+    useMyFollowedEnterprises();
   const { data: recentlyViewed, isLoading: recentlyViewedLoading } =
     useRecentlyViewed();
   const { specializations } = useSpecializations();
@@ -488,7 +491,13 @@ export function InstructorDashboard() {
             title={t("favoriteTrainers")}
             delay={8}
           >
-            <FavoriteTrainersSection favorites={favorites} isLoading={false} />
+            <FavoriteTrainersSection
+              favorites={favorites}
+              isLoading={false}
+              showFollowedTab={true}
+              followedEnterprises={followedEnterprises}
+              isFollowedLoading={followedEnterprisesLoading}
+            />
           </DashboardCard>
 
           {/* Recently Viewed Trainers */}

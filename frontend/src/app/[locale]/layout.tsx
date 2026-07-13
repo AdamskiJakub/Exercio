@@ -20,11 +20,46 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Exercio - Find Your Perfect Trainer",
-  description:
-    "Marketplace for personal trainers, fitness instructors, and wellness professionals",
-};
+interface LocaleLayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: LocaleLayoutProps): Promise<Metadata> {
+  const { locale } = await params;
+
+  if (locale === "pl") {
+    return {
+      title: {
+        default: "Exercio — Znajdź swojego idealnego trenera",
+        template: "%s — Exercio",
+      },
+      description:
+        "Rynek trenerów personalnych, instruktorów fitness i specjalistów od wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
+      openGraph: {
+        siteName: "Exercio",
+        type: "website",
+        locale: "pl_PL",
+      },
+    };
+  }
+
+  return {
+    title: {
+      default: "Exercio — Find Your Perfect Trainer",
+      template: "%s — Exercio",
+    },
+    description:
+      "Marketplace for personal trainers, fitness instructors, and wellness professionals. Browse profiles, check availability, and book online training.",
+    openGraph: {
+      siteName: "Exercio",
+      type: "website",
+      locale: "en_US",
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -33,10 +68,7 @@ export function generateStaticParams() {
 export default async function LocaleLayout({
   children,
   params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
+}: LocaleLayoutProps) {
   const { locale } = await params;
 
   const messages = await getMessages();
