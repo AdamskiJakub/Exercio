@@ -14,6 +14,7 @@ export interface NotifiableBooking {
   price: number | null;
   guestName?: string | null;
   guestEmail?: string | null;
+  guestPhone?: string | null;
   cancellationToken?: string | null;
   client?: {
     id?: string;
@@ -397,6 +398,7 @@ export class BookingNotificationHelper {
         price: booking.price ?? undefined,
         clientName,
         clientEmail: booking.guestEmail || booking.client?.email,
+        clientPhone: booking.guestPhone || undefined,
       })
       .catch((err) =>
         this.logger.error(

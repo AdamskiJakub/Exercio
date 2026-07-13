@@ -102,6 +102,16 @@ ${
 `
     : ''
 }
+${
+  details.clientPhone
+    ? `
+<tr>
+  <td style="padding:6px 0;">${content.clientPhoneLabel || 'Telefon klienta'}</td>
+  <td style="padding:6px 0;color:#f1f5f9;text-align:right;">${escapeHtml(details.clientPhone)}</td>
+</tr>
+`
+    : ''
+}
 <tr><td style="padding:6px 0;">${content.dateLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.date)}</td></tr>
 <tr><td style="padding:6px 0;">${content.timeLabel}</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.time)}</td></tr>
 <tr><td style="padding:6px 0;">${content.durationLabel}</td><td align="right" style="color:#f1f5f9;">${details.duration} ${content.minutes}</td></tr>
