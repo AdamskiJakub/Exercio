@@ -1,7 +1,7 @@
 export const refundContent = `
 
-**Ostatnia aktualizacja:** 11 lipca 2026
-**Obowiązuje od:** 11 lipca 2026
+**Ostatnia aktualizacja:** 13 lipca 2026
+**Obowiązuje od:** 13 lipca 2026
 
 ---
 
@@ -27,6 +27,8 @@ Typowe zasady mogą obejmować:
 - Częściowy zwrot przy anulowaniu w krótszym terminie
 - Brak zwrotu przy anulowaniu w dniu sesji
 - Brak zwrotu w przypadku niestawienia się (no-show)
+
+Przykłady mają charakter wyłącznie informacyjny.
 
 ### 2.2. Jak anulować rezerwację
 
@@ -74,7 +76,7 @@ Exercio nie pośredniczy w sporach pomiędzy Klientem a Instruktorem/Firmą.
 
 ## 5. Reklamacje techniczne
 
-Reklamacje dotyczące technicznego działania Platformy (błędy, niedziałające funkcje) należy kierować na adres: **kontakt@exercio.app**.
+Reklamacje dotyczące technicznego działania Platformy (błędy, niedziałające funkcje) należy kierować na adres: **support@exercio.app**.
 
 Usługodawca rozpatruje reklamacje w terminie 14 dni.
 
@@ -94,5 +96,5 @@ W przypadku Platformy Exercio:
 ---
 
 _Exercio — exercio.app_
-**Kontakt:** kontakt@exercio.app
+**Kontakt:** support@exercio.app
 `;

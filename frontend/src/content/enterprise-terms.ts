@@ -1,7 +1,7 @@
 export const enterpriseTermsContent = `
 
-**Ostatnia aktualizacja:** 11 lipca 2026
-**Obowiązuje od:** 11 lipca 2026
+**Ostatnia aktualizacja:** 13 lipca 2026
+**Obowiązuje od:** 13 lipca 2026
 
 ---
 
@@ -18,7 +18,7 @@ export const enterpriseTermsContent = `
 - Fizjoterapii
 - Innych form aktywności sportowej/rekreacyjnej
 
-  1.3. W sprawach nieuregulowanych w niniejszym Regulaminie zastosowanie mają postanowienia [Regulaminu świadczenia usług](/terms).
+1.3. W sprawach nieuregulowanych w niniejszym Regulaminie zastosowanie mają postanowienia [Regulaminu świadczenia usług](/terms).
 
 ## 2. Założenie konta Enterprise
 
@@ -27,9 +27,9 @@ export const enterpriseTermsContent = `
 - Rejestrację bezpośrednią na Platformie
 - Złożenie zapytania przez formularz Enterprise Lead
 
-  2.2. Konto Enterprise wymaga akceptacji przez Usługodawcę.
+2.2. Konto Enterprise wymaga akceptacji przez Usługodawcę.
 
-  2.3. Usługodawca zastrzega sobie prawo do odmowy założenia konta Enterprise bez podania przyczyny.
+2.3. Usługodawca może odmówić aktywacji konta Enterprise, w szczególności w przypadku uzasadnionych wątpliwości dotyczących zgodności działalności z Regulaminem lub obowiązującym prawem.
 
 ## 3. Subskrypcja
 
@@ -47,7 +47,7 @@ export const enterpriseTermsContent = `
 
 4.2. Anulowanie subskrypcji powoduje utratę dostępu do funkcji Enterprise z końcem opłaconego okresu.
 
-4.3. Exercio nie dokonuje zwrotów za niewykorzystany okres subskrypcji.
+4.3. Exercio nie dokonuje zwrotów za niewykorzystany okres subskrypcji, z zastrzeżeniem bezwzględnie obowiązujących przepisów prawa.
 
 ## 5. Zarządzanie instruktorami
 
@@ -74,7 +74,7 @@ export const enterpriseTermsContent = `
 - Rozliczenia z Klientami
 - Zgodność z przepisami prawa
 
-  7.2. Exercio nie ponosi odpowiedzialności za działania Firm Enterprise ani przypisanych do nich instruktorów.
+7.2. Exercio nie ponosi odpowiedzialności za działania Firm Enterprise ani przypisanych do nich instruktorów.
 
 ## 8. Zawieszenie i usunięcie konta
 
@@ -83,6 +83,7 @@ export const enterpriseTermsContent = `
 - Naruszenia Regulaminu
 - Braku płatności
 - Działalności sprzecznej z prawem
+- Długotrwałej nieaktywności konta
 - Na wniosek Firmy
 
 ## 9. Postanowienia końcowe
@@ -94,5 +95,5 @@ export const enterpriseTermsContent = `
 ---
 
 _Exercio — exercio.app_
-**Kontakt:** kontakt@exercio.app
+**Kontakt:** support@exercio.app
 `;

@@ -1,7 +1,7 @@
 export const termsContentEn = `
 
-**Last updated:** July 11, 2026
-**Effective from:** July 11, 2026
+**Last updated:** July 13, 2026
+**Effective from:** July 13, 2026
 
 ---
 
@@ -19,11 +19,11 @@ export const termsContentEn = `
 10. [Payments and Subscriptions](#10-payments-and-subscriptions)
 11. [Refunds and Complaints](#11-refunds-and-complaints)
 12. [Liability](#12-liability)
-13. [Instructor Verification](#13-instructor-verification)
-14. [Content Moderation and DSA](#14-content-moderation-and-dsa)
-15. [Intellectual Property Rights](#15-intellectual-property-rights)
-16. [Personal Data and Cookies](#16-personal-data-and-cookies)
-17. [Final Provisions](#17-final-provisions)
+13. [Content Moderation and DSA](#13-content-moderation-and-dsa)
+14. [Intellectual Property Rights](#14-intellectual-property-rights)
+15. [Personal Data and Cookies](#15-personal-data-and-cookies)
+16. [Final Provisions](#16-final-provisions)
+17. [Force Majeure](#17-force-majeure)
 
 ---
 
@@ -31,8 +31,8 @@ export const termsContentEn = `
 
 | Term                   | Meaning                                                                                                                           |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Platform**           | The website available at exercio.app, including web and mobile applications, through which Services are provided                  |
-| **Service Provider/Exercio** | Jakub Adamski                                                                                                               |
+| **Platform**           | The website available at exercio.app, including the web application, through which Services are provided                          |
+| **Service Provider/Exercio** | The owner and operator of the Exercio Platform                                                                              |
 | **User**               | Any natural or legal person using the Platform                                                                                    |
 | **Client**             | A User with an account in the client role who searches for instructors and makes bookings                                         |
 | **Instructor**         | A User with an account in the instructor role who offers training/sports/dance services through the Platform                      |
@@ -78,6 +78,8 @@ export const termsContentEn = `
 
 3.2.3. Exercio only provides technical tools for searching, communication, and booking.
 
+3.2.4. Exercio is not an employer, principal, or representative of the Instructors or Companies using the Platform.
+
 ### 3.3. No Liability for Instructor Services
 
 **Exercio is not liable for:**
@@ -103,7 +105,9 @@ export const termsContentEn = `
 - Engage in hacking, phishing, spam
 - Use the Platform for illegal purposes
 
-4.3. Detailed rules regarding prohibited content can be found in the [Acceptable Use Policy](/acceptable-use).
+4.3. A person who provides false data or impersonates another person bears sole legal responsibility for such actions, including criminal and civil liability. Exercio does not verify the identity of persons creating an Account and is not liable for the consequences of impersonation.
+
+4.4. Detailed rules regarding prohibited content can be found in the [Acceptable Use Policy](/acceptable-use).
 
 ---
 
@@ -117,13 +121,15 @@ export const termsContentEn = `
 - Verify your email address
 - Choose a role (Client, Instructor, or Enterprise)
 
-5.3. A User may only have one Account assigned to one email address.
+5.3. A User may only have one Account assigned to one email address. Creating multiple Accounts to circumvent restrictions imposed on the User is prohibited.
 
-5.4. The User is obliged to secure access to their Account and not share it with third parties.
+5.4. An Account may only be created by a person with full legal capacity. Minors require the consent of a parent or legal guardian.
 
-5.5. The User may delete their Account at any time via the Panel.
+5.5. The User is obliged to secure access to their Account and not share it with third parties.
 
-5.6. The Service Provider may suspend or delete an Account in the event of a violation of these Terms.
+5.6. The User may delete their Account at any time via the Panel.
+
+5.7. The Service Provider may suspend or delete an Account in the event of a violation of these Terms.
 
 ---
 
@@ -170,18 +176,16 @@ The Guest can:
 
 ## 7. Instructor and Company Profiles
 
-7.1. The Instructor and Company bear **sole responsibility** for the content of their profile.
+7.1. The Instructor and Company bear **sole responsibility** for the content of their profile, including the truthfulness, completeness, and timeliness of the information provided.
 
-7.2. Exercio does not verify:
+7.2. Exercio does not conduct formal verification of:
 
 - The truthfulness of data provided in the profile
 - The Instructor's qualifications or certificates
 - Authorization to practice the profession
-- The legality of the Company's business
+- The legality of the conducted business
 
-7.3. Profiles may include a "verified" badge; however, verification only concerns identity confirmation (e.g., via ID document), not confirmation of professional qualifications.
-
-7.4. Users should exercise caution and independently verify the credibility of the Instructor/Company before using their services.
+7.3. Users should exercise caution and independently verify the credibility of the Instructor/Company before using their services.
 
 ---
 
@@ -191,9 +195,11 @@ The Guest can:
 
 8.2. Exercio enables the technical making of Bookings but **is not a party to the agreement** between the Client and the Instructor/Company.
 
-8.3. The terms of cancellation are set by the Instructor/Company in their profile. Exercio does not interfere with these terms.
+8.3. The Instructor/Company has the right to refuse a Booking for valid reasons, in particular due to lack of availability, health contraindications, violation of these Terms by the Client, or other justified circumstances.
 
-8.4. In the case of a Guest booking, the Client receives a cancellation link without needing to log in.
+8.4. The terms of cancellation are set by the Instructor/Company in their profile. Exercio does not interfere with these terms.
+
+8.5. In the case of a Guest booking, the Client receives a cancellation link without needing to log in.
 
 ---
 
@@ -205,7 +211,7 @@ The Guest can:
 
 9.3. Exercio reserves the right to remove reviews that violate these Terms or the law.
 
-9.4. The Instructor/Company has the right to report a review as violating these Terms (procedure described in section 14).
+9.4. The Instructor/Company has the right to report a review as violating these Terms (procedure described in section 13).
 
 ---
 
@@ -244,7 +250,9 @@ Exercio does not handle complaints concerning:
 
 ### 11.2. Complaints Regarding Platform Operation
 
-Complaints regarding the technical operation of the Platform (errors, non-functioning features) should be sent to: **kontakt@exercio.app**.
+Complaints regarding the technical operation of the Platform (errors, non-functioning features) should be sent to: **support@exercio.app**.
+
+The complaint should contain data enabling the identification of the User and a description of the reported issue.
 
 The Service Provider handles complaints within 14 days.
 
@@ -256,7 +264,11 @@ Exercio does not issue refunds for Instructor Services, as it is not a party to 
 
 ## 12. Liability
 
-### 12.1. Limitation of Exercio's Liability
+### 12.1. Platform Operation
+
+Exercio exercises due diligence to ensure the proper and secure operation of the Platform, but does not guarantee uninterrupted availability due to planned technical maintenance, failures, or force majeure events.
+
+### 12.2. Limitation of Exercio's Liability
 
 **Exercio is not liable for:**
 
@@ -266,9 +278,9 @@ Exercio does not issue refunds for Instructor Services, as it is not a party to 
 4. **Instructor verification** — truthfulness of data, qualifications, authorizations
 5. **Content published by Users** — profiles, reviews, comments
 6. **Financial settlements** — between the Client and the Instructor/Company
-7. **Damages resulting from force majeure** — failures, technical interruptions, cyberattacks
+7. **Damages resulting from force majeure** — failures, technical interruptions, cyberattacks, failures of third-party services
 
-### 12.2. Liability of the Instructor/Company
+### 12.3. Liability of the Instructor/Company
 
 The Instructor/Company bears **full liability** for:
 
@@ -278,7 +290,7 @@ The Instructor/Company bears **full liability** for:
 - Settlements with Clients
 - Processing of Clients' personal data
 
-### 12.3. Liability of the Client
+### 12.4. Liability of the Client
 
 The Client is liable for:
 
@@ -289,84 +301,76 @@ The Client is liable for:
 
 ---
 
-## 13. Instructor Verification
+## 13. Content Moderation and DSA
 
-13.1. Exercio **does not verify** the qualifications, authorizations, or truthfulness of data of Instructors and Companies.
+13.1. Users may report illegal content or content violating these Terms to: **support@exercio.app**.
 
-13.2. A "verified" badge on a profile means only that the Instructor/Company has confirmed their identity (e.g., by submitting a document). This does not constitute confirmation of:
-
-- Possession of appropriate qualifications
-- Authorization to practice the profession
-- Legality of the business
-- Credibility or reliability
-
-13.3. **Each User uses the Platform at their own risk.** Before using the services of an Instructor/Company, we recommend:
-
-- Checking reviews from other Clients
-- Independently verifying qualifications
-- Exercising caution during initial sessions
-
----
-
-## 14. Content Moderation and DSA
-
-14.1. Users may report illegal content or content violating these Terms to: **kontakt@exercio.app**.
-
-14.2. The report should include:
+13.2. The report should include:
 
 - An explanation of why the content is illegal/violates these Terms
 - The exact location of the content (URL)
 - The name of the reporting person
 - A statement of good faith
 
-14.3. The Service Provider handles reports within 14 days.
+13.3. The Service Provider handles reports without undue delay, no later than within 14 days.
 
-14.4. If a violation is found, the Service Provider may:
+13.4. If a violation is found, the Service Provider may:
 
 - Remove the content
 - Restrict the visibility of the content
+- Temporarily hide the content pending verification
 - Suspend or delete the User's Account
 
-14.5. An appeal against the Service Provider's decision may be filed within 14 days.
+13.5. An appeal against the Service Provider's decision may be filed within 14 days.
 
 ---
 
-## 15. Intellectual Property Rights
+## 14. Intellectual Property Rights
 
-15.1. All content posted on the Platform by the Service Provider (name, logo, code, documents) is protected by copyright.
+14.1. All content posted on the Platform by the Service Provider (name, logo, code, documents) is protected by copyright.
 
-15.2. A User publishing content on the Platform (photos, descriptions, reviews) grants the Service Provider a non-exclusive license to display it on the Platform.
+14.2. A User publishing content on the Platform (photos, descriptions, reviews) grants the Service Provider a non-exclusive license to use such content solely for the purpose of providing, developing, and promoting the Exercio Platform.
 
-15.3. The User declares that the content they publish does not infringe the rights of third parties.
-
----
-
-## 16. Personal Data and Cookies
-
-16.1. The controller of Users' personal data is the Service Provider.
-
-16.2. Detailed information on personal data processing can be found in the [Privacy Policy](/privacy).
-
-16.3. Information about cookies can be found in the [Cookie Policy](/cookies).
+14.3. The User declares that the content they publish does not infringe the rights of third parties.
 
 ---
 
-## 17. Final Provisions
+## 15. Personal Data and Cookies
 
-17.1. These Terms are available in Polish and English. In case of discrepancies, the Polish version prevails.
+15.1. The controller of Users' personal data is the Service Provider.
 
-17.2. The governing law is Polish law.
+15.2. Detailed information on personal data processing can be found in the [Privacy Policy](/privacy).
 
-17.3. The Service Provider reserves the right to change these Terms. Users will be informed of changes via a notice on the Platform.
+15.3. Information about cookies can be found in the [Cookie Policy](/cookies).
 
-17.4. Changes to these Terms take effect 14 days after announcement.
+---
 
-17.5. Users with an Account who do not accept the changes may delete their Account before the changes take effect.
+## 16. Final Provisions
 
-17.6. Matters not regulated in these Terms are governed by Polish law.
+16.1. These Terms are available in Polish and English. In case of discrepancies, the Polish version prevails.
+
+16.2. The governing law is Polish law.
+
+16.3. The Service Provider reserves the right to change these Terms. Users will be informed of changes via a notice on the Platform and, in the case of material changes, by email.
+
+16.4. Changes to these Terms take effect 14 days after announcement.
+
+16.5. Changes to these Terms do not affect the rights and obligations arising from agreements concluded before the changes take effect.
+
+16.6. Users with an Account who do not accept the changes may delete their Account before the changes take effect.
+
+16.7. Matters not regulated in these Terms are governed by Polish law.
+
+---
+
+## 17. Force Majeure
+
+17.1. Exercio shall not be liable for non-performance or improper performance of obligations under these Terms caused by force majeure events, in particular: natural disasters, wars, riots, strikes, IT infrastructure failures, cyberattacks, decisions of state authorities, or other events beyond the Service Provider's control.
+
+17.2. In the event of force majeure, the Service Provider will make every effort to minimize the effects of such an event and restore normal Platform operation as soon as reasonably possible.
 
 ---
 
 _Exercio — exercio.app_
-**Contact:** kontakt@exercio.app
+**Contact:** support@exercio.app
 `;

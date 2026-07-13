@@ -1,7 +1,7 @@
 export const dpaContent = `
 
 **Wersja:** 1.0
-**Data:** 11 lipca 2026
+**Data:** 13 lipca 2026
 
 ---
 
@@ -10,7 +10,7 @@ export const dpaContent = `
 | Strona                     | Dane                                                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **Administrator danych**   | Instruktor / Firma Enterprise korzystająca z Platformy Exercio, która przetwarza dane osobowe swoich klientów |
-| **Podmiot przetwarzający** | Jakub Adamski (Exercio), kontakt@exercio.app                                                                  |
+| **Podmiot przetwarzający** | Operator Platformy Exercio, support@exercio.app                                                               |
 
 ## 2. Zakres umowy
 
@@ -43,7 +43,7 @@ export const dpaContent = `
 
 ## 6. Podwykonawcy
 
-Podmiot przetwarzający może korzystać z podwykonawców (hosting, Stripe, analityka). Aktualna lista podwykonawców jest dostępna w [Polityce prywatności](/privacy).
+Podmiot przetwarzający może korzystać z podwykonawców (hosting, Stripe, analityka, dostawcy poczty elektronicznej). Aktualna lista podwykonawców jest dostępna w [Polityce prywatności](/privacy).
 
 ## 7. Okres obowiązywania
 
@@ -53,10 +53,10 @@ Umowa obowiązuje przez okres korzystania przez Administratora z Platformy Exerc
 
 8.1. W sprawach nieuregulowanych stosuje się RODO i przepisy prawa polskiego.
 
-8.2. Wszelkie zmiany wymagają formy pisemnej.
+8.2. Wszelkie zmiany wymagają formy dokumentowej.
 
 ---
 
 _Exercio — exercio.app_
-**Kontakt:** kontakt@exercio.app
+**Kontakt:** support@exercio.app
 `;

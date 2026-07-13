@@ -1,7 +1,7 @@
 export const privacyContentEn = `
 
-**Last updated:** July 11, 2026
-**Effective from:** July 11, 2026
+**Last updated:** July 13, 2026
+**Effective from:** July 13, 2026
 
 ---
 
@@ -19,16 +19,15 @@ export const privacyContentEn = `
 10. [Cookies and Similar Technologies](#10-cookies-and-similar-technologies)
 11. [Data Security](#11-data-security)
 12. [Instructors and Companies as Independent Controllers](#12-instructors-and-companies-as-independent-controllers)
-13. [Contact](#13-contact)
-14. [Changes to This Policy](#14-changes-to-this-policy)
+13. [Automated Decision Making](#13-automated-decision-making)
+14. [Contact](#14-contact)
+15. [Changes to This Policy](#15-changes-to-this-policy)
 
 ---
 
 ## 1. Introduction
 
-Protecting your privacy and the security of your personal data is our priority. This Privacy Policy (hereinafter: "Policy") explains how we collect, use, store, and protect your personal data when you use the Exercio platform (hereinafter: "Platform"), available at **exercio.app** as a web application and mobile application.
-
-By using the Platform, you accept the terms of this Policy. If you do not agree with its content, do not use the Platform.
+Protecting your privacy and the security of your personal data is our priority. This Privacy Policy (hereinafter: "Policy") is for informational purposes and explains how we collect, use, store, and protect your personal data when you use the Exercio platform (hereinafter: "Platform"), available at **exercio.app**.
 
 ---
 
@@ -38,13 +37,13 @@ By using the Platform, you accept the terms of this Policy. If you do not agree 
 
 | Field                            | Value                                                                             |
 | -------------------------------- | --------------------------------------------------------------------------------- |
-| **Controller**                   | Jakub Adamski                                                                     |
-| **Contact Email**                | kontakt@exercio.app                                                               |
+| **Controller**                   | Jakub Adamski, conducting business under the name [...]                           |
+| **Contact Email**                | support@exercio.app                                                               |
 | **Address**                      | [to be completed]                                                                 |
 | **Tax ID (NIP)**                 | [to be completed]                                                                 |
 | **Data Protection Officer (DPO)**| Not appointed — no legal obligation at this stage                                 |
 
-For all matters related to personal data processing, you can contact us at: **kontakt@exercio.app**.
+For all matters related to personal data processing, you can contact us at: **support@exercio.app**.
 
 ---
 
@@ -57,7 +56,7 @@ This Policy applies to the following categories of users:
 | **Client**             | An individual who registers on the Platform to search for instructors, browse profiles, book sessions, and leave reviews         |
 | **Instructor**         | An individual or business who creates an instructor profile on the Platform to offer training/sports/dance services               |
 | **Enterprise (Company)**| A business (dance school, gym, MMA club, fitness studio, etc.) that purchases a subscription and manages instructor profiles      |
-| **Guest**              | A person browsing the Platform without logging in, who can make a guest booking                                                   |
+| **Guest**              | A person browsing the Platform without logging in, who can make a guest booking. Guest data is processed solely to the extent necessary to fulfill the booking |
 | **User**               | A general term for all of the above                                                                                              |
 
 ---
@@ -69,8 +68,8 @@ This Policy applies to the following categories of users:
 | Data Category           | Scope                                                                                                                            |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **Identification Data** | First name, last name, username, email address, phone number (optional)                                                          |
-| **Login Data**          | Password (stored in encrypted form — bcrypt)                                                                                     |
-| **OAuth Data**          | If you log in via Google, Apple, or Facebook — we collect: email address, avatar (profile picture), provider identifier          |
+| **Login Data**          | Password (stored in encrypted form — modern one-way hashing algorithms)                                                          |
+| **OAuth Data**          | If you log in via Google or Facebook — we collect: email address, avatar (profile picture), provider identifier                  |
 
 ### 4.2 Instructor Profile Data
 
@@ -86,7 +85,7 @@ This Policy applies to the following categories of users:
 
 | Data Category          | Scope                                              |
 | ---------------------- | -------------------------------------------------- |
-| **Company Data**       | Company name, tax ID, address, email, phone, website |
+| **Company Data**       | Company name, address, email, phone, website       |
 | **Profile Data**       | Logo, cover image, description, category, tags     |
 | **Location Data**      | Address, city, postal code                         |
 | **Social Media**       | URLs to Facebook, Instagram, YouTube, TikTok       |
@@ -121,7 +120,7 @@ This Policy applies to the following categories of users:
 | Data Category         | Scope                                                                    |
 | --------------------- | ------------------------------------------------------------------------ |
 | **Contact Form**      | First name, last name, email, category, message content                  |
-| **Enterprise Lead**   | Company name, email, phone, website, business type, number of instructors|
+| **Enterprise Lead**   | Company name, email, phone, website, city, business type, number of instructors |
 
 ---
 
@@ -136,7 +135,6 @@ This Policy applies to the following categories of users:
 | Service-related communication                | Email, push notifications            | Art. 6(1)(b) GDPR                                              | Duration of account                    |
 | Handling inquiries and complaints            | Contact data, message content        | Art. 6(1)(b) and (f) GDPR                                      | 1 year from case closure               |
 | Legal obligations (accounting, DSA)          | Transaction data, user data          | Art. 6(1)(c) GDPR                                              | 6 years (accounting)                   |
-| Direct marketing                             | Email, first name                    | Art. 6(1)(a) GDPR (consent)                                    | Until consent withdrawal               |
 | Analytics and Platform improvement           | Technical data, behavioral data      | Art. 6(1)(a) GDPR (consent) or (f) (legitimate interest)       | Up to 2 years                          |
 
 ### 5.2 For Clients
@@ -174,25 +172,18 @@ This Policy applies to the following categories of users:
 
 | Recipient                                  | Purpose of Sharing                                                                       | Data Category                                                          |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Payment Provider (Stripe)**              | Processing Enterprise subscription payments                                              | Subscription ID, amount, email (Stripe is an independent controller)   |
+| **Cloud Infrastructure Provider**          | Platform and database hosting                                                            | All data (based on data processing agreement)                          |
+| **OAuth Provider (Google, Facebook)**      | Authentication via external identity providers                                           | Email address, avatar, provider identifier                             |
+| **Email Service Provider**                 | Sending service-related email notifications                                              | Email address                                                          |
+| **Analytics Provider (Google Analytics)**  | Analyzing Platform traffic (with consent)                                                | Anonymized technical data                                              |
 | **Instructors**                            | Booking fulfillment — the instructor receives client data necessary to conduct the session| Client identification data, booking data                               |
 | **Enterprise Companies**                   | Managing instructors assigned to the company                                             | Instructor profile data                                                |
-| **Payment Provider (Stripe)**              | Processing Enterprise subscription payments                                              | Subscription ID, amount, email (Stripe is an independent controller)   |
-| **Hosting Provider**                       | Platform and database hosting                                                            | All data (based on data processing agreement)                          |
-| **Analytics Provider (Google Analytics)**  | Analyzing Platform traffic (with consent)                                                | Anonymized technical data                                              |
-| **Error Monitoring (Sentry)**              | Monitoring and fixing errors                                                             | IP address, technical data                                             |
 | **Law enforcement and courts**             | Fulfilling legal obligations                                                             | Scope as defined in the request                                        |
 
 ### 6.2 Instructors and Companies as Independent Data Controllers
 
-**This is key:** Exercio is a technology platform (marketplace) that enables clients to find an instructor and make a booking. Once a booking is made and you (as a client) attend a training session/class — **you enter into a direct relationship with the instructor or Enterprise company.**
-
-At that point:
-
-- **The instructor/company becomes an independent controller** of your data to the extent necessary to provide the service
-- **Exercio is not responsible** for how the instructor/company processes your data outside the Platform
-- **Exercio is not liable for the quality of services** provided by instructors and companies
-
-We recommend reviewing the instructor's/company's privacy policy before using their services.
+After a booking is made, the instructor or enterprise company may become a separate data controller of personal data to the extent necessary to provide their services. Detailed information can be found in section 12.
 
 ---
 
@@ -205,9 +196,7 @@ Some of the providers we use are based outside the European Economic Area (EEA),
 | Stripe                     | USA     | Data Privacy Framework (DPF)       |
 | Google (OAuth, Analytics)  | USA     | Data Privacy Framework (DPF)       |
 | Meta (Facebook OAuth)      | USA     | Data Privacy Framework (DPF)       |
-| Apple (OAuth)              | USA     | Data Privacy Framework (DPF)       |
 | Vercel (hosting)           | USA/EU  | Standard Contractual Clauses (SCC) |
-| Sentry                     | USA     | Standard Contractual Clauses (SCC) |
 
 You have the right to request a copy of the safeguards applied by contacting us.
 
@@ -215,7 +204,7 @@ You have the right to request a copy of the safeguards applied by contacting us.
 
 ## 8. How Long We Keep Data
 
-We retain your personal data for as long as necessary to fulfill the purposes outlined in this Policy, unless the law requires longer retention.
+We retain your personal data for as long as necessary to fulfill the purposes outlined in this Policy, unless the law requires longer retention, or until the statute of limitations for claims, if applicable.
 
 | Data Type                  | Retention Period                       |
 | -------------------------- | -------------------------------------- |
@@ -235,18 +224,18 @@ Under the GDPR, you have the following rights:
 
 | Right                                       | Description                                                                           | How to Exercise                         |
 | ------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------- |
-| **Right of Access** (Art. 15)               | You have the right to know whether we process your data and to receive a copy         | Email: kontakt@exercio.app              |
+| **Right of Access** (Art. 15)               | You have the right to know whether we process your data and to receive a copy         | Email: support@exercio.app              |
 | **Right to Rectification** (Art. 16)        | You have the right to correct inaccurate or incomplete data                           | Account panel → edit profile            |
-| **Right to Erasure** (Art. 17)              | You have the right to request deletion of your data ("right to be forgotten")         | Email: kontakt@exercio.app              |
-| **Right to Restrict Processing** (Art. 18)  | You have the right to request restriction of processing                               | Email: kontakt@exercio.app              |
-| **Right to Data Portability** (Art. 20)     | You have the right to receive your data in a structured format (JSON)                 | Email: kontakt@exercio.app              |
-| **Right to Object** (Art. 21)               | You have the right to object to processing based on legitimate interest               | Email: kontakt@exercio.app              |
-| **Right to Withdraw Consent** (Art. 7(3))   | You have the right to withdraw consent at any time                                    | Cookie panel / email: kontakt@exercio.app|
+| **Right to Erasure** (Art. 17)              | You have the right to request deletion of your data ("right to be forgotten")         | Email: support@exercio.app              |
+| **Right to Restrict Processing** (Art. 18)  | You have the right to request restriction of processing                               | Email: support@exercio.app              |
+| **Right to Data Portability** (Art. 20)     | You have the right to receive your data in a structured format (JSON)                 | Email: support@exercio.app              |
+| **Right to Object** (Art. 21)               | You have the right to object to processing based on legitimate interest               | Email: support@exercio.app              |
+| **Right to Withdraw Consent** (Art. 7(3))   | You have the right to withdraw consent at any time                                    | Cookie panel / email: support@exercio.app|
 | **Right to Lodge a Complaint** (Art. 77)    | You have the right to lodge a complaint with the supervisory authority                | https://uodo.gov.pl (Polish DPA)        |
 
 **Note:** Exercising some rights may prevent us from further providing services (e.g., deletion of data = deletion of account).
 
-We respond to requests within 30 days.
+We respond to requests within 30 days, in accordance with Art. 12(3) GDPR.
 
 ---
 
@@ -272,8 +261,11 @@ You can manage your cookie preferences in the cookie banner available on the Pla
 We implement appropriate technical and organizational measures to protect your data:
 
 - **Transmission encryption** — SSL/TLS certificate (HTTPS)
-- **Password encryption** — bcrypt
+- **Password encryption** — modern one-way hashing algorithms
 - **Regular security testing**
+- **Regular system updates**
+- **Backups**
+- **Security monitoring**
 - **Access control** — data accessible only to authorized persons
 - **Data segmentation** — production data separated from test data
 
@@ -295,25 +287,31 @@ This means that:
 4. Exercio, by providing you with technical tools, acts as a data processor in this regard
 5. Exercio is not responsible for how you process client data
 
-If you run a business and wish to sign a Data Processing Agreement (DPA) with us, contact us at: **kontakt@exercio.app**.
+If you run a business and wish to sign a Data Processing Agreement (DPA) with us, contact us at: **support@exercio.app**.
 
 ---
 
-## 13. Contact
+## 13. Automated Decision Making
+
+Exercio does not make decisions concerning users that produce legal effects or similarly significant effects solely by automated means, including profiling, as referred to in Article 22 of the GDPR.
+
+---
+
+## 14. Contact
 
 For all matters related to personal data protection:
 
 | Channel                 | Data                |
 | ----------------------- | ------------------- |
-| **Email**               | kontakt@exercio.app |
+| **Email**               | support@exercio.app |
 | **Address**             | [to be completed]   |
-| **Contact form**        | exercio.app/contact |
+| **Contact form**        | https://exercio.app/contact |
 
 ---
 
-## 14. Changes to This Policy
+## 15. Changes to This Policy
 
-We reserve the right to change this Policy. We will inform you of changes:
+We reserve the right to change this Policy. Changes do not limit users' rights under applicable law. We will inform you of changes:
 
 - via a notice on the Platform
 - in case of significant changes — additionally by email (if you have an account)

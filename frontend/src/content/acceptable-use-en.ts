@@ -1,7 +1,7 @@
 export const acceptableUseContentEn = `
 
-**Last updated:** July 11, 2026
-**Effective from:** July 11, 2026
+**Last updated:** July 13, 2026
+**Effective from:** July 13, 2026
 
 ---
 
@@ -53,6 +53,7 @@ It is prohibited to:
 - Create fake accounts
 - Manipulate reviews (buying, posting fake reviews)
 - Harass other Users
+- Use the Platform to train AI models or mass-harvest data without the Service Provider's consent
 
 ## 4. Consequences of Violations
 
@@ -69,7 +70,7 @@ Penalties are applied proportionally to the severity of the violation.
 
 ## 5. Reporting Violations
 
-Violations can be reported to: **kontakt@exercio.app**
+Violations can be reported to: **support@exercio.app**
 
 The report should include:
 
@@ -80,7 +81,7 @@ The report should include:
 
 ## 6. Appeals
 
-An appeal against the Service Provider's decision may be filed within 14 days to: **kontakt@exercio.app**.
+An appeal against the Service Provider's decision may be filed within 14 days to: **support@exercio.app**.
 
 ---
 
