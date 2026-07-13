@@ -1,13 +1,11 @@
-"use client";
-
 import { useState, useCallback } from "react";
 
-interface UseShowMoreOptions {
+export interface UseShowMoreOptions {
   initialVisible?: number;
   batchSize?: number;
 }
 
-interface UseShowMoreReturn {
+export interface UseShowMoreReturn {
   visibleCount: number;
   hasMore: boolean;
   showMore: () => void;

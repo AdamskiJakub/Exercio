@@ -33,56 +33,68 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
       throw new BadRequestException('URL is required for link-type news');
     }
 
-    const news = await this.prisma.enterpriseNews.create({
-      data: {
-        enterpriseId,
-        type,
-        title: dto.title,
-        url: dto.url ?? '',
-        description: dto.description ?? null,
-        thumbnailUrl: dto.thumbnailUrl ?? null,
-      },
-    });
-
-    // Fetch enterprise profile info for the notification
-    const enterprise = await this.prisma.enterpriseProfile.findUnique({
-      where: { id: enterpriseId },
-      select: {
-        companyName: true,
-        slug: true,
-      },
-    });
-
-    if (enterprise) {
-      // Fetch all followers of this enterprise
-      const followers = await this.prisma.enterpriseFollow.findMany({
-        where: { enterpriseId },
-        select: { followerId: true },
-      });
-
-      // Create a notification for each follower
-      const notificationPromises = followers.map((follower) =>
-        this.notificationsService.createNotification({
-          userId: follower.followerId,
-          type: NotificationType.ENTERPRISE_NEWS,
-          title: enterprise.companyName,
-          message: dto.title,
-          data: {
-            enterpriseId,
-            enterpriseSlug: enterprise.slug,
-            newsId: news.id,
-            newsType: type,
-            newsTitle: dto.title,
-            newsUrl: dto.url ?? '',
-            companyName: enterprise.companyName,
-          },
-        }),
-      );
-
-      await Promise.all(notificationPromises);
+    // Validate: title is required for notifications
+    if (!dto.title?.trim()) {
+      throw new BadRequestException('Title is required');
     }
 
-    return news;
+    // Use $transaction to ensure atomicity: news creation + notifications
+    const result = await this.prisma.$transaction(async (tx) => {
+      const news = await tx.enterpriseNews.create({
+        data: {
+          enterpriseId,
+          type,
+          title: dto.title,
+          url: dto.url ?? '',
+          description: dto.description ?? null,
+          thumbnailUrl: dto.thumbnailUrl ?? null,
+        },
+      });
+
+      // Fetch enterprise profile info for the notification
+      const enterprise = await tx.enterpriseProfile.findUnique({
+        where: { id: enterpriseId },
+        select: {
+          companyName: true,
+          slug: true,
+        },
+      });
+
+      if (enterprise) {
+        // Fetch all followers of this enterprise
+        const followers = await tx.enterpriseFollow.findMany({
+          where: { enterpriseId },
+          select: { followerId: true },
+        });
+
+        if (followers.length > 0) {
+          // Create a notification for each follower
+          await Promise.all(
+            followers.map((follower) =>
+              this.notificationsService.createNotification({
+                userId: follower.followerId,
+                type: NotificationType.ENTERPRISE_NEWS,
+                title: enterprise.companyName,
+                message: dto.title,
+                data: {
+                  enterpriseId,
+                  enterpriseSlug: enterprise.slug,
+                  newsId: news.id,
+                  newsType: type as NotificationType,
+                  newsTitle: dto.title,
+                  newsUrl: dto.url ?? '',
+                  companyName: enterprise.companyName,
+                },
+              }),
+            ),
+          );
+        }
+      }
+
+      return news;
+    });
+
+    return result;
   }
 
   async findAll(enterpriseId: string) {

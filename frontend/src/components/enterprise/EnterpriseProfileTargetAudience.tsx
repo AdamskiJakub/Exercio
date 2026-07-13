@@ -74,7 +74,7 @@ export function EnterpriseProfileTargetAudience({
                 type="button"
                 onClick={() => remove(value)}
                 className="ml-2 hover:text-emerald-100"
-                aria-label={`${t("removeTargetAudience") || "Remove"} ${value}`}
+                aria-label={`${t("removeTargetAudience")} ${value}`}
               >
                 <X className="w-3 h-3" aria-hidden="true" />
               </button>

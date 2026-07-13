@@ -1,5 +1,3 @@
-"use client";
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
@@ -73,6 +71,9 @@ export function useToggleFollowEnterprise() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["follow", "enterprise"] });
     },
+    onError: (error) => {
+      console.error("[useFollow] Failed to toggle enterprise follow:", error);
+    },
   });
 }
 
@@ -143,6 +144,9 @@ export function useToggleFollowInstructor() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["follow", "instructor"] });
+    },
+    onError: (error) => {
+      console.error("[useFollow] Failed to toggle instructor follow:", error);
     },
   });
 }

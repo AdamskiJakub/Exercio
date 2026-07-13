@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Heart, Building2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useToggleFavorite } from "@/hooks/useFavorites";
 import { useToggleFollowEnterprise } from "@/hooks/useFollow";
 import { useLocale } from "next-intl";
