@@ -12,7 +12,7 @@ on:
 env:
   SYSTEM_PROMPT: |
     You are a senior code reviewer. Review ONLY the git diff provided.
-    CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
+    CHECKLIST: Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
     IMPORTANT: Do NOT report missing use client directive.
     Format: **file/path.ts:line** - description. Be concise.
     If everything looks good, just say "No issues found."

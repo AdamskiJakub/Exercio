@@ -20,6 +20,7 @@ interface UserAvatarProps {
   size?: "sm" | "md" | "lg";
   showChevron?: boolean;
   className?: string;
+  bgWhite?: boolean;
 }
 
 const sizeClasses = {
@@ -42,11 +43,12 @@ export function UserAvatar({
   size = "md",
   showChevron = false,
   className = "",
+  bgWhite = false,
 }: UserAvatarProps) {
   return (
     <div className={`relative inline-flex ${className}`}>
       <Avatar
-        className={`${sizeClasses[size]} cursor-pointer border-2 border-slate-700 hover:border-orange-500 transition-colors`}
+        className={`${sizeClasses[size]} cursor-pointer border-2 border-slate-700 hover:border-orange-500 transition-colors ${bgWhite ? "bg-white p-0.5" : ""}`}
       >
         <AvatarImage src={src} alt={alt} />
         <AvatarFallback

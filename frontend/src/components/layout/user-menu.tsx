@@ -30,10 +30,13 @@ import {
   Heart,
   Building2,
   Users,
+  UserPlus,
+  Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api";
 import { useMyInstructorProfile } from "@/hooks/useMyInstructorProfile";
+import { useMyEnterpriseProfile } from "@/hooks/useEnterpriseProfile";
 import { usePendingReviews } from "@/hooks/useReviews";
 import { useQuery } from "@tanstack/react-query";
 import { getMediaUrl } from "@/lib/utils/media";
@@ -57,9 +60,14 @@ export function UserMenu() {
   const t = useTranslations("Common");
   const navT = useTranslations("Navigation");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
 
   const { data: instructorProfile } = useMyInstructorProfile({
     enabled: isAuthenticated && user?.role === "INSTRUCTOR",
+  });
+
+  const { data: enterpriseProfile } = useMyEnterpriseProfile({
+    enabled: isAuthenticated && user?.role === "ENTERPRISE",
   });
 
   // Pending bookings count (always fetch for instructors)
@@ -170,9 +178,11 @@ export function UserMenu() {
   const avatarUrl =
     user?.role === "INSTRUCTOR" && instructorProfile?.photoUrl
       ? getMediaUrl(instructorProfile.photoUrl)
-      : user?.avatarUrl
-        ? getMediaUrl(user.avatarUrl)
-        : undefined;
+      : user?.role === "ENTERPRISE" && enterpriseProfile?.logoUrl
+        ? getMediaUrl(enterpriseProfile.logoUrl)
+        : user?.avatarUrl
+          ? getMediaUrl(user.avatarUrl)
+          : undefined;
 
   if (!isAuthenticated || !user) {
     return null;
@@ -202,7 +212,13 @@ export function UserMenu() {
     <>
       <div className="flex items-center gap-2">
         {/* Notification Bell Dropdown - like Facebook */}
-        <DropdownMenu onOpenChange={(open) => !open && handleDropdownClose()}>
+        <DropdownMenu
+          open={notifDropdownOpen}
+          onOpenChange={(open) => {
+            setNotifDropdownOpen(open);
+            if (!open) handleDropdownClose();
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <button
               type="button"
@@ -342,15 +358,36 @@ export function UserMenu() {
                   const isFavorite = notification.type === "FAVORITE";
                   const isEnterpriseInvitation =
                     notification.type === "ENTERPRISE_INVITATION";
+                  const isNewFollower = notification.type === "NEW_FOLLOWER";
+                  const isEnterpriseNews =
+                    notification.type === "ENTERPRISE_NEWS";
 
                   const title = isFavorite
                     ? tNotifications("favoriteTitle")
-                    : notification.title;
+                    : isNewFollower
+                      ? tNotifications("newFollowerTitle")
+                      : isEnterpriseNews
+                        ? tNotifications("enterpriseNewsTitle", {
+                            name:
+                              (data?.companyName as string) ||
+                              notification.title,
+                          })
+                        : notification.title;
                   const description = isFavorite
                     ? tNotifications("favoriteMessage", {
                         name: (data?.displayName as string) || "",
                       })
-                    : notification.message;
+                    : isNewFollower
+                      ? tNotifications("newFollowerMessage", {
+                          name: (data?.followerName as string) || "",
+                        })
+                      : isEnterpriseNews
+                        ? tNotifications("enterpriseNewsMessage", {
+                            title:
+                              (data?.newsTitle as string) ||
+                              notification.message,
+                          })
+                        : notification.message;
 
                   let iconBg = "bg-pink-500/10";
                   let iconColor = "text-pink-400";
@@ -360,6 +397,14 @@ export function UserMenu() {
                     iconBg = "bg-emerald-500/10";
                     iconColor = "text-emerald-400";
                     Icon = Building2;
+                  } else if (isNewFollower) {
+                    iconBg = "bg-blue-500/10";
+                    iconColor = "text-blue-400";
+                    Icon = UserPlus;
+                  } else if (isEnterpriseNews) {
+                    iconBg = "bg-amber-500/10";
+                    iconColor = "text-amber-400";
+                    Icon = Newspaper;
                   } else if (isFavorite) {
                     iconBg = "bg-pink-500/10";
                     iconColor = "text-pink-400";
@@ -378,8 +423,29 @@ export function UserMenu() {
                       description={description}
                       onClick={() => {
                         markAsRead.mutate(notification.id);
+                        setNotifDropdownOpen(false);
                         if (isEnterpriseInvitation) {
                           router.push("/dashboard");
+                        } else if (isNewFollower) {
+                          const enterpriseSlug =
+                            (data?.enterpriseSlug as string) || undefined;
+                          if (enterpriseSlug) {
+                            (router as any).push(
+                              `/enterprise/${enterpriseSlug}`,
+                            );
+                          } else {
+                            router.push("/dashboard");
+                          }
+                        } else if (isEnterpriseNews) {
+                          const enterpriseSlug =
+                            (data?.enterpriseSlug as string) || undefined;
+                          if (enterpriseSlug) {
+                            (router as any).push(
+                              `/enterprise/${enterpriseSlug}#news`,
+                            );
+                          } else {
+                            router.push("/dashboard");
+                          }
                         } else {
                           const username =
                             (data?.favoritedByUsername as string) ||
@@ -426,6 +492,7 @@ export function UserMenu() {
                   firstName={user.firstName}
                   lastName={user.lastName}
                   showChevron
+                  bgWhite={user.role === "ENTERPRISE"}
                 />
               </button>
             </DropdownMenuTrigger>
@@ -442,6 +509,7 @@ export function UserMenu() {
                     alt={user.email}
                     firstName={user.firstName}
                     lastName={user.lastName}
+                    bgWhite={user.role === "ENTERPRISE"}
                   />
                   <UserInfo
                     firstName={user.firstName}
@@ -522,6 +590,7 @@ export function UserMenu() {
           type="button"
           onClick={() => setMobileMenuOpen(true)}
           className="relative rounded-full outline-none"
+          aria-label={t("openMenu")}
         >
           <UserAvatar
             src={avatarUrl}
@@ -529,6 +598,7 @@ export function UserMenu() {
             firstName={user.firstName}
             lastName={user.lastName}
             showChevron
+            bgWhite={user.role === "ENTERPRISE"}
           />
         </button>
 
@@ -545,6 +615,7 @@ export function UserMenu() {
                   firstName={user.firstName}
                   lastName={user.lastName}
                   size="lg"
+                  bgWhite={user.role === "ENTERPRISE"}
                 />
                 <div className="flex flex-col overflow-hidden text-left">
                   <SheetTitle className="text-base font-semibold text-slate-100 truncate">

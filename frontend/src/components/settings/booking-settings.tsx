@@ -183,7 +183,7 @@ export function BookingSettings({ form }: BookingSettingsFormProps) {
                 id="packageDealsDescription"
                 placeholder={tProfile("packageDealsPlaceholder")}
                 rows={3}
-                className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500"
+                className="bg-slate-900/50 border-slate-600 text-slate-100 placeholder:text-slate-500 focus-visible:border-orange-500 focus-visible:ring-orange-500/50"
               />
               <p className="text-sm text-slate-400">
                 {tProfile("packageDealsHint")}

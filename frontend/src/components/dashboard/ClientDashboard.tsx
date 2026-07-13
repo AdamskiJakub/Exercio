@@ -31,6 +31,7 @@ import { BookingsList } from "@/components/bookings/BookingsList";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useClearHistory } from "@/hooks/useClearHistory";
 import { useMyFavorites } from "@/hooks/useFavorites";
+import { useMyFollowedEnterprises } from "@/hooks/useFollow";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { useState, useMemo } from "react";
 import { useSpecializations } from "@/hooks/useConfig";
@@ -55,6 +56,8 @@ export function ClientDashboard() {
   const { data: pendingReviews, isLoading: pendingReviewsLoading } =
     usePendingReviews();
   const { data: favorites } = useMyFavorites();
+  const { data: followedEnterprises, isLoading: followedEnterprisesLoading } =
+    useMyFollowedEnterprises();
   const { data: recentlyViewed, isLoading: recentlyViewedLoading } =
     useRecentlyViewed();
   const clearHistory = useClearHistory();
@@ -267,7 +270,13 @@ export function ClientDashboard() {
           title={t("favoriteTrainers")}
           delay={6}
         >
-          <FavoriteTrainersSection favorites={favorites} isLoading={false} />
+          <FavoriteTrainersSection
+            favorites={favorites}
+            isLoading={false}
+            showFollowedTab={true}
+            followedEnterprises={followedEnterprises}
+            isFollowedLoading={followedEnterprisesLoading}
+          />
         </DashboardCard>
 
         {/* Recently Viewed Trainers */}

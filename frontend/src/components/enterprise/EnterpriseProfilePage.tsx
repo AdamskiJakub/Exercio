@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { EnterpriseHero } from "./EnterpriseHero";
 import { EnterpriseInstructors } from "./EnterpriseInstructors";
 import { EnterpriseNews } from "./EnterpriseNews";
@@ -58,6 +58,17 @@ export function EnterpriseProfilePage({
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
+
+  // Handle hash-based navigation on page load (e.g., /enterprise/slug#news)
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        scrollToSection(hash);
+      }, 300);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950">

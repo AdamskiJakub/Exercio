@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -80,8 +79,9 @@ export function EnterpriseProfileDisciplines({
                 type="button"
                 onClick={() => remove(value)}
                 className="ml-2 hover:text-emerald-100"
+                aria-label={`${t("removeDiscipline")} ${value}`}
               >
-                <X className="w-3 h-3" />
+                <X className="w-3 h-3" aria-hidden="true" />
               </button>
             </Badge>
           ))}

@@ -31,6 +31,7 @@ model User {
   favorites            Favorite[]
   notifications        Notification[]
   profileViews         ProfileView[]
+  enterpriseFollows    EnterpriseFollow[]
 
   @@unique([provider, providerId])
   @@map("users")
@@ -75,6 +76,7 @@ model InstructorProfile {
   favorites               Favorite[]
   profileViews            ProfileView[]
   enterpriseMemberships   EnterpriseInstructor[]
+  followedByEnterprises   InstructorFollow[]
 
   @@map("instructor_profiles")
 }
@@ -172,6 +174,36 @@ model Favorite {
   @@index([userId])
   @@index([instructorProfileId])
   @@map("favorites")
+}
+
+model EnterpriseFollow {
+  id           String             @id @default(uuid())
+  followerId   String
+  enterpriseId String
+  createdAt    DateTime           @default(now())
+
+  follower   User               @relation(fields: [followerId], references: [id], onDelete: Cascade)
+  enterprise EnterpriseProfile  @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, enterpriseId])
+  @@index([followerId])
+  @@index([enterpriseId])
+  @@map("enterprise_follows")
+}
+
+model InstructorFollow {
+  id                   String             @id @default(uuid())
+  enterpriseId         String
+  instructorProfileId  String
+  createdAt            DateTime           @default(now())
+
+  enterprise          EnterpriseProfile  @relation(fields: [enterpriseId], references: [id], onDelete: Cascade)
+  instructorProfile   InstructorProfile  @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([enterpriseId, instructorProfileId])
+  @@index([enterpriseId])
+  @@index([instructorProfileId])
+  @@map("instructor_follows")
 }
 
 model Availability {
@@ -274,6 +306,8 @@ enum NotificationType {
   BOOKING_CANCELLED
   ENTERPRISE_INVITATION
   ENTERPRISE_INVITATION_ACCEPTED
+  NEW_FOLLOWER
+  ENTERPRISE_NEWS
 }
 
 enum BookingStatus {
@@ -378,8 +412,10 @@ model EnterpriseProfile {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
-  instructors     EnterpriseInstructor[]
-  news            EnterpriseNews[]
+  instructors           EnterpriseInstructor[]
+  news                  EnterpriseNews[]
+  followers             EnterpriseFollow[]
+  followedInstructors   InstructorFollow[]
 
   @@index([status])
   @@index([city])

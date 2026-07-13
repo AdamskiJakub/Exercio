@@ -54,13 +54,16 @@ function DropdownMenuContent({
           className,
         )}
         onCloseAutoFocus={(event) => {
-          // Safeguard against Radix UI bug where it tries to call .focus()
-          // on a null ref during rapid mount/unmount cycles.
+          // Prevent Radix UI from trying to focus a null ref during rapid
+          // mount/unmount cycles (e.g. when a dropdown is opened and immediately
+          // closed). The try/catch alone doesn't prevent the console error
+          // because the error originates inside Radix's internal handler.
           // See: https://github.com/radix-ui/primitives/issues/3104
+          event.preventDefault();
           try {
             onCloseAutoFocus?.(event);
           } catch {
-            event.preventDefault();
+            // Silently ignore — focus was already prevented above
           }
         }}
         {...props}

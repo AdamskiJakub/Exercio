@@ -1,36 +1,23 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { getMediaUrl } from "@/lib/utils/media";
-import {
-  Calendar,
-  Newspaper,
-  Link as LinkIcon,
-  FileText,
-  Share2,
-  Check,
-  X,
-} from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { pl } from "date-fns/locale";
-import { useState, useCallback } from "react";
-import { SOCIAL_PLATFORMS } from "@/constants/enterprise";
+import { Calendar, Newspaper } from "lucide-react";
+import { parseISO } from "date-fns";
+import { useState } from "react";
 import { NewsCardImage } from "./NewsCardImage";
 import { NewsCardContent } from "./NewsCardContent";
+import { PostDetailModal } from "./PostDetailModal";
 import type { EnterpriseNews as EnterpriseNewsType } from "@/types/enterprise";
 import type {
   NewsFilter,
   EnterpriseNewsProps,
   NewsCardProps,
-  SocialShareProps,
-  PostDetailModalProps,
   FilterTab,
 } from "@/types/enterprise-news";
 
-const INITIAL_VISIBLE = 6;
+const INITIAL_VISIBLE = 3;
 
 function NewsCard({ item, onSelect, isLink = false }: NewsCardProps) {
   const t = useTranslations("EnterpriseProfile");
@@ -85,175 +72,6 @@ function NewsCard({ item, onSelect, isLink = false }: NewsCardProps) {
   );
 }
 
-function SocialShare({ copied, onCopyLink }: SocialShareProps) {
-  const t = useTranslations("EnterpriseProfile");
-  const shareUrl =
-    typeof window !== "undefined"
-      ? encodeURIComponent(window.location.href)
-      : "";
-
-  return (
-    <div className="pt-6 border-t border-slate-800">
-      <h3 className="text-sm font-medium text-slate-400 flex items-center gap-2 mb-3">
-        <Share2 className="w-4 h-4 text-emerald-500" aria-hidden="true" />
-        {t("share") || "Udostępnij"}
-      </h3>
-      <div className="flex flex-wrap items-center gap-2">
-        {SOCIAL_PLATFORMS.map((platform) => {
-          const shareHref =
-            platform.key === "facebookUrl"
-              ? `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`
-              : platform.key === "instagramUrl"
-                ? `https://www.instagram.com/`
-                : null;
-          if (!shareHref) return null;
-          return (
-            <a
-              key={platform.key}
-              href={shareHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center text-slate-300 hover:bg-emerald-600/20 hover:text-emerald-500 transition-colors border border-slate-700"
-              aria-label={`${platform.label} (${t("opensInNewTab")})`}
-            >
-              <svg
-                className="w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path d={platform.path} />
-              </svg>
-            </a>
-          );
-        })}
-
-        <button
-          onClick={onCopyLink}
-          className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition-colors shadow-lg"
-          aria-label={
-            copied
-              ? t("linkCopied") || "Link copied"
-              : t("copyLink") || "Copy link"
-          }
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4" aria-hidden="true" />
-              <span>{t("linkCopied") || "Skopiowano!"}</span>
-            </>
-          ) : (
-            <>
-              <LinkIcon className="w-4 h-4" aria-hidden="true" />
-              {t("copyLink") || "Kopiuj link"}
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function PostDetailModal({ selectedPost, onClose }: PostDetailModalProps) {
-  const t = useTranslations("EnterpriseProfile");
-  const locale = useLocale();
-  const dateLocale = locale === "pl" ? pl : undefined;
-  const [copied, setCopied] = useState(false);
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = parseISO(dateStr);
-      return format(date, "dd MMM yyyy", { locale: dateLocale });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const handleCopyLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // clipboard write not available
-    }
-  }, []);
-
-  return (
-    <Dialog
-      open={!!selectedPost}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-    >
-      <DialogContent
-        className="bg-slate-900 border border-slate-700/80 text-white max-w-2xl max-h-[85vh] overflow-y-auto p-0 mx-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800"
-        showCloseButton={false}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
-          aria-label={t("close") || "Close"}
-        >
-          <X className="w-5 h-5" aria-hidden="true" />
-        </button>
-
-        {selectedPost && (
-          <div>
-            {selectedPost.thumbnailUrl && (
-              <div className="aspect-video overflow-hidden rounded-t-lg">
-                <img
-                  src={getMediaUrl(selectedPost.thumbnailUrl)}
-                  alt={selectedPost.title || ""}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
-            <div className="p-6 sm:p-8 space-y-6">
-              <div className="flex items-center gap-4 text-sm text-slate-300">
-                {selectedPost.createdAt && (
-                  <time
-                    dateTime={selectedPost.createdAt}
-                    className="flex items-center gap-1.5"
-                  >
-                    <Calendar
-                      className="w-4 h-4 text-emerald-500"
-                      aria-hidden="true"
-                    />
-                    {formatDate(selectedPost.createdAt)}
-                  </time>
-                )}
-                <span className="flex items-center gap-1.5 text-slate-400">
-                  <FileText
-                    className="w-4 h-4 text-emerald-500"
-                    aria-hidden="true"
-                  />
-                  {t("post") || "Post"}
-                </span>
-              </div>
-
-              {selectedPost.title && (
-                <DialogTitle className="text-2xl sm:text-3xl font-bold text-white leading-tight text-left">
-                  {selectedPost.title}
-                </DialogTitle>
-              )}
-
-              {selectedPost.description && (
-                <div className="text-slate-200 leading-relaxed whitespace-pre-line text-base">
-                  {selectedPost.description}
-                </div>
-              )}
-
-              <SocialShare copied={copied} onCopyLink={handleCopyLink} />
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 export function EnterpriseNews({ news }: EnterpriseNewsProps) {
   const t = useTranslations("EnterpriseProfile");
 
@@ -294,7 +112,7 @@ export function EnterpriseNews({ news }: EnterpriseNewsProps) {
 
   return (
     <>
-      <section className="space-y-6" aria-labelledby="news-heading">
+      <section id="news" className="space-y-6" aria-labelledby="news-heading">
         <h2
           id="news-heading"
           className="text-2xl font-bold text-white flex items-center gap-2"
@@ -365,9 +183,9 @@ export function EnterpriseNews({ news }: EnterpriseNewsProps) {
         {hasMore && (
           <div className="text-center pt-2">
             <Button
-              variant="outline"
+              variant="default"
               onClick={() => setShowAll(!showAll)}
-              className="px-6"
+              className="px-6 bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm cursor-pointer"
               aria-label={
                 showAll
                   ? t("showLess") || "Show less"

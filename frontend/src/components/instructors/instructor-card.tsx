@@ -245,11 +245,13 @@ export function InstructorCard({
               })}
             </div>
 
-            {!disableLink && (
-              <span className="text-orange-500 hover:text-orange-400 text-sm font-medium transition-colors">
-                {t("viewProfile")} →
-              </span>
-            )}
+            <div className="flex items-center gap-2 shrink-0">
+              {!disableLink && (
+                <span className="text-orange-500 hover:text-orange-400 text-sm font-medium transition-colors whitespace-nowrap">
+                  {t("viewProfile")} →
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
