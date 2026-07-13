@@ -48,7 +48,7 @@ export class EmailService {
 
     if (apiKey) {
       this.resend = new Resend(apiKey);
-      this.logger.log(`Resend initialized. From: ${this.fromEmail}`);
+      this.logger.log('Resend initialized.');
     } else {
       this.logger.warn(
         'RESEND_API_KEY not configured. Emails will be disabled.',
