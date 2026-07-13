@@ -94,7 +94,7 @@ export function PaymentSettingsSection({ form }: PaymentSettingsSectionProps) {
               value={(field.value as string) || ""}
               id="paymentInfo"
               placeholder={t("additionalInfoPlaceholder")}
-              className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 min-h-20"
+              className="bg-slate-900/50 border-slate-700 text-white placeholder:text-slate-500 min-h-20 focus-visible:border-orange-500 focus-visible:ring-orange-500/50"
               maxLength={500}
             />
           )}

@@ -1,98 +1,136 @@
-"use client";
+import { InstructorPublicProfileClient } from "./InstructorPublicProfileClient";
+import { API_BASE_URL } from "@/lib/utils/api-url";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
-import { useEffect } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api";
-import { InstructorProfile } from "@/types";
-import { NewPublicInstructorProfile } from "@/components/instructors/profile/NewPublicInstructorProfile";
-import { useRouter } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
-import { useAuthStore } from "@/stores/auth-store";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { useTrackProfileView } from "@/hooks/useRecentlyViewed";
+interface Props {
+  params: Promise<{ username: string; locale: string }>;
+}
 
-export default function InstructorPublicProfilePage() {
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const username = params?.username as string;
-  const source = searchParams.get("from");
-  const { user, isAuthenticated } = useAuthStore();
-  const tProfile = useTranslations("InstructorProfile");
-  const trackView = useTrackProfileView();
+interface InstructorMeta {
+  user: {
+    firstName: string | null;
+    lastName: string | null;
+    username: string;
+  };
+  photoUrl: string | null;
+  tagline: string | null;
+  city: string | null;
+  averageRating: number | null;
+  reviewCount: number | null;
+  updatedAt: string;
+}
 
-  const {
-    data: profile,
-    isLoading,
-    error,
-  } = useQuery<InstructorProfile>({
-    queryKey: ["instructor", username],
-    queryFn: async () => {
-      const response = await apiClient.get(`/instructor-profiles/${username}`);
-      return response.data;
+async function getInstructorMeta(
+  username: string,
+): Promise<InstructorMeta | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/instructor-profiles/${username}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username, locale } = await params;
+  const instructor = await getInstructorMeta(username);
+
+  if (!instructor) {
+    return { title: "Not Found" };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
+  const fullName =
+    [instructor.user.firstName, instructor.user.lastName]
+      .filter(Boolean)
+      .join(" ") || instructor.user.username;
+  const title = `${fullName} — Exercio`;
+  const description =
+    instructor.tagline ||
+    `${fullName} — ${locale === "pl" ? "profil specjalisty na Exercio" : "specialist profile on Exercio"}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "profile",
+      locale: locale === "pl" ? "pl_PL" : "en_US",
+      siteName: "Exercio",
+      url: `${siteUrl}/${locale}/instructors/${username}`,
+      images: instructor.photoUrl
+        ? [
+            {
+              url: `${API_BASE_URL}/files/${instructor.photoUrl}`,
+              width: 800,
+              height: 800,
+              alt: `${fullName} profile photo`,
+            },
+          ]
+        : undefined,
     },
-    enabled: !!username,
-  });
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: instructor.photoUrl
+        ? [`${API_BASE_URL}/files/${instructor.photoUrl}`]
+        : undefined,
+    },
+    alternates: {
+      canonical: `${siteUrl}/${locale}/instructors/${username}`,
+      languages: {
+        pl: `${siteUrl}/pl/instruktorzy/${username}`,
+        en: `${siteUrl}/en/instructors/${username}`,
+      },
+    },
+  };
+}
 
-  useEffect(() => {
-    if (profile?.isDraft) {
-      router.push("/instructors");
-    }
-  }, [profile, router]);
+export default async function InstructorPublicProfilePage({ params }: Props) {
+  const { username, locale } = await params;
+  const instructor = await getInstructorMeta(username);
 
-  // Track profile view when authenticated user views an instructor profile
-  // Skip if the viewer is the profile owner (instructor viewing their own profile)
-  useEffect(() => {
-    if (profile && isAuthenticated && !profile.isDraft) {
-      const isOwnProfile =
-        user?.role === "INSTRUCTOR" && profile.user?.id === user.id;
-      if (!isOwnProfile) {
-        trackView.mutate(profile.id);
-      }
-    }
-  }, [profile?.id, isAuthenticated, user?.id, user?.role]);
-
-  if (isLoading) {
-    return <LoadingSpinner />;
+  if (!instructor) {
+    notFound();
   }
 
-  if (error || !profile) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-white">
-            {tProfile("instructorNotFound")}
-          </h1>
-          <p className="text-slate-400">
-            {tProfile("instructorNotFoundDescription")}
-          </p>
-          <button
-            onClick={() => router.push("/instructors")}
-            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors"
-          >
-            {tProfile("backToInstructors")}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
+  const fullName =
+    [instructor.user.firstName, instructor.user.lastName]
+      .filter(Boolean)
+      .join(" ") || instructor.user.username;
 
-  const isOwnProfile =
-    isAuthenticated &&
-    user?.role === "INSTRUCTOR" &&
-    profile.user?.id === user.id;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: fullName,
+    description: instructor.tagline || undefined,
+    url: `${siteUrl}/${locale}/instructors/${username}`,
+    image: instructor.photoUrl
+      ? `${API_BASE_URL}/files/${instructor.photoUrl}`
+      : undefined,
+    address: instructor.city
+      ? {
+          "@type": "PostalAddress",
+          addressLocality: instructor.city,
+          addressCountry: "PL",
+        }
+      : undefined,
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-32">
-      <div className="container mx-auto px-4 pt-12 pb-4 max-w-7xl">
-        <NewPublicInstructorProfile
-          profile={profile}
-          isPreview={false}
-          source={source}
-          isOwnProfile={isOwnProfile}
-        />
-      </div>
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <InstructorPublicProfileClient />
+    </>
   );
 }

@@ -1,0 +1,2 @@
+-- Add ENTERPRISE_NEWS to NotificationType enum
+ALTER TYPE "NotificationType" ADD VALUE IF NOT EXISTS 'ENTERPRISE_NEWS';

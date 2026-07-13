@@ -20,6 +20,7 @@ import { pl } from "date-fns/locale";
 import type { InstructorProfile } from "@/types";
 import { useAuthStore } from "@/stores/auth-store";
 import { FavoriteButton } from "./FavoriteButton";
+import { FollowInstructorButton } from "./FollowInstructorButton";
 
 interface InstructorHeroProps {
   profile: InstructorProfile;
@@ -319,6 +320,13 @@ export function InstructorHero({
                   <FavoriteButton instructorProfileId={profile.id} />
                 </div>
               )}
+
+            {/* Follow Button — for ENTERPRISE accounts (hidden on own profile) */}
+            {user?.role === "ENTERPRISE" && !isOwnProfile && (
+              <div className="mt-3">
+                <FollowInstructorButton instructorProfileId={profile.id} />
+              </div>
+            )}
           </div>
         </div>
       </div>
