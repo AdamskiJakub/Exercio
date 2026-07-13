@@ -1,7 +1,7 @@
 export const acceptableUseContent = `
 
-**Ostatnia aktualizacja:** 11 lipca 2026
-**Obowiązuje od:** 11 lipca 2026
+**Ostatnia aktualizacja:** 13 lipca 2026
+**Obowiązuje od:** 13 lipca 2026
 
 ---
 
@@ -53,6 +53,7 @@ Zabronione jest:
 - Tworzenie fałszywych kont
 - Manipulowanie opiniami (kupowanie, wystawianie fałszywych)
 - Nękanie innych Użytkowników
+- Wykorzystywanie Platformy do trenowania modeli AI lub masowego pozyskiwania danych bez zgody Usługodawcy
 
 ## 4. Konsekwencje naruszeń
 
@@ -69,7 +70,7 @@ Kary są stosowane proporcjonalnie do wagi naruszenia.
 
 ## 5. Zgłaszanie naruszeń
 
-Naruszenia można zgłaszać na adres: **kontakt@exercio.app**
+Naruszenia można zgłaszać na adres: **support@exercio.app**
 
 Zgłoszenie powinno zawierać:
 
@@ -80,7 +81,7 @@ Zgłoszenie powinno zawierać:
 
 ## 6. Odwołania
 
-Od decyzji Usługodawcy przysługuje odwołanie w terminie 14 dni na adres: **kontakt@exercio.app**.
+Od decyzji Usługodawcy przysługuje odwołanie w terminie 14 dni na adres: **support@exercio.app**.
 
 ---
 

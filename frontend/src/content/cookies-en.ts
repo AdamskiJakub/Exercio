@@ -1,7 +1,7 @@
 export const cookiesContentEn = `
 
-**Last updated:** July 11, 2026
-**Effective from:** July 11, 2026
+**Last updated:** July 13, 2026
+**Effective from:** July 13, 2026
 
 ---
 
@@ -17,8 +17,8 @@ Cookies are small text files stored on a User's device (computer, smartphone, ta
 | ---------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------------- |
 | **Essential**    | Required for the proper functioning of the Platform. Without them, some features will not work.     | Login session, CSRF token, cookie preferences    | Session / up to 1 year |
 | **Functional**   | Allow remembering User preferences.                                                                 | Selected language, display settings              | Up to 1 year     |
-| **Analytical**   | Allow analysis of how the Platform is used in order to improve it.                                  | Google Analytics (_ga, _gid, _gat)               | Up to 2 years    |
-| **Marketing**    | Used to display personalized advertisements.                                                        | Facebook Pixel (_fbp), Google Ads (_gcl_*)       | Up to 3 months   |
+| **Analytical**   | Allow analysis of how the Platform is used in order to improve it.                                  | Google Analytics                                 | Up to 2 years    |
+| **Marketing**    | Used to display personalized advertisements.                                                        | Facebook Pixel, Google Ads                       | Up to 3 months   |
 
 ### 2.2. By Origin
 
@@ -34,11 +34,8 @@ Cookies are small text files stored on a User's device (computer, smartphone, ta
 | \`next-auth.session-token\` | Exercio       | Maintaining login session            | Session       |
 | \`cookie-consent\`          | Exercio       | Storing cookie preferences           | 1 year        |
 | \`language\`                | Exercio       | Remembering selected language        | 1 year        |
-| \`_ga\`                     | Google Analytics | Anonymous user identification     | 2 years       |
-| \`_gid\`                    | Google Analytics | Session identification            | 24 hours      |
-| \`_gat\`                    | Google Analytics | Rate limiting                     | 1 minute      |
-| \`_fbp\`                    | Meta (Facebook)  | Ad targeting                      | 3 months      |
-| \`_gcl_*\`                  | Google Ads       | Ad conversion measurement         | 90 days       |
+
+The list of cookies used may change as the Platform evolves and new functionalities or third-party services are implemented.
 
 ## 4. Consent Management
 
@@ -79,7 +76,7 @@ Some cookie providers (Google, Meta) may process User data as independent contro
 
 For matters related to cookies:
 
-**Email:** kontakt@exercio.app
+**Email:** support@exercio.app
 
 ---
 

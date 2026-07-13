@@ -1,7 +1,7 @@
 export const termsContent = `
 
-**Ostatnia aktualizacja:** 11 lipca 2026
-**Obowiązuje od:** 11 lipca 2026
+**Ostatnia aktualizacja:** 13 lipca 2026
+**Obowiązuje od:** 13 lipca 2026
 
 ---
 
@@ -19,11 +19,11 @@ export const termsContent = `
 10. [Płatności i subskrypcje](#10-płatności-i-subskrypcje)
 11. [Zwroty i reklamacje](#11-zwroty-i-reklamacje)
 12. [Odpowiedzialność](#12-odpowiedzialność)
-13. [Weryfikacja instruktorów](#13-weryfikacja-instruktorów)
-14. [Moderacja treści i DSA](#14-moderacja-treści-i-dsa)
-15. [Prawa własności intelektualnej](#15-prawa-własności-intelektualnej)
-16. [Dane osobowe i cookies](#16-dane-osobowe-i-cookies)
-17. [Postanowienia końcowe](#17-postanowienia-końcowe)
+13. [Moderacja treści i DSA](#13-moderacja-treści-i-dsa)
+14. [Prawa własności intelektualnej](#14-prawa-własności-intelektualnej)
+15. [Dane osobowe i cookies](#15-dane-osobowe-i-cookies)
+16. [Postanowienia końcowe](#16-postanowienia-końcowe)
+17. [Siła wyższa](#17-siła-wyższa)
 
 ---
 
@@ -31,8 +31,8 @@ export const termsContent = `
 
 | Pojęcie                 | Znaczenie                                                                                                                            |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Platforma**           | Serwis internetowy dostępny pod adresem exercio.app, w tym aplikacja webowa i mobilna, za pośrednictwem którego świadczone są Usługi |
-| **Usługodawca/Exercio** | Jakub Adamski                                                                                                                       |
+| **Platforma**           | Serwis internetowy dostępny pod adresem exercio.app, w tym aplikacja webowa, za pośrednictwem którego świadczone są Usługi           |
+| **Usługodawca/Exercio** | Właściciel i operator Platformy Exercio                                                                                              |
 | **Użytkownik**          | Każda osoba fizyczna lub prawna korzystająca z Platformy                                                                             |
 | **Klient**              | Użytkownik posiadający Konto w roli klienta, który wyszukuje instruktorów i dokonuje rezerwacji                                      |
 | **Instruktor**          | Użytkownik posiadający Konto w roli instruktora, który oferuje usługi treningowe/sportowe/taneczne za pośrednictwem Platformy        |
@@ -58,9 +58,9 @@ export const termsContent = `
 - Ustawą z dnia 30 maja 2014 r. o prawach konsumenta
 - Rozporządzeniem Parlamentu Europejskiego i Rady (UE) 2022/2065 (Akt o usługach cyfrowych)
 
-  2.3. Korzystanie z Platformy jest dobrowolne, jednak niektóre funkcjonalności wymagają założenia Konta.
+2.3. Korzystanie z Platformy jest dobrowolne, jednak niektóre funkcjonalności wymagają założenia Konta.
 
-  2.4. Regulamin jest dostępny na Platformie w sposób umożliwiający jego pobranie, odtwarzanie i utrwalenie.
+2.4. Regulamin jest dostępny na Platformie w sposób umożliwiający jego pobranie, odtwarzanie i utrwalenie.
 
 ---
 
@@ -77,6 +77,8 @@ export const termsContent = `
 3.2.2. Umowa pomiędzy Klientem a Instruktorem/Firmą dotycząca Usług Instruktora (trening, zajęcia) zawierana jest **bezpośrednio pomiędzy Klientem a Instruktorem/Firmą**. Exercio nie jest stroną tej umowy.
 
 3.2.3. Exercio udostępnia wyłącznie narzędzia techniczne do wyszukiwania, komunikacji i rezerwacji.
+
+3.2.4. Exercio nie jest pracodawcą, zleceniodawcą ani przedstawicielem Instruktorów lub Firm korzystających z Platformy.
 
 ### 3.3. Brak odpowiedzialności za usługi instruktorów
 
@@ -103,7 +105,9 @@ export const termsContent = `
 - Działania hakerskie, phishing, spam
 - Wykorzystywanie Platformy do celów sprzecznych z prawem
 
-  4.3. Szczegółowe zasady dotyczące zakazanych treści znajdują się w [Zasadach korzystania](/acceptable-use).
+4.3. Osoba, która podaje nieprawdziwe dane lub podszywa się pod inną osobę, ponosi wyłączną odpowiedzialność prawną z tego tytułu, w tym odpowiedzialność karną i cywilną. Exercio nie weryfikuje tożsamości osób zakładających Konto i nie ponosi odpowiedzialności za skutki podszycia się.
+
+4.4. Szczegółowe zasady dotyczące zakazanych treści znajdują się w [Zasadach korzystania](/acceptable-use).
 
 ---
 
@@ -117,13 +121,15 @@ export const termsContent = `
 - Zweryfikować adres email
 - Wybrać rolę (Klient, Instruktor lub Enterprise)
 
-  5.3. Użytkownik może posiadać tylko jedno Konto przypisane do jednego adresu email.
+5.3. Użytkownik może posiadać tylko jedno Konto przypisane do jednego adresu email. Zabronione jest tworzenie wielu Kont w celu obchodzenia ograniczeń nałożonych na Użytkownika.
 
-  5.4. Użytkownik zobowiązany jest do zabezpieczenia dostępu do swojego Konta i nieudostępniania go osobom trzecim.
+5.4. Konto może zostać założone wyłącznie przez osobę posiadającą pełną zdolność do czynności prawnych. W przypadku osób niepełnoletnich wymagana jest zgoda rodzica lub opiekuna prawnego.
 
-  5.5. Użytkownik może w każdej chwili usunąć Konto samodzielnie za pośrednictwem Panelu.
+5.5. Użytkownik zobowiązany jest do zabezpieczenia dostępu do swojego Konta i nieudostępniania go osobom trzecim.
 
-  5.6. Usługodawca może zawiesić lub usunąć Konto w przypadku naruszenia Regulaminu.
+5.6. Użytkownik może w każdej chwili usunąć Konto samodzielnie za pośrednictwem Panelu.
+
+5.7. Usługodawca może zawiesić lub usunąć Konto w przypadku naruszenia Regulaminu.
 
 ---
 
@@ -170,18 +176,16 @@ Gość ma możliwość:
 
 ## 7. Profile instruktorów i firm
 
-7.1. Instruktor i Firma ponoszą **wyłączną odpowiedzialność** za treść swojego profilu.
+7.1. Instruktor i Firma ponoszą **wyłączną odpowiedzialność** za treść swojego profilu, w tym za prawdziwość, kompletność i aktualność zamieszczonych informacji.
 
-7.2. Exercio nie weryfikuje:
+7.2. Exercio nie prowadzi formalnej weryfikacji:
 
 - Prawdziwości danych podanych w profilu
 - Kwalifikacji ani certyfikatów Instruktora
 - Uprawnień do wykonywania zawodu
-- Legalności działalności Firmy
+- Legalności prowadzonej działalności
 
-  7.3. Profile mogą zawierać oznaczenie „zweryfikowany", jednak weryfikacja dotyczy wyłącznie potwierdzenia tożsamości (np. poprzez dokument), a nie potwierdzenia kwalifikacji zawodowych.
-
-  7.4. Użytkownicy powinni zachować ostrożność i samodzielnie zweryfikować wiarygodność Instruktora/Firmy przed skorzystaniem z usług.
+7.3. Użytkownicy powinni zachować ostrożność i samodzielnie zweryfikować wiarygodność Instruktora/Firmy przed skorzystaniem z usług.
 
 ---
 
@@ -191,9 +195,11 @@ Gość ma możliwość:
 
 8.2. Exercio umożliwia techniczne dokonanie Rezerwacji, ale **nie jest stroną umowy** pomiędzy Klientem a Instruktorem/Firmą.
 
-8.3. Warunki anulowania Rezerwacji określa Instruktor/Firma w swoim profilu. Exercio nie ingeruje w te warunki.
+8.3. Instruktor/Firma ma prawo odmówić przyjęcia Rezerwacji z ważnych powodów, w szczególności w przypadku braku dostępności, przeciwwskazań zdrowotnych, naruszenia Regulaminu przez Klienta lub innych uzasadnionych okoliczności.
 
-8.4. W przypadku Rezerwacji gościnnej, Klient otrzymuje link do anulowania bez konieczności logowania.
+8.4. Warunki anulowania Rezerwacji określa Instruktor/Firma w swoim profilu. Exercio nie ingeruje w te warunki.
+
+8.5. W przypadku Rezerwacji gościnnej, Klient otrzymuje link do anulowania bez konieczności logowania.
 
 ---
 
@@ -205,7 +211,7 @@ Gość ma możliwość:
 
 9.3. Exercio zastrzega sobie prawo do usunięcia opinii naruszającej Regulamin lub przepisy prawa.
 
-9.4. Instruktor/Firma ma prawo zgłosić opinię jako naruszającą Regulamin (procedura opisana w pkt 14).
+9.4. Instruktor/Firma ma prawo zgłosić opinię jako naruszającą Regulamin (procedura opisana w pkt 13).
 
 ---
 
@@ -244,7 +250,9 @@ Exercio nie rozpatruje reklamacji dotyczących:
 
 ### 11.2. Reklamacje dotyczące działania Platformy
 
-Reklamacje dotyczące technicznego działania Platformy (błędy, niedziałające funkcje) należy kierować na adres: **kontakt@exercio.app**.
+Reklamacje dotyczące technicznego działania Platformy (błędy, niedziałające funkcje) należy kierować na adres: **support@exercio.app**.
+
+Reklamacja powinna zawierać dane umożliwiające identyfikację Użytkownika oraz opis zgłaszanego problemu.
 
 Usługodawca rozpatruje reklamacje w terminie 14 dni.
 
@@ -256,7 +264,11 @@ Exercio nie dokonuje zwrotów za Usługi Instruktora, ponieważ nie jest stroną
 
 ## 12. Odpowiedzialność
 
-### 12.1. Ograniczenie odpowiedzialności Exercio
+### 12.1. Działanie Platformy
+
+Exercio dokłada należytej staranności, aby zapewnić prawidłowe i bezpieczne działanie Platformy, jednak nie gwarantuje jej nieprzerwanej dostępności z uwagi na planowane przerwy techniczne, awarie lub działania siły wyższej.
+
+### 12.2. Ograniczenie odpowiedzialności Exercio
 
 **Exercio nie ponosi odpowiedzialności za:**
 
@@ -266,9 +278,9 @@ Exercio nie dokonuje zwrotów za Usługi Instruktora, ponieważ nie jest stroną
 4. **Weryfikację Instruktorów** — prawdziwość danych, kwalifikacje, uprawnienia
 5. **Treści publikowane przez Użytkowników** — profile, opinie, komentarze
 6. **Rozliczenia finansowe** — pomiędzy Klientem a Instruktorem/Firmą
-7. **Szkody wynikające z działania siły wyższej** — awarie, przerwy techniczne, cyberataki
+7. **Szkody wynikające z działania siły wyższej** — awarie, przerwy techniczne, cyberataki, awarie usług podmiotów trzecich
 
-### 12.2. Odpowiedzialność Instruktora/Firmy
+### 12.3. Odpowiedzialność Instruktora/Firmy
 
 Instruktor/Firma ponosi **pełną odpowiedzialność** za:
 
@@ -278,7 +290,7 @@ Instruktor/Firma ponosi **pełną odpowiedzialność** za:
 - Rozliczenia z Klientami
 - Przetwarzanie danych osobowych Klientów
 
-### 12.3. Odpowiedzialność Klienta
+### 12.4. Odpowiedzialność Klienta
 
 Klient ponosi odpowiedzialność za:
 
@@ -289,84 +301,76 @@ Klient ponosi odpowiedzialność za:
 
 ---
 
-## 13. Weryfikacja instruktorów
+## 13. Moderacja treści i DSA
 
-13.1. Exercio **nie weryfikuje** kwalifikacji, uprawnień ani prawdziwości danych Instruktorów i Firm.
+13.1. Użytkownicy mogą zgłaszać nielegalne treści lub treści naruszające Regulamin na adres: **support@exercio.app**.
 
-13.2. Oznaczenie „zweryfikowany" na profilu oznacza wyłącznie, że Instruktor/Firma potwierdził swoją tożsamość (np. poprzez przesłanie dokumentu). Nie stanowi to potwierdzenia:
-
-- Posiadania odpowiednich kwalifikacji
-- Uprawnień do wykonywania zawodu
-- Legalności prowadzonej działalności
-- Wiarygodności ani rzetelności
-
-  13.3. **Każdy Użytkownik korzysta z Platformy na własne ryzyko.** Przed skorzystaniem z usług Instruktora/Firmy zalecamy:
-
-- Sprawdzenie opinii innych Klientów
-- Samodzielną weryfikację kwalifikacji
-- Zachowanie ostrożności przy pierwszych sesjach
-
----
-
-## 14. Moderacja treści i DSA
-
-14.1. Użytkownicy mogą zgłaszać nielegalne treści lub treści naruszające Regulamin na adres: **kontakt@exercio.app**.
-
-14.2. Zgłoszenie powinno zawierać:
+13.2. Zgłoszenie powinno zawierać:
 
 - Wyjaśnienie, dlaczego treść jest niezgodna z prawem/Regulaminem
 - Dokładną lokalizację treści (URL)
 - Imię i nazwisko zgłaszającego
 - Oświadczenie o działaniu w dobrej wierze
 
-  14.3. Usługodawca rozpatruje zgłoszenia w terminie do 14 dni.
+13.3. Usługodawca rozpatruje zgłoszenia bez zbędnej zwłoki, nie później niż w terminie 14 dni.
 
-  14.4. W przypadku stwierdzenia naruszenia, Usługodawca może:
+13.4. W przypadku stwierdzenia naruszenia, Usługodawca może:
 
 - Usunąć treść
 - Ograniczyć widoczność treści
+- Tymczasowo ukryć treść do czasu zakończenia weryfikacji
 - Zawiesić lub usunąć Konto Użytkownika
 
-  14.5. Od decyzji Usługodawcy przysługuje odwołanie w terminie 14 dni.
+13.5. Od decyzji Usługodawcy przysługuje odwołanie w terminie 14 dni.
 
 ---
 
-## 15. Prawa własności intelektualnej
+## 14. Prawa własności intelektualnej
 
-15.1. Wszelkie treści zamieszczone na Platformie przez Usługodawcę (nazwa, logo, kod, dokumenty) są chronione prawem autorskim.
+14.1. Wszelkie treści zamieszczone na Platformie przez Usługodawcę (nazwa, logo, kod, dokumenty) są chronione prawem autorskim.
 
-15.2. Użytkownik publikujący treści na Platformie (zdjęcia, opisy, opinie) udziela Usługodawcy niewyłącznej licencji na ich wyświetlanie na Platformie.
+14.2. Użytkownik publikujący treści na Platformie (zdjęcia, opisy, opinie) udziela Usługodawcy niewyłącznej licencji na korzystanie z tych treści wyłącznie w celu świadczenia, rozwijania i promowania Platformy Exercio.
 
-15.3. Użytkownik oświadcza, że publikowane przez niego treści nie naruszają praw osób trzecich.
-
----
-
-## 16. Dane osobowe i cookies
-
-16.1. Administratorem danych osobowych Użytkowników jest Usługodawca.
-
-16.2. Szczegółowe informacje o przetwarzaniu danych osobowych znajdują się w [Polityce prywatności](/privacy).
-
-16.3. Informacje o plikach cookie znajdują się w [Polityce cookie](/cookies).
+14.3. Użytkownik oświadcza, że publikowane przez niego treści nie naruszają praw osób trzecich.
 
 ---
 
-## 17. Postanowienia końcowe
+## 15. Dane osobowe i cookies
 
-17.1. Regulamin jest dostępny w języku polskim.
+15.1. Administratorem danych osobowych Użytkowników jest Usługodawca.
 
-17.2. Prawem właściwym jest prawo polskie.
+15.2. Szczegółowe informacje o przetwarzaniu danych osobowych znajdują się w [Polityce prywatności](/privacy).
 
-17.3. Usługodawca zastrzega sobie prawo do zmiany Regulaminu. O zmianach Użytkownicy zostaną poinformowani poprzez komunikat na Platformie.
+15.3. Informacje o plikach cookie znajdują się w [Polityce cookie](/cookies).
 
-17.4. Zmiany Regulaminu wchodzą w życie po 14 dniach od ogłoszenia.
+---
 
-17.5. Użytkownicy posiadający Konto, którzy nie akceptują zmian, mogą usunąć Konto przed wejściem zmian w życie.
+## 16. Postanowienia końcowe
 
-17.6. W sprawach nieuregulowanych w Regulaminie stosuje się przepisy prawa polskiego.
+16.1. Regulamin jest dostępny w języku polskim.
+
+16.2. Prawem właściwym jest prawo polskie.
+
+16.3. Usługodawca zastrzega sobie prawo do zmiany Regulaminu. O zmianach Użytkownicy zostaną poinformowani poprzez komunikat na Platformie oraz, w przypadku istotnych zmian, drogą mailową.
+
+16.4. Zmiany Regulaminu wchodzą w życie po 14 dniach od ogłoszenia.
+
+16.5. Zmiany Regulaminu nie wpływają na prawa i obowiązki wynikające z umów zawartych przed wejściem zmian w życie.
+
+16.6. Użytkownicy posiadający Konto, którzy nie akceptują zmian, mogą usunąć Konto przed wejściem zmian w życie.
+
+16.7. W sprawach nieuregulowanych w Regulaminie stosuje się przepisy prawa polskiego.
+
+---
+
+## 17. Siła wyższa
+
+17.1. Exercio nie ponosi odpowiedzialności za niewykonanie lub nienależyte wykonanie zobowiązań wynikających z Regulaminu spowodowane działaniem siły wyższej, w szczególności: klęsk żywiołowych, wojen, zamieszek, strajków, awarii infrastruktury teleinformatycznej, cyberataków, decyzji organów państwowych lub innych zdarzeń pozostających poza kontrolą Usługodawcy.
+
+17.2. W przypadku wystąpienia siły wyższej, Usługodawca dołoży wszelkich starań, aby zminimalizować skutki takiego zdarzenia i przywrócić normalne funkcjonowanie Platformy w możliwie najkrótszym czasie.
 
 ---
 
 _Exercio — exercio.app_
-**Kontakt:** kontakt@exercio.app
+**Kontakt:** support@exercio.app
 `;

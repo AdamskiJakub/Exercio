@@ -1,7 +1,7 @@
 export const cookiesContent = `
 
-**Ostatnia aktualizacja:** 11 lipca 2026
-**Obowiązuje od:** 11 lipca 2026
+**Ostatnia aktualizacja:** 13 lipca 2026
+**Obowiązuje od:** 13 lipca 2026
 
 ---
 
@@ -17,8 +17,8 @@ Pliki cookie to małe pliki tekstowe przechowywane na urządzeniu Użytkownika (
 | ---------------- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------- | -------------------- |
 | **Niezbędne**    | Wymagane do prawidłowego działania Platformy. Bez nich niektóre funkcjonalności nie będą działać. | Sesja logowania, token CSRF, preferencje cookie | Sesja / do 1 roku    |
 | **Funkcjonalne** | Umożliwiają zapamiętanie preferencji Użytkownika.                                                 | Wybrany język, ustawienia wyświetlania          | Do 1 roku            |
-| **Analityczne**  | Pozwalają na analizę sposobu korzystania z Platformy w celu jej ulepszania.                       | Google Analytics (\_ga, \_gid, \_gat)           | Do 2 lat             |
-| **Marketingowe** | Służą do wyświetlania spersonalizowanych reklam.                                                  | Facebook Pixel (_fbp), Google Ads (\_gcl_\*)    | Do 3 miesięcy        |
+| **Analityczne**  | Pozwalają na analizę sposobu korzystania z Platformy w celu jej ulepszania.                       | Google Analytics                                | Do 2 lat             |
+| **Marketingowe** | Służą do wyświetlania spersonalizowanych reklam.                                                  | Facebook Pixel, Google Ads                      | Do 3 miesięcy        |
 
 ### 2.2. Ze względu na pochodzenie
 
@@ -34,11 +34,8 @@ Pliki cookie to małe pliki tekstowe przechowywane na urządzeniu Użytkownika (
 | \`next-auth.session-token\` | Exercio          | Utrzymanie sesji logowania          | Sesja          |
 | \`cookie-consent\`          | Exercio          | Przechowywanie preferencji cookie   | 1 rok          |
 | \`language\`                | Exercio          | Zapamiętanie wybranego języka       | 1 rok          |
-| \`_ga\`                     | Google Analytics | Anonimowa identyfikacja użytkownika | 2 lata         |
-| \`_gid\`                    | Google Analytics | Identyfikacja sesji                 | 24 godziny     |
-| \`_gat\`                    | Google Analytics | Ograniczenie częstotliwości żądań   | 1 minuta       |
-| \`_fbp\`                    | Meta (Facebook)  | Targetowanie reklam                 | 3 miesiące     |
-| \`_gcl_*\`                  | Google Ads       | Pomiar konwersji reklam             | 90 dni         |
+
+Lista wykorzystywanych plików cookie może ulegać zmianom wraz z rozwojem Platformy oraz wdrażaniem nowych funkcjonalności lub usług podmiotów trzecich.
 
 ## 4. Zarządzanie zgodą
 
@@ -48,9 +45,9 @@ Pliki cookie to małe pliki tekstowe przechowywane na urządzeniu Użytkownika (
 - Zaakceptowanie tylko niezbędnych plików cookie
 - Dostosowanie preferencji dla poszczególnych kategorii
 
-  4.2. Zgodę można w każdej chwili wycofać lub zmienić za pomocą ustawień cookie dostępnych na Platformie.
+4.2. Zgodę można w każdej chwili wycofać lub zmienić za pomocą ustawień cookie dostępnych na Platformie.
 
-  4.3. Niezbędne pliki cookie są zawsze aktywne — nie można ich wyłączyć, ponieważ są wymagane do działania Platformy.
+4.3. Niezbędne pliki cookie są zawsze aktywne — nie można ich wyłączyć, ponieważ są wymagane do działania Platformy.
 
 ## 5. Zarządzanie cookie w przeglądarce
 
@@ -79,7 +76,7 @@ Niektórzy dostawcy plików cookie (Google, Meta) mogą przetwarzać dane Użytk
 
 W sprawach związanych z plikami cookie:
 
-**Email:** kontakt@exercio.app
+**Email:** support@exercio.app
 
 ---
 

@@ -1,7 +1,7 @@
 export const refundContentEn = `
 
-**Last updated:** July 11, 2026
-**Effective from:** July 11, 2026
+**Last updated:** July 13, 2026
+**Effective from:** July 13, 2026
 
 ---
 
@@ -27,6 +27,8 @@ Typical rules may include:
 - Partial refund for cancellation within a shorter period
 - No refund for cancellation on the day of the session
 - No refund in case of no-show
+
+Examples are for informational purposes only.
 
 ### 2.2. How to Cancel a Booking
 
@@ -74,7 +76,7 @@ Exercio does not mediate in disputes between the Client and the Instructor/Compa
 
 ## 5. Technical Complaints
 
-Complaints regarding the technical operation of the Platform (errors, non-functioning features) should be sent to: **kontakt@exercio.app**.
+Complaints regarding the technical operation of the Platform (errors, non-functioning features) should be sent to: **support@exercio.app**.
 
 The Service Provider handles complaints within 14 days.
 
@@ -94,5 +96,5 @@ In the case of the Exercio Platform:
 ---
 
 _Exercio — exercio.app_
-**Contact:** kontakt@exercio.app
+**Contact:** support@exercio.app
 `;

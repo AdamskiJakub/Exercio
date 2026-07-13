@@ -1,7 +1,7 @@
 export const enterpriseTermsContentEn = `
 
-**Last updated:** July 11, 2026
-**Effective from:** July 11, 2026
+**Last updated:** July 13, 2026
+**Effective from:** July 13, 2026
 
 ---
 
@@ -29,7 +29,7 @@ export const enterpriseTermsContentEn = `
 
 2.2. An Enterprise Account requires acceptance by the Service Provider.
 
-2.3. The Service Provider reserves the right to refuse to create an Enterprise Account without giving a reason.
+2.3. The Service Provider may refuse to activate an Enterprise Account, in particular in the event of reasonable doubts regarding the compliance of the business with these Terms or applicable law.
 
 ## 3. Subscription
 
@@ -47,7 +47,7 @@ export const enterpriseTermsContentEn = `
 
 4.2. Cancelling the subscription results in loss of access to Enterprise features at the end of the paid period.
 
-4.3. Exercio does not issue refunds for the unused portion of a subscription.
+4.3. Exercio does not issue refunds for the unused portion of a subscription, subject to mandatory provisions of applicable law.
 
 ## 5. Managing Instructors
 
@@ -83,6 +83,7 @@ export const enterpriseTermsContentEn = `
 - Violation of the Terms
 - Non-payment
 - Illegal activity
+- Prolonged account inactivity
 - At the Company's request
 
 ## 9. Final Provisions
@@ -94,5 +95,5 @@ export const enterpriseTermsContentEn = `
 ---
 
 _Exercio — exercio.app_
-**Contact:** kontakt@exercio.app
+**Contact:** support@exercio.app
 `;

@@ -1,7 +1,7 @@
 export const dpaContentEn = `
 
 **Version:** 1.0
-**Date:** July 11, 2026
+**Date:** July 13, 2026
 
 ---
 
@@ -10,7 +10,7 @@ export const dpaContentEn = `
 | Party                       | Details                                                                                                       |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | **Data Controller**         | Instructor / Enterprise Company using the Exercio Platform who processes personal data of their clients        |
-| **Data Processor**          | Jakub Adamski (Exercio), kontakt@exercio.app                                                                  |
+| **Data Processor**          | Operator of the Exercio Platform, support@exercio.app                                                         |
 
 ## 2. Scope of the Agreement
 
@@ -43,7 +43,7 @@ export const dpaContentEn = `
 
 ## 6. Sub-processors
 
-The Processor may use sub-processors (hosting, Stripe, analytics). The current list of sub-processors is available in the [Privacy Policy](/privacy).
+The Processor may use sub-processors (hosting, Stripe, analytics, email service providers). The current list of sub-processors is available in the [Privacy Policy](/privacy).
 
 ## 7. Term
 
@@ -53,10 +53,10 @@ This agreement is effective for the duration of the Controller's use of the Exer
 
 8.1. Matters not regulated herein are governed by the GDPR and Polish law.
 
-8.2. Any amendments require written form.
+8.2. Any amendments require documentary form.
 
 ---
 
 _Exercio — exercio.app_
-**Contact:** kontakt@exercio.app
+**Contact:** support@exercio.app
 `;
