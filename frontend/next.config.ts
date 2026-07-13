@@ -24,6 +24,13 @@ const nextConfig: NextConfig = {
         port: url.port,
         pathname: "/uploads/**",
       },
+      // Backend API proxy for serving uploaded files from R2
+      {
+        protocol: url.protocol.replace(":", "") as "http" | "https",
+        hostname: url.hostname,
+        port: url.port,
+        pathname: "/upload/**",
+      },
       // Cloudflare R2 / Images for production
       {
         protocol: "https",

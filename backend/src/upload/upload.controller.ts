@@ -1,6 +1,9 @@
 import {
   Controller,
+  Get,
   Post,
+  Param,
+  Res,
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
@@ -8,6 +11,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UploadService } from './upload.service';
 
@@ -48,11 +52,11 @@ const galleryMulterOptions = createMulterOptions(
 );
 
 @Controller('upload')
-@UseGuards(JwtAuthGuard)
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
   @Post('profile-photo')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', profilePhotoMulterOptions))
   async uploadProfilePhoto(@UploadedFile() file: Express.Multer.File) {
     const url = await this.uploadService.uploadFile(file, false);
@@ -60,6 +64,7 @@ export class UploadController {
   }
 
   @Post('gallery')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10, galleryMulterOptions))
   async uploadGalleryPhotos(@UploadedFiles() files: Express.Multer.File[]) {
     const urls = await this.uploadService.uploadMultipleFiles(files, true);
@@ -67,9 +72,22 @@ export class UploadController {
   }
 
   @Post('thumbnail')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', profilePhotoMulterOptions))
   async uploadThumbnail(@UploadedFile() file: Express.Multer.File) {
     const url = await this.uploadService.uploadFile(file, false);
     return { url };
+  }
+
+  /**
+   * Serve uploaded files from R2 via the API.
+   * Public endpoint - no auth required so profile photos/gallery images are viewable.
+   */
+  @Get(':filename')
+  async serveFile(@Param('filename') filename: string, @Res() res: Response) {
+    const { stream, contentType } = await this.uploadService.getFile(filename);
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    stream.pipe(res);
   }
 }

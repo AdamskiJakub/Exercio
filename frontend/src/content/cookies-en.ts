@@ -18,7 +18,7 @@ Cookies are small text files stored on a User's device (computer, smartphone, ta
 | **Essential**    | Required for the proper functioning of the Platform. Without them, some features will not work.     | Login session, CSRF token, cookie preferences    | Session / up to 1 year |
 | **Functional**   | Allow remembering User preferences.                                                                 | Selected language, display settings              | Up to 1 year     |
 | **Analytical**   | Allow analysis of how the Platform is used in order to improve it.                                  | Google Analytics                                 | Up to 2 years    |
-| **Marketing**    | Used to display personalized advertisements.                                                        | Facebook Pixel, Google Ads                       | Up to 3 months   |
+| **Marketing**    | Used to display personalized advertisements.                                                        | Google Ads                                       | Up to 3 months   |
 
 ### 2.2. By Origin
 

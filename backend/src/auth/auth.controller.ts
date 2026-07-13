@@ -35,6 +35,20 @@ const COOKIE_OPTIONS = {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  // ── CSRF Token Endpoint ────────────────────────────────────────────────────
+  // The frontend calls this to get a CSRF token. The token is set as a cookie
+  // (non-httpOnly) and returned in the response body. The frontend must send
+  // this token back in the X-CSRF-Token header for all state-changing requests
+  // (POST, PUT, PATCH, DELETE) that use session-based auth (cookies).
+  //
+  // JWT-authenticated requests (Authorization: Bearer header) are automatically
+  // exempt from CSRF checks.
+  @Get('csrf-token')
+  getCsrfToken(@Req() req: Request) {
+    const token = (req as any).csrfToken?.();
+    return { csrfToken: token };
+  }
+
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() dto: RegisterDto, @Query('lang') lang?: string) {
