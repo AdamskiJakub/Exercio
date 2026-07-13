@@ -18,7 +18,7 @@ Pliki cookie to małe pliki tekstowe przechowywane na urządzeniu Użytkownika (
 | **Niezbędne**    | Wymagane do prawidłowego działania Platformy. Bez nich niektóre funkcjonalności nie będą działać. | Sesja logowania, token CSRF, preferencje cookie | Sesja / do 1 roku    |
 | **Funkcjonalne** | Umożliwiają zapamiętanie preferencji Użytkownika.                                                 | Wybrany język, ustawienia wyświetlania          | Do 1 roku            |
 | **Analityczne**  | Pozwalają na analizę sposobu korzystania z Platformy w celu jej ulepszania.                       | Google Analytics                                | Do 2 lat             |
-| **Marketingowe** | Służą do wyświetlania spersonalizowanych reklam.                                                  | Facebook Pixel, Google Ads                      | Do 3 miesięcy        |
+| **Marketingowe** | Służą do wyświetlania spersonalizowanych reklam.                                                  | Google Ads                                      | Do 3 miesięcy        |
 
 ### 2.2. Ze względu na pochodzenie
 
