@@ -144,4 +144,17 @@ export class UpdateInstructorProfileDto {
   @MaxLength(500)
   @IsOptional()
   paymentInfo?: string | null; // Additional payment instructions
+
+  // SOCIAL MEDIA
+  @IsString()
+  @IsOptional()
+  instagramUrl?: string | null;
+
+  @IsString()
+  @IsOptional()
+  facebookUrl?: string | null;
+
+  @IsString()
+  @IsOptional()
+  whatsappUrl?: string | null;
 }

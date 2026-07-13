@@ -74,6 +74,9 @@ export interface InstructorProfile {
   showPhone?: boolean;
   showEmail?: boolean;
   contactMessage?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  whatsappUrl?: string | null;
   // Booking settings
   sessionDuration?: number;
   sessionPrice?: number | null;
