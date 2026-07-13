@@ -61,14 +61,12 @@ export function EnterpriseProfilePage({
 
   // Handle hash-based navigation on page load (e.g., /enterprise/slug#news)
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hash = window.location.hash.replace("#", "");
-      if (hash) {
-        // Small delay to ensure DOM is fully rendered
-        setTimeout(() => {
-          scrollToSection(hash);
-        }, 300);
-      }
+    const hash = window.location.hash.replace("#", "");
+    if (hash) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        scrollToSection(hash);
+      }, 300);
     }
   }, []);
 

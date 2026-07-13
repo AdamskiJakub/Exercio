@@ -79,7 +79,7 @@ export function EnterpriseProfileDisciplines({
                 type="button"
                 onClick={() => remove(value)}
                 className="ml-2 hover:text-emerald-100"
-                aria-label={`${t("removeDiscipline") || "Remove"} ${value}`}
+                aria-label={`${t("removeDiscipline")} ${value}`}
               >
                 <X className="w-3 h-3" aria-hidden="true" />
               </button>

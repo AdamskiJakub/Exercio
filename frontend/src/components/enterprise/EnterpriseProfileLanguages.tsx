@@ -73,7 +73,7 @@ export function EnterpriseProfileLanguages({
                 type="button"
                 onClick={() => remove(value)}
                 className="ml-2 hover:text-emerald-100"
-                aria-label={`${t("removeLanguage") || "Remove"} ${value}`}
+                aria-label={`${t("removeLanguage")} ${value}`}
               >
                 <X className="w-3 h-3" aria-hidden="true" />
               </button>

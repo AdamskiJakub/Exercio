@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import NextLink from "next/link";
 import { getMediaUrl } from "@/lib/utils/media";

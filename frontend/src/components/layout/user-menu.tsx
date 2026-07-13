@@ -590,7 +590,7 @@ export function UserMenu() {
           type="button"
           onClick={() => setMobileMenuOpen(true)}
           className="relative rounded-full outline-none"
-          aria-label={t("openMenu") || "Open menu"}
+          aria-label={t("openMenu")}
         >
           <UserAvatar
             src={avatarUrl}

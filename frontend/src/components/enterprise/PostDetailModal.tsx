@@ -33,8 +33,8 @@ export function PostDetailModal({
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // clipboard write not available
+    } catch (err) {
+      console.error("[PostDetailModal] Failed to copy link:", err);
     }
   }, []);
 
