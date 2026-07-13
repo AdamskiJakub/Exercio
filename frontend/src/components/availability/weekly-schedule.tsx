@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
-import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
 import { MonthlyCalendarPreview } from "./monthly-calendar-preview";
+import { TimePicker } from "./time-picker";
 import type { DaySchedule, AvailabilityException } from "@/types/availability";
 import { DAYS_OF_WEEK } from "@/constants/availability";
 
@@ -214,43 +214,21 @@ export function WeeklySchedule() {
             {/* Time Inputs */}
             {daySchedule.isAvailable ? (
               <div className="flex items-center gap-1.5 sm:gap-2 pl-0 sm:pl-8">
-                <div
-                  className="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-lg px-2 py-2.5 w-35 sm:flex-1 cursor-pointer hover:bg-slate-700 transition-colors"
-                  onClick={(e) => {
-                    const input = e.currentTarget.querySelector("input");
-                    input?.showPicker?.();
-                  }}
-                >
-                  <Clock className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
-                  <input
-                    type="time"
-                    value={daySchedule.startTime}
-                    onChange={(e) =>
-                      handleTimeChange(dayOfWeek, "startTime", e.target.value)
-                    }
-                    style={{ colorScheme: "dark" }}
-                    className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
-                  />
-                </div>
+                <TimePicker
+                  value={daySchedule.startTime}
+                  onChange={(value) =>
+                    handleTimeChange(dayOfWeek, "startTime", value)
+                  }
+                  className="flex-1"
+                />
                 <span className="text-slate-400 shrink-0">—</span>
-                <div
-                  className="flex items-center gap-1.5 bg-slate-800 border border-slate-600 rounded-lg px-2 py-2.5 w-35 sm:flex-1 cursor-pointer hover:bg-slate-700 transition-colors"
-                  onClick={(e) => {
-                    const input = e.currentTarget.querySelector("input");
-                    input?.showPicker?.();
-                  }}
-                >
-                  <Clock className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
-                  <input
-                    type="time"
-                    value={daySchedule.endTime}
-                    onChange={(e) =>
-                      handleTimeChange(dayOfWeek, "endTime", e.target.value)
-                    }
-                    style={{ colorScheme: "dark" }}
-                    className="bg-transparent border-none text-white text-sm focus:outline-none cursor-pointer w-full"
-                  />
-                </div>
+                <TimePicker
+                  value={daySchedule.endTime}
+                  onChange={(value) =>
+                    handleTimeChange(dayOfWeek, "endTime", value)
+                  }
+                  className="flex-1"
+                />
               </div>
             ) : (
               <span className="text-slate-500 text-sm pl-0 sm:pl-8">

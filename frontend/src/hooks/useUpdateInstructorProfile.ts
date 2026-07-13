@@ -26,6 +26,9 @@ export interface UpdateInstructorProfileData {
   showPhone?: boolean;
   showEmail?: boolean;
   contactMessage?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  whatsappUrl?: string | null;
   // Booking settings
   isBookingEnabled?: boolean;
   sessionDuration?: number;
