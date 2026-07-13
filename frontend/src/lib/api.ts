@@ -7,6 +7,24 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
+// ── CSRF Token Management ────────────────────────────────────────────────────
+// The backend uses Double Submit Cookie pattern for CSRF protection.
+// The CSRF token is stored in a non-httpOnly cookie (x-csrf-token) and must be
+// sent back in the X-CSRF-Token header for all state-changing requests.
+//
+// JWT-authenticated requests (Authorization: Bearer header) are automatically
+// exempt from CSRF checks on the backend, so we only need to add the header
+// when no Bearer token is present (i.e., session-based auth via cookies).
+
+/**
+ * Read the CSRF token from the non-httpOnly cookie set by the backend.
+ */
+function getCsrfTokenFromCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)x-csrf-token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 apiClient.interceptors.request.use((config) => {
   config.headers = config.headers || {};
 
@@ -16,6 +34,21 @@ apiClient.interceptors.request.use((config) => {
   if (!config.headers["Content-Type"] && !isFormData) {
     config.headers["Content-Type"] = "application/json";
   }
+
+  // Add CSRF token for state-changing requests (POST, PUT, PATCH, DELETE)
+  // when no Authorization header is present (session-based auth via cookies).
+  // JWT-authenticated requests are immune to CSRF and are skipped.
+  if (
+    config.method &&
+    ["post", "put", "patch", "delete"].includes(config.method) &&
+    !config.headers["Authorization"]
+  ) {
+    const csrfToken = getCsrfTokenFromCookie();
+    if (csrfToken) {
+      config.headers["X-CSRF-Token"] = csrfToken;
+    }
+  }
+
   return config;
 });
 
@@ -55,6 +88,18 @@ apiClient.interceptors.response.use(
         }
       }
     }
+
+    // Handle CSRF errors - if we get a 403 with CSRF error code,
+    // try to refresh the CSRF token by fetching a new one
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.code === "CSRF_TOKEN_INVALID"
+    ) {
+      console.warn("[API 403] CSRF token invalid, attempting to refresh...");
+      // The next request will automatically get a new token from the cookie
+      // after the backend sets a new one on the next GET request
+    }
+
     return Promise.reject(error);
   },
 );

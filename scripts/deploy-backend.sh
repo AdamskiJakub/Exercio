@@ -18,11 +18,14 @@ rsync -avz --delete \
   --exclude='dist' \
   --exclude='.env' \
   --exclude='pnpm-lock.yaml' \
+  --exclude='docker-compose.yml' \
+  --exclude='Dockerfile' \
+  --exclude='uploads/' \
   "$LOCAL_BACKEND_DIR/" "$HOST:$REMOTE_DIR/"
 
-# 2. Copy prisma.config.ts (it's in the root, not backend/)
+# 2. Copy prisma.config.ts (it's in the backend/ directory)
 echo "📄 Copying prisma.config.ts..."
-rsync -avz "$(dirname "$LOCAL_BACKEND_DIR")/prisma.config.ts" "$HOST:$REMOTE_DIR/"
+rsync -avz "$LOCAL_BACKEND_DIR/prisma.config.ts" "$HOST:$REMOTE_DIR/"
 
 # 3. Rebuild and restart on server
 echo "🔨 Rebuilding and restarting..."
