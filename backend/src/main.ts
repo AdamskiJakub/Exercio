@@ -141,8 +141,13 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // ── Enable CORS (must be before CSRF middleware) ────────────────────────────
+  // Supports multiple origins via CORS_ORIGINS env var (comma-separated).
+  // Falls back to FRONTEND_URL for backward compatibility, then localhost.
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+    : [process.env.FRONTEND_URL || 'http://localhost:3000'];
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: corsOrigins,
     credentials: true,
   });
 
