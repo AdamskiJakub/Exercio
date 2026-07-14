@@ -611,7 +611,52 @@ export const disciplinesData: Discipline[] = [
     icon: '🥗',
   },
 
-  // === RECOVERY ===
+  // === RECOVERY & REHAB ===
+  {
+    id: 'disc_physiotherapy',
+    key: 'physiotherapy',
+    categoryId: 'cat_recovery',
+    names: { pl: 'Fizjoterapia', en: 'Physiotherapy' },
+    slugs: { pl: 'fizjoterapia', en: 'physiotherapy' },
+    synonyms: [
+      'fizjoterapia',
+      'physiotherapy',
+      'fizjoterapeuta',
+      'rehabilitacja ruchowa',
+    ],
+    seo: {
+      titleTemplate: 'Fizjoterapia w {city} | Exercio',
+      descriptionTemplate:
+        'Znajdź fizjoterapeutę w {city}. Rehabilitacja, fizjoterapia sportowa i leczenie bólu.',
+    },
+    popularity: 88,
+    enabled: true,
+    indexable: true,
+    icon: '🦵',
+  },
+  {
+    id: 'disc_rehabilitation',
+    key: 'rehabilitation',
+    categoryId: 'cat_recovery',
+    names: { pl: 'Rehabilitacja', en: 'Rehabilitation' },
+    slugs: { pl: 'rehabilitacja', en: 'rehabilitation' },
+    synonyms: [
+      'rehabilitacja',
+      'rehabilitation',
+      'rehab',
+      'rehabilitacja sportowa',
+      'rehabilitacja po kontuzji',
+    ],
+    seo: {
+      titleTemplate: 'Rehabilitacja w {city} | Exercio',
+      descriptionTemplate:
+        'Rehabilitacja w {city} — powrót do sprawności po kontuzji. Sprawdź specjalistów.',
+    },
+    popularity: 85,
+    enabled: true,
+    indexable: true,
+    icon: '🩹',
+  },
   {
     id: 'disc_massage',
     key: 'massage',
