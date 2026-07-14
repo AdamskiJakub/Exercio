@@ -13,6 +13,13 @@ interface EnterpriseItem {
   updatedAt: string;
 }
 
+interface CatalogDiscipline {
+  slugs: { pl: string; en: string };
+  enabled: boolean;
+  indexable: boolean;
+  popularity: number;
+}
+
 const staticRoutes = [
   // Polish routes
   {
@@ -150,10 +157,29 @@ const staticRoutes = [
   },
 ];
 
+/**
+ * Fetch catalog disciplines from the backend for SEO landing page sitemaps.
+ */
+async function fetchDisciplines(): Promise<CatalogDiscipline[]> {
+  try {
+    const response = await fetch(`${API_URL}/catalog/disciplines`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+  } catch (error) {
+    console.error("Failed to fetch disciplines for sitemap:", error);
+  }
+  return [];
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let instructorRoutes: MetadataRoute.Sitemap = [];
   let enterpriseRoutes: MetadataRoute.Sitemap = [];
+  let disciplineRoutes: MetadataRoute.Sitemap = [];
 
+  // Fetch instructor profiles
   try {
     const response = await fetch(`${API_URL}/instructor-profiles`, {
       signal: AbortSignal.timeout(5000),
@@ -181,6 +207,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to fetch instructors for sitemap:", error);
   }
 
+  // Fetch enterprise profiles
   try {
     const response = await fetch(`${API_URL}/enterprise`, {
       signal: AbortSignal.timeout(5000),
@@ -208,5 +235,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to fetch enterprises for sitemap:", error);
   }
 
-  return [...staticRoutes, ...instructorRoutes, ...enterpriseRoutes];
+  // Fetch disciplines for SEO landing pages
+  const disciplines = await fetchDisciplines();
+  const indexableDisciplines = disciplines.filter(
+    (d) => d.enabled && d.indexable,
+  );
+
+  if (indexableDisciplines.length > 0) {
+    disciplineRoutes = indexableDisciplines.flatMap((discipline) => [
+      {
+        url: `${BASE_URL}/pl/${discipline.slugs.pl}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/en/${discipline.slugs.en}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.7,
+      },
+    ]);
+  }
+
+  return [
+    ...staticRoutes,
+    ...instructorRoutes,
+    ...enterpriseRoutes,
+    ...disciplineRoutes,
+  ];
 }
