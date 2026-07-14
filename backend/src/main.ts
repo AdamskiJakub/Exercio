@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { URL } from 'url';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -11,23 +10,32 @@ import session from 'express-session';
 import helmet from 'helmet';
 import { doubleCsrf } from 'csrf-csrf';
 
+const logger = new Logger('CORS');
 const DEFAULT_CORS_ORIGIN = 'http://localhost:3000';
 
 function parseCorsOrigins(): string[] {
   const raw = process.env.CORS_ORIGINS;
   if (raw) {
-    return raw.split(',').map((o) => {
+    const origins = raw.split(',').map((o) => {
       const trimmed = o.trim();
       try {
         new URL(trimmed);
         return trimmed;
       } catch {
-        console.warn(
-          `[CORS] Invalid origin in CORS_ORIGINS: "${trimmed}". Using FRONTEND_URL or default.`,
+        logger.warn(
+          `Invalid origin in CORS_ORIGINS: "${trimmed}". Using FRONTEND_URL or default.`,
         );
         return process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN;
       }
     });
+    // Ensure we never return an empty array (would block all origins)
+    if (origins.length === 0) {
+      logger.warn(
+        'CORS_ORIGINS resulted in empty array, falling back to FRONTEND_URL or default',
+      );
+      return [process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN];
+    }
+    return origins;
   }
   return [process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN];
 }
