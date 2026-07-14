@@ -10,6 +10,8 @@ interface SearchFilters {
   q?: string;
   city?: string;
   tags?: string[];
+  specializations?: string[];
+  disciplines?: string[];
   type?: 'all' | 'instructors' | 'enterprises';
   sortBy?: string;
   page?: number;
@@ -37,6 +39,7 @@ export class SearchService {
         filters.q,
         filters.city,
         filters.tags,
+        filters.specializations,
         page,
         limit,
         filters.sortBy,
@@ -48,6 +51,7 @@ export class SearchService {
         filters.q,
         filters.city,
         filters.tags,
+        filters.disciplines,
         page,
         limit,
         filters.sortBy,
@@ -57,10 +61,50 @@ export class SearchService {
     return result;
   }
 
+  /**
+   * Get unique cities from instructor and enterprise profiles.
+   * Supports prefix search for autocomplete.
+   */
+  async getCities(q?: string): Promise<string[]> {
+    const cityFilter = q
+      ? { city: { contains: q, mode: 'insensitive' as const } }
+      : {};
+
+    const [instructorCities, enterpriseCities] = await Promise.all([
+      this.prisma.instructorProfile.findMany({
+        where: {
+          ...cityFilter,
+          city: { not: null },
+          isDraft: false,
+        },
+        select: { city: true },
+        distinct: ['city'],
+        take: 50,
+      }),
+      this.prisma.enterpriseProfile.findMany({
+        where: {
+          ...cityFilter,
+          city: { not: null },
+          status: 'ACTIVE',
+        },
+        select: { city: true },
+        distinct: ['city'],
+        take: 50,
+      }),
+    ]);
+
+    const cities = new Set<string>();
+    instructorCities.forEach((c) => c.city && cities.add(c.city));
+    enterpriseCities.forEach((c) => c.city && cities.add(c.city));
+
+    return Array.from(cities).sort();
+  }
+
   private async searchInstructors(
     q?: string,
     city?: string,
     tags?: string[],
+    specializations?: string[],
     page: number = 1,
     limit: number = 20,
     sortBy?: string,
@@ -87,6 +131,19 @@ export class SearchService {
     // Filter by tags (AND logic — all selected tags must be present)
     if (tags && tags.length > 0) {
       where.AND = tags.map((tag) => ({ tags: { has: tag } }));
+    }
+
+    // Filter by specializations (OR logic — any selected specialization matches)
+    if (specializations && specializations.length > 0) {
+      const specFilter = specializations.map((spec) => ({
+        specializations: { has: spec },
+      }));
+      // Merge with existing AND if present
+      if (where.AND) {
+        where.AND = [...where.AND, ...specFilter];
+      } else {
+        where.AND = specFilter;
+      }
     }
 
     const skip = (page - 1) * limit;
@@ -129,6 +186,7 @@ export class SearchService {
     q?: string,
     city?: string,
     tags?: string[],
+    disciplines?: string[],
     page: number = 1,
     limit: number = 20,
     sortBy?: string,
@@ -152,6 +210,19 @@ export class SearchService {
     // Filter by tags (AND logic — all selected tags must be present)
     if (tags && tags.length > 0) {
       where.AND = tags.map((tag) => ({ tags: { has: tag } }));
+    }
+
+    // Filter by disciplines (OR logic — any selected discipline matches)
+    if (disciplines && disciplines.length > 0) {
+      const discFilter = disciplines.map((disc) => ({
+        disciplines: { has: disc },
+      }));
+      // Merge with existing AND if present
+      if (where.AND) {
+        where.AND = [...where.AND, ...discFilter];
+      } else {
+        where.AND = discFilter;
+      }
     }
 
     const skip = (page - 1) * limit;
