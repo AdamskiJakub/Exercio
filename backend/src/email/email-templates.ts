@@ -367,7 +367,7 @@ ${messageRow}
 `)}
 <div style="margin-top:24px;padding:16px;background:#1e293b;border-radius:8px;border:1px solid #334155;">
 <p style="margin:0;color:#cbd5e1;font-size:14px;">${content.approveHint}</p>
-<code style="display:block;margin-top:8px;padding:8px 12px;background:#0f172a;border-radius:4px;color:#10b981;font-family:monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;">ssh exercio-vps "curl -s -X PATCH -H 'Authorization: Bearer exercio-approve-cli-secret-2026' http://localhost:3001/enterprise/leads/${escapeHtml(details.id)}/approve-cli"</code>
+<code style="display:block;margin-top:8px;padding:8px 12px;background:#0f172a;border-radius:4px;color:#10b981;font-family:monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;">ssh exercio-vps approve-lead ${escapeHtml(details.id)}</code>
 </div>
 </td>
 </tr>

@@ -304,7 +304,7 @@ export const ENTERPRISE_LEAD_TEXTS: Record<
     cityLabel: 'Miasto',
     messageLabel: 'Wiadomość',
     leadIdLabel: 'ID zgłoszenia',
-    approveHint: 'Aby zatwierdzić, skopiuj i wklej w terminalu:',
+    approveHint: 'Aby zatwierdzić, uruchom w terminalu:',
     footer: 'Otrzymano z formularza partnerskiego Exercio.',
   },
   en: {
@@ -317,7 +317,7 @@ export const ENTERPRISE_LEAD_TEXTS: Record<
     cityLabel: 'City',
     messageLabel: 'Message',
     leadIdLabel: 'Lead ID',
-    approveHint: 'To approve, copy and paste in your terminal:',
+    approveHint: 'To approve, run in your terminal:',
     footer: 'Received from Exercio partner inquiry form.',
   },
 };
