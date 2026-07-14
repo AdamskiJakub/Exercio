@@ -120,6 +120,9 @@ async function bootstrap() {
           formAction: [
             "'self'",
             process.env.FRONTEND_URL || 'http://localhost:3000',
+            ...(process.env.CORS_ORIGINS
+              ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
+              : []),
           ],
           upgradeInsecureRequests:
             process.env.NODE_ENV === 'production' ? [] : null,
@@ -224,8 +227,13 @@ async function bootstrap() {
       },
     });
 
+  // Generate CSRF token on every request to ensure the cookie is always present.
+  // IMPORTANT: Only generate on safe methods (GET, HEAD, OPTIONS) to avoid
+  // overwriting the token between when the frontend reads it and when it sends
+  // it back on a state-changing request. The token is generated on GET requests
+  // (e.g., /auth/csrf-token) and then sent back on subsequent POST/PUT/PATCH/DELETE.
   app.use((req: any, res: any, next: any) => {
-    if (req.sessionID) {
+    if (req.sessionID && ['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
       try {
         generateCsrfToken(req, res, { overwrite: true });
       } catch {}
@@ -233,26 +241,14 @@ async function bootstrap() {
     next();
   });
 
+  // Apply CSRF protection for state-changing requests.
+  // The skipCsrfProtection callback in doubleCsrf config already handles:
+  //   - JWT-authenticated requests (Bearer token)
+  //   - OAuth callbacks
+  //   - /auth/csrf-token endpoint
+  // The ignoredMethods config skips GET/HEAD/OPTIONS.
+  // We only need to check that a session exists before applying protection.
   app.use((req: any, res: any, next: any) => {
-    if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-      return next();
-    }
-
-    if (req.headers.authorization?.startsWith('Bearer ')) {
-      return next();
-    }
-
-    if (
-      req.path?.startsWith('/auth/google/callback') ||
-      req.path?.startsWith('/auth/facebook/callback')
-    ) {
-      return next();
-    }
-
-    if (req.path === '/auth/csrf-token') {
-      return next();
-    }
-
     if (!req.sessionID) {
       return next();
     }
