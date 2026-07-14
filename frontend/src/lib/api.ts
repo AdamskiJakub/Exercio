@@ -38,7 +38,26 @@ export function getCsrfToken(): string | null {
   return csrfTokenValue;
 }
 
-apiClient.interceptors.request.use((config) => {
+/**
+ * Fetch a fresh CSRF token from the backend and store it in memory.
+ * Used by hooks that make state-changing requests without prior login
+ * (e.g., register, guest booking, contact form).
+ */
+export async function fetchCsrfToken(): Promise<string | null> {
+  try {
+    const response = await apiClient.get("/auth/csrf-token");
+    const token = response?.data?.csrfToken as string | undefined;
+    if (token) {
+      setCsrfToken(token);
+      return token;
+    }
+  } catch (err) {
+    console.warn("[CSRF] Failed to fetch CSRF token:", err);
+  }
+  return null;
+}
+
+apiClient.interceptors.request.use(async (config) => {
   config.headers = config.headers || {};
 
   const isFormData =
@@ -56,7 +75,15 @@ apiClient.interceptors.request.use((config) => {
     ["post", "put", "patch", "delete"].includes(config.method) &&
     !config.headers["Authorization"]
   ) {
-    const token = getCsrfToken();
+    let token = getCsrfToken();
+
+    // Auto-fetch CSRF token if not in memory (e.g., after page refresh,
+    // or for first-time visitors on register/guest-booking pages).
+    // This avoids having to manually call fetchCsrfToken() in every hook.
+    if (!token) {
+      token = await fetchCsrfToken();
+    }
+
     if (token) {
       config.headers["X-CSRF-Token"] = token;
     }
