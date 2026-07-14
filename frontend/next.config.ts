@@ -54,6 +54,21 @@ const nextConfig: NextConfig = {
     unoptimized: process.env.NODE_ENV === "development",
   },
 
+  async rewrites() {
+    // In development, proxy API requests through Next.js to avoid CORS/CSRF issues
+    // (localhost:3000 -> localhost:3001). In production, frontend and backend are
+    // on different domains and communicate directly via API_BASE_URL.
+    if (process.env.NODE_ENV === "development") {
+      return [
+        {
+          source: "/api/:path*",
+          destination: `${apiUrl}/:path*`,
+        },
+      ];
+    }
+    return [];
+  },
+
   async headers() {
     return [
       {

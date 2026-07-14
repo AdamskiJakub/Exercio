@@ -36,6 +36,11 @@ export function useLoginForm() {
     form.clearErrors();
 
     try {
+      // Fetch CSRF token before login - backend sets x-csrf-token cookie (non-httpOnly).
+      // The axios interceptor in api.ts reads this cookie and adds X-CSRF-Token header
+      // to POST/PUT/PATCH/DELETE requests automatically when no Authorization header is present.
+      await apiClient.get("/auth/csrf-token");
+
       const response = await apiClient.post("/auth/login", data);
       const { user } = response.data;
 
@@ -44,12 +49,10 @@ export function useLoginForm() {
       router.push("/dashboard");
     } catch (err: any) {
       const backendMessage = err?.response?.data?.message;
-      // Check if the error is about unverified email
       if (backendMessage === "Please verify your email before logging in") {
         setEmailForVerification(data.email);
         setError(t("verifyEmailRequired"));
       } else {
-        // Map backend "Invalid credentials" to localized message
         const errorMessage =
           backendMessage === "Invalid credentials"
             ? t("loginFailed")
