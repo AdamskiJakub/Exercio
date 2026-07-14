@@ -224,7 +224,7 @@ async function bootstrap() {
       cookieName: 'x-csrf-token',
       cookieOptions: {
         httpOnly: false,
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         secure: process.env.NODE_ENV === 'production',
         path: '/',
       },
