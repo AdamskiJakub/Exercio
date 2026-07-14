@@ -18,11 +18,15 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: "GPTBot",
-        disallow: "/",
+        allow: "/",
       },
       {
         userAgent: "ChatGPT-User",
-        disallow: "/",
+        allow: "/",
+      },
+      {
+        userAgent: "Google-Extended",
+        allow: "/",
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
