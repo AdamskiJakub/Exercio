@@ -503,6 +503,9 @@
       "languages": "Języki",
       "languagesPlaceholder": "np. Polski, Angielski, Niemiecki",
       "languagesHint": "W jakich językach prowadzisz zajęcia?",
+      "removeLanguage": "Usuń język",
+      "removeTargetAudience": "Usuń grupę docelową",
+      "removeDiscipline": "Usuń dyscyplinę",
       "languagesPresets": {
         "polish": "Polski",
         "english": "Angielski",
