@@ -44,7 +44,10 @@ export class EmailService {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     const configuredFrom = this.configService.get<string>('RESEND_FROM_EMAIL');
 
-    this.fromEmail = configuredFrom ?? '"Exercio" <noreply@exercio.app>';
+    this.fromEmail =
+      configuredFrom ??
+      process.env.RESEND_FROM_EMAIL ??
+      '"Exercio" <noreply@exercio.app>';
 
     if (apiKey) {
       this.resend = new Resend(apiKey);

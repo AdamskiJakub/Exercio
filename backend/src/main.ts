@@ -13,6 +13,10 @@ import { doubleCsrf } from 'csrf-csrf';
 const logger = new Logger('CORS');
 const DEFAULT_CORS_ORIGIN = 'http://localhost:3000';
 
+function getFallbackOrigin(): string {
+  return process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN;
+}
+
 function parseCorsOrigins(): string[] {
   const raw = process.env.CORS_ORIGINS;
   if (raw) {
@@ -25,7 +29,7 @@ function parseCorsOrigins(): string[] {
         logger.warn(
           `Invalid origin in CORS_ORIGINS: "${trimmed}". Using FRONTEND_URL or default.`,
         );
-        return process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN;
+        return getFallbackOrigin();
       }
     });
     // Ensure we never return an empty array (would block all origins)
@@ -33,11 +37,11 @@ function parseCorsOrigins(): string[] {
       logger.warn(
         'CORS_ORIGINS resulted in empty array, falling back to FRONTEND_URL or default',
       );
-      return [process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN];
+      return [getFallbackOrigin()];
     }
     return origins;
   }
-  return [process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN];
+  return [getFallbackOrigin()];
 }
 
 async function bootstrap() {
