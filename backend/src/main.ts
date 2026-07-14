@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -10,37 +10,17 @@ import session from 'express-session';
 import helmet from 'helmet';
 import { doubleCsrf } from 'csrf-csrf';
 
-const logger = new Logger('CORS');
 const DEFAULT_CORS_ORIGIN = 'http://localhost:3000';
-
-function getFallbackOrigin(): string {
-  return process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN;
-}
 
 function parseCorsOrigins(): string[] {
   const raw = process.env.CORS_ORIGINS;
   if (raw) {
-    const origins = raw.split(',').map((o) => {
-      const trimmed = o.trim();
-      try {
-        new URL(trimmed);
-        return trimmed;
-      } catch {
-        logger.warn(
-          `Invalid origin in CORS_ORIGINS: "${trimmed}". Using FRONTEND_URL or default.`,
-        );
-        return getFallbackOrigin();
-      }
-    });
-    if (origins.length === 0) {
-      logger.warn(
-        'CORS_ORIGINS resulted in empty array, falling back to FRONTEND_URL or default',
-      );
-      return [getFallbackOrigin()];
-    }
-    return origins;
+    return raw
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean);
   }
-  return [getFallbackOrigin()];
+  return [process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN];
 }
 
 async function bootstrap() {
@@ -174,80 +154,66 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  const { invalidCsrfTokenError, generateCsrfToken, doubleCsrfProtection } =
-    doubleCsrf({
-      getSecret: (req?) => {
-        if (!req) {
-          return randomBytes(32).toString('hex');
+  const { doubleCsrfProtection } = doubleCsrf({
+    getSecret: (req?) => {
+      if (!req) {
+        return randomBytes(32).toString('hex');
+      }
+      const sessionSecret = (req.session as any)?.csrfSecret;
+      if (!sessionSecret) {
+        const secret = randomBytes(32).toString('hex');
+        if (req.session) {
+          (req.session as any).csrfSecret = secret;
         }
-        const sessionSecret = (req.session as any)?.csrfSecret;
-        if (!sessionSecret) {
-          const secret = randomBytes(32).toString('hex');
-          if (req.session) {
-            (req.session as any).csrfSecret = secret;
-          }
-          return secret;
-        }
-        return sessionSecret;
-      },
-      getSessionIdentifier: (req) => req.sessionID,
-      cookieName: 'x-csrf-token',
-      cookieOptions: {
-        httpOnly: false,
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-      },
-      size: 64,
-      hmacAlgorithm: 'sha256',
-      ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
-      getCsrfTokenFromRequest: (req) => req.headers['x-csrf-token'] as string,
-      skipCsrfProtection: (req) => {
-        if (req.headers.authorization?.startsWith('Bearer ')) {
-          return true;
-        }
+        return secret;
+      }
+      return sessionSecret;
+    },
+    getSessionIdentifier: (req) => req.sessionID,
+    cookieName: 'x-csrf-token',
+    cookieOptions: {
+      httpOnly: false,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    },
+    size: 64,
+    hmacAlgorithm: 'sha256',
+    ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+    getCsrfTokenFromRequest: (req) => req.headers['x-csrf-token'] as string,
+    skipCsrfProtection: (req) => {
+      if (req.headers.authorization?.startsWith('Bearer ')) {
+        return true;
+      }
 
-        if (
-          req.path?.startsWith('/auth/google/callback') ||
-          req.path?.startsWith('/auth/facebook/callback')
-        ) {
-          return true;
-        }
+      if (
+        req.path?.startsWith('/auth/google/callback') ||
+        req.path?.startsWith('/auth/facebook/callback')
+      ) {
+        return true;
+      }
 
-        if (req.path === '/auth/csrf-token') {
-          return true;
-        }
-        return false;
-      },
-      errorConfig: {
-        statusCode: 403,
-        message:
-          'Invalid or missing CSRF token. This could be a cross-site request forgery attempt.',
-        code: 'CSRF_TOKEN_INVALID',
-      },
-    });
-
-  // Generate CSRF token on every request to ensure the cookie is always present.
-  // IMPORTANT: Only generate on safe methods (GET, HEAD, OPTIONS) to avoid
-  // overwriting the token between when the frontend reads it and when it sends
-  // it back on a state-changing request. The token is generated on GET requests
-  // (e.g., /auth/csrf-token) and then sent back on subsequent POST/PUT/PATCH/DELETE.
-  app.use((req: any, res: any, next: any) => {
-    if (req.sessionID && ['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-      try {
-        generateCsrfToken(req, res, { overwrite: true });
-      } catch {}
-    }
-    next();
+      if (req.path === '/auth/csrf-token') {
+        return true;
+      }
+      return false;
+    },
+    errorConfig: {
+      statusCode: 403,
+      message:
+        'Invalid or missing CSRF token. This could be a cross-site request forgery attempt.',
+      code: 'CSRF_TOKEN_INVALID',
+    },
   });
 
   // Apply CSRF protection for state-changing requests.
-  // The skipCsrfProtection callback in doubleCsrf config already handles:
+  // The skipCsrfProtection callback in doubleCsrf config handles:
   //   - JWT-authenticated requests (Bearer token)
   //   - OAuth callbacks
   //   - /auth/csrf-token endpoint
   // The ignoredMethods config skips GET/HEAD/OPTIONS.
-  // We only need to check that a session exists before applying protection.
+  // The CSRF token is generated on-demand by the /auth/csrf-token endpoint
+  // and returned in the response body for the frontend to send back.
   app.use((req: any, res: any, next: any) => {
     if (!req.sessionID) {
       return next();
