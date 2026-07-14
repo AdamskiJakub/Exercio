@@ -7,4 +7,4 @@ ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "activationExpires" TIMESTAMP(3);
 
 -- Enterprise lead fields (from the application form)
 ALTER TABLE "enterprise_leads" ADD COLUMN IF NOT EXISTS "businessType" TEXT;
-ALTER TABLE "enterprise_leads" ADD COLUMN IF NOT EXISTS "instructorCount" INTEGER;
+ALTER TABLE "enterprise_leads" ADD COLUMN IF NOT EXISTS "instructorCount" TEXT;

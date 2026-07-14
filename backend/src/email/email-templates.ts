@@ -366,7 +366,8 @@ ${messageRow}
 <tr><td style="padding:6px 0;color:#94a3b8;">${content.leadIdLabel}</td><td align="right" style="color:#10b981;font-family:monospace;font-weight:600;">${escapeHtml(details.id)}</td></tr>
 `)}
 <div style="margin-top:24px;padding:16px;background:#1e293b;border-radius:8px;border:1px solid #334155;">
-<p style="margin:0;color:#cbd5e1;font-size:14px;">${content.approveHint} <code style="display:inline-block;margin-top:8px;padding:8px 12px;background:#0f172a;border-radius:4px;color:#10b981;font-family:monospace;font-size:13px;">npm run enterprise:approve ${escapeHtml(details.id)}</code></p>
+<p style="margin:0;color:#cbd5e1;font-size:14px;">${content.approveHint}</p>
+<code style="display:block;margin-top:8px;padding:8px 12px;background:#0f172a;border-radius:4px;color:#10b981;font-family:monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;">ssh exercio-vps approve-lead ${escapeHtml(details.id)}</code>
 </div>
 </td>
 </tr>
