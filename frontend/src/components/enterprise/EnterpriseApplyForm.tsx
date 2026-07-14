@@ -66,6 +66,13 @@ export function EnterpriseApplyForm() {
       newErrors.email = t("validation.invalidEmail");
     }
 
+    if (
+      formData.phone &&
+      !/^[\d\s\+\-\(\)]{7,20}$/.test(formData.phone.trim())
+    ) {
+      newErrors.phone = t("validation.invalidPhone");
+    }
+
     setErrors(newErrors);
 
     if (!agreeToTerms) {

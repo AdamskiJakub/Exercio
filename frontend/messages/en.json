@@ -1618,7 +1618,8 @@
     },
     "validation": {
       "required": "This field is required",
-      "invalidEmail": "Invalid email address"
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Invalid phone number"
     },
     "error": {
       "generic": "An error occurred while submitting. Please try again later.",
