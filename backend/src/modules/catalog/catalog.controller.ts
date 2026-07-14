@@ -1,4 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { CatalogService } from './catalog.service';
 
 @Controller('catalog')
@@ -15,9 +21,30 @@ export class CatalogController {
     return this.catalogService.getDisciplines();
   }
 
+  @Get('disciplines/by-slug/:slug')
+  getDisciplineBySlug(
+    @Param('slug') slug: string,
+    @Query('locale') locale: string = 'pl',
+  ) {
+    const discipline = this.catalogService.getDisciplineBySlug(
+      slug,
+      locale as 'pl' | 'en',
+    );
+    if (!discipline) {
+      throw new NotFoundException(
+        `Discipline with slug "${slug}" not found for locale "${locale}"`,
+      );
+    }
+    return discipline;
+  }
+
   @Get('disciplines/:key')
   getDiscipline(@Param('key') key: string) {
-    return this.catalogService.getDisciplineByKey(key);
+    const discipline = this.catalogService.getDisciplineByKey(key);
+    if (!discipline) {
+      throw new NotFoundException(`Discipline with key "${key}" not found`);
+    }
+    return discipline;
   }
 
   @Get('categories')
