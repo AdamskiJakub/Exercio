@@ -7,7 +7,7 @@ import {
   createLoginSchema,
   type LoginFormData,
 } from "@/lib/validations/login-form";
-import { apiClient } from "@/lib/api";
+import { apiClient, setCsrfToken } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { normalizeApiError } from "@/lib/utils/error-handlers";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,10 +36,16 @@ export function useLoginForm() {
     form.clearErrors();
 
     try {
-      // Fetch CSRF token before login - backend sets x-csrf-token cookie (non-httpOnly).
-      // The axios interceptor in api.ts reads this cookie and adds X-CSRF-Token header
-      // to POST/PUT/PATCH/DELETE requests automatically when no Authorization header is present.
-      await apiClient.get("/auth/csrf-token");
+      // Fetch CSRF token before login. The backend returns the token in the
+      // response body ({ csrfToken: "..." }) AND sets it as a non-httpOnly cookie.
+      // Since the frontend runs on a different origin than the API, we cannot
+      // read the cookie via document.cookie. Instead, we read the token from
+      // the response body and store it in memory. The axios interceptor in
+      // api.ts will then add it as the X-CSRF-Token header on the POST request.
+      const csrfResponse = await apiClient.get("/auth/csrf-token");
+      if (csrfResponse?.data?.csrfToken) {
+        setCsrfToken(csrfResponse.data.csrfToken);
+      }
 
       const response = await apiClient.post("/auth/login", data);
       const { user } = response.data;

@@ -9,20 +9,33 @@ export const apiClient = axios.create({
 
 // ── CSRF Token Management ────────────────────────────────────────────────────
 // The backend uses Double Submit Cookie pattern for CSRF protection.
-// The CSRF token is stored in a non-httpOnly cookie (x-csrf-token) and must be
-// sent back in the X-CSRF-Token header for all state-changing requests.
+// The CSRF token is stored in a non-httpOnly cookie (x-csrf-token) set by the
+// backend on api.exercio.app. Since the frontend runs on a different origin
+// (dev.exercio.app / exercio.app), JavaScript cannot read the cookie via
+// document.cookie (cross-origin cookie isolation).
+//
+// Instead, the frontend fetches the CSRF token from the response body of
+// GET /auth/csrf-token and stores it in memory. This in-memory value is then
+// sent back as the X-CSRF-Token header for all state-changing requests.
 //
 // JWT-authenticated requests (Authorization: Bearer header) are automatically
 // exempt from CSRF checks on the backend, so we only need to add the header
 // when no Bearer token is present (i.e., session-based auth via cookies).
 
+let csrfTokenValue: string | null = null;
+
 /**
- * Read the CSRF token from the non-httpOnly cookie set by the backend.
+ * Store the CSRF token in memory (called after fetching from /auth/csrf-token).
  */
-function getCsrfTokenFromCookie(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)x-csrf-token=([^;]*)/);
-  return match ? decodeURIComponent(match[1]) : null;
+export function setCsrfToken(token: string | null) {
+  csrfTokenValue = token;
+}
+
+/**
+ * Get the current in-memory CSRF token.
+ */
+export function getCsrfToken(): string | null {
+  return csrfTokenValue;
 }
 
 apiClient.interceptors.request.use((config) => {
@@ -43,9 +56,9 @@ apiClient.interceptors.request.use((config) => {
     ["post", "put", "patch", "delete"].includes(config.method) &&
     !config.headers["Authorization"]
   ) {
-    const csrfToken = getCsrfTokenFromCookie();
-    if (csrfToken) {
-      config.headers["X-CSRF-Token"] = csrfToken;
+    const token = getCsrfToken();
+    if (token) {
+      config.headers["X-CSRF-Token"] = token;
     }
   }
 
