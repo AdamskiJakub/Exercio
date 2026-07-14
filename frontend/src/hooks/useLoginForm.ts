@@ -36,6 +36,9 @@ export function useLoginForm() {
     form.clearErrors();
 
     try {
+      // Fetch CSRF token before login - backend sets x-csrf-token cookie (non-httpOnly).
+      // The axios interceptor in api.ts reads this cookie and adds X-CSRF-Token header
+      // to POST/PUT/PATCH/DELETE requests automatically when no Authorization header is present.
       await apiClient.get("/auth/csrf-token");
 
       const response = await apiClient.post("/auth/login", data);

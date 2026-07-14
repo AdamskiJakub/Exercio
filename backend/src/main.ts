@@ -32,7 +32,6 @@ function parseCorsOrigins(): string[] {
         return getFallbackOrigin();
       }
     });
-    // Ensure we never return an empty array (would block all origins)
     if (origins.length === 0) {
       logger.warn(
         'CORS_ORIGINS resulted in empty array, falling back to FRONTEND_URL or default',
@@ -47,15 +46,10 @@ function parseCorsOrigins(): string[] {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Trust proxy in production (required for secure cookies behind reverse proxy)
-  // Without this, Express will see req.protocol='http' even when user connects via HTTPS
-  // This breaks secure cookies and OAuth sessions won't persist
-  // Enable when deploying behind Nginx/Cloudflare/etc.
   if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
   }
 
-  // Validate required environment variables
   if (!process.env.SESSION_SECRET) {
     throw new Error('SESSION_SECRET environment variable is required');
   }
@@ -131,20 +125,15 @@ async function bootstrap() {
             process.env.NODE_ENV === 'production' ? [] : null,
         },
       },
-      // HSTS: enforce HTTPS for 1 year, include subdomains, preload
+
       strictTransportSecurity: {
         maxAge: 31536000,
         includeSubDomains: true,
         preload: true,
       },
-      // Referrer-Policy: strict-origin-when-cross-origin (less strict than Helmet's default 'no-referrer')
-      // Allows referrer to be sent for same-origin requests and to HTTPS origins,
-      // which is needed for OAuth flows and analytics
+
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-      // Cross-Origin-Resource-Policy: cross-origin
-      // The API and frontend are on different origins (localhost:3001 vs localhost:3000 in dev,
-      // api.exercio.app vs exercio.app in prod). Images and other static assets served by the
-      // backend need to be loadable cross-origin by the frontend.
+
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     }),
   );
@@ -161,49 +150,27 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        sameSite: 'lax', // CSRF protection
-        maxAge: 3600000, // 1 hour
+        sameSite: 'lax',
+        maxAge: 3600000,
       },
     }),
   );
 
-  // Enable cookie parsing
   app.use(cookieParser());
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  // ── Enable CORS (must be before CSRF middleware) ────────────────────────────
-  // Supports multiple origins via CORS_ORIGINS env var (comma-separated).
-  // Falls back to FRONTEND_URL for backward compatibility, then localhost.
-  // Origins are validated to prevent CORS misconfiguration.
   app.enableCors({
     origin: parseCorsOrigins(),
     credentials: true,
   });
 
-  // Serve static files from uploads directory
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads/',
   });
 
-  // ── CSRF Protection (Double Submit Cookie) ─────────────────────────────────
-  // Uses the Double Submit Cookie pattern:
-  //   1. Server generates a CSRF token and sets it as a non-httpOnly cookie
-  //   2. Client reads the cookie and sends the token back in X-CSRF-Token header
-  //   3. Server validates the header matches the cookie value
-  //
-  // IMPORTANT: CSRF protection is ONLY applied to routes that need it.
-  // We use a custom middleware that checks:
-  //   - Skip GET/HEAD/OPTIONS (safe methods)
-  //   - Skip requests with JWT Bearer token (not vulnerable to CSRF)
-  //   - Skip OAuth callback routes (external redirects)
-  //   - Skip /auth/csrf-token endpoint (frontend needs to fetch token)
-  //   - For all other mutating requests: validate X-CSRF-Token header
-  //
-  // This approach avoids the issue where csrf-csrf throws on requests without
-  // a session (saveUninitialized: false means no session for anonymous users).
   const { invalidCsrfTokenError, generateCsrfToken, doubleCsrfProtection } =
     doubleCsrf({
       getSecret: (req?) => {
@@ -233,18 +200,17 @@ async function bootstrap() {
       ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
       getCsrfTokenFromRequest: (req) => req.headers['x-csrf-token'] as string,
       skipCsrfProtection: (req) => {
-        // Skip if JWT Bearer token is present (not vulnerable to CSRF)
         if (req.headers.authorization?.startsWith('Bearer ')) {
           return true;
         }
-        // Skip OAuth callback routes (external redirects)
+
         if (
           req.path?.startsWith('/auth/google/callback') ||
           req.path?.startsWith('/auth/facebook/callback')
         ) {
           return true;
         }
-        // Skip CSRF token endpoint (frontend needs to fetch token)
+
         if (req.path === '/auth/csrf-token') {
           return true;
         }
@@ -258,52 +224,37 @@ async function bootstrap() {
       },
     });
 
-  // ── CSRF Token Middleware ─────────────────────────────────────────────────────
-  // Sets the CSRF cookie on every response so the frontend always has a token.
-  // The token is regenerated on each request for simplicity.
-  // csrf-csrf 4.x does NOT set the cookie automatically - we must call
-  // generateCsrfToken() explicitly.
   app.use((req: any, res: any, next: any) => {
-    // Only set CSRF cookie if the request has a session (i.e., the user has
-    // visited before). For anonymous users without a session, we skip CSRF
-    // entirely because there are no cookies to exploit.
     if (req.sessionID) {
       try {
         generateCsrfToken(req, res, { overwrite: true });
-      } catch {
-        // If token generation fails (e.g., missing session), just continue
-      }
+      } catch {}
     }
     next();
   });
 
-  // Apply CSRF protection middleware ONLY for mutating requests that need it.
-  // We wrap doubleCsrfProtection in a custom handler that safely skips
-  // requests without a session (anonymous users don't need CSRF).
   app.use((req: any, res: any, next: any) => {
-    // Skip safe methods
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
       return next();
     }
-    // Skip if JWT Bearer token is present
+
     if (req.headers.authorization?.startsWith('Bearer ')) {
       return next();
     }
-    // Skip OAuth callback routes
+
     if (
       req.path?.startsWith('/auth/google/callback') ||
       req.path?.startsWith('/auth/facebook/callback')
     ) {
       return next();
     }
-    // Skip CSRF token endpoint
+
     if (req.path === '/auth/csrf-token') {
       return next();
     }
-    // For all other mutating requests, apply CSRF protection
-    // If there's no session, create one so csrf-csrf can work
+
     if (!req.sessionID) {
-      return next(); // No session = no CSRF risk (no cookies to exploit)
+      return next();
     }
     doubleCsrfProtection(req, res, next);
   });
