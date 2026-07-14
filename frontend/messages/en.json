@@ -503,6 +503,9 @@
       "languages": "Languages",
       "languagesPlaceholder": "e.g. English, Polish, German",
       "languagesHint": "What languages do you conduct sessions in?",
+      "removeLanguage": "Remove language",
+      "removeTargetAudience": "Remove target audience",
+      "removeDiscipline": "Remove discipline",
       "languagesPresets": {
         "polish": "Polish",
         "english": "English",
