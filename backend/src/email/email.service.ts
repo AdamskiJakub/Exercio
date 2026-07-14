@@ -42,15 +42,20 @@ export class EmailService {
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    const configuredFrom = this.configService.get<string>('RESEND_FROM_EMAIL');
 
     this.fromEmail =
-      this.configService.get<string>('RESEND_FROM_EMAIL') ??
-      '"Exercio" <onboarding@resend.dev>';
+      configuredFrom ??
+      process.env.RESEND_FROM_EMAIL ??
+      '"Exercio" <noreply@exercio.app>';
 
     if (apiKey) {
       this.resend = new Resend(apiKey);
+      this.logger.log('Resend initialized.');
     } else {
-      this.logger.warn('RESEND_API_KEY not configured. Emails disabled.');
+      this.logger.warn(
+        'RESEND_API_KEY not configured. Emails will be disabled.',
+      );
     }
   }
 

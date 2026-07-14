@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -9,6 +9,40 @@ import { useContainer } from 'class-validator';
 import session from 'express-session';
 import helmet from 'helmet';
 import { doubleCsrf } from 'csrf-csrf';
+
+const logger = new Logger('CORS');
+const DEFAULT_CORS_ORIGIN = 'http://localhost:3000';
+
+function getFallbackOrigin(): string {
+  return process.env.FRONTEND_URL || DEFAULT_CORS_ORIGIN;
+}
+
+function parseCorsOrigins(): string[] {
+  const raw = process.env.CORS_ORIGINS;
+  if (raw) {
+    const origins = raw.split(',').map((o) => {
+      const trimmed = o.trim();
+      try {
+        new URL(trimmed);
+        return trimmed;
+      } catch {
+        logger.warn(
+          `Invalid origin in CORS_ORIGINS: "${trimmed}". Using FRONTEND_URL or default.`,
+        );
+        return getFallbackOrigin();
+      }
+    });
+    // Ensure we never return an empty array (would block all origins)
+    if (origins.length === 0) {
+      logger.warn(
+        'CORS_ORIGINS resulted in empty array, falling back to FRONTEND_URL or default',
+      );
+      return [getFallbackOrigin()];
+    }
+    return origins;
+  }
+  return [getFallbackOrigin()];
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -141,8 +175,11 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // ── Enable CORS (must be before CSRF middleware) ────────────────────────────
+  // Supports multiple origins via CORS_ORIGINS env var (comma-separated).
+  // Falls back to FRONTEND_URL for backward compatibility, then localhost.
+  // Origins are validated to prevent CORS misconfiguration.
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: parseCorsOrigins(),
     credentials: true,
   });
 
