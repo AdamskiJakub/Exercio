@@ -36,6 +36,8 @@ export function useLoginForm() {
     form.clearErrors();
 
     try {
+      await apiClient.get("/auth/csrf-token");
+
       const response = await apiClient.post("/auth/login", data);
       const { user } = response.data;
 
@@ -44,12 +46,10 @@ export function useLoginForm() {
       router.push("/dashboard");
     } catch (err: any) {
       const backendMessage = err?.response?.data?.message;
-      // Check if the error is about unverified email
       if (backendMessage === "Please verify your email before logging in") {
         setEmailForVerification(data.email);
         setError(t("verifyEmailRequired"));
       } else {
-        // Map backend "Invalid credentials" to localized message
         const errorMessage =
           backendMessage === "Invalid credentials"
             ? t("loginFailed")
