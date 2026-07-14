@@ -182,7 +182,13 @@ async function bootstrap() {
     ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
     getCsrfTokenFromRequest: (req) => req.headers['x-csrf-token'] as string,
     skipCsrfProtection: (req) => {
-      if (req.headers.authorization?.startsWith('Bearer ')) {
+      // Skip CSRF for JWT-authenticated requests.
+      // JWT can be sent via Authorization header (API clients) or
+      // via httpOnly cookie (browser, set by /auth/login).
+      if (
+        req.headers.authorization?.startsWith('Bearer ') ||
+        req.cookies?.access_token
+      ) {
         return true;
       }
 
