@@ -7,11 +7,23 @@
 
 /** Normalize a city name to a URL slug (e.g. "Białystok" → "bialystok") */
 export function slugifyCity(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-ząćęłńóśźż0-9-]/g, "");
+  return (
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      // Normalize Polish characters to ASCII so URL slugs are consistent
+      .replace(/ą/g, "a")
+      .replace(/ć/g, "c")
+      .replace(/ę/g, "e")
+      .replace(/ł/g, "l")
+      .replace(/ń/g, "n")
+      .replace(/ó/g, "o")
+      .replace(/ś/g, "s")
+      .replace(/ź/g, "z")
+      .replace(/ż/g, "z")
+      .replace(/[^a-z0-9-]/g, "")
+  );
 }
 
 /** Convert a URL slug back to a city name (e.g. "bialystok" → "Białystok") */
