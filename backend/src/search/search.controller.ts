@@ -12,6 +12,7 @@ export class SearchController {
     @Query('tags') tags?: string | string[],
     @Query('specializations') specializations?: string | string[],
     @Query('disciplines') disciplines?: string | string[],
+    @Query('category') category?: string,
     @Query('type') type?: 'all' | 'instructors' | 'enterprises',
     @Query('sortBy') sortBy?: string,
     @Query('page') page?: string,
@@ -37,6 +38,7 @@ export class SearchController {
         : disciplines
           ? [disciplines]
           : undefined,
+      category,
       type: type || 'all',
       sortBy,
       page: parseNumeric(page),

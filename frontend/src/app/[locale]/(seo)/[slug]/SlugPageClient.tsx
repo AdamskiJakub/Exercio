@@ -42,13 +42,26 @@ interface CityVariant {
   initialResults: SearchResults | null;
 }
 
-type SlugPageClientProps = DisciplineVariant | CityVariant;
+interface CategoryVariant {
+  type: "category";
+  category: CatalogCategory;
+  locale: string;
+  disciplines: CatalogDiscipline[];
+  allCategories: CatalogCategory[];
+  initialResults: SearchResults | null;
+}
+
+type SlugPageClientProps = DisciplineVariant | CityVariant | CategoryVariant;
 
 const MAX_VISIBLE = 6;
 
 export function SlugPageClient(props: SlugPageClientProps) {
   if (props.type === "discipline") {
     return <DisciplineView {...props} />;
+  }
+
+  if (props.type === "category") {
+    return <CategoryView {...props} />;
   }
 
   return <CityView {...props} />;
@@ -630,6 +643,212 @@ function CityView({
           buttonText={t("searchInCity", {
             city: cityName,
             defaultValue: "Szukaj w {city}",
+          })}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CategoryView({
+  category,
+  locale,
+  disciplines,
+  allCategories,
+  initialResults,
+}: CategoryVariant) {
+  const t = useTranslations("SEO");
+  const name = getLocalizedName(category.names, locale);
+  const totalResults =
+    (initialResults?.instructors?.total || 0) +
+    (initialResults?.enterprises?.total || 0);
+
+  const instructors = initialResults?.instructors?.data || [];
+  const enterprises = initialResults?.enterprises?.data || [];
+
+  // Other categories (for cross-linking)
+  const otherCategories = allCategories.filter(
+    (c) => c.id !== category.id && c.enabled,
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-950">
+      {/* Hero Section */}
+      <div className="border-b border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-3xl">
+              <div className="mb-2 flex items-center gap-3">
+                <span className="text-3xl" aria-hidden="true">
+                  {category.icon}
+                </span>
+                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  {name}
+                </h1>
+              </div>
+              <p className="text-base text-slate-400">
+                {locale === "pl"
+                  ? `Znajdź najlepszych instruktorów i kluby w kategorii ${name.toLowerCase()}`
+                  : `Find the best instructors and clubs in ${name.toLowerCase()}`}
+              </p>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="flex shrink-0 gap-3">
+              <StatsCounter
+                value={totalResults}
+                label={t("totalResults", {
+                  defaultValue: "Dostępnych wyników",
+                })}
+              />
+              <StatsCounter
+                value={disciplines.length}
+                label={t("disciplines", { defaultValue: "Dyscypliny" })}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Disciplines in this category */}
+        <div className="mb-12">
+          <h2 className="mb-6 text-xl font-bold text-white">
+            {locale === "pl"
+              ? `Dyscypliny w kategorii ${name.toLowerCase()}`
+              : `Disciplines in ${name.toLowerCase()}`}
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {disciplines.map((discipline) => (
+              <Link
+                key={discipline.id}
+                href={`/${locale}/${discipline.slugs[locale as "pl" | "en"]}`}
+                className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/50 p-4 transition-colors hover:border-slate-700 hover:bg-slate-800/50"
+              >
+                <span className="text-2xl" aria-hidden="true">
+                  {discipline.icon}
+                </span>
+                <div>
+                  <div className="font-medium text-white">
+                    {getLocalizedName(discipline.names, locale)}
+                  </div>
+                  <div className="text-sm text-slate-400">
+                    {discipline.synonyms.slice(0, 3).join(", ")}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Results Section */}
+        {totalResults > 0 && (
+          <div className="mb-12">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-white">
+                  {t("results", {
+                    defaultValue: `Popularni specjaliści`,
+                  })}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  {t("resultsDescriptionDiscipline", {
+                    count: totalResults,
+                    discipline: name.toLowerCase(),
+                    defaultValue:
+                      "Znaleźliśmy {count} specjalistów w tej kategorii.",
+                  })}
+                </p>
+              </div>
+              <Link
+                href={`/${locale}/instruktorzy?specialization=${disciplines[0]?.key || ""}`}
+                className="flex items-center gap-1 text-sm text-orange-500 transition-colors hover:text-orange-400"
+              >
+                {t("viewAll", { defaultValue: "Zobacz wszystkich" })}
+                <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            {/* Instructors */}
+            {instructors.length > 0 && (
+              <div className="mb-8">
+                <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-300">
+                  <UsersIcon
+                    className="h-4 w-4 text-orange-500"
+                    aria-hidden="true"
+                  />
+                  {t("instructors", { defaultValue: "Instruktorzy" })}
+                </h3>
+                <div className="grid grid-cols-1 gap-4">
+                  {instructors.slice(0, MAX_VISIBLE).map((instructor) => (
+                    <InstructorCard
+                      key={`inst-${instructor.id}`}
+                      instructor={instructor}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Enterprises */}
+            {enterprises.length > 0 && (
+              <div>
+                <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-300">
+                  <MapPinIcon
+                    className="h-4 w-4 text-emerald-500"
+                    aria-hidden="true"
+                  />
+                  {t("enterprises", { defaultValue: "Kluby i studia" })}
+                </h3>
+                <div className="grid grid-cols-1 gap-4">
+                  {enterprises.slice(0, MAX_VISIBLE).map((enterprise) => (
+                    <EnterpriseCard
+                      key={`ent-${enterprise.id}`}
+                      enterprise={enterprise}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Other categories — cross-linking */}
+        {otherCategories.length > 0 && (
+          <div className="mb-12">
+            <h2 className="mb-3 text-base font-semibold text-white">
+              {locale === "pl"
+                ? "Zobacz także inne kategorie"
+                : "See also other categories"}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {otherCategories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/${locale}/${cat.slugs[locale as "pl" | "en"]}`}
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+                >
+                  <span aria-hidden="true">{cat.icon}</span>
+                  <span>{getLocalizedName(cat.names, locale)}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* CTA */}
+        <CtaBanner
+          title={t("findInstructor", {
+            defaultValue: "Nie znalazłeś tego czego szukasz?",
+          })}
+          description={t("findInstructorDesc", {
+            city: "",
+            defaultValue:
+              "Skorzystaj z wyszukiwarki, aby znaleźć instruktora lub klub.",
+          })}
+          href={`/${locale}/instruktorzy`}
+          buttonText={t("browseAll", {
+            defaultValue: "Przeglądaj wszystkich",
           })}
         />
       </div>

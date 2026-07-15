@@ -17,8 +17,9 @@ export interface CatalogResponse {
 }
 
 export interface ResolveSlugResult {
-  type: 'discipline' | 'city' | null;
+  type: 'discipline' | 'city' | 'category' | null;
   discipline?: Discipline;
+  category?: Category;
   cityName?: string;
   instructors?: number;
   enterprises?: number;
@@ -67,8 +68,12 @@ export class CatalogService {
     return categoriesData.find((c) => c.key === key && c.enabled);
   }
 
+  getCategoryBySlug(slug: string, locale: 'pl' | 'en'): Category | undefined {
+    return categoriesData.find((c) => c.slugs[locale] === slug && c.enabled);
+  }
+
   /**
-   * Resolve a URL slug to determine if it's a discipline, a city with profiles, or unknown.
+   * Resolve a URL slug to determine if it's a discipline, a category, a city with profiles, or unknown.
    * This is the single source of truth for SEO page routing — frontend should NOT guess.
    */
   async resolveSlug(
@@ -84,7 +89,16 @@ export class CatalogService {
       };
     }
 
-    // 2. Check if slug matches a city with profiles in the database
+    // 2. Check if slug matches a category
+    const category = this.getCategoryBySlug(slug, locale);
+    if (category) {
+      return {
+        type: 'category',
+        category,
+      };
+    }
+
+    // 3. Check if slug matches a city with profiles in the database
     const city = await this.searchService.findCityBySlug(slug);
     if (city) {
       return {
@@ -95,7 +109,7 @@ export class CatalogService {
       };
     }
 
-    // 3. Not found
+    // 4. Not found
     return { type: null };
   }
 }

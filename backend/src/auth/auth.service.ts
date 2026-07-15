@@ -204,7 +204,10 @@ export class AuthService {
     }
 
     if (!user) {
-      const username = await this.generateUniqueUsername(oauthUser.email);
+      const username = await this.generateUniqueUsername(
+        oauthUser.firstName,
+        oauthUser.lastName,
+      );
 
       try {
         user = await this.prisma.user.create({
@@ -269,11 +272,20 @@ export class AuthService {
     };
   }
 
-  private async generateUniqueUsername(email: string): Promise<string> {
-    const baseUsername = email
-      .split('@')[0]
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '-');
+  private async generateUniqueUsername(
+    firstName?: string,
+    lastName?: string,
+  ): Promise<string> {
+    // Use firstName + lastName if available, otherwise fall back to a random slug
+    const baseUsername =
+      [firstName, lastName].filter(Boolean).length > 0
+        ? [firstName, lastName]
+            .filter(Boolean)
+            .join('-')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/^-|-$/g, '')
+        : `user-${Date.now().toString(36)}`;
 
     let username = baseUsername;
     let counter = 1;

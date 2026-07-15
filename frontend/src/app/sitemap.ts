@@ -21,6 +21,12 @@ interface CatalogDiscipline {
   popularity: number;
 }
 
+interface CatalogCategory {
+  key: string;
+  slugs: { pl: string; en: string };
+  enabled: boolean;
+}
+
 interface SitemapCity {
   name: string;
   slug: string;
@@ -38,6 +44,7 @@ interface SitemapCityDisciplinePair {
 interface SitemapData {
   cities: SitemapCity[];
   cityDisciplinePairs: SitemapCityDisciplinePair[];
+  cityCategoryPairs?: SitemapCityDisciplinePair[];
 }
 
 const staticRoutes = [
@@ -195,6 +202,23 @@ async function fetchDisciplines(): Promise<CatalogDiscipline[]> {
 }
 
 /**
+ * Fetch catalog categories from the backend for SEO landing page sitemaps.
+ */
+async function fetchCategories(): Promise<CatalogCategory[]> {
+  try {
+    const response = await fetch(`${API_URL}/catalog/categories`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+  } catch (error) {
+    console.error("Failed to fetch categories for sitemap:", error);
+  }
+  return [];
+}
+
+/**
  * Fetch sitemap data (cities + city-discipline pairs) from SearchService.
  * Only returns combinations that actually exist in the database.
  */
@@ -216,8 +240,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let instructorRoutes: MetadataRoute.Sitemap = [];
   let enterpriseRoutes: MetadataRoute.Sitemap = [];
   let disciplineRoutes: MetadataRoute.Sitemap = [];
+  let categoryRoutes: MetadataRoute.Sitemap = [];
   let cityRoutes: MetadataRoute.Sitemap = [];
   let cityDisciplineRoutes: MetadataRoute.Sitemap = [];
+  let cityCategoryRoutes: MetadataRoute.Sitemap = [];
 
   // Fetch instructor profiles
   try {
@@ -298,6 +324,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
   }
 
+  // Fetch categories for SEO landing pages
+  const categories = await fetchCategories();
+  const enabledCategories = categories.filter((c) => c.enabled);
+
+  if (enabledCategories.length > 0) {
+    categoryRoutes = enabledCategories.flatMap((category) => [
+      {
+        url: `${BASE_URL}/pl/${category.slugs.pl}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.9,
+      },
+      {
+        url: `${BASE_URL}/en/${category.slugs.en}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      },
+    ]);
+  }
+
   // Fetch sitemap data for cities and city+discipline pairs
   const sitemapData = await fetchSitemapData();
 
@@ -344,12 +391,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  // Category+city routes
+  if (sitemapData?.cityCategoryPairs) {
+    cityCategoryRoutes = sitemapData.cityCategoryPairs.flatMap((pair) => {
+      const category = enabledCategories.find(
+        (c) => c.key === pair.disciplineKey,
+      );
+      const enSlug = category?.slugs.en || pair.disciplineSlug;
+
+      return [
+        {
+          url: `${BASE_URL}/pl/${pair.citySlug}/${pair.disciplineSlug}`,
+          lastModified: new Date(),
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        },
+        {
+          url: `${BASE_URL}/en/${pair.citySlug}/${enSlug}`,
+          lastModified: new Date(),
+          changeFrequency: "daily" as const,
+          priority: 0.7,
+        },
+      ];
+    });
+  }
+
   return [
     ...staticRoutes,
     ...instructorRoutes,
     ...enterpriseRoutes,
     ...disciplineRoutes,
+    ...categoryRoutes,
     ...cityRoutes,
     ...cityDisciplineRoutes,
+    ...cityCategoryRoutes,
   ];
 }
