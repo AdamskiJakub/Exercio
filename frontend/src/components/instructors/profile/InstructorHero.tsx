@@ -74,9 +74,13 @@ export function InstructorHero({
     }, [primarySpecialization, disciplines]);
 
   // Build SEO link: /{locale}/{citySlug}/{disciplineSlug}
+  const disciplineSlug =
+    locale === "pl"
+      ? matchingDiscipline?.slugs.pl
+      : matchingDiscipline?.slugs.en;
   const seoLink =
-    profile.city && matchingDiscipline
-      ? `/${locale}/${slugifyCity(profile.city)}/${matchingDiscipline.slugs[locale as "pl" | "en"]}`
+    profile.city && matchingDiscipline && disciplineSlug
+      ? `/${locale}/${slugifyCity(profile.city)}/${disciplineSlug}`
       : null;
 
   const showPrice =

@@ -112,7 +112,7 @@ export default async function SubslugPage({ params }: Props) {
       "@type": "Thing",
       name,
     },
-    mentions: {
+    contentLocation: {
       "@type": "City",
       name: cityName,
     },

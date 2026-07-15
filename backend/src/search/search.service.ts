@@ -71,11 +71,15 @@ export class SearchService {
     instructors: number;
     enterprises: number;
   } | null> {
-    // Deslug: "bialystok" → "Białystok"
-    const cityName = slug
-      .split('-')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
+    // Normalize helper: "Białystok" → "bialystok"
+    const slugify = (name: string): string =>
+      name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-ząćęłńóśźż0-9-]/g, '');
+
+    const normalizedSlug = slug.toLowerCase().trim();
 
     // Get all distinct cities from both tables
     const [instructorCities, enterpriseCities] = await Promise.all([
@@ -91,16 +95,7 @@ export class SearchService {
       }),
     ]);
 
-    // Normalize helper: "Białystok" → "bialystok"
-    const slugify = (name: string): string =>
-      name
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/[^a-ząćęłńóśźż0-9-]/g, '');
-
-    const normalizedSlug = slug.toLowerCase().trim();
-
+    // Find the actual city name by matching normalized slug against stored city names
     const matchingInstructorCities = instructorCities
       .filter((c) => c.city && slugify(c.city) === normalizedSlug)
       .map((c) => c.city!);
@@ -115,6 +110,9 @@ export class SearchService {
     ) {
       return null;
     }
+
+    // Use the actual city name from the database (preserves diacritics: "Łódź", "Białystok", etc.)
+    const cityName = matchingInstructorCities[0] || matchingEnterpriseCities[0];
 
     // Count actual profiles in matching cities
     const [instructorCount, enterpriseCount] = await Promise.all([

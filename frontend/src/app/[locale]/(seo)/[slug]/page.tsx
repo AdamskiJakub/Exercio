@@ -132,11 +132,13 @@ export default async function SlugPage({ params }: Props) {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       name: `${name} — Exercio`,
-      description: discipline.seo.descriptionTemplate
-        .replace("{city}", "")
-        .replace(" — ", "")
-        .replace("  ", " ")
-        .trim(),
+      description: discipline.seo?.descriptionTemplate
+        ? discipline.seo.descriptionTemplate
+            .replace("{city}", "")
+            .replace(" — ", "")
+            .replace("  ", " ")
+            .trim()
+        : undefined,
       url: `${siteUrl}/${locale}/${slug}`,
       about: {
         "@type": "Thing",
@@ -161,8 +163,11 @@ export default async function SlugPage({ params }: Props) {
     );
   }
 
-  // City page
-  const cityName = resolved.cityName!;
+  // City page — resolved.type is "city" here (discipline case returned above)
+  if (!resolved.cityName) {
+    notFound();
+  }
+  const cityName = resolved.cityName;
   const catalog = await fetchCatalog();
   if (!catalog) {
     notFound();
