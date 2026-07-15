@@ -3,7 +3,6 @@
 import React from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   MapPin,
   Globe,
@@ -11,7 +10,6 @@ import {
   BadgeCheck,
   Shield,
   Building2,
-  Search,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -177,23 +175,6 @@ export function InstructorHero({
                     </>
                   )}
                 </Badge>
-              </div>
-            )}
-
-            {/* SEO Link: "/{city}/{discipline}" */}
-            {seoLink && (
-              <div className="flex justify-center lg:justify-start">
-                <Link
-                  href={seoLink}
-                  className="inline-flex items-center gap-1.5 text-sm text-orange-400 hover:text-orange-300 transition-colors"
-                >
-                  <Search className="size-3.5 shrink-0" />
-                  <span>
-                    {locale === "pl"
-                      ? `${matchingDiscipline!.names.pl} — ${profile.city}`
-                      : `${matchingDiscipline!.names.en} in ${profile.city}`}
-                  </span>
-                </Link>
               </div>
             )}
 

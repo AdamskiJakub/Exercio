@@ -12,8 +12,8 @@ on:
 env:
   SYSTEM_PROMPT: |
     You are a senior code reviewer. Review ONLY the git diff provided.
-    CHECKLIST: Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
-    IMPORTANT: Do NOT report missing use client directive.
+    Focus ONLY on real bugs: Logic errors, Security issues, Crash risks, Data leaks, Broken functionality.
+    DO NOT report: Unused imports, any usage, Hardcoded strings, Hardcoded locale, Missing error handling for fetch calls, Code style, Missing use client directive, Type safety nitpicks, Code duplication, Performance micro-optimizations.
     Format: **file/path.ts:line** - description. Be concise.
     If everything looks good, just say "No issues found."
 
@@ -28,7 +28,7 @@ jobs:
       - name: Get git diff
         id: diff
         run: |
-          DIFF=$(git diff "origin/${{ github.base_ref }}...HEAD" -- . \
+          DIFF=$(git diff --unified=3 "origin/${{ github.base_ref }}...HEAD" -- . \
             ':!*.lock' ':!*.toml' \
             ':!*.svg' ':!*.png' ':!*.jpg' ':!*.jpeg' \
             ':!**/node_modules/**' 2>/dev/null || true)
@@ -63,8 +63,8 @@ jobs:
           # Build system prompt file to avoid jq quoting issues
           cat > /tmp/system_prompt.txt << 'PROMPT_EOF'
           You are a senior code reviewer. Review ONLY the git diff provided.
-          CHECKLIST: Unused imports/variables, any type usage, Dead code, Hardcoded strings that should use i18n, Hardcoded locale, Missing error handling, Type safety issues, Code duplication, Logic errors, Security issues, Performance, Accessibility.
-          IMPORTANT: Do NOT report missing use client directive.
+          Focus ONLY on real bugs: Logic errors, Security issues, Crash risks, Data leaks, Broken functionality.
+          DO NOT report: Unused imports, any usage, Hardcoded strings, Hardcoded locale, Missing error handling for fetch calls, Code style, Missing use client directive, Type safety nitpicks, Code duplication, Performance micro-optimizations.
           Format: **file/path.ts:line** - description. Be concise.
           If everything looks good, just say "No issues found."
           PROMPT_EOF
@@ -72,7 +72,7 @@ jobs:
           SYSTEM_PROMPT=$(cat /tmp/system_prompt.txt)
 
           # If diff is small enough, do a single review
-          if [ "$DIFF_SIZE" -lt 15000 ]; then
+          if [ "$DIFF_SIZE" -lt 30000 ]; then
             echo "Single review (diff size: $DIFF_SIZE bytes)"
 
             jq -n \
@@ -103,15 +103,15 @@ jobs:
             REVIEWS=""
             CHUNK_NUM=1
             while true; do
-              CHUNK_FILES=$(sed -n '1,5p' "$CHUNK_FILE")
-              sed -i '1,5d' "$CHUNK_FILE"
+              CHUNK_FILES=$(sed -n '1,10p' "$CHUNK_FILE")
+              sed -i '1,10d' "$CHUNK_FILE"
 
               if [ -z "$CHUNK_FILES" ]; then
                 break
               fi
 
               CHUNK_DIFF=$(echo "$CHUNK_FILES" | while IFS= read -r file; do
-                git diff "origin/${{ github.base_ref }}...HEAD" -- "$file" 2>/dev/null
+                git diff --unified=3 "origin/${{ github.base_ref }}...HEAD" -- "$file" 2>/dev/null
               done)
 
               if [ -z "$CHUNK_DIFF" ]; then
@@ -126,7 +126,7 @@ jobs:
                 --arg diff "$CHUNK_DIFF" \
                 '{
                   model: "deepseek-chat",
-                  max_tokens: 4096,
+                  max_tokens: 2048,
                   temperature: 0.1,
                   messages: [
                     {
@@ -153,6 +153,13 @@ jobs:
 
               CHUNK_NUM=$((CHUNK_NUM + 1))
             done
+
+            # Deduplicate: remove repeated identical lines (e.g. same "Unused import" reported N times)
+            if [ -n "$REVIEWS" ]; then
+              echo "$REVIEWS" > /tmp/reviews_raw.txt
+              awk '!seen[$0]++' /tmp/reviews_raw.txt > /tmp/reviews_deduped.txt
+              REVIEWS=$(cat /tmp/reviews_deduped.txt)
+            fi
 
             rm -f "$CHUNK_FILE"
 

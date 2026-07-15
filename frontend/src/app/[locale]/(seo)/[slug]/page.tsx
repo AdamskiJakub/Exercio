@@ -37,12 +37,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const name = getLocalizedName(discipline.names, locale);
     const title = discipline.seo.titleTemplate
       .replace("{city}", "")
-      .replace(" w ", "")
+      .replace(" — ", "")
       .replace("  ", " ")
       .trim();
     const description = discipline.seo.descriptionTemplate
       .replace("{city}", "")
-      .replace(" w ", "")
+      .replace(" — ", "")
       .replace("  ", " ")
       .trim();
 
@@ -134,7 +134,7 @@ export default async function SlugPage({ params }: Props) {
       name: `${name} — Exercio`,
       description: discipline.seo.descriptionTemplate
         .replace("{city}", "")
-        .replace(" w ", "")
+        .replace(" — ", "")
         .replace("  ", " ")
         .trim(),
       url: `${siteUrl}/${locale}/${slug}`,

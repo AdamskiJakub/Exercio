@@ -1,5 +1,7 @@
 import { API_BASE_URL } from "@/lib/utils/api-url";
 import type { CatalogDiscipline, CatalogCategory } from "@/lib/catalog-types";
+import type { InstructorListing } from "@/types";
+import type { EnterpriseListing } from "@/types/enterprise";
 
 export interface ResolveSlugResponse {
   type: "discipline" | "city" | null;
@@ -9,9 +11,9 @@ export interface ResolveSlugResponse {
   enterprises?: number;
 }
 
-interface SearchResponse {
-  instructors?: { data: any[]; total: number };
-  enterprises?: { data: any[]; total: number };
+export interface SearchResponse {
+  instructors?: { data: InstructorListing[]; total: number };
+  enterprises?: { data: EnterpriseListing[]; total: number };
 }
 
 interface CatalogResponse {

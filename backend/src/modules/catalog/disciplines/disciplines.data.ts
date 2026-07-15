@@ -21,9 +21,9 @@ export const disciplinesData: Discipline[] = [
       'boks trening',
     ],
     seo: {
-      titleTemplate: 'Trenerzy boksu w {city} | Exercio',
+      titleTemplate: 'Trenerzy boksu — {city} | Exercio',
       descriptionTemplate:
-        'Szukasz trenera boksu w {city}? Sprawdź opinie, cennik i dostępne terminy. Profesjonalny trening boksu dla początkujących i zaawansowanych.',
+        'Szukasz trenera boksu — {city}? Sprawdź opinie, cennik i dostępne terminy. Profesjonalny trening boksu dla początkujących i zaawansowanych.',
     },
     popularity: 95,
     enabled: true,
@@ -38,9 +38,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'mma', en: 'mma' },
     synonyms: ['mma', 'mixed martial arts', 'mieszane sztuki walki'],
     seo: {
-      titleTemplate: 'Trening MMA w {city} | Exercio',
+      titleTemplate: 'Trening MMA — {city} | Exercio',
       descriptionTemplate:
-        'Znajdź kluby i trenerów MMA w {city}. Sprawdź ofertę zajęć MMA dla początkujących i zaawansowanych.',
+        'Znajdź kluby i trenerów MMA — {city}. Sprawdź ofertę zajęć MMA dla początkujących i zaawansowanych.',
     },
     popularity: 93,
     enabled: true,
@@ -61,9 +61,9 @@ export const disciplinesData: Discipline[] = [
       'jiu-jitsu',
     ],
     seo: {
-      titleTemplate: 'Zajęcia BJJ w {city} | Exercio',
+      titleTemplate: 'Zajęcia BJJ — {city} | Exercio',
       descriptionTemplate:
-        'Szukasz treningu BJJ w {city}? Sprawdź instruktorów brazylijskiego jiu-jitsu i kluby.',
+        'Szukasz treningu BJJ — {city}? Sprawdź instruktorów brazylijskiego jiu-jitsu i kluby.',
     },
     popularity: 88,
     enabled: true,
@@ -78,9 +78,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'kickboxing', en: 'kickboxing' },
     synonyms: ['kickboxing', 'kick boxing'],
     seo: {
-      titleTemplate: 'Kickboxing w {city} | Exercio',
+      titleTemplate: 'Kickboxing — {city} | Exercio',
       descriptionTemplate:
-        'Znajdź najlepsze zajęcia kickboxingu w {city}. Trening dla początkujących i zaawansowanych.',
+        'Znajdź najlepsze zajęcia kickboxingu — {city}. Trening dla początkujących i zaawansowanych.',
     },
     popularity: 85,
     enabled: true,
@@ -95,9 +95,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'muay-thai', en: 'muay-thai' },
     synonyms: ['muay thai', 'tajski boks', 'boks tajski'],
     seo: {
-      titleTemplate: 'Muay Thai w {city} | Exercio',
+      titleTemplate: 'Muay Thai — {city} | Exercio',
       descriptionTemplate:
-        'Trening Muay Thai w {city} — sprawdź kluby i instruktorów. Boks tajski dla każdego.',
+        'Trening Muay Thai — {city} — sprawdź kluby i instruktorów. Boks tajski dla każdego.',
     },
     popularity: 80,
     enabled: true,
@@ -112,9 +112,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'karate', en: 'karate' },
     synonyms: ['karate', 'karate tradycyjne', 'karate shotokan'],
     seo: {
-      titleTemplate: 'Zajęcia karate w {city} | Exercio',
+      titleTemplate: 'Zajęcia karate — {city} | Exercio',
       descriptionTemplate:
-        'Szukasz zajęć karate w {city}? Sprawdź instruktorów i kluby karate.',
+        'Szukasz zajęć karate — {city}? Sprawdź instruktorów i kluby karate.',
     },
     popularity: 75,
     enabled: true,
@@ -129,9 +129,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'krav-maga', en: 'krav-maga' },
     synonyms: ['krav maga', 'krav-maga'],
     seo: {
-      titleTemplate: 'Krav Maga w {city} | Exercio',
+      titleTemplate: 'Krav Maga — {city} | Exercio',
       descriptionTemplate:
-        'Trening Krav Maga w {city} — samoobrona i kondycja. Sprawdź dostępnych instruktorów.',
+        'Trening Krav Maga — {city} — samoobrona i kondycja. Sprawdź dostępnych instruktorów.',
     },
     popularity: 72,
     enabled: true,
@@ -146,9 +146,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'judo', en: 'judo' },
     synonyms: ['judo'],
     seo: {
-      titleTemplate: 'Judo w {city} | Exercio',
+      titleTemplate: 'Judo — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia judo w {city} — trening dla dzieci i dorosłych. Sprawdź kluby judo.',
+        'Zajęcia judo — {city} — trening dla dzieci i dorosłych. Sprawdź kluby judo.',
     },
     popularity: 70,
     enabled: true,
@@ -163,9 +163,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'taekwondo', en: 'taekwondo' },
     synonyms: ['taekwondo', 'tae kwon do'],
     seo: {
-      titleTemplate: 'Taekwondo w {city} | Exercio',
+      titleTemplate: 'Taekwondo — {city} | Exercio',
       descriptionTemplate:
-        'Trening taekwondo w {city} — zajęcia dla dzieci i dorosłych. Sprawdź ofertę.',
+        'Trening taekwondo — {city} — zajęcia dla dzieci i dorosłych. Sprawdź ofertę.',
     },
     popularity: 68,
     enabled: true,
@@ -182,9 +182,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'bachata', en: 'bachata' },
     synonyms: ['bachata', 'taniec bachata', 'bachata dance'],
     seo: {
-      titleTemplate: 'Zajęcia bachaty w {city} | Exercio',
+      titleTemplate: 'Zajęcia bachaty — {city} | Exercio',
       descriptionTemplate:
-        'Szukasz zajęć bachaty w {city}? Sprawdź instruktorów i szkoły tańca.',
+        'Szukasz zajęć bachaty — {city}? Sprawdź instruktorów i szkoły tańca.',
     },
     popularity: 90,
     enabled: true,
@@ -199,9 +199,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'salsa', en: 'salsa' },
     synonyms: ['salsa', 'taniec salsa', 'salsa dance'],
     seo: {
-      titleTemplate: 'Zajęcia salsy w {city} | Exercio',
+      titleTemplate: 'Zajęcia salsy — {city} | Exercio',
       descriptionTemplate:
-        'Nauka salsy w {city} — zajęcia dla początkujących i zaawansowanych. Sprawdź szkoły tańca.',
+        'Nauka salsy — {city} — zajęcia dla początkujących i zaawansowanych. Sprawdź szkoły tańca.',
     },
     popularity: 88,
     enabled: true,
@@ -216,9 +216,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'kizomba', en: 'kizomba' },
     synonyms: ['kizomba', 'taniec kizomba'],
     seo: {
-      titleTemplate: 'Kizomba w {city} | Exercio',
+      titleTemplate: 'Kizomba — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia kizomby w {city} — zmysłowy taniec dla par. Sprawdź instruktorów.',
+        'Zajęcia kizomby — {city} — zmysłowy taniec dla par. Sprawdź instruktorów.',
     },
     popularity: 78,
     enabled: true,
@@ -233,9 +233,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'hip-hop', en: 'hip-hop' },
     synonyms: ['hip hop', 'hip-hop', 'taniec hip hop'],
     seo: {
-      titleTemplate: 'Taniec hip-hop w {city} | Exercio',
+      titleTemplate: 'Taniec hip-hop — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia hip-hop w {city} — taniec nowoczesny dla dzieci i dorosłych.',
+        'Zajęcia hip-hop — {city} — taniec nowoczesny dla dzieci i dorosłych.',
     },
     popularity: 82,
     enabled: true,
@@ -250,9 +250,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'pole-dance', en: 'pole-dance' },
     synonyms: ['pole dance', 'taniec na rurze', 'pole fitness', 'pole'],
     seo: {
-      titleTemplate: 'Pole Dance w {city} | Exercio',
+      titleTemplate: 'Pole Dance — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia pole dance w {city} — taniec na rurze dla początkujących i zaawansowanych.',
+        'Zajęcia pole dance — {city} — taniec na rurze dla początkujących i zaawansowanych.',
     },
     popularity: 85,
     enabled: true,
@@ -267,9 +267,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'high-heels', en: 'high-heels' },
     synonyms: ['high heels', 'heels dance', 'taniec na szpilkach'],
     seo: {
-      titleTemplate: 'High Heels w {city} | Exercio',
+      titleTemplate: 'High Heels — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia high heels w {city} — taniec na szpilkach. Sprawdź instruktorów.',
+        'Zajęcia high heels — {city} — taniec na szpilkach. Sprawdź instruktorów.',
     },
     popularity: 76,
     enabled: true,
@@ -284,9 +284,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'balet', en: 'ballet' },
     synonyms: ['balet', 'ballet', 'taniec klasyczny'],
     seo: {
-      titleTemplate: 'Balet w {city} | Exercio',
+      titleTemplate: 'Balet — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia baletu w {city} — nauka tańca klasycznego dla dzieci i dorosłych.',
+        'Zajęcia baletu — {city} — nauka tańca klasycznego dla dzieci i dorosłych.',
     },
     popularity: 74,
     enabled: true,
@@ -301,9 +301,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'break-dance', en: 'breakdance' },
     synonyms: ['breakdance', 'break dance', 'breaking'],
     seo: {
-      titleTemplate: 'Break dance w {city} | Exercio',
+      titleTemplate: 'Break dance — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia break dance w {city} — taniec i akrobatyka dla młodzieży i dorosłych.',
+        'Zajęcia break dance — {city} — taniec i akrobatyka dla młodzieży i dorosłych.',
     },
     popularity: 72,
     enabled: true,
@@ -318,9 +318,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'reggaeton', en: 'reggaeton' },
     synonyms: ['reggaeton', 'reggaeton dance'],
     seo: {
-      titleTemplate: 'Reggaeton w {city} | Exercio',
+      titleTemplate: 'Reggaeton — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia reggaeton w {city} — energetyczny taniec latynoski.',
+        'Zajęcia reggaeton — {city} — energetyczny taniec latynoski.',
     },
     popularity: 70,
     enabled: true,
@@ -340,9 +340,9 @@ export const disciplinesData: Discipline[] = [
       'nauka pierwszego tańca',
     ],
     seo: {
-      titleTemplate: 'Nauka pierwszego tańca w {city} | Exercio',
+      titleTemplate: 'Nauka pierwszego tańca — {city} | Exercio',
       descriptionTemplate:
-        'Przygotuj się do pierwszego tańca weselnego w {city}. Sprawdź instruktorów tańca.',
+        'Przygotuj się do pierwszego tańca weselnego — {city}. Sprawdź instruktorów tańca.',
     },
     popularity: 78,
     enabled: true,
@@ -359,9 +359,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'pilates', en: 'pilates' },
     synonyms: ['pilates', 'pilates trening'],
     seo: {
-      titleTemplate: 'Pilates w {city} | Exercio',
+      titleTemplate: 'Pilates — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia pilates w {city} — wzmocnij ciało i popraw elastyczność. Sprawdź instruktorów.',
+        'Zajęcia pilates — {city} — wzmocnij ciało i popraw elastyczność. Sprawdź instruktorów.',
     },
     popularity: 92,
     enabled: true,
@@ -380,9 +380,9 @@ export const disciplinesData: Discipline[] = [
       'trening interwałowy',
     ],
     seo: {
-      titleTemplate: 'Trening HIIT w {city} | Exercio',
+      titleTemplate: 'Trening HIIT — {city} | Exercio',
       descriptionTemplate:
-        'Trening interwałowy HIIT w {city} — spal kalorie i popraw kondycję. Sprawdź zajęcia.',
+        'Trening interwałowy HIIT — {city} — spal kalorie i popraw kondycję. Sprawdź zajęcia.',
     },
     popularity: 90,
     enabled: true,
@@ -397,9 +397,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'crossfit', en: 'crossfit' },
     synonyms: ['crossfit', 'cross fit', 'crossfit trening'],
     seo: {
-      titleTemplate: 'CrossFit w {city} | Exercio',
+      titleTemplate: 'CrossFit — {city} | Exercio',
       descriptionTemplate:
-        'Trening CrossFit w {city} — siła, kondycja i wytrzymałość. Sprawdź boxy CrossFit.',
+        'Trening CrossFit — {city} — siła, kondycja i wytrzymałość. Sprawdź boxy CrossFit.',
     },
     popularity: 89,
     enabled: true,
@@ -414,9 +414,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'stretching', en: 'stretching' },
     synonyms: ['stretching', 'rozciąganie', 'elastyczność'],
     seo: {
-      titleTemplate: 'Stretching w {city} | Exercio',
+      titleTemplate: 'Stretching — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia stretchingu w {city} — popraw elastyczność i zregeneruj ciało.',
+        'Zajęcia stretchingu — {city} — popraw elastyczność i zregeneruj ciało.',
     },
     popularity: 82,
     enabled: true,
@@ -436,9 +436,9 @@ export const disciplinesData: Discipline[] = [
       'street workout',
     ],
     seo: {
-      titleTemplate: 'Kalistenika w {city} | Exercio',
+      titleTemplate: 'Kalistenika — {city} | Exercio',
       descriptionTemplate:
-        'Trening kalisteniki w {city} — ćwicz z masą własnego ciała. Sprawdź instruktorów.',
+        'Trening kalisteniki — {city} — ćwicz z masą własnego ciała. Sprawdź instruktorów.',
     },
     popularity: 76,
     enabled: true,
@@ -458,9 +458,9 @@ export const disciplinesData: Discipline[] = [
       'ruchomość stawów',
     ],
     seo: {
-      titleTemplate: 'Trening mobilności w {city} | Exercio',
+      titleTemplate: 'Trening mobilności — {city} | Exercio',
       descriptionTemplate:
-        'Popraw mobilność w {city} — zajęcia z zakresu ruchomości stawów i elastyczności.',
+        'Popraw mobilność — {city} — zajęcia z zakresu ruchomości stawów i elastyczności.',
     },
     popularity: 72,
     enabled: true,
@@ -475,9 +475,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'bieganie', en: 'running' },
     synonyms: ['bieganie', 'running', 'trening biegowy', 'biegi'],
     seo: {
-      titleTemplate: 'Trening biegowy w {city} | Exercio',
+      titleTemplate: 'Trening biegowy — {city} | Exercio',
       descriptionTemplate:
-        'Przygotowanie biegowe w {city} — trenerzy biegania, plany treningowe i grupy biegowe.',
+        'Przygotowanie biegowe — {city} — trenerzy biegania, plany treningowe i grupy biegowe.',
     },
     popularity: 80,
     enabled: true,
@@ -494,9 +494,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'joga', en: 'yoga' },
     synonyms: ['joga', 'yoga', 'zajęcia jogi', 'trening jogi'],
     seo: {
-      titleTemplate: 'Zajęcia jogi w {city} | Exercio',
+      titleTemplate: 'Zajęcia jogi — {city} | Exercio',
       descriptionTemplate:
-        'Joga w {city} — znajdź instruktora jogi. Hatha, vinyasa, yin yoga i więcej.',
+        'Joga — {city} — znajdź instruktora jogi. Hatha, vinyasa, yin yoga i więcej.',
     },
     popularity: 94,
     enabled: true,
@@ -518,9 +518,9 @@ export const disciplinesData: Discipline[] = [
       'trener osobisty',
     ],
     seo: {
-      titleTemplate: 'Trener personalny w {city} | Exercio',
+      titleTemplate: 'Trener personalny — {city} | Exercio',
       descriptionTemplate:
-        'Znajdź najlepszego trenera personalnego w {city}. Indywidualne treningi dopasowane do Twoich celów.',
+        'Znajdź najlepszego trenera personalnego — {city}. Indywidualne treningi dopasowane do Twoich celów.',
     },
     popularity: 98,
     enabled: true,
@@ -537,9 +537,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'plywanie', en: 'swimming' },
     synonyms: ['pływanie', 'swimming', 'nauka pływania', 'trener pływania'],
     seo: {
-      titleTemplate: 'Nauka pływania w {city} | Exercio',
+      titleTemplate: 'Nauka pływania — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia z pływania w {city} — nauka pływania dla dzieci i dorosłych. Sprawdź instruktorów.',
+        'Zajęcia z pływania — {city} — nauka pływania dla dzieci i dorosłych. Sprawdź instruktorów.',
     },
     popularity: 86,
     enabled: true,
@@ -554,9 +554,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'tenis', en: 'tennis' },
     synonyms: ['tenis', 'tennis', 'nauka tenisa', 'trener tenisa'],
     seo: {
-      titleTemplate: 'Tenis w {city} | Exercio',
+      titleTemplate: 'Tenis — {city} | Exercio',
       descriptionTemplate:
-        'Trening tenisa w {city} — korepetycje tenisowe dla dzieci i dorosłych.',
+        'Trening tenisa — {city} — korepetycje tenisowe dla dzieci i dorosłych.',
     },
     popularity: 78,
     enabled: true,
@@ -576,9 +576,9 @@ export const disciplinesData: Discipline[] = [
       'trening piłkarski',
     ],
     seo: {
-      titleTemplate: 'Trening piłki nożnej w {city} | Exercio',
+      titleTemplate: 'Trening piłki nożnej — {city} | Exercio',
       descriptionTemplate:
-        'Zajęcia piłki nożnej w {city} — treningi indywidualne i grupowe dla dzieci i dorosłych.',
+        'Zajęcia piłki nożnej — {city} — treningi indywidualne i grupowe dla dzieci i dorosłych.',
     },
     popularity: 84,
     enabled: true,
@@ -601,9 +601,9 @@ export const disciplinesData: Discipline[] = [
       'doradca żywieniowy',
     ],
     seo: {
-      titleTemplate: 'Dietetyk w {city} | Exercio',
+      titleTemplate: 'Dietetyk — {city} | Exercio',
       descriptionTemplate:
-        'Znajdź dietetyka w {city}. Układanie planów żywieniowych, dieta redukcyjna i sportowa.',
+        'Znajdź dietetyka — {city}. Układanie planów żywieniowych, dieta redukcyjna i sportowa.',
     },
     popularity: 82,
     enabled: true,
@@ -625,9 +625,9 @@ export const disciplinesData: Discipline[] = [
       'rehabilitacja ruchowa',
     ],
     seo: {
-      titleTemplate: 'Fizjoterapia w {city} | Exercio',
+      titleTemplate: 'Fizjoterapia — {city} | Exercio',
       descriptionTemplate:
-        'Znajdź fizjoterapeutę w {city}. Rehabilitacja, fizjoterapia sportowa i leczenie bólu.',
+        'Znajdź fizjoterapeutę — {city}. Rehabilitacja, fizjoterapia sportowa i leczenie bólu.',
     },
     popularity: 88,
     enabled: true,
@@ -648,9 +648,9 @@ export const disciplinesData: Discipline[] = [
       'rehabilitacja po kontuzji',
     ],
     seo: {
-      titleTemplate: 'Rehabilitacja w {city} | Exercio',
+      titleTemplate: 'Rehabilitacja — {city} | Exercio',
       descriptionTemplate:
-        'Rehabilitacja w {city} — powrót do sprawności po kontuzji. Sprawdź specjalistów.',
+        'Rehabilitacja — {city} — powrót do sprawności po kontuzji. Sprawdź specjalistów.',
     },
     popularity: 85,
     enabled: true,
@@ -665,9 +665,9 @@ export const disciplinesData: Discipline[] = [
     slugs: { pl: 'masaz', en: 'massage' },
     synonyms: ['masaż', 'massage', 'masaż sportowy', 'masaż relaksacyjny'],
     seo: {
-      titleTemplate: 'Masaż w {city} | Exercio',
+      titleTemplate: 'Masaż — {city} | Exercio',
       descriptionTemplate:
-        'Masaż sportowy i relaksacyjny w {city}. Sprawdź specjalistów od masażu.',
+        'Masaż sportowy i relaksacyjny — {city}. Sprawdź specjalistów od masażu.',
     },
     popularity: 80,
     enabled: true,
