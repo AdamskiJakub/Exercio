@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 
 @Controller('search')
@@ -10,6 +10,8 @@ export class SearchController {
     @Query('q') q?: string,
     @Query('city') city?: string,
     @Query('tags') tags?: string | string[],
+    @Query('specializations') specializations?: string | string[],
+    @Query('disciplines') disciplines?: string | string[],
     @Query('type') type?: 'all' | 'instructors' | 'enterprises',
     @Query('sortBy') sortBy?: string,
     @Query('page') page?: string,
@@ -25,10 +27,35 @@ export class SearchController {
       q,
       city,
       tags: Array.isArray(tags) ? tags : tags ? [tags] : undefined,
+      specializations: Array.isArray(specializations)
+        ? specializations
+        : specializations
+          ? [specializations]
+          : undefined,
+      disciplines: Array.isArray(disciplines)
+        ? disciplines
+        : disciplines
+          ? [disciplines]
+          : undefined,
       type: type || 'all',
       sortBy,
       page: parseNumeric(page),
       limit: parseNumeric(limit),
     });
+  }
+
+  @Get('cities')
+  async getCities(@Query('q') q?: string) {
+    return this.searchService.getCities(q);
+  }
+
+  @Get('sitemap')
+  async getSitemapData() {
+    return this.searchService.getSitemapData();
+  }
+
+  @Get('disciplines/:slug/cities')
+  async getDisciplineCities(@Param('slug') slug: string) {
+    return this.searchService.getDisciplineCities(slug);
   }
 }
