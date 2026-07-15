@@ -35,16 +35,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (resolved.type === "discipline") {
     const discipline = resolved.discipline!;
     const name = getLocalizedName(discipline.names, locale);
-    const title = discipline.seo.titleTemplate
-      .replace("{city}", "")
-      .replace(" — ", "")
-      .replace("  ", " ")
-      .trim();
-    const description = discipline.seo.descriptionTemplate
-      .replace("{city}", "")
-      .replace(" — ", "")
-      .replace("  ", " ")
-      .trim();
+    const title =
+      discipline.seo?.titleTemplate
+        ?.replace("{city}", "")
+        ?.replace(" — ", "")
+        ?.replace("  ", " ")
+        ?.trim() ?? name;
+    const description =
+      discipline.seo?.descriptionTemplate
+        ?.replace("{city}", "")
+        ?.replace(" — ", "")
+        ?.replace("  ", " ")
+        ?.trim() ?? undefined;
 
     return {
       title: `${name} — ${title}`,
