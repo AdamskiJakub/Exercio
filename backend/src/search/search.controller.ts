@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 
 @Controller('search')
@@ -47,5 +47,15 @@ export class SearchController {
   @Get('cities')
   async getCities(@Query('q') q?: string) {
     return this.searchService.getCities(q);
+  }
+
+  @Get('sitemap')
+  async getSitemapData() {
+    return this.searchService.getSitemapData();
+  }
+
+  @Get('disciplines/:slug/cities')
+  async getDisciplineCities(@Param('slug') slug: string) {
+    return this.searchService.getDisciplineCities(slug);
   }
 }

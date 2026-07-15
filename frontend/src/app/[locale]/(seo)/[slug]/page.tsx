@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
+  resolveSlug,
   fetchCatalog,
-  fetchDisciplineBySlug,
   fetchSearchResults,
+  fetchDisciplineCities,
 } from "@/lib/seo/fetch-seo-page";
-import { getLocalizedName } from "@/hooks/useCatalog";
+import { getLocalizedName } from "@/lib/catalog-types";
 import { isReservedSlug } from "@/lib/seo/reserved-slugs";
 import { SlugPageClient } from "./SlugPageClient";
 
@@ -14,7 +15,10 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug, locale } = await params;
+  const { slug: rawSlug, locale } = await params;
+
+  // Next.js passes URL-encoded params for characters like ł (e.g. "bia%C5%82ystok")
+  const slug = decodeURIComponent(rawSlug);
 
   // Reserved slugs (routes, city names) should not generate SEO for disciplines
   if (isReservedSlug(slug)) {
@@ -23,9 +27,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
 
-  // First, try to match as a discipline
-  const discipline = await fetchDisciplineBySlug(slug, locale);
-  if (discipline) {
+  const resolved = await resolveSlug(slug, locale);
+  if (!resolved || resolved.type === null) {
+    return { title: "Not Found" };
+  }
+
+  if (resolved.type === "discipline") {
+    const discipline = resolved.discipline!;
     const name = getLocalizedName(discipline.names, locale);
     const title = discipline.seo.titleTemplate
       .replace("{city}", "")
@@ -63,12 +71,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  // If not a discipline, treat as a city page
-  const cityName = slug
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-
+  // City page metadata
+  const cityName = resolved.cityName!;
   const title =
     locale === "pl"
       ? `Trenerzy i kluby fitness w ${cityName} | Exercio`
@@ -96,7 +100,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function SlugPage({ params }: Props) {
-  const { slug, locale } = await params;
+  const { slug: rawSlug, locale } = await params;
+
+  // Next.js passes URL-encoded params for characters like ł (e.g. "bia%C5%82ystok")
+  const slug = decodeURIComponent(rawSlug);
 
   // Reserved slugs should not be treated as SEO pages
   if (isReservedSlug(slug)) {
@@ -105,14 +112,21 @@ export default async function SlugPage({ params }: Props) {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
 
-  // Try to match as a discipline first
-  const discipline = await fetchDisciplineBySlug(slug, locale);
-  if (discipline) {
+  const resolved = await resolveSlug(slug, locale);
+  if (!resolved || resolved.type === null) {
+    notFound();
+  }
+
+  if (resolved.type === "discipline") {
+    const discipline = resolved.discipline!;
     const name = getLocalizedName(discipline.names, locale);
     const results = await fetchSearchResults({
       discipline: discipline.key,
       limit: 20,
     });
+
+    // Fetch cities where this discipline is available (for internal linking)
+    const disciplineCities = await fetchDisciplineCities(discipline.key);
 
     const jsonLd = {
       "@context": "https://schema.org",
@@ -141,21 +155,23 @@ export default async function SlugPage({ params }: Props) {
           discipline={discipline}
           locale={locale}
           initialResults={results}
+          disciplineCities={disciplineCities}
         />
       </>
     );
   }
 
-  // Otherwise, treat as a city page
+  // City page
+  const cityName = resolved.cityName!;
   const catalog = await fetchCatalog();
   if (!catalog) {
     notFound();
   }
 
-  const cityName = slug
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  // If city has no profiles at all → 404 (Google hates empty landing pages)
+  if ((resolved.instructors || 0) + (resolved.enterprises || 0) === 0) {
+    notFound();
+  }
 
   const results = await fetchSearchResults({
     city: cityName,

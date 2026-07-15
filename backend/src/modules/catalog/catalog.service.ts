@@ -7,6 +7,7 @@ import { Discipline } from './disciplines/disciplines.types';
 import { Category } from './categories/categories.types';
 import { Tag } from './tags/tags.types';
 import { Goal } from './goals/goals.types';
+import { SearchService } from '../../search/search.service';
 
 export interface CatalogResponse {
   disciplines: Discipline[];
@@ -15,8 +16,17 @@ export interface CatalogResponse {
   goals: Goal[];
 }
 
+export interface ResolveSlugResult {
+  type: 'discipline' | 'city' | null;
+  discipline?: Discipline;
+  cityName?: string;
+  instructors?: number;
+  enterprises?: number;
+}
+
 @Injectable()
 export class CatalogService {
+  constructor(private readonly searchService: SearchService) {}
   getAll(): CatalogResponse {
     return {
       disciplines: disciplinesData.filter((d) => d.enabled),
@@ -55,5 +65,37 @@ export class CatalogService {
 
   getCategoryByKey(key: string): Category | undefined {
     return categoriesData.find((c) => c.key === key && c.enabled);
+  }
+
+  /**
+   * Resolve a URL slug to determine if it's a discipline, a city with profiles, or unknown.
+   * This is the single source of truth for SEO page routing — frontend should NOT guess.
+   */
+  async resolveSlug(
+    slug: string,
+    locale: 'pl' | 'en',
+  ): Promise<ResolveSlugResult> {
+    // 1. Check if slug matches a discipline
+    const discipline = this.getDisciplineBySlug(slug, locale);
+    if (discipline) {
+      return {
+        type: 'discipline',
+        discipline,
+      };
+    }
+
+    // 2. Check if slug matches a city with profiles in the database
+    const city = await this.searchService.findCityBySlug(slug);
+    if (city) {
+      return {
+        type: 'city',
+        cityName: city.cityName,
+        instructors: city.instructors,
+        enterprises: city.enterprises,
+      };
+    }
+
+    // 3. Not found
+    return { type: null };
   }
 }

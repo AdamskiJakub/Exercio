@@ -2,12 +2,29 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import type { CatalogDiscipline, CatalogCategory } from "@/hooks/useCatalog";
-import { getLocalizedName } from "@/hooks/useCatalog";
+import type { CatalogDiscipline, CatalogCategory } from "@/lib/catalog-types";
+import { getLocalizedName } from "@/lib/catalog-types";
+import type { DisciplineCity } from "@/lib/seo/fetch-seo-page";
+
+interface SearchInstructorItem {
+  id: string;
+  fullName: string;
+  tagline: string | null;
+  city: string | null;
+  user?: { username: string };
+}
+
+interface SearchEnterpriseItem {
+  id: string;
+  companyName: string;
+  shortDescription: string | null;
+  city: string | null;
+  slug: string;
+}
 
 interface SearchResults {
-  instructors?: { data: any[]; total: number };
-  enterprises?: { data: any[]; total: number };
+  instructors?: { data: SearchInstructorItem[]; total: number };
+  enterprises?: { data: SearchEnterpriseItem[]; total: number };
 }
 
 interface DisciplineVariant {
@@ -15,6 +32,7 @@ interface DisciplineVariant {
   discipline: CatalogDiscipline;
   locale: string;
   initialResults: SearchResults | null;
+  disciplineCities: DisciplineCity[];
 }
 
 interface CityVariant {
@@ -43,6 +61,7 @@ function DisciplineView({
   discipline,
   locale,
   initialResults,
+  disciplineCities,
 }: DisciplineVariant) {
   const t = useTranslations("SEO");
   const name = getLocalizedName(discipline.names, locale);
@@ -116,6 +135,31 @@ function DisciplineView({
           </div>
         )}
 
+        {/* Cities where this discipline is available — internal linking */}
+        {disciplineCities.length > 0 && (
+          <div className="mb-12">
+            <h2 className="mb-3 text-lg font-semibold text-white">
+              {t("availableInCities", {
+                defaultValue: "Dostępny w miastach",
+              })}
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {disciplineCities.map((city) => (
+                <Link
+                  key={city.citySlug}
+                  href={`/${locale}/${city.citySlug}/${discipline.slugs[locale as "pl" | "en"]}`}
+                  className="inline-flex items-center gap-1 rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
+                >
+                  {city.cityName}
+                  <span className="text-xs text-slate-500">
+                    ({city.instructors + city.enterprises})
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* CTA */}
         <div className="rounded-xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-8">
           <h2 className="mb-2 text-2xl font-bold text-white">
@@ -173,6 +217,18 @@ function CityView({
   return (
     <div className="min-h-screen bg-slate-950">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Breadcrumbs */}
+        <nav className="mb-8 flex items-center gap-2 text-sm text-slate-500">
+          <Link
+            href={`/${locale}`}
+            className="transition-colors hover:text-white"
+          >
+            Exercio
+          </Link>
+          <span>/</span>
+          <span className="text-white">{cityName}</span>
+        </nav>
+
         {/* H1 */}
         <h1 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
           {t("cityTitle", {
@@ -260,12 +316,14 @@ function CityView({
         <div className="rounded-xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-8">
           <h2 className="mb-2 text-2xl font-bold text-white">
             {t("findInstructor", {
-              defaultValue: `Nie znalazłeś tego czego szukasz?`,
+              defaultValue: "Nie znalazłeś tego czego szukasz?",
             })}
           </h2>
           <p className="mb-6 text-slate-400">
             {t("findInstructorDesc", {
-              defaultValue: `Skorzystaj z wyszukiwarki, aby znaleźć instruktora lub klub w ${cityName}.`,
+              city: cityName,
+              defaultValue:
+                "Skorzystaj z wyszukiwarki, aby znaleźć instruktora lub klub w {city}.",
             })}
           </p>
           <Link
@@ -273,7 +331,8 @@ function CityView({
             className="inline-flex items-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-200"
           >
             {t("searchInCity", {
-              defaultValue: `Szukaj w ${cityName}`,
+              city: cityName,
+              defaultValue: "Szukaj w {city}",
             })}
           </Link>
         </div>

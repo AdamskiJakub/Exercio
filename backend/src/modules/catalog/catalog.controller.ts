@@ -61,4 +61,12 @@ export class CatalogController {
   getGoals() {
     return this.catalogService.getGoals();
   }
+
+  @Get('resolve-slug/:slug')
+  async resolveSlug(
+    @Param('slug') slug: string,
+    @Query('locale') locale: string = 'pl',
+  ) {
+    return this.catalogService.resolveSlug(slug, locale as 'pl' | 'en');
+  }
 }

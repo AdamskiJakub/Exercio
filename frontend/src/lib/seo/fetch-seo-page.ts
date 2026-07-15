@@ -1,5 +1,13 @@
 import { API_BASE_URL } from "@/lib/utils/api-url";
-import type { CatalogDiscipline, CatalogCategory } from "@/hooks/useCatalog";
+import type { CatalogDiscipline, CatalogCategory } from "@/lib/catalog-types";
+
+export interface ResolveSlugResponse {
+  type: "discipline" | "city" | null;
+  discipline?: CatalogDiscipline;
+  cityName?: string;
+  instructors?: number;
+  enterprises?: number;
+}
 
 interface SearchResponse {
   instructors?: { data: any[]; total: number };
@@ -21,17 +29,21 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-export async function fetchCatalog(): Promise<CatalogResponse | null> {
-  return fetchJson<CatalogResponse>(`${API_BASE_URL}/catalog`);
-}
-
-export async function fetchDisciplineBySlug(
+/**
+ * Resolve a URL slug to determine if it's a discipline, a city with profiles, or unknown.
+ * This is the single source of truth — frontend should NOT guess the type.
+ */
+export async function resolveSlug(
   slug: string,
   locale: string,
-): Promise<CatalogDiscipline | null> {
-  return fetchJson<CatalogDiscipline>(
-    `${API_BASE_URL}/catalog/disciplines/by-slug/${encodeURIComponent(slug)}?locale=${locale}`,
+): Promise<ResolveSlugResponse | null> {
+  return fetchJson<ResolveSlugResponse>(
+    `${API_BASE_URL}/catalog/resolve-slug/${encodeURIComponent(slug)}?locale=${locale}`,
   );
+}
+
+export async function fetchCatalog(): Promise<CatalogResponse | null> {
+  return fetchJson<CatalogResponse>(`${API_BASE_URL}/catalog`);
 }
 
 export async function fetchSearchResults(params: {
@@ -45,7 +57,12 @@ export async function fetchSearchResults(params: {
   searchParams.set("type", "all");
 
   if (params.city) searchParams.set("city", params.city);
-  if (params.discipline) searchParams.set("disciplines", params.discipline);
+  // Discipline key doubles as specialization ID for instructor profiles
+  // Send it as both `disciplines` (for enterprises) and `specializations` (for instructors)
+  if (params.discipline) {
+    searchParams.set("disciplines", params.discipline);
+    searchParams.set("specializations", params.discipline);
+  }
   if (params.specialization)
     searchParams.set("specializations", params.specialization);
   if (params.page) searchParams.set("page", String(params.page));
@@ -71,4 +88,24 @@ export async function fetchDisciplinesByCity(city: string): Promise<{
     categories: catalog?.categories || [],
     results,
   };
+}
+
+export interface DisciplineCity {
+  cityName: string;
+  citySlug: string;
+  instructors: number;
+  enterprises: number;
+}
+
+/**
+ * Fetch cities where a specific discipline is available.
+ * Used for internal linking on discipline landing pages.
+ */
+export async function fetchDisciplineCities(
+  disciplineKey: string,
+): Promise<DisciplineCity[]> {
+  const data = await fetchJson<DisciplineCity[]>(
+    `${API_BASE_URL}/search/disciplines/${encodeURIComponent(disciplineKey)}/cities`,
+  );
+  return data || [];
 }

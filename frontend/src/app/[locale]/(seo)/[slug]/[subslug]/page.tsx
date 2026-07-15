@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  fetchDisciplineBySlug,
-  fetchSearchResults,
-} from "@/lib/seo/fetch-seo-page";
-import { getLocalizedName } from "@/hooks/useCatalog";
+import { resolveSlug, fetchSearchResults } from "@/lib/seo/fetch-seo-page";
+import { getLocalizedName } from "@/lib/catalog-types";
 import { isReservedSlug } from "@/lib/seo/reserved-slugs";
+import { deslugifyCity } from "@/lib/seo/slug-utils";
 import { SubslugPageClient } from "./SubslugPageClient";
 
 interface Props {
@@ -13,22 +11,25 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug: citySlug, subslug: discSlug, locale } = await params;
+  const { slug: rawCitySlug, subslug: discSlug, locale } = await params;
 
-  // If either segment is a reserved slug, don't generate SEO
-  if (isReservedSlug(citySlug) || isReservedSlug(discSlug)) {
+  // Next.js passes URL-encoded params for characters like ł (e.g. "bia%C5%82ystok")
+  const citySlug = decodeURIComponent(rawCitySlug);
+
+  // Only check the discipline slug against reserved slugs.
+  // City slugs are expected to match city names (which are in reserved slugs),
+  // so we only block if the discipline slug itself is reserved.
+  if (isReservedSlug(discSlug)) {
     return { title: "Exercio" };
   }
 
-  const discipline = await fetchDisciplineBySlug(discSlug, locale);
-  if (!discipline) {
+  const resolved = await resolveSlug(discSlug, locale);
+  if (!resolved || resolved.type !== "discipline") {
     return { title: "Not Found" };
   }
 
-  const cityName = citySlug
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  const discipline = resolved.discipline!;
+  const cityName = deslugifyCity(citySlug);
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
   const name = getLocalizedName(discipline.names, locale);
@@ -64,28 +65,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function SubslugPage({ params }: Props) {
-  const { slug: citySlug, subslug: discSlug, locale } = await params;
+  const { slug: rawCitySlug, subslug: discSlug, locale } = await params;
 
-  // Reserved slugs should not be treated as SEO pages
-  if (isReservedSlug(citySlug) || isReservedSlug(discSlug)) {
+  // Next.js passes URL-encoded params for characters like ł (e.g. "bia%C5%82ystok")
+  const citySlug = decodeURIComponent(rawCitySlug);
+
+  // Only check the discipline slug against reserved slugs.
+  // City slugs are expected to match city names (which are in reserved slugs),
+  // so we only block if the discipline slug itself is reserved.
+  if (isReservedSlug(discSlug)) {
     notFound();
   }
 
-  const discipline = await fetchDisciplineBySlug(discSlug, locale);
-  if (!discipline) {
+  const resolved = await resolveSlug(discSlug, locale);
+  if (!resolved || resolved.type !== "discipline") {
     notFound();
   }
 
-  const cityName = citySlug
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  const discipline = resolved.discipline!;
+  const cityName = deslugifyCity(citySlug);
 
   const results = await fetchSearchResults({
     city: cityName,
     discipline: discipline.key,
     limit: 20,
   });
+
+  // If no results at all → 404 (Google hates empty landing pages)
+  const hasResults =
+    (results?.instructors?.total || 0) + (results?.enterprises?.total || 0) > 0;
+
+  if (!hasResults) {
+    notFound();
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
   const name = getLocalizedName(discipline.names, locale);

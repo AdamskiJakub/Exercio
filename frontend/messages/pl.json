@@ -1664,5 +1664,28 @@
     "ctaSectionTitle": "Gotowy na rozwój?",
     "ctaSectionSubtitle": "Wypełnij formularz, a skontaktujemy się z Tobą w ciągu 24 godzin, aby omówić, jak Exercio może pomóc Twojej firmie.",
     "contactUs": "Skontaktuj się z nami"
+  },
+  "SEO": {
+    "totalResults": "Dostępnych wyników",
+    "instructors": "Instruktorzy",
+    "enterprises": "Kluby i studia",
+    "alsoKnownAs": "Znane również jako",
+    "findInCity": "Znajdź {discipline} w swoim mieście",
+    "findInCityDesc": "Wybierz miasto, aby znaleźć najlepszych instruktorów i kluby.",
+    "browseAll": "Przeglądaj wszystkich",
+    "cityTitle": "Trening i fitness w {city}",
+    "cityDescription": "Znajdź najlepszych trenerów personalnych, instruktorów i kluby fitness w {city}. Porównaj opinie, cennik i dostępne terminy.",
+    "results": "Dostępni specjaliści",
+    "ctaTitle": "Jesteś instruktorem {discipline} w {city}?",
+    "ctaDescription": "Dodaj swój profil do Exercio i zacznij otrzymywać nowych klientów.",
+    "ctaButton": "Dodaj profil",
+    "joinNow": "Dołącz za darmo",
+    "disciplines": "Dyscypliny",
+    "categories": "Kategorie",
+    "browseByCategory": "Przeglądaj według kategorii",
+    "findInstructor": "Nie znalazłeś tego czego szukasz?",
+    "findInstructorDesc": "Skorzystaj z wyszukiwarki, aby znaleźć instruktora lub klub w {city}.",
+    "searchInCity": "Szukaj w {city}",
+    "availableInCities": "Dostępny w miastach"
   }
 }

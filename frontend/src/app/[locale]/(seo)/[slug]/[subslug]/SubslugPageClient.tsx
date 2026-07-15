@@ -2,12 +2,28 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import type { CatalogDiscipline } from "@/hooks/useCatalog";
-import { getLocalizedName } from "@/hooks/useCatalog";
+import type { CatalogDiscipline } from "@/lib/catalog-types";
+import { getLocalizedName } from "@/lib/catalog-types";
+
+interface SearchInstructorItem {
+  id: string;
+  fullName: string;
+  tagline: string | null;
+  city: string | null;
+  user?: { username: string };
+}
+
+interface SearchEnterpriseItem {
+  id: string;
+  companyName: string;
+  shortDescription: string | null;
+  city: string | null;
+  slug: string;
+}
 
 interface SearchResults {
-  instructors?: { data: any[]; total: number };
-  enterprises?: { data: any[]; total: number };
+  instructors?: { data: SearchInstructorItem[]; total: number };
+  enterprises?: { data: SearchEnterpriseItem[]; total: number };
 }
 
 interface SubslugPageClientProps {
@@ -111,7 +127,7 @@ export function SubslugPageClient({
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {initialResults.instructors.data
                       .slice(0, 6)
-                      .map((instructor: any) => (
+                      .map((instructor: SearchInstructorItem) => (
                         <Link
                           key={instructor.id}
                           href={`/${locale}/instruktorzy/${instructor.user?.username}`}
@@ -145,7 +161,7 @@ export function SubslugPageClient({
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {initialResults.enterprises.data
                       .slice(0, 6)
-                      .map((enterprise: any) => (
+                      .map((enterprise: SearchEnterpriseItem) => (
                         <Link
                           key={enterprise.id}
                           href={`/${locale}/enterprise/${enterprise.slug}`}
@@ -197,11 +213,14 @@ export function SubslugPageClient({
         <div className="rounded-xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-8">
           <h2 className="mb-2 text-2xl font-bold text-white">
             {t("ctaTitle", {
-              defaultValue: `Jesteś instruktorem ${name} w ${cityName}?`,
+              discipline: name,
+              city: cityName,
+              defaultValue: "Jesteś instruktorem {discipline} w {city}?",
             })}
           </h2>
           <p className="mb-6 text-slate-400">
             {t("ctaDescription", {
+              city: cityName,
               defaultValue:
                 "Dołącz do Exercio i zyskaj nowych klientów. Rejestracja jest bezpłatna.",
             })}

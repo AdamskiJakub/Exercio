@@ -2,61 +2,39 @@
 
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api";
+import type {
+  CatalogDiscipline,
+  CatalogCategory,
+  CatalogTag,
+  CatalogGoal,
+  CatalogResponse,
+} from "@/lib/catalog-types";
+import {
+  getLocalizedName,
+  getDisciplineName,
+  getCategoryName,
+  getCatalogTagName,
+  getCatalogGoalName,
+} from "@/lib/catalog-types";
+
+// Re-export types and helpers for backward compatibility
+export type {
+  CatalogDiscipline,
+  CatalogCategory,
+  CatalogTag,
+  CatalogGoal,
+  CatalogResponse,
+};
+export {
+  getLocalizedName,
+  getDisciplineName,
+  getCategoryName,
+  getCatalogTagName,
+  getCatalogGoalName,
+};
 
 // ============= MOCK CONFIG IMPORT =============
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_INSTRUCTORS === "true";
-
-// ============= TYPES =============
-
-export interface CatalogDiscipline {
-  id: string;
-  key: string;
-  categoryId: string;
-  names: { pl: string; en: string };
-  slugs: { pl: string; en: string };
-  synonyms: string[];
-  seo: {
-    titleTemplate: string;
-    descriptionTemplate: string;
-  };
-  popularity: number;
-  enabled: boolean;
-  indexable: boolean;
-  icon?: string;
-}
-
-export interface CatalogCategory {
-  id: string;
-  key: string;
-  names: { pl: string; en: string };
-  slugs: { pl: string; en: string };
-  icon: string;
-  order: number;
-  enabled: boolean;
-}
-
-export interface CatalogTag {
-  id: string;
-  key: string;
-  names: { pl: string; en: string };
-  categoryIds: string[];
-  enabled: boolean;
-}
-
-export interface CatalogGoal {
-  id: string;
-  key: string;
-  names: { pl: string; en: string };
-  icon: string;
-  enabled: boolean;
-}
-
-export interface CatalogResponse {
-  disciplines: CatalogDiscipline[];
-  categories: CatalogCategory[];
-  tags: CatalogTag[];
-  goals: CatalogGoal[];
-}
 
 // ============= CACHE =============
 let disciplinesCache: CatalogDiscipline[] | null = null;
@@ -437,17 +415,7 @@ export function prefetchCatalogGoals() {
   return fetchGoals();
 }
 
-// ============= HELPER FUNCTIONS =============
-
-/** Get localized name from a {pl, en} names object */
-export function getLocalizedName(
-  names: { pl: string; en: string },
-  locale: string,
-): string {
-  return locale === "pl" ? names.pl : names.en;
-}
-
-// --- Discipline helpers ---
+// ============= HELPER FUNCTIONS (cache-dependent) =============
 
 export function getDisciplineByKey(key: string): CatalogDiscipline | undefined {
   return disciplinesCache?.find((d) => d.key === key);
@@ -455,13 +423,6 @@ export function getDisciplineByKey(key: string): CatalogDiscipline | undefined {
 
 export function getDisciplineById(id: string): CatalogDiscipline | undefined {
   return disciplinesCache?.find((d) => d.id === id);
-}
-
-export function getDisciplineName(
-  discipline: CatalogDiscipline,
-  locale: string,
-): string {
-  return getLocalizedName(discipline.names, locale);
 }
 
 export function getDisciplineNameByKey(key: string, locale: string): string {
@@ -492,13 +453,6 @@ export function getCategoryById(id: string): CatalogCategory | undefined {
   return categoriesCache?.find((c) => c.id === id);
 }
 
-export function getCategoryName(
-  category: CatalogCategory,
-  locale: string,
-): string {
-  return getLocalizedName(category.names, locale);
-}
-
 export function getCategoryNameByKey(key: string, locale: string): string {
   const category = getCategoryByKey(key);
   return category ? getCategoryName(category, locale) : key;
@@ -515,10 +469,6 @@ export function getCatalogTagById(id: string): CatalogTag | undefined {
   return tagsCache?.find((t) => t.id === id);
 }
 
-export function getCatalogTagName(tag: CatalogTag, locale: string): string {
-  return getLocalizedName(tag.names, locale);
-}
-
 export function getCatalogTagNameById(id: string, locale: string): string {
   const tag = getCatalogTagById(id);
   return tag ? getCatalogTagName(tag, locale) : id;
@@ -528,10 +478,6 @@ export function getCatalogTagNameById(id: string, locale: string): string {
 
 export function getCatalogGoalById(id: string): CatalogGoal | undefined {
   return goalsCache?.find((g) => g.id === id);
-}
-
-export function getCatalogGoalName(goal: CatalogGoal, locale: string): string {
-  return getLocalizedName(goal.names, locale);
 }
 
 export function getCatalogGoalNameById(id: string, locale: string): string {
