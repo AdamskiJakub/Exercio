@@ -127,6 +127,30 @@ function buildReservedSlugs(): Set<string> {
     }
   }
 
+  // Add category slugs from the catalog to prevent conflicts
+  // Categories are used as SEO landing pages at /[locale]/{category-slug}
+  const categorySlugs = [
+    "taniec",
+    "dance",
+    "trening-personalny",
+    "personal-training",
+    "joga",
+    "yoga",
+    "sztuki-walki",
+    "martial-arts",
+    "fitness-i-cardio",
+    "fitness-and-cardio",
+    "sporty-druzynowe",
+    "team-sports",
+    "taniec-dla-par",
+    "dance-for-couples",
+    "taniec-dla-dzieci",
+    "dance-for-kids",
+  ];
+  for (const slug of categorySlugs) {
+    slugs.add(slug);
+  }
+
   return slugs;
 }
 

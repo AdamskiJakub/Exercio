@@ -4,8 +4,9 @@ import type { InstructorListing } from "@/types";
 import type { EnterpriseListing } from "@/types/enterprise";
 
 export interface ResolveSlugResponse {
-  type: "discipline" | "city" | null;
+  type: "discipline" | "city" | "category" | null;
   discipline?: CatalogDiscipline;
+  category?: CatalogCategory;
   cityName?: string;
   instructors?: number;
   enterprises?: number;
@@ -52,6 +53,7 @@ export async function fetchSearchResults(params: {
   city?: string;
   discipline?: string;
   specialization?: string;
+  category?: string;
   page?: number;
   limit?: number;
 }): Promise<SearchResponse | null> {
@@ -67,6 +69,7 @@ export async function fetchSearchResults(params: {
   }
   if (params.specialization)
     searchParams.set("specializations", params.specialization);
+  if (params.category) searchParams.set("category", params.category);
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 

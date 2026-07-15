@@ -12,6 +12,7 @@ import type { Language } from '../email/email.types';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { BCRYPT_SALT_ROUNDS } from '../auth/constants';
+import { slugifyToAscii } from '../common/slug-utils';
 
 @Injectable()
 export class EnterpriseLeadsService {
@@ -124,24 +125,27 @@ export class EnterpriseLeadsService {
       );
     }
 
-    // Generate a slug from company name with timestamp suffix to avoid collisions
-    const slug =
-      lead.companyName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '') +
-      '-' +
-      Date.now().toString(36);
+    // Generate a slug from company name with counter-based deduplication
+    const baseSlug = slugifyToAscii(lead.companyName);
+    let slug = baseSlug;
+    let slugCounter = 1;
+    while (
+      await this.prisma.enterpriseProfile.findUnique({ where: { slug } })
+    ) {
+      slug = `${baseSlug}-${slugCounter}`;
+      slugCounter++;
+    }
 
-    // Generate a username from company name with timestamp suffix to avoid collisions
-    const username =
-      lead.companyName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '_')
-        .replace(/^_|_$/g, '')
-        .substring(0, 20) +
-      '_' +
-      Date.now().toString(36).substring(0, 6);
+    // Generate a username from company name with counter-based deduplication
+    const baseUsername = slugifyToAscii(lead.companyName)
+      .replace(/-/g, '_')
+      .substring(0, 20);
+    let username = baseUsername;
+    let usernameCounter = 1;
+    while (await this.prisma.user.findUnique({ where: { username } })) {
+      username = `${baseUsername}_${usernameCounter}`;
+      usernameCounter++;
+    }
 
     // Generate activation token (48h expiry)
     const activationToken = crypto.randomBytes(32).toString('hex');

@@ -1725,6 +1725,16 @@
     "faqCityChoose": "How to find a good trainer in {city}?",
     "faqCityChooseAnswer": "Browse instructor profiles in {city}, check their reviews, pricing and availability. Exercio enables direct contact and online booking.",
     "faqCityOnline": "Are there online training options in {city}?",
-    "faqCityOnlineAnswer": "Yes, many instructors in {city} offer online training. On Exercio you can filter results to find specialists offering remote sessions."
+    "faqCityOnlineAnswer": "Yes, many instructors in {city} offer online training. On Exercio you can filter results to find specialists offering remote sessions.",
+    "categoryTitle": "{category} — find instructors and clubs",
+    "categoryDescription": "Find the best instructors and clubs in {category}. Check reviews, prices and availability.",
+    "categoryCityTitle": "{category} in {city} — find instructors and clubs",
+    "categoryCityDescription": "Find the best instructors and clubs for {category} in {city}. Check reviews, prices and availability.",
+    "categoryDisciplines": "Dance styles in {category}",
+    "categoryDisciplinesDesc": "Check {discipline} instructors in {city}",
+    "otherCategories": "See also other categories",
+    "categoryResults": "Available specialists in {category}",
+    "categoryResultsDescription": "We found {count} specialists in {category}. All have public profiles and are available for contact.",
+    "categoryCityResultsDescription": "We found {count} specialists in {category} in {city}. All have public profiles and are available for contact."
   }
 }

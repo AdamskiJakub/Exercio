@@ -73,6 +73,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  // Category page metadata
+  if (resolved.type === "category") {
+    const category = resolved.category!;
+    const name = getLocalizedName(category.names, locale);
+    const title =
+      locale === "pl"
+        ? `${name} — znajdź instruktorów i kluby | Exercio`
+        : `${name} — find instructors and clubs | Exercio`;
+    const description =
+      locale === "pl"
+        ? `Znajdź najlepszych instruktorów i kluby w kategorii ${name.toLowerCase()}. Sprawdź opinie, cennik i dostępne terminy.`
+        : `Find the best instructors and clubs in ${name.toLowerCase()}. Check reviews, prices and availability.`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        locale: locale === "pl" ? "pl_PL" : "en_US",
+        siteName: "Exercio",
+        url: `${siteUrl}/${locale}/${slug}`,
+        type: "website",
+      },
+      alternates: {
+        canonical: `${siteUrl}/${locale}/${slug}`,
+        languages: {
+          pl: category.slugs.pl
+            ? `${siteUrl}/pl/${category.slugs.pl}`
+            : undefined,
+          en: category.slugs.en
+            ? `${siteUrl}/en/${category.slugs.en}`
+            : undefined,
+        },
+      },
+    };
+  }
+
   // City page metadata
   const cityName = resolved.cityName!;
   const title =
@@ -107,14 +145,15 @@ export default async function SlugPage({ params }: Props) {
   // Next.js passes URL-encoded params for characters like ł (e.g. "bia%C5%82ystok")
   const slug = decodeURIComponent(rawSlug);
 
-  // Reserved slugs should not be treated as SEO pages
-  if (isReservedSlug(slug)) {
-    notFound();
-  }
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
 
   const resolved = await resolveSlug(slug, locale);
+
+  // Reserved slugs that don't resolve to a valid type should not be treated as SEO pages
+  if (isReservedSlug(slug) && (!resolved || resolved.type === null)) {
+    notFound();
+  }
+
   if (!resolved || resolved.type === null) {
     notFound();
   }
@@ -165,7 +204,55 @@ export default async function SlugPage({ params }: Props) {
     );
   }
 
-  // City page — resolved.type is "city" here (discipline case returned above)
+  // Category page
+  if (resolved.type === "category") {
+    const category = resolved.category!;
+    const name = getLocalizedName(category.names, locale);
+    const catalog = await fetchCatalog();
+    if (!catalog) {
+      notFound();
+    }
+
+    // Get disciplines in this category
+    const categoryDisciplines = catalog.disciplines.filter(
+      (d) => d.categoryId === category.id && d.enabled,
+    );
+
+    const results = await fetchSearchResults({
+      category: category.key,
+      limit: 20,
+    });
+
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: `${name} — Exercio`,
+      url: `${siteUrl}/${locale}/${slug}`,
+      about: {
+        "@type": "Thing",
+        name,
+      },
+    };
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <SlugPageClient
+          type="category"
+          category={category}
+          locale={locale}
+          disciplines={categoryDisciplines}
+          allCategories={catalog.categories}
+          initialResults={results}
+        />
+      </>
+    );
+  }
+
+  // City page — resolved.type is "city" here (discipline/category cases returned above)
   if (!resolved.cityName) {
     notFound();
   }

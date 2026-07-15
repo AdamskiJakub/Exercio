@@ -1725,6 +1725,16 @@
     "faqCityChoose": "Jak znaleźć dobrego trenera w {city}?",
     "faqCityChooseAnswer": "Przeglądaj profile instruktorów w {city}, sprawdź ich opinie, cennik oraz dostępne terminy. Exercio umożliwia bezpośredni kontakt i rezerwację online.",
     "faqCityOnline": "Czy w {city} są treningi online?",
-    "faqCityOnlineAnswer": "Tak, wielu instruktorów w {city} oferuje treningi online. Na Exercio możesz filtrować wyniki, aby znaleźć specjalistów oferujących zdalne sesje."
+    "faqCityOnlineAnswer": "Tak, wielu instruktorów w {city} oferuje treningi online. Na Exercio możesz filtrować wyniki, aby znaleźć specjalistów oferujących zdalne sesje.",
+    "categoryTitle": "{category} — znajdź instruktorów i kluby",
+    "categoryDescription": "Znajdź najlepszych instruktorów i kluby z kategorii {category}. Sprawdź opinie, cennik i dostępne terminy.",
+    "categoryCityTitle": "{category} w {city} — znajdź instruktorów i kluby",
+    "categoryCityDescription": "Znajdź najlepszych instruktorów i kluby {category} w {city}. Sprawdź opinie, cennik i dostępne terminy.",
+    "categoryDisciplines": "Style tańca w kategorii {category}",
+    "categoryDisciplinesDesc": "Sprawdź instruktorów {discipline} w {city}",
+    "otherCategories": "Zobacz także inne kategorie",
+    "categoryResults": "Dostępni specjaliści w kategorii {category}",
+    "categoryResultsDescription": "Znaleźliśmy {count} specjalistów w kategorii {category}. Wszyscy posiadają publiczne profile oraz możliwość kontaktu.",
+    "categoryCityResultsDescription": "Znaleźliśmy {count} specjalistów w kategorii {category} w {city}. Wszyscy posiadają publiczne profile oraz możliwość kontaktu."
   }
 }
