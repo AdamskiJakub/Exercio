@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { format, addDays, parseISO, isPast, isToday } from "date-fns";
-import { Calendar, Play } from "lucide-react";
+import { Calendar, Play, ArrowRight } from "lucide-react";
 import { useRouter } from "@/i18n/routing";
+import Link from "next/link";
 import { useAuthStore } from "@/stores/auth-store";
 import { InstructorHero } from "./InstructorHero";
 import { ExercioHighlights } from "./ExercioHighlights";
@@ -19,6 +20,9 @@ import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { getMediaUrl, isVideoUrl } from "@/lib/utils/media";
 import { NAV_SOURCE } from "./types";
 import type { InstructorProfile } from "@/types";
+import type { CatalogDiscipline } from "@/lib/catalog-types";
+import { useDisciplines } from "@/hooks/useCatalog";
+import { slugifyCity } from "@/lib/seo/slug-utils";
 
 interface NewPublicInstructorProfileProps {
   profile: InstructorProfile;
@@ -35,7 +39,9 @@ export function NewPublicInstructorProfile({
 }: NewPublicInstructorProfileProps) {
   const t = useTranslations("InstructorProfile");
   const router = useRouter();
+  const locale = useLocale();
   const { user } = useAuthStore();
+  const { disciplines } = useDisciplines();
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -100,6 +106,31 @@ export function NewPublicInstructorProfile({
   };
 
   const hasGallery = profile.gallery && profile.gallery.length > 0;
+
+  // Find the first discipline matching the instructor's primary specialization
+  const primarySpecialization = profile.specializations?.[0];
+  const matchingDiscipline: CatalogDiscipline | undefined = useMemo(() => {
+    if (!primarySpecialization || !disciplines.length) return undefined;
+    // First try: direct key match (specialization ID === discipline key)
+    const directMatch = disciplines.find(
+      (d) => d.key === primarySpecialization,
+    );
+    if (directMatch) return directMatch;
+    // Second try: category match (specialization ID === discipline categoryId)
+    return disciplines.find(
+      (d) => d.categoryId === `cat_${primarySpecialization}`,
+    );
+  }, [primarySpecialization, disciplines]);
+
+  // Build SEO link: /{locale}/{citySlug}/{disciplineSlug}
+  const disciplineSlug =
+    locale === "pl"
+      ? matchingDiscipline?.slugs.pl
+      : matchingDiscipline?.slugs.en;
+  const seoLink =
+    profile.city && matchingDiscipline && disciplineSlug
+      ? `/${locale}/${slugifyCity(profile.city)}/${disciplineSlug}`
+      : null;
 
   return (
     <>
@@ -183,10 +214,27 @@ export function NewPublicInstructorProfile({
           </div>
         )}
 
-        {/* SECTION 7: All Reviews */}
+        {/* SECTION 7: SEO Link — "See all {discipline} in {city}" (subtle, lower on page) */}
+        {seoLink && matchingDiscipline && profile.city && (
+          <div className="">
+            <Link
+              href={seoLink}
+              className="group inline-flex items-center gap-2 text-sm text-slate-300 hover:text-orange-400 transition-colors"
+            >
+              <span>
+                {locale === "pl"
+                  ? `Zobacz wszystkich specjalistów: ${matchingDiscipline.names.pl} — ${profile.city}`
+                  : `See all ${matchingDiscipline.names.en} in ${profile.city}`}
+              </span>
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </div>
+        )}
+
+        {/* SECTION 8: All Reviews */}
         <ReviewsSection instructorProfileId={profile.id} />
 
-        {/* SECTION 8: Contact */}
+        {/* SECTION 9: Contact */}
         <ContactSection profile={profile} />
       </div>
 

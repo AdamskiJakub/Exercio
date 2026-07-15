@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
@@ -14,11 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getMediaUrl } from "@/lib/utils/media";
 import { useSpecializations, getSpecializationName } from "@/hooks/useConfig";
+import { useDisciplines } from "@/hooks/useCatalog";
 import { getFullName } from "@/lib/utils/user";
 import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
 import type { InstructorProfile } from "@/types";
+import type { CatalogDiscipline } from "@/lib/catalog-types";
 import { useAuthStore } from "@/stores/auth-store";
+import { slugifyCity } from "@/lib/seo/slug-utils";
 import { FavoriteButton } from "./FavoriteButton";
 import { FollowInstructorButton } from "./FollowInstructorButton";
 
@@ -39,6 +43,7 @@ export function InstructorHero({
   const locale = useLocale();
   const dateLocale = locale === "pl" ? pl : undefined;
   const { specializations } = useSpecializations();
+  const { disciplines } = useDisciplines();
 
   // Don't show favorite button on own profile
   const isOwnProfile = user?.id === profile.userId;
@@ -48,6 +53,35 @@ export function InstructorHero({
   const specializationName = primarySpecialization
     ? specializations.find((s) => s.id === primarySpecialization)
     : null;
+
+  // Find the first discipline matching the instructor's primary specialization
+  // Some specialization IDs match discipline keys directly (e.g. "personal-training"),
+  // others are category IDs (e.g. "martial-arts") that contain multiple disciplines
+  const matchingDiscipline: CatalogDiscipline | undefined =
+    React.useMemo(() => {
+      if (!primarySpecialization || !disciplines.length) return undefined;
+
+      // First try: direct key match (specialization ID === discipline key)
+      const directMatch = disciplines.find(
+        (d) => d.key === primarySpecialization,
+      );
+      if (directMatch) return directMatch;
+
+      // Second try: category match (specialization ID === discipline categoryId)
+      return disciplines.find(
+        (d) => d.categoryId === `cat_${primarySpecialization}`,
+      );
+    }, [primarySpecialization, disciplines]);
+
+  // Build SEO link: /{locale}/{citySlug}/{disciplineSlug}
+  const disciplineSlug =
+    locale === "pl"
+      ? matchingDiscipline?.slugs.pl
+      : matchingDiscipline?.slugs.en;
+  const seoLink =
+    profile.city && matchingDiscipline && disciplineSlug
+      ? `/${locale}/${slugifyCity(profile.city)}/${disciplineSlug}`
+      : null;
 
   const showPrice =
     !profile.hourlyRateHidden && (profile.sessionPrice || profile.hourlyRate);

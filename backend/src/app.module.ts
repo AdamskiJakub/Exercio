@@ -22,6 +22,7 @@ import { EnterpriseModule } from './enterprise/enterprise.module';
 import { FollowModule } from './follow/follow.module';
 import { SearchModule } from './search/search.module';
 import { OGPreviewModule } from './og-preview/og-preview.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { OGPreviewModule } from './og-preview/og-preview.module';
     FollowModule,
     SearchModule,
     OGPreviewModule,
+    CatalogModule,
   ],
   controllers: [AppController],
   providers: [

@@ -13,6 +13,33 @@ interface EnterpriseItem {
   updatedAt: string;
 }
 
+interface CatalogDiscipline {
+  key: string;
+  slugs: { pl: string; en: string };
+  enabled: boolean;
+  indexable: boolean;
+  popularity: number;
+}
+
+interface SitemapCity {
+  name: string;
+  slug: string;
+  instructors: number;
+  enterprises: number;
+}
+
+interface SitemapCityDisciplinePair {
+  cityName: string;
+  citySlug: string;
+  disciplineKey: string;
+  disciplineSlug: string;
+}
+
+interface SitemapData {
+  cities: SitemapCity[];
+  cityDisciplinePairs: SitemapCityDisciplinePair[];
+}
+
 const staticRoutes = [
   // Polish routes
   {
@@ -150,10 +177,49 @@ const staticRoutes = [
   },
 ];
 
+/**
+ * Fetch catalog disciplines from the backend for SEO landing page sitemaps.
+ */
+async function fetchDisciplines(): Promise<CatalogDiscipline[]> {
+  try {
+    const response = await fetch(`${API_URL}/catalog/disciplines`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+  } catch (error) {
+    console.error("Failed to fetch disciplines for sitemap:", error);
+  }
+  return [];
+}
+
+/**
+ * Fetch sitemap data (cities + city-discipline pairs) from SearchService.
+ * Only returns combinations that actually exist in the database.
+ */
+async function fetchSitemapData(): Promise<SitemapData | null> {
+  try {
+    const response = await fetch(`${API_URL}/search/sitemap`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) {
+      return response.json();
+    }
+  } catch (error) {
+    console.error("Failed to fetch sitemap data:", error);
+  }
+  return null;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let instructorRoutes: MetadataRoute.Sitemap = [];
   let enterpriseRoutes: MetadataRoute.Sitemap = [];
+  let disciplineRoutes: MetadataRoute.Sitemap = [];
+  let cityRoutes: MetadataRoute.Sitemap = [];
+  let cityDisciplineRoutes: MetadataRoute.Sitemap = [];
 
+  // Fetch instructor profiles
   try {
     const response = await fetch(`${API_URL}/instructor-profiles`, {
       signal: AbortSignal.timeout(5000),
@@ -181,6 +247,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to fetch instructors for sitemap:", error);
   }
 
+  // Fetch enterprise profiles
   try {
     const response = await fetch(`${API_URL}/enterprise`, {
       signal: AbortSignal.timeout(5000),
@@ -208,5 +275,81 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Failed to fetch enterprises for sitemap:", error);
   }
 
-  return [...staticRoutes, ...instructorRoutes, ...enterpriseRoutes];
+  // Fetch disciplines for SEO landing pages
+  const disciplines = await fetchDisciplines();
+  const indexableDisciplines = disciplines.filter(
+    (d) => d.enabled && d.indexable,
+  );
+
+  if (indexableDisciplines.length > 0) {
+    disciplineRoutes = indexableDisciplines.flatMap((discipline) => [
+      {
+        url: `${BASE_URL}/pl/${discipline.slugs.pl}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.95,
+      },
+      {
+        url: `${BASE_URL}/en/${discipline.slugs.en}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.85,
+      },
+    ]);
+  }
+
+  // Fetch sitemap data for cities and city+discipline pairs
+  const sitemapData = await fetchSitemapData();
+
+  if (sitemapData) {
+    // City routes: /pl/{city}, /en/{city}
+    cityRoutes = sitemapData.cities.flatMap((city) => [
+      {
+        url: `${BASE_URL}/pl/${city.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.9,
+      },
+      {
+        url: `${BASE_URL}/en/${city.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      },
+    ]);
+
+    // City+discipline routes: /pl/{city}/{discipline}, /en/{city}/{discipline}
+    // Only for pairs that actually exist in the database
+    cityDisciplineRoutes = sitemapData.cityDisciplinePairs.flatMap((pair) => {
+      // Find the English slug for this discipline
+      const discipline = indexableDisciplines.find(
+        (d) => d.key === pair.disciplineKey,
+      );
+      const enSlug = discipline?.slugs.en || pair.disciplineSlug;
+
+      return [
+        {
+          url: `${BASE_URL}/pl/${pair.citySlug}/${pair.disciplineSlug}`,
+          lastModified: new Date(),
+          changeFrequency: "daily" as const,
+          priority: 0.85,
+        },
+        {
+          url: `${BASE_URL}/en/${pair.citySlug}/${enSlug}`,
+          lastModified: new Date(),
+          changeFrequency: "daily" as const,
+          priority: 0.75,
+        },
+      ];
+    });
+  }
+
+  return [
+    ...staticRoutes,
+    ...instructorRoutes,
+    ...enterpriseRoutes,
+    ...disciplineRoutes,
+    ...cityRoutes,
+    ...cityDisciplineRoutes,
+  ];
 }
