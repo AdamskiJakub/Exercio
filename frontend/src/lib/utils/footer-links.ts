@@ -2,6 +2,7 @@ export const footerLinks = {
   platform: [
     { href: "/instructors", translationKey: "platform.findTrainers" },
     { href: "/register", translationKey: "platform.becomeInstructor" },
+    { href: "/partner", translationKey: "platform.forBusiness" },
   ],
   support: [
     { href: "/help", translationKey: "support.helpCenter" },
