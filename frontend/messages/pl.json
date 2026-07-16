@@ -31,6 +31,11 @@
         "content": "Zobacz oceny i przeczytaj doświadczenia innych osób, aby wybrać najlepszego trenera."
       }
     },
+    "partners": {
+      "title": "Partnerzy, którzy nam zaufali",
+      "description": "Prowadzisz studio, siłownię lub organizację sportową? Zostań Partnerem Założycielskim i współtwórz z nami największy marketplace sportowy w Polsce.",
+      "partnerFeniks": "Studio Tańca Feniks"
+    },
     "stats": {
       "trainers": "Zweryfikowanych Trenerów",
       "sessions": "Zarezerwowanych Sesji",
@@ -828,7 +833,8 @@
     "platform": {
       "title": "Platforma",
       "findTrainers": "Znajdź Trenerów",
-      "becomeInstructor": "Zostań Instruktorem"
+      "becomeInstructor": "Zostań Instruktorem",
+      "forBusiness": "Dla Firm"
     },
     "support": {
       "title": "Pomoc",
@@ -1550,34 +1556,41 @@
     }
   },
   "EnterpriseApply": {
-    "title": "Dołącz do Exercio jako Partner",
-    "subtitle": "Wypełnij formularz, a skontaktujemy się z Tobą w ciągu 24 godzin, aby omówić współpracę.",
-    "whyEnterprise": "Dlaczego warto zostać Partnerem?",
+    "title": "Zostań Partnerem Założycielskim Exercio",
+    "subtitle": "Dołącz do pierwszych studiów i organizacji sportowych, które wspólnie z nami rozwijają Exercio — platformę łączącą klientów z instruktorami oraz firmami z branży sportowej i fitness.",
+    "subtitleForm": "Obecnie rozwijamy Exercio wspólnie z pierwszymi partnerami. Wypełnij formularz, a skontaktujemy się z Tobą, aby porozmawiać o Twojej działalności i sprawdzić, jak platforma może wspierać rozwój Twojej firmy.",
+    "whyEnterprise": "Co zyskuje Twój biznes?",
     "benefits": {
       "instructors": {
-        "title": "Zespół instruktorów",
-        "description": "Przypisz instruktorów do swojej organizacji i pokaż odwiedzającym cały zespół w jednym miejscu."
+        "title": "Profesjonalny profil firmy",
+        "description": "Stwórz kompletną wizytówkę swojej firmy z opisem, zdjęciami oraz najważniejszymi informacjami."
       },
       "visibility": {
-        "title": "Profesjonalny profil firmy",
-        "description": "Zaprezentuj swoją markę, ofertę, galerię zdjęć i wszystkie najważniejsze informacje w jednym miejscu."
+        "title": "Zaprezentuj cały zespół",
+        "description": "Przypisz instruktorów do swojej organizacji i pokaż klientom wszystkie osoby prowadzące zajęcia."
       },
       "management": {
-        "title": "Materiały i media",
-        "description": "Dodawaj zdjęcia, filmy oraz linki do wydarzeń lub swoich social mediów."
+        "title": "Publikuj materiały i aktualności",
+        "description": "Dodawaj zdjęcia, filmy oraz informacje o wydarzeniach i nowych kursach."
       },
       "brand": {
-        "title": "Większa widoczność",
-        "description": "Twoja firma pojawi się obok instruktorów w wynikach wyszukiwania Exercio."
+        "title": "Dotrzyj do nowych klientów",
+        "description": "Twoja firma będzie widoczna w wynikach wyszukiwania Exercio obok instruktorów i innych organizacji."
       }
     },
+    "founderProgramTitle": "Program Partnerów Założycielskich",
+    "founderProgramDesc": "Obecnie zapraszamy pierwsze firmy do współtworzenia Exercio. Partnerzy otrzymują bezpłatny dostęp do platformy na etapie jej rozwoju oraz możliwość zgłaszania pomysłów i wpływania na kierunek rozwoju nowych funkcji. Naszym celem jest stworzenie największej platformy łączącej klientów z instruktorami i firmami sportowymi w Polsce.",
     "howItWorks": {
       "title": "Jak wygląda współpraca",
-      "step1": "Wypełnij formularz zgłoszeniowy",
-      "step2": "Porozmawiajmy o Twoich potrzebach",
-      "step3": "Aktywujemy konto Twojej firmy",
+      "step1": "Wypełniasz formularz",
+      "step2": "Rozmawiamy o Twojej działalności",
+      "step3": "Aktywujemy konto Partnera",
       "step4": "Publikujesz profil i zapraszasz instruktorów"
     },
+    "afterSubmissionTitle": "Co dzieje się po wysłaniu zgłoszenia?",
+    "afterSubmission1": "Skontaktujemy się z Tobą w ciągu 24 godzin.",
+    "afterSubmission2": "Odpowiemy na wszystkie pytania dotyczące platformy.",
+    "afterSubmission3": "Jeżeli wspólnie uznamy, że Exercio odpowiada na potrzeby Twojej firmy, aktywujemy konto Partnera.",
     "companyName": "Nazwa firmy",
     "email": "Adres e-mail",
     "city": "Miasto",
@@ -1607,7 +1620,7 @@
       "city": "np. Warszawa",
       "phone": "+48 123 456 789",
       "website": "https://twojastrona.pl",
-      "message": "Opisz swoją działalność oraz czego oczekujesz od współpracy z Exercio.",
+      "message": "Opowiedz nam kilka słów o swojej działalności i napisz, jak Exercio może pomóc Twojej firmie.",
       "businessType": "Wybierz typ działalności",
       "instructorCount": "Wybierz liczbę"
     },
@@ -1615,7 +1628,7 @@
     "submitting": "Wysyłanie...",
     "success": {
       "title": "Zgłoszenie wysłane! 🎉",
-      "description": "Dziękujemy za zgłoszenie! Skontaktujemy się z Tobą w ciągu 24 godzin, aby omówić szczegóły współpracy."
+      "description": "Dziękujemy za zgłoszenie! Skontaktujemy się z Tobą w ciągu 24 godzin, aby porozmawiać o możliwościach współpracy."
     },
     "validation": {
       "required": "To pole jest wymagane",
@@ -1628,42 +1641,45 @@
     }
   },
   "PartnerPage": {
-    "badge": "Dla Firm",
-    "heroTitle": "Pokaż swoją firmę tam, gdzie klienci szukają instruktorów",
-    "heroSubtitle": "Stwórz profesjonalny profil swojej firmy, prezentuj instruktorów, dodawaj zdjęcia i materiały oraz zwiększ swoją widoczność w wyszukiwarce Exercio.",
-    "ctaButton": "Rozpocznij współpracę",
-    "backToRegister": "Powrót do rejestracji",
-    "benefitsTitle": "Co otrzymujesz",
-    "benefitsSubtitle": "Wszystko, czego potrzebujesz do prowadzenia i rozwijania swojego biznesu treningowego na jednej platformie.",
-    "benefitProfileTitle": "Zaprezentuj swoją firmę w jednym miejscu",
-    "benefitProfileDesc": "Pokaż swoją markę, ofertę, galerię zdjęć i wszystkie najważniejsze informacje w jednym miejscu.",
-    "benefitInstructorsTitle": "Zaprezentuj cały zespół instruktorów w jednym miejscu",
-    "benefitInstructorsDesc": "Przypisz instruktorów do swojej organizacji i pokaż odwiedzającym cały zespół pod jednym dachem.",
-    "benefitMediaTitle": "Zdjęcia, filmy i social media",
-    "benefitMediaDesc": "Dodawaj zdjęcia, filmy oraz linki do wydarzeń lub swoich social mediów.",
-    "benefitSearchTitle": "Dotrzyj do osób szukających zajęć w Twojej okolicy",
-    "benefitSearchDesc": "Twoja firma pojawi się obok instruktorów w wynikach wyszukiwania Exercio.",
+    "badge": "Program Partnerski",
+    "heroTitle": "Rozwijaj swoją firmę razem z Exercio",
+    "heroSubtitle": "Dołącz do grona pierwszych Partnerów Exercio — budujemy największy marketplace sportowy w Polsce. Zyskaj obecność w rozwijającej się platformie i współtwórz produkt, który realnie odpowiada na potrzeby branży.",
+    "ctaButton": "Dołącz do programu",
+    "backToRegister": "Dowiedz się więcej",
+    "benefitsTitle": "Co zyskuje Twoja firma",
+    "benefitsSubtitle": "Każda funkcja Exercio została zaprojektowana tak, aby przynosić realną wartość Twojej firmie.",
+    "benefitProfileTitle": "Nowi klienci w Twojej okolicy",
+    "benefitProfileDesc": "Twoja firma będzie widoczna dla osób aktywnie szukających zajęć sportowych w Twojej okolicy. Profil, który prezentuje ofertę, instruktorów i zdjęcia — wszystko w jednym miejscu.",
+    "benefitInstructorsTitle": "Cały zespół w jednym miejscu",
+    "benefitInstructorsDesc": "Przypisz instruktorów do swojej organizacji i pokaż odwiedzającym pełen obraz zespołu. Klienci widzą, kto u Was uczy i mogą łatwo nawiązać kontakt.",
+    "benefitMediaTitle": "Obecność w rozwijającym się marketplace",
+    "benefitMediaDesc": "Exercio to nie tylko profil — to rosnący rynek. Twoja firma zyskuje miejsce na platformie, która przyciąga coraz więcej osób zainteresowanych sportem i aktywnością.",
+    "benefitSearchTitle": "Wpływ na rozwój platformy",
+    "benefitSearchDesc": "Jako Partner Założycielski masz realny wpływ na kierunek rozwoju Exercio. Twoje opinie i potrzeby pomagają nam budować lepszy produkt dla całej branży.",
+    "buildingTogetherTitle": "Budujemy Exercio razem z pierwszymi Partnerami",
+    "buildingTogetherSubtitle": "Exercio powstaje we współpracy z pierwszymi studiami i organizacjami sportowymi. Nie jesteśmy gotowym produktem, który sprzedajemy — budujemy go wspólnie z naszymi Partnerami.",
+    "buildingTogetherPoint1": "Platforma jest na etapie aktywnego rozwoju — każdy tydzień przynosi nowe funkcje i usprawnienia",
+    "buildingTogetherPoint2": "Współpracujemy z pierwszymi studiami tańca, siłowniami i akademiami sportowymi, które testują i współtworzą produkt",
+    "buildingTogetherPoint3": "Partnerzy mają realny wpływ na roadmapę — to ich potrzeby kształtują priorytety rozwoju",
+    "buildingTogetherPoint4": "Udział w programie jest obecnie bezpłatny — zapraszamy pierwszych Partnerów do wspólnego budowania fundamentów platformy",
+    "buildingTogetherPoint5": "Naszym celem jest stworzenie największego marketplace'u sportowego w Polsce, który połączy profesjonalistów z klientami w każdej dyscyplinie",
+    "founderProgramTitle": "🚀 Program Partnerów Założycielskich",
+    "founderProgramDesc": "Obecnie zapraszamy pierwsze studia i organizacje sportowe do wspólnego rozwoju Exercio. Partnerzy otrzymują bezpłatny dostęp do platformy podczas etapu rozwoju oraz możliwość wpływania na kierunek produktu. To wyjątkowa okazja, aby być częścią czegoś nowego — od samego początku.",
     "howItWorksTitle": "Jak wygląda współpraca",
-    "howItWorksSubtitle": "Rozpocznij w 4 prostych krokach.",
+    "howItWorksSubtitle": "Proces jest prosty i nastawiony na partnerskie relacje.",
     "step1Title": "Wyślij zgłoszenie",
-    "step1Desc": "Wypełnij formularz, a my skontaktujemy się z Tobą.",
-    "step2Title": "Skontaktujemy się z Tobą",
-    "step2Desc": "Omówimy ofertę i odpowiemy na wszystkie pytania.",
-    "step3Title": "Aktywujemy konto Partnera",
-    "step3Desc": "Otrzymasz link aktywacyjny i ustawisz hasło do swojego konta.",
-    "step4Title": "Publikujesz profil i zapraszasz instruktorów",
-    "step4Desc": "Zaproś instruktorów i zacznij przyciągać klientów.",
-    "forWhomTitle": "Dla kogo jest Exercio Business?",
-    "forWhomSubtitle": "Niezależnie od tego, czy prowadzisz siłownię, studio jogi czy akademię sportową — Exercio pomoże Ci dotrzeć do nowych klientów.",
-    "forWhomGym": "Siłownie",
-    "forWhomDance": "Szkoły tańca",
-    "forWhomSwim": "Szkoły pływania",
-    "forWhomYoga": "Studia jogi",
-    "forWhomMartial": "Kluby sportów walki",
-    "forWhomTennis": "Akademie tenisowe",
-    "forWhomSports": "Akademie sportowe",
-    "ctaSectionTitle": "Gotowy na rozwój?",
-    "ctaSectionSubtitle": "Wypełnij formularz, a skontaktujemy się z Tobą w ciągu 24 godzin, aby omówić, jak Exercio może pomóc Twojej firmie.",
+    "step1Desc": "Wypełnij krótki formularz, a my skontaktujemy się, aby poznać Twoją firmę i potrzeby.",
+    "step2Title": "Poznajmy się",
+    "step2Desc": "Przeprowadzimy rozmowę, podczas której opowiesz o swojej firmie, a my o planach rozwoju Exercio.",
+    "step3Title": "Dołączasz do grona Partnerów",
+    "step3Desc": "Otrzymasz dostęp do platformy i stajesz się częścią grupy Partnerów Założycielskich.",
+    "step4Title": "Wspólnie rozwijamy Exercio",
+    "step4Desc": "Korzystasz z platformy, dzielisz się opiniami i współtworzysz produkt, który rośnie razem z Tobą.",
+    "socialProofTitle": "Pierwsi Partnerzy Exercio",
+    "socialProofSubtitle": "Poznaj studia i organizacje, które już dołączyły do programu i współtworzą z nami przyszłość rynku sportowego w Polsce.",
+    "partnerFeniks": "Studio Tańca Feniks",
+    "ctaSectionTitle": "Zostań jednym z pierwszych Partnerów Exercio",
+    "ctaSectionSubtitle": "Nie szukamy klientów — szukamy Partnerów, którzy razem z nami chcą zbudować coś wartościowego. Jeśli prowadzisz studio, siłownię lub organizację sportową i widzisz potencjał we wspólnym działaniu — wypełnij formularz, a porozmawiamy.",
     "contactUs": "Skontaktuj się z nami"
   },
   "SEO": {
