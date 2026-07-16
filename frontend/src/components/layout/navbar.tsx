@@ -15,6 +15,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import Image from "next/image";
+import logoSrc from "public/logo.svg";
 
 export function Navbar() {
   const t = useTranslations("Common");
@@ -33,14 +35,16 @@ export function Navbar() {
           {/* Left: Logo */}
           <Link
             href="/"
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             aria-label={t("homeAriaLabel")}
           >
-            <DumbbellIcon
-              className="w-8 h-8 text-orange-500"
+            <Image
+              src={logoSrc}
+              alt=""
+              className="w-7 h-7 text-orange-500"
               aria-hidden="true"
             />
-            <span className="text-3xl font-bold bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+            <span className="text-3xl tracking-wide font-medium bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
               Exercio
             </span>
           </Link>
