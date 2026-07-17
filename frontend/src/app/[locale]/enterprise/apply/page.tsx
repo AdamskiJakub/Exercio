@@ -2,9 +2,9 @@ import { EnterpriseApplyPage } from "@/components/enterprise/EnterpriseApplyPage
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dołącz jako Partner — Exercio",
+  title: "Zostań Partnerem Założycielskim — Exercio",
   description:
-    "Zarejestruj swoją szkołę tańca, studio fitness lub klub sportowy na Exercio i zyskaj dostęp do bazy instruktorów.",
+    "Dołącz do grona pierwszych Partnerów Exercio. Rozwijaj swoją firmę razem z nami — zyskaj obecność w rozwijającym się marketplace sportowym.",
 };
 
 export default function ApplyPage() {

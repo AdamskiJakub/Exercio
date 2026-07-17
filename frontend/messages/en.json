@@ -31,6 +31,11 @@
         "content": "See ratings and read experiences from others to choose the best trainer."
       }
     },
+    "partners": {
+      "title": "Partners who trust us",
+      "description": "Run a studio, gym, or sports organization? Become a Founding Partner and help us build Poland's largest sports marketplace.",
+      "partnerFeniks": "Feniks Dance Studio"
+    },
     "stats": {
       "trainers": "Verified Trainers",
       "sessions": "Sessions Booked",
@@ -828,7 +833,8 @@
     "platform": {
       "title": "Platform",
       "findTrainers": "Find Trainers",
-      "becomeInstructor": "Become Instructor"
+      "becomeInstructor": "Become Instructor",
+      "forBusiness": "For Business"
     },
     "support": {
       "title": "Support",
@@ -1550,34 +1556,41 @@
     }
   },
   "EnterpriseApply": {
-    "title": "Join Exercio as a Partner",
-    "subtitle": "Fill out the form and we'll get back to you within 24 hours to discuss partnership opportunities.",
-    "whyEnterprise": "Why become a Partner?",
+    "title": "Become an Exercio Founding Partner",
+    "subtitle": "Join the first studios and sports organizations that are developing Exercio together with us — a platform connecting clients with instructors and businesses in the sports and fitness industry.",
+    "subtitleForm": "We are currently developing Exercio together with our first partners. Fill out the form and we'll get in touch to talk about your business and see how the platform can support your growth.",
+    "whyEnterprise": "What your business gains",
     "benefits": {
       "instructors": {
-        "title": "Instructor Team",
-        "description": "Assign instructors to your organization and showcase your entire team in one place."
+        "title": "Professional Company Profile",
+        "description": "Create a complete business listing with a description, photos, and all key information."
       },
       "visibility": {
-        "title": "Professional Company Profile",
-        "description": "Present your brand, offerings, photo gallery, and all key information in a single place."
+        "title": "Showcase Your Entire Team",
+        "description": "Assign instructors to your organization and show clients all the people running classes."
       },
       "management": {
-        "title": "Media & Materials",
-        "description": "Add photos, videos, and links to events or your social media channels."
+        "title": "Publish Materials & News",
+        "description": "Add photos, videos, and information about events and new courses."
       },
       "brand": {
-        "title": "Greater Visibility",
-        "description": "Your company will appear alongside instructors in Exercio search results."
+        "title": "Reach New Clients",
+        "description": "Your business will be visible in Exercio search results alongside instructors and other organizations."
       }
     },
+    "founderProgramTitle": "Founding Partners Program",
+    "founderProgramDesc": "We are currently inviting the first businesses to co-create Exercio. Partners receive free access to the platform during its development phase and the ability to suggest ideas and influence the direction of new features. Our goal is to create the largest platform connecting clients with instructors and sports businesses in Poland.",
     "howItWorks": {
-      "title": "How it works",
-      "step1": "Fill out the application form",
-      "step2": "Let's talk about your needs",
-      "step3": "We activate your company account",
+      "title": "How the partnership works",
+      "step1": "Fill out the form",
+      "step2": "We talk about your business",
+      "step3": "We activate your Partner account",
       "step4": "Publish your profile and invite instructors"
     },
+    "afterSubmissionTitle": "What happens after you submit?",
+    "afterSubmission1": "We'll contact you within 24 hours.",
+    "afterSubmission2": "We'll answer all your questions about the platform.",
+    "afterSubmission3": "If we both agree that Exercio meets your business needs, we'll activate your Partner account.",
     "companyName": "Company name",
     "email": "Email address",
     "city": "City",
@@ -1607,7 +1620,7 @@
       "city": "e.g. New York",
       "phone": "+1 234 567 890",
       "website": "https://yourwebsite.com",
-      "message": "Describe your business and what you expect from partnering with Exercio.",
+      "message": "Tell us a few words about your business and how Exercio can help your company.",
       "businessType": "Select business type",
       "instructorCount": "Select count"
     },
@@ -1615,7 +1628,7 @@
     "submitting": "Submitting...",
     "success": {
       "title": "Application submitted! 🎉",
-      "description": "Thank you for your application! We'll get back to you within 24 hours to discuss the next steps."
+      "description": "Thank you for your application! We'll get back to you within 24 hours to discuss partnership opportunities."
     },
     "validation": {
       "required": "This field is required",
@@ -1628,43 +1641,46 @@
     }
   },
   "PartnerPage": {
-    "badge": "For Businesses",
-    "heroTitle": "Showcase your business where clients find instructors",
-    "heroSubtitle": "Create a professional company profile, present your instructors, add photos and media, and increase your visibility in Exercio search.",
-    "ctaButton": "Start partnership",
-    "backToRegister": "Back to registration",
-    "benefitsTitle": "What you get",
-    "benefitsSubtitle": "Everything you need to run and grow your training business on one platform.",
-    "benefitProfileTitle": "Showcase your company in one place",
-    "benefitProfileDesc": "Present your brand, offerings, photo gallery, and all key information in a single place.",
-    "benefitInstructorsTitle": "Showcase your entire instructor team in one place",
-    "benefitInstructorsDesc": "Assign instructors to your organization and showcase your entire team under one roof.",
-    "benefitMediaTitle": "Photos, videos & social media",
-    "benefitMediaDesc": "Add photos, videos, and links to events or your social media channels.",
-    "benefitSearchTitle": "Reach people looking for classes in your area",
-    "benefitSearchDesc": "Your company will appear alongside instructors in Exercio search results.",
-    "howItWorksTitle": "How it works",
-    "howItWorksSubtitle": "Get started in 4 simple steps.",
+    "badge": "Partner Program",
+    "heroTitle": "Grow your business together with Exercio",
+    "heroSubtitle": "Join the first Exercio Partners — we're building Poland's largest sports marketplace. Gain presence on a growing platform and co-create a product that truly serves the industry.",
+    "ctaButton": "Join the program",
+    "backToRegister": "Learn more",
+    "benefitsTitle": "What your business gains",
+    "benefitsSubtitle": "Every Exercio feature is designed to deliver real value to your business.",
+    "benefitProfileTitle": "New clients in your area",
+    "benefitProfileDesc": "Your business will be visible to people actively looking for sports activities nearby. A profile showcasing your offer, instructors, and photos — all in one place.",
+    "benefitInstructorsTitle": "Your entire team in one place",
+    "benefitInstructorsDesc": "Assign instructors to your organization and show visitors the full picture of your team. Clients see who teaches at your facility and can easily reach out.",
+    "benefitMediaTitle": "Presence in a growing marketplace",
+    "benefitMediaDesc": "Exercio is more than a profile — it's a growing marketplace. Your business gains a place on a platform that attracts more people interested in sports and activity every day.",
+    "benefitSearchTitle": "Influence on platform development",
+    "benefitSearchDesc": "As a Founding Partner, you have real influence on Exercio's direction. Your feedback and needs help us build a better product for the entire industry.",
+    "buildingTogetherTitle": "Building Exercio together with our first Partners",
+    "buildingTogetherSubtitle": "Exercio is being built in collaboration with the first studios and sports organizations. We're not a finished product we're selling — we're building it together with our Partners.",
+    "buildingTogetherPoint1": "The platform is in active development — every week brings new features and improvements",
+    "buildingTogetherPoint2": "We work with the first dance studios, gyms, and sports academies that test and co-create the product",
+    "buildingTogetherPoint3": "Partners have real influence on the roadmap — their needs shape development priorities",
+    "buildingTogetherPoint4": "Participation in the program is currently free — we invite the first Partners to help build the platform's foundations",
+    "buildingTogetherPoint5": "Our goal is to create Poland's largest sports marketplace, connecting professionals with clients across every discipline",
+    "founderProgramTitle": "🚀 Founding Partners Program",
+    "founderProgramDesc": "We are currently inviting the first studios and sports organizations to co-develop Exercio. Partners receive free access to the platform during the development phase and the ability to influence the product direction. This is a unique opportunity to be part of something new — from the very beginning.",
+    "howItWorksTitle": "How the partnership works",
+    "howItWorksSubtitle": "The process is simple and focused on building partner relationships.",
     "step1Title": "Submit your application",
-    "step1Desc": "Fill out the form and we'll get in touch with you.",
-    "step2Title": "We'll contact you",
-    "step2Desc": "We'll discuss the offer and answer your questions.",
-    "step3Title": "We activate your Partner account",
-    "step3Desc": "You'll receive an activation link to set up your account password.",
-    "step4Title": "Publish your profile and invite instructors",
-    "step4Desc": "Invite instructors and start attracting clients.",
-    "forWhomTitle": "Who is Exercio Business for?",
-    "forWhomSubtitle": "Whether you run a gym, yoga studio, or sports academy — Exercio helps you reach new clients.",
-    "forWhomGym": "Gyms",
-    "forWhomDance": "Dance Schools",
-    "forWhomSwim": "Swimming Schools",
-    "forWhomYoga": "Yoga Studios",
-    "forWhomMartial": "Martial Arts Clubs",
-    "forWhomTennis": "Tennis Academies",
-    "forWhomSports": "Sports Academies",
-    "ctaSectionTitle": "Ready to grow your business?",
-    "ctaSectionSubtitle": "Fill out the form and we'll contact you within 24 hours to discuss how Exercio can help your business.",
-    "contactUs": "Contact us instead"
+    "step1Desc": "Fill out a short form and we'll get in touch to learn about your business and needs.",
+    "step2Title": "Let's get to know each other",
+    "step2Desc": "We'll have a conversation where you tell us about your business, and we share our plans for Exercio.",
+    "step3Title": "Join the Partner group",
+    "step3Desc": "You'll receive access to the platform and become part of the Founding Partners group.",
+    "step4Title": "We develop Exercio together",
+    "step4Desc": "Use the platform, share your feedback, and co-create a product that grows with you.",
+    "socialProofTitle": "First Exercio Partners",
+    "socialProofSubtitle": "Meet the studios and organizations that have already joined the program and are co-creating the future of Poland's sports market with us.",
+    "partnerFeniks": "Feniks Dance Studio",
+    "ctaSectionTitle": "Become one of the first Exercio Partners",
+    "ctaSectionSubtitle": "We're not looking for customers — we're looking for Partners who want to build something valuable together. If you run a studio, gym, or sports organization and see the potential in working together — fill out the form and let's talk.",
+    "contactUs": "Contact us"
   },
   "SEO": {
     "totalResults": "Available results",

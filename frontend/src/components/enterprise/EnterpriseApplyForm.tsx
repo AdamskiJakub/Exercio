@@ -17,6 +17,7 @@ import {
 import { useEnterpriseApply } from "@/hooks/useEnterpriseApply";
 import { LegalCheckbox } from "@/components/ui/legal-checkbox";
 import type { CreateEnterpriseLeadDto } from "@/types/enterprise";
+import { CheckCircle2 } from "lucide-react";
 
 const BUSINESS_TYPES = [
   "danceSchool",
@@ -103,10 +104,13 @@ export function EnterpriseApplyForm() {
   if (isSuccess) {
     return (
       <Card
-        className="bg-slate-900/50 border-emerald-500/20 p-4 text-center"
+        className="bg-slate-900/50 border-emerald-500/20 p-8 text-center"
         role="status"
         aria-live="polite"
       >
+        <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+        </div>
         <h2 className="text-3xl font-bold text-white mb-4">
           {t("success.title")}
         </h2>
@@ -118,204 +122,229 @@ export function EnterpriseApplyForm() {
   }
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 p-8">
-      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-        <div className="space-y-2">
-          <Label htmlFor="companyName" className="text-white">
-            {t("companyName")} <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="companyName"
-            value={formData.companyName}
-            onChange={(e) => handleChange("companyName", e.target.value)}
-            className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-            placeholder={t("placeholders.companyName")}
-            aria-invalid={!!errors.companyName}
-            aria-describedby={
-              errors.companyName ? "companyName-error" : undefined
-            }
+    <div className="space-y-8">
+      <Card className="bg-slate-900/50 border-slate-800 p-8">
+        <p className="text-slate-300 text-sm mb-6 leading-relaxed">
+          {t("subtitleForm")}
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          <div className="space-y-2">
+            <Label htmlFor="companyName" className="text-white">
+              {t("companyName")} <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="companyName"
+              value={formData.companyName}
+              onChange={(e) => handleChange("companyName", e.target.value)}
+              className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
+              placeholder={t("placeholders.companyName")}
+              aria-invalid={!!errors.companyName}
+              aria-describedby={
+                errors.companyName ? "companyName-error" : undefined
+              }
+            />
+            {errors.companyName && (
+              <p
+                id="companyName-error"
+                className="text-red-400 text-sm"
+                role="alert"
+              >
+                {errors.companyName}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-white">
+              {t("email")} <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleChange("email", e.target.value)}
+              className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
+              placeholder={t("placeholders.email")}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
+            />
+            {errors.email && (
+              <p id="email-error" className="text-red-400 text-sm" role="alert">
+                {errors.email}
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="businessType" className="text-white">
+                {t("businessType")}
+              </Label>
+              <Select
+                value={formData.businessType}
+                onValueChange={(value) => handleChange("businessType", value)}
+              >
+                <SelectTrigger
+                  id="businessType"
+                  className="w-full bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 cursor-pointer"
+                >
+                  <SelectValue placeholder={t("placeholders.businessType")} />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700">
+                  {BUSINESS_TYPES.map((type) => (
+                    <SelectItem
+                      key={type}
+                      value={type}
+                      className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
+                    >
+                      {t(`businessTypes.${type}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="instructorCount" className="text-white">
+                {t("instructorCount")}
+              </Label>
+              <Select
+                value={formData.instructorCount}
+                onValueChange={(value) =>
+                  handleChange("instructorCount", value)
+                }
+              >
+                <SelectTrigger
+                  id="instructorCount"
+                  className="w-full bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 cursor-pointer"
+                >
+                  <SelectValue
+                    placeholder={t("placeholders.instructorCount")}
+                  />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700">
+                  {INSTRUCTOR_COUNTS.map((count) => (
+                    <SelectItem
+                      key={count}
+                      value={count}
+                      className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
+                    >
+                      {count}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city" className="text-white">
+                {t("city")}
+              </Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
+                placeholder={t("placeholders.city")}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-white">
+                {t("phone")}
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleChange("phone", e.target.value)}
+                className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
+                placeholder={t("placeholders.phone")}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="website" className="text-white">
+              {t("website")}
+            </Label>
+            <Input
+              id="website"
+              type="text"
+              value={formData.website}
+              onChange={(e) => handleChange("website", e.target.value)}
+              className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
+              placeholder={t("placeholders.website")}
+              autoComplete="url"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="message" className="text-white">
+              {t("message")}
+            </Label>
+            <Textarea
+              id="message"
+              value={formData.message}
+              onChange={(e) => handleChange("message", e.target.value)}
+              className="bg-slate-800/50 border-emerald-900/50 text-white min-h-30 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
+              placeholder={t("placeholders.message")}
+            />
+          </div>
+
+          {/* Legal Checkbox */}
+          <LegalCheckbox
+            checked={agreeToTerms}
+            onChange={(checked) => {
+              setAgreeToTerms(checked);
+              if (checked) setAgreeError(undefined);
+            }}
+            error={agreeError}
           />
-          {errors.companyName && (
-            <p
-              id="companyName-error"
-              className="text-red-400 text-sm"
+
+          {error && (
+            <div
+              className="bg-red-900/30 border border-red-800 rounded-lg p-4"
               role="alert"
+              aria-live="assertive"
             >
-              {errors.companyName}
-            </p>
+              <p className="text-red-400 text-sm">
+                {(error as any)?.response?.data?.message?.includes(
+                  "already exists and is being processed",
+                )
+                  ? t("error.emailInUse")
+                  : t("error.generic")}
+              </p>
+            </div>
           )}
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email" className="text-white">
-            {t("email")} <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => handleChange("email", e.target.value)}
-            className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-            placeholder={t("placeholders.email")}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
-          />
-          {errors.email && (
-            <p id="email-error" className="text-red-400 text-sm" role="alert">
-              {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="businessType" className="text-white">
-              {t("businessType")}
-            </Label>
-            <Select
-              value={formData.businessType}
-              onValueChange={(value) => handleChange("businessType", value)}
-            >
-              <SelectTrigger
-                id="businessType"
-                className="w-full bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 cursor-pointer"
-              >
-                <SelectValue placeholder={t("placeholders.businessType")} />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700">
-                {BUSINESS_TYPES.map((type) => (
-                  <SelectItem
-                    key={type}
-                    value={type}
-                    className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
-                  >
-                    {t(`businessTypes.${type}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="instructorCount" className="text-white">
-              {t("instructorCount")}
-            </Label>
-            <Select
-              value={formData.instructorCount}
-              onValueChange={(value) => handleChange("instructorCount", value)}
-            >
-              <SelectTrigger
-                id="instructorCount"
-                className="w-full bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 cursor-pointer"
-              >
-                <SelectValue placeholder={t("placeholders.instructorCount")} />
-              </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700">
-                {INSTRUCTOR_COUNTS.map((count) => (
-                  <SelectItem
-                    key={count}
-                    value={count}
-                    className="text-white hover:bg-slate-700 focus:bg-slate-700 cursor-pointer"
-                  >
-                    {count}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="city" className="text-white">
-              {t("city")}
-            </Label>
-            <Input
-              id="city"
-              value={formData.city}
-              onChange={(e) => handleChange("city", e.target.value)}
-              className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-              placeholder={t("placeholders.city")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="text-white">
-              {t("phone")}
-            </Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
-              className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-              placeholder={t("placeholders.phone")}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="website" className="text-white">
-            {t("website")}
-          </Label>
-          <Input
-            id="website"
-            type="text"
-            value={formData.website}
-            onChange={(e) => handleChange("website", e.target.value)}
-            className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-            placeholder={t("placeholders.website")}
-            autoComplete="url"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="message" className="text-white">
-            {t("message")}
-          </Label>
-          <Textarea
-            id="message"
-            value={formData.message}
-            onChange={(e) => handleChange("message", e.target.value)}
-            className="bg-slate-800/50 border-emerald-900/50 text-white min-h-30 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-            placeholder={t("placeholders.message")}
-          />
-        </div>
-
-        {/* Legal Checkbox */}
-        <LegalCheckbox
-          checked={agreeToTerms}
-          onChange={(checked) => {
-            setAgreeToTerms(checked);
-            if (checked) setAgreeError(undefined);
-          }}
-          error={agreeError}
-        />
-
-        {error && (
-          <div
-            className="bg-red-900/30 border border-red-800 rounded-lg p-4"
-            role="alert"
-            aria-live="assertive"
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-6 text-lg cursor-pointer"
           >
-            <p className="text-red-400 text-sm">
-              {(error as any)?.response?.data?.message?.includes(
-                "already exists and is being processed",
-              )
-                ? t("error.emailInUse")
-                : t("error.generic")}
-            </p>
-          </div>
-        )}
+            {isPending ? t("submitting") : t("submit")}
+          </Button>
+        </form>
+      </Card>
 
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-6 text-lg"
-        >
-          {isPending ? t("submitting") : t("submit")}
-        </Button>
-      </form>
-    </Card>
+      {/* After submission info */}
+      <Card className="bg-slate-900/30 border-slate-800/50 p-6">
+        <h3 className="text-lg font-bold text-white mb-4">
+          {t("afterSubmissionTitle")}
+        </h3>
+        <ul className="space-y-3">
+          {[1, 2, 3].map((item) => (
+            <li key={item} className="flex gap-3 text-sm text-slate-300">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <span>{t(`afterSubmission${item}`)}</span>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    </div>
   );
 }
