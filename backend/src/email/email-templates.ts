@@ -176,6 +176,7 @@ export const buildBookingTemplate = (
     duration: number;
     price?: number;
     instructorName?: string;
+    instructorPhone?: string;
   },
   cancelLink?: string,
   locale: string = 'pl',
@@ -217,6 +218,10 @@ export const buildBookingTemplate = (
     ? `<tr><td style="padding:6px 0;">Instruktor / Instructor</td><td align="right" style="color:#f1f5f9;font-weight:600;">${escapeHtml(details.instructorName)}</td></tr>`
     : '';
 
+  const instructorPhoneRow = details.instructorPhone
+    ? `<tr><td style="padding:6px 0;">Telefon / Phone</td><td align="right" style="color:#f1f5f9;">${escapeHtml(details.instructorPhone)}</td></tr>`
+    : '';
+
   return buildLayout(
     `
 <tr>
@@ -229,6 +234,7 @@ ${detailsTable(`
 <tr><td style="padding:6px 0;">${content.durationLabel}</td><td align="right" style="color:#f1f5f9;">${details.duration} ${content.minutes}</td></tr>
 ${priceRow(content.priceLabel, details.price)}
 ${instructorRow}
+${instructorPhoneRow}
 `)}
 ${actionHtml}
 </td>

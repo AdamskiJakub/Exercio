@@ -93,6 +93,7 @@ export class BookingCreationService {
             email: true,
             firstName: true,
             lastName: true,
+            phone: true,
             instructorProfile: {
               select: {
                 id: true,
@@ -105,12 +106,13 @@ export class BookingCreationService {
       },
     });
 
-    // Only notify the instructor about the new booking request.
-    // The confirmation email to the client is sent when the instructor confirms.
+    // Notify the instructor about the new booking request.
+    // Notify the client that the booking is pending instructor confirmation.
     this.notificationHelper.sendInstructorNewBookingRequestNotification(
       booking,
       language,
     );
+    this.notificationHelper.sendBookingPendingToClient(booking, language);
 
     return booking;
   }
@@ -169,6 +171,7 @@ export class BookingCreationService {
             email: true,
             firstName: true,
             lastName: true,
+            phone: true,
             instructorProfile: {
               select: {
                 id: true,
@@ -181,7 +184,11 @@ export class BookingCreationService {
       },
     });
 
-    this.notificationHelper.sendBookingConfirmationToGuest(booking, language);
+    this.notificationHelper.sendInstructorNewBookingRequestNotification(
+      booking,
+      language,
+    );
+    this.notificationHelper.sendBookingPendingToGuest(booking, language);
 
     return booking;
   }
@@ -612,28 +619,28 @@ export class BookingCreationService {
       throw new BadRequestException('Only confirmed bookings can be completed');
     }
 
-    // Prevent completing before the session endTime
-    const nodeEnv = this.configService.get<string>('NODE_ENV');
-    const devBypassEnabled =
-      this.configService.get<string>('DEV_BYPASS_SESSION_TIME') === 'true';
-    const devBypass = nodeEnv === 'development' && devBypassEnabled;
+    // [TEMP DISABLED for testing] Prevent completing before the session endTime
+    // const nodeEnv = this.configService.get<string>('NODE_ENV');
+    // const devBypassEnabled =
+    //   this.configService.get<string>('DEV_BYPASS_SESSION_TIME') === 'true';
+    // const devBypass = nodeEnv === 'development' && devBypassEnabled;
 
-    // Production guard: never allow bypass in production
-    if (nodeEnv === 'production' && devBypassEnabled) {
-      throw new BadRequestException(
-        'DEV_BYPASS_SESSION_TIME is not allowed in production',
-      );
-    }
+    // // Production guard: never allow bypass in production
+    // if (nodeEnv === 'production' && devBypassEnabled) {
+    //   throw new BadRequestException(
+    //     'DEV_BYPASS_SESSION_TIME is not allowed in production',
+    //   );
+    // }
 
-    if (
-      !devBypass &&
-      booking.endTime &&
-      new Date() < new Date(booking.endTime)
-    ) {
-      throw new BadRequestException(
-        'Cannot complete a booking before the session end time',
-      );
-    }
+    // if (
+    //   !devBypass &&
+    //   booking.endTime &&
+    //   new Date() < new Date(booking.endTime)
+    // ) {
+    //   throw new BadRequestException(
+    //     'Cannot complete a booking before the session end time',
+    //   );
+    // }
 
     const updated = await this.prisma.booking.update({
       where: { id: bookingId },

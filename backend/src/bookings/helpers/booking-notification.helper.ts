@@ -27,6 +27,7 @@ export interface NotifiableBooking {
     email?: string;
     firstName?: string | null;
     lastName?: string | null;
+    phone?: string | null;
     instructorProfile?: {
       id?: string;
       sessionDuration?: number;
@@ -64,7 +65,89 @@ export class BookingNotificationHelper {
   }
 
   /**
-   * Send booking confirmation to a registered client + notification to instructor.
+   * Send "booking pending" notification to a registered client (when they create a booking).
+   * Tells them the booking awaits instructor confirmation, with instructor details.
+   */
+  sendBookingPendingToClient(
+    booking: NotifiableBooking,
+    language: Language,
+  ): void {
+    const { bookingDate, bookingTime } = this.formatDateTime(
+      booking.startTime,
+      language,
+    );
+    const instructorName = this.resolveInstructorName(booking);
+    const instructorPhone = booking.instructorUser?.phone || undefined;
+    const dashboardUrl = this.buildDashboardUrl(language);
+
+    const clientEmail = booking.client?.email;
+    if (clientEmail) {
+      this.emailService
+        .sendBookingPendingClient(
+          clientEmail,
+          language,
+          {
+            date: bookingDate,
+            time: bookingTime,
+            duration: booking.duration ?? 0,
+            price: booking.price ?? undefined,
+            instructorName,
+            instructorPhone,
+          },
+          dashboardUrl,
+        )
+        .catch((err) =>
+          this.logger.error(
+            'Failed to send booking pending notification to client',
+            err,
+          ),
+        );
+    }
+  }
+
+  /**
+   * Send "booking pending" notification to a guest (when they create a booking).
+   * Tells them the booking awaits instructor confirmation, with instructor details.
+   */
+  sendBookingPendingToGuest(
+    booking: NotifiableBooking,
+    language: Language,
+  ): void {
+    const { bookingDate, bookingTime } = this.formatDateTime(
+      booking.startTime,
+      language,
+    );
+    const instructorName = this.resolveInstructorName(booking);
+    const instructorPhone = booking.instructorUser?.phone || undefined;
+    const cancellationUrl = this.buildCancellationUrl(booking, language);
+
+    const guestEmail = booking.guestEmail;
+    if (guestEmail) {
+      this.emailService
+        .sendBookingPendingGuest(
+          guestEmail,
+          language,
+          {
+            date: bookingDate,
+            time: bookingTime,
+            duration: booking.duration ?? 0,
+            price: booking.price ?? undefined,
+            instructorName,
+            instructorPhone,
+          },
+          cancellationUrl,
+        )
+        .catch((err) =>
+          this.logger.error(
+            'Failed to send booking pending notification to guest',
+            err,
+          ),
+        );
+    }
+  }
+
+  /**
+   * Send booking confirmation to a registered client.
    */
   sendBookingConfirmationToClient(
     booking: NotifiableBooking,
@@ -96,12 +179,10 @@ export class BookingNotificationHelper {
           this.logger.error('Failed to send booking confirmation', err),
         );
     }
-
-    this.sendInstructorNewBookingNotification(booking, language);
   }
 
   /**
-   * Send booking confirmation to a guest + notification to instructor.
+   * Send booking confirmation to a guest.
    */
   sendBookingConfirmationToGuest(
     booking: NotifiableBooking,
@@ -133,8 +214,6 @@ export class BookingNotificationHelper {
           this.logger.error('Failed to send guest booking confirmation', err),
         );
     }
-
-    this.sendInstructorNewBookingNotification(booking, language);
   }
 
   /**

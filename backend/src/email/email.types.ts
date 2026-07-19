@@ -2,6 +2,7 @@ export type Language = 'pl' | 'en';
 
 export interface BookingDetails {
   instructorName: string;
+  instructorPhone?: string;
   date: string;
   time: string;
   duration: number;
