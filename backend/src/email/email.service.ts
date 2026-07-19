@@ -10,6 +10,7 @@ import {
   CancellationByInstructorDetails,
   ClientAcceptedManualBookingDetails,
   EnterpriseLeadDetails,
+  BookingEmailContent,
 } from './email.types';
 
 import {
@@ -25,6 +26,7 @@ import {
 
 import {
   BOOKING_TEXTS,
+  BOOKING_PENDING_TEXTS,
   CANCELLATION_TEXTS,
   INFO_EMAIL_TEXTS,
   PASSWORD_RESET_TEXTS,
@@ -127,6 +129,34 @@ export class EmailService {
     cancellationUrl: string,
   ) {
     const texts = BOOKING_TEXTS.guestConfirmation[language];
+    const html = buildBookingTemplate(
+      texts,
+      details,
+      cancellationUrl,
+      language,
+    );
+    return this.sendEmail(email, texts.title, html);
+  }
+
+  async sendBookingPendingClient(
+    email: string,
+    language: Language,
+    details: BookingDetails,
+    dashboardUrl: string,
+  ) {
+    const baseTexts = BOOKING_PENDING_TEXTS.clientPending[language];
+    const texts = { ...baseTexts, dashboardUrl };
+    const html = buildBookingTemplate(texts, details, undefined, language);
+    return this.sendEmail(email, texts.title, html);
+  }
+
+  async sendBookingPendingGuest(
+    email: string,
+    language: Language,
+    details: BookingDetails,
+    cancellationUrl: string,
+  ) {
+    const texts = BOOKING_PENDING_TEXTS.guestPending[language];
     const html = buildBookingTemplate(
       texts,
       details,

@@ -33,12 +33,13 @@ export function InstructorBookingActions({
 
   const canConfirm = booking.status === "PENDING";
   const canComplete = booking.status === "CONFIRMED";
-  const devBypass = process.env.NEXT_PUBLIC_DEV_BYPASS_SESSION_TIME === "true";
-  const isBeforeEndTime =
-    canComplete &&
-    booking.endTime &&
-    new Date() < new Date(booking.endTime) &&
-    !devBypass;
+  // [TEMP DISABLED for testing] Time-based guard for completing sessions
+  // const devBypass = process.env.NEXT_PUBLIC_DEV_BYPASS_SESSION_TIME === "true";
+  // const isBeforeEndTime =
+  //   canComplete &&
+  //   booking.endTime &&
+  //   new Date() < new Date(booking.endTime) &&
+  //   !devBypass;
 
   if (!canConfirm && !canComplete) return null;
 
@@ -72,27 +73,12 @@ export function InstructorBookingActions({
           <Button
             size="sm"
             onClick={() => onCompleteClick(booking)}
-            disabled={isBeforeEndTime || isCompletePending}
-            className={cn(
-              "h-8 px-3 w-full",
-              isBeforeEndTime
-                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600 text-white",
-            )}
+            disabled={isCompletePending}
+            className="h-8 px-3 w-full bg-blue-500 hover:bg-blue-600 text-white"
           >
             <CheckCircle className="w-4 h-4 mr-1" />
             {t("completeBooking")}
           </Button>
-          {isBeforeEndTime && (
-            <PortalTooltip
-              content={t("completeAfterEndTime", {
-                date: format(new Date(booking.endTime), "d MMMM", {
-                  locale: dateLocale,
-                }),
-                time: format(new Date(booking.endTime), "HH:mm"),
-              })}
-            />
-          )}
         </div>
       )}
     </div>
