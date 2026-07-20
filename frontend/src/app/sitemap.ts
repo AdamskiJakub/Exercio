@@ -252,7 +252,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     if (response.ok) {
-      const instructors: InstructorProfile[] = await response.json();
+      const body = await response.json();
+      // The API returns a paginated response: { data: [...], total, page, limit, totalPages }
+      const instructors: InstructorProfile[] = body.data ?? body;
 
       instructorRoutes = instructors.flatMap((instructor) => [
         {
@@ -280,7 +282,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
 
     if (response.ok) {
-      const enterprises: EnterpriseItem[] = await response.json();
+      const body = await response.json();
+      // The API returns a paginated response: { data: [...], total, ... }
+      const enterprises: EnterpriseItem[] = body.data ?? body;
 
       enterpriseRoutes = enterprises.flatMap((ent) => [
         {
