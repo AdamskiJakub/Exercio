@@ -61,7 +61,7 @@ export default function Home() {
         </div>
 
         <div className="relative container mx-auto px-4 md:px-6 py-12 md:py-16 min-h-[calc(100vh-5rem)] flex items-center">
-          <div className="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto w-full">
+          <div className="grid md:grid-cols-2 gap-12 items-center w-full">
             <div className="space-y-6">
               <div className="space-y-3">
                 <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
@@ -91,7 +91,7 @@ export default function Home() {
       {/* Partners Section — between hero and feature cards */}
       <section className="bg-slate-950 pt-16">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
               {t("partners.title")}
             </h2>
@@ -127,7 +127,7 @@ export default function Home() {
       {/* Feature Cards */}
       <div className="bg-slate-950 py-20">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6">
             <Card className="bg-slate-800/50 backdrop-blur-sm border-2 border-slate-700 hover:border-orange-500 transition-all duration-300 h-full">
               <CardHeader>
                 <div className="text-5xl mb-4">🔍</div>

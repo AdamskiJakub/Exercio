@@ -105,6 +105,67 @@ export const BOOKING_TEXTS = {
   },
 };
 
+export const BOOKING_PENDING_TEXTS = {
+  clientPending: {
+    pl: {
+      title: 'Rezerwacja oczekuje na potwierdzenie ⏳',
+      subtitle:
+        'Twoja rezerwacja została przyjęta i oczekuje na potwierdzenie przez instruktora. Gdy instruktor potwierdzi termin, otrzymasz kolejną wiadomość.',
+      dateLabel: 'Data',
+      timeLabel: 'Godzina',
+      durationLabel: 'Czas trwania',
+      priceLabel: 'Cena',
+      minutes: 'min',
+      cancelInfo: 'Możesz zarządzać swoimi rezerwacjami w panelu użytkownika.',
+      cancelButton: 'Przejdź do panelu',
+      footer: 'Dziękujemy za skorzystanie z Exercio!',
+    },
+    en: {
+      title: 'Booking Pending Confirmation ⏳',
+      subtitle:
+        'Your booking has been received and is awaiting confirmation by the instructor. You will receive another email once the instructor confirms the session.',
+      dateLabel: 'Date',
+      timeLabel: 'Time',
+      durationLabel: 'Duration',
+      priceLabel: 'Price',
+      minutes: 'min',
+      cancelInfo: 'You can manage your bookings in your dashboard.',
+      cancelButton: 'Go to Dashboard',
+      footer: 'Thank you for using Exercio!',
+    },
+  },
+  guestPending: {
+    pl: {
+      title: 'Rezerwacja oczekuje na potwierdzenie ⏳',
+      subtitle:
+        'Twoja rezerwacja została przyjęta i oczekuje na potwierdzenie przez instruktora. Gdy instruktor potwierdzi termin, otrzymasz kolejną wiadomość.',
+      dateLabel: 'Data',
+      timeLabel: 'Godzina',
+      durationLabel: 'Czas trwania',
+      priceLabel: 'Cena',
+      minutes: 'min',
+      cancelInfo:
+        'Jeśli nie możesz wziąć udziału, anuluj sesję klikając przycisk poniżej.',
+      cancelButton: 'Anuluj sesję',
+      footer: 'Dziękujemy za skorzystanie z Exercio!',
+    },
+    en: {
+      title: 'Booking Pending Confirmation ⏳',
+      subtitle:
+        'Your booking has been received and is awaiting confirmation by the instructor. You will receive another email once the instructor confirms the session.',
+      dateLabel: 'Date',
+      timeLabel: 'Time',
+      durationLabel: 'Duration',
+      priceLabel: 'Price',
+      minutes: 'min',
+      cancelInfo:
+        'If you cannot attend, cancel the session by clicking the button below.',
+      cancelButton: 'Cancel Session',
+      footer: 'Thank you for using Exercio!',
+    },
+  },
+};
+
 export const CANCELLATION_TEXTS = {
   byInstructor: {
     pl: {
