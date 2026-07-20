@@ -131,7 +131,7 @@ async function bootstrap() {
     session({
       secret: process.env.SESSION_SECRET,
       resave: false,
-      saveUninitialized: false,
+      saveUninitialized: true,
       cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
@@ -199,7 +199,7 @@ async function bootstrap() {
         return true;
       }
 
-      if (req.path === '/auth/csrf-token' || req.path === '/auth/login') {
+      if (req.path === '/auth/csrf-token') {
         return true;
       }
       return false;
