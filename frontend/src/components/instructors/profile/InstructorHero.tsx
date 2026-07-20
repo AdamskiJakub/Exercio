@@ -318,6 +318,21 @@ export function InstructorHero({
               </div>
             ) : null}
 
+            {/* Package Deals */}
+            {profile.packageDealsEnabled && profile.packageDealsDescription && (
+              <>
+                <div className="border-t border-slate-700" />
+                <div className="text-center">
+                  <p className="text-xs text-slate-400 mb-3 uppercase tracking-wide font-medium">
+                    {t("packageDeals")}
+                  </p>
+                  <p className="text-orange-400 text-base leading-relaxed whitespace-pre-line">
+                    {profile.packageDealsDescription}
+                  </p>
+                </div>
+              </>
+            )}
+
             {/* Divider */}
             <div className="border-t border-slate-700" />
 

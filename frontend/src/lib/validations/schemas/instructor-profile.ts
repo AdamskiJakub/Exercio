@@ -52,9 +52,27 @@ export const instructorProfileSchema = z.object({
   showPhone: z.boolean().optional(),
   showEmail: z.boolean().optional(),
   contactMessage: z.string().max(500).optional(),
-  instagramUrl: z.string().url().max(500).optional().nullable(),
-  facebookUrl: z.string().url().max(500).optional().nullable(),
-  whatsappUrl: z.string().url().max(500).optional().nullable(),
+  instagramUrl: z
+    .string()
+    .url()
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+  facebookUrl: z
+    .string()
+    .url()
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
+  whatsappUrl: z
+    .string()
+    .url()
+    .max(500)
+    .optional()
+    .nullable()
+    .or(z.literal("")),
   // Payment settings
   paymentMethods: z.array(z.enum(paymentMethodsEnum)).max(10).optional(),
   paymentInfo: z.string().max(500).optional().nullable(),

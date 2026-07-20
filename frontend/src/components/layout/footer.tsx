@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { DumbbellIcon } from "lucide-react";
+import logoSrc from "public/logo.svg";
 import { footerLinks, socialLinks } from "@/lib/utils/footer-links";
 
 export function Footer() {
@@ -17,15 +18,18 @@ export function Footer() {
       <div className="container mx-auto px-4 md:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <DumbbellIcon
-                className="w-8 h-8 text-orange-500"
+            <Link
+              href="/"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <Image
+                src={logoSrc}
+                alt=""
+                className="w-7 h-7 text-orange-500"
                 aria-hidden="true"
               />
-              <span className="text-2xl font-bold bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                Exercio
-              </span>
-            </div>
+              <span className="text-2xl font-bold text-white">Exercio</span>
+            </Link>
             <p className="text-slate-400 text-sm leading-relaxed">
               {t("tagline")}
             </p>

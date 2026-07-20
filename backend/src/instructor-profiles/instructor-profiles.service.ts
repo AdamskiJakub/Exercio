@@ -435,7 +435,7 @@ export class InstructorProfilesService {
 
     return this.prisma.instructorProfile.update({
       where: { id: profileId },
-      data: { isDraft: false },
+      data: { isDraft: false, isBookingEnabled: true },
       include: {
         user: {
           select: {
