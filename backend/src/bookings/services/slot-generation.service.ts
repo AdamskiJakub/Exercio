@@ -257,8 +257,17 @@ export class SlotGenerationService {
       const startTotalMinutes = startHour * 60 + startMinute;
       const endTotalMinutes = endHour * 60 + endMinute;
 
-      let startUtcMinutes = startTotalMinutes + timezoneOffset;
-      let endUtcMinutes = endTotalMinutes + timezoneOffset;
+      const rawStartUtcMinutes = startTotalMinutes + timezoneOffset;
+      const rawEndUtcMinutes = endTotalMinutes + timezoneOffset;
+
+      // Detect if the time wrapped to the previous/next UTC day
+      const startWrapsBack = rawStartUtcMinutes < 0;
+      const endWrapsBack = rawEndUtcMinutes < 0;
+      const startWrapsForward = rawStartUtcMinutes >= 24 * 60;
+      const endWrapsForward = rawEndUtcMinutes >= 24 * 60;
+
+      let startUtcMinutes = rawStartUtcMinutes;
+      let endUtcMinutes = rawEndUtcMinutes;
 
       // Normalize to 0-1439 range (00:00-23:59)
       while (startUtcMinutes < 0) startUtcMinutes += 24 * 60;
@@ -271,11 +280,16 @@ export class SlotGenerationService {
       const utcEndHour = Math.floor(endUtcMinutes / 60);
       const utcEndMinute = endUtcMinutes % 60;
 
-      // Build day boundaries in pure UTC
+      // Build day boundaries in pure UTC.
+      // If the local time wrapped to the previous UTC day (e.g. Poland 00:00 = UTC 22:00 previous day),
+      // we must use the previous day as the base date, not currentDate.
       const slotStart = new Date(currentDate);
+      if (startWrapsBack) slotStart.setUTCDate(slotStart.getUTCDate() - 1);
       slotStart.setUTCHours(utcStartHour, utcStartMinute, 0, 0);
 
       const dayEnd = new Date(currentDate);
+      if (endWrapsBack) dayEnd.setUTCDate(dayEnd.getUTCDate() - 1);
+      if (endWrapsForward) dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
       dayEnd.setUTCHours(utcEndHour, utcEndMinute, 0, 0);
 
       while (slotStart < dayEnd) {
