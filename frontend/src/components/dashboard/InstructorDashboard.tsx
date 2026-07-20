@@ -661,7 +661,7 @@ export function InstructorDashboard() {
           onConfirm={() => {
             updateProfile({
               profileId: profile.id,
-              data: { isDraft: true, isBookingEnabled: false },
+              data: { isDraft: true },
             });
             setHideProfileOpen(false);
           }}
