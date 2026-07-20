@@ -9,8 +9,14 @@ import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
 import { MonthlyCalendarPreview } from "./monthly-calendar-preview";
 import { TimePicker } from "./time-picker";
-import type { DaySchedule, AvailabilityException } from "@/types/availability";
+import type {
+  DaySchedule,
+  AvailabilityException,
+  TimeRange,
+} from "@/types/availability";
+import type { ApiAvailabilitySlot } from "@/types/availability";
 import { DAYS_OF_WEEK } from "@/constants/availability";
+import { Plus, X } from "lucide-react";
 
 export function WeeklySchedule() {
   const t = useTranslations("Dashboard.availability");
@@ -49,25 +55,30 @@ export function WeeklySchedule() {
 
   const fetchSchedule = async () => {
     try {
-      const response = await apiClient.get("/availability/weekly");
+      const response = await apiClient.get<ApiAvailabilitySlot[]>(
+        "/availability/weekly",
+      );
       const data = response.data;
 
-      const fullSchedule = DAYS_OF_WEEK.map((dayOfWeek) => {
-        const existingDay = data.find((d: any) => d.dayOfWeek === dayOfWeek);
+      const fullSchedule: DaySchedule[] = DAYS_OF_WEEK.map((dayOfWeek) => {
+        const existingDays = data.filter((d) => d.dayOfWeek === dayOfWeek);
 
-        if (existingDay) {
+        if (existingDays.length > 0) {
           return {
             dayOfWeek,
-            isAvailable: existingDay.isActive ?? true,
-            startTime: existingDay.startTime,
-            endTime: existingDay.endTime,
+            isAvailable: existingDays.some((d) => d.isActive),
+            timeRanges: existingDays
+              .filter((d) => d.isActive)
+              .map((d) => ({
+                startTime: d.startTime,
+                endTime: d.endTime,
+              })),
           };
         } else {
           return {
             dayOfWeek,
             isAvailable: false,
-            startTime: "09:00",
-            endTime: "17:00",
+            timeRanges: [{ startTime: "09:00", endTime: "17:00" }],
           };
         }
       });
@@ -86,7 +97,17 @@ export function WeeklySchedule() {
       const existing = prev.find((d) => d.dayOfWeek === dayOfWeek);
       if (existing) {
         return prev.map((d) =>
-          d.dayOfWeek === dayOfWeek ? { ...d, isAvailable } : d,
+          d.dayOfWeek === dayOfWeek
+            ? {
+                ...d,
+                isAvailable,
+                timeRanges: isAvailable
+                  ? d.timeRanges.length > 0
+                    ? d.timeRanges
+                    : [{ startTime: "09:00", endTime: "17:00" }]
+                  : d.timeRanges,
+              }
+            : d,
         );
       } else {
         return [
@@ -94,22 +115,58 @@ export function WeeklySchedule() {
           {
             dayOfWeek,
             isAvailable,
-            startTime: "09:00",
-            endTime: "17:00",
+            timeRanges: [{ startTime: "09:00", endTime: "17:00" }],
           },
         ];
       }
     });
   };
 
-  const handleTimeChange = (
+  const handleRangeTimeChange = (
     dayOfWeek: number,
+    rangeIndex: number,
     field: "startTime" | "endTime",
     value: string,
   ) => {
     setSchedule((prev) =>
       prev.map((d) =>
-        d.dayOfWeek === dayOfWeek ? { ...d, [field]: value } : d,
+        d.dayOfWeek === dayOfWeek
+          ? {
+              ...d,
+              timeRanges: d.timeRanges.map((r, i) =>
+                i === rangeIndex ? { ...r, [field]: value } : r,
+              ),
+            }
+          : d,
+      ),
+    );
+  };
+
+  const handleAddRange = (dayOfWeek: number) => {
+    setSchedule((prev) =>
+      prev.map((d) =>
+        d.dayOfWeek === dayOfWeek
+          ? {
+              ...d,
+              timeRanges: [
+                ...d.timeRanges,
+                { startTime: "09:00", endTime: "17:00" },
+              ],
+            }
+          : d,
+      ),
+    );
+  };
+
+  const handleRemoveRange = (dayOfWeek: number, rangeIndex: number) => {
+    setSchedule((prev) =>
+      prev.map((d) =>
+        d.dayOfWeek === dayOfWeek
+          ? {
+              ...d,
+              timeRanges: d.timeRanges.filter((_, i) => i !== rangeIndex),
+            }
+          : d,
       ),
     );
   };
@@ -121,23 +178,58 @@ export function WeeklySchedule() {
         existing || {
           dayOfWeek,
           isAvailable: false,
-          startTime: "09:00",
-          endTime: "17:00",
+          timeRanges: [{ startTime: "09:00", endTime: "17:00" }],
         }
       );
     });
 
+    // Validate all time ranges
     for (const day of fullSchedule) {
-      if (day.isAvailable && day.startTime >= day.endTime) {
-        toast.error(t("endBeforeStart"));
-        return;
+      if (!day.isAvailable) continue;
+
+      for (const range of day.timeRanges) {
+        if (range.startTime >= range.endTime) {
+          toast.error(t("endBeforeStart"));
+          return;
+        }
+      }
+
+      // Check for overlapping ranges within the same day
+      const sorted = [...day.timeRanges].sort((a, b) =>
+        a.startTime.localeCompare(b.startTime),
+      );
+      for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i - 1].endTime > sorted[i].startTime) {
+          toast.error(t("overlappingRanges"));
+          return;
+        }
       }
     }
 
     setIsSaving(true);
     try {
+      // Flatten schedule: each time range becomes a separate availability record
+      const flatSchedule = fullSchedule.flatMap((day) => {
+        if (!day.isAvailable) {
+          return [
+            {
+              dayOfWeek: day.dayOfWeek,
+              isAvailable: false,
+              startTime: "09:00",
+              endTime: "17:00",
+            },
+          ];
+        }
+        return day.timeRanges.map((range) => ({
+          dayOfWeek: day.dayOfWeek,
+          isAvailable: true,
+          startTime: range.startTime,
+          endTime: range.endTime,
+        }));
+      });
+
       await apiClient.post("/availability/weekly", {
-        schedule: fullSchedule,
+        schedule: flatSchedule,
       });
 
       toast.success(t("saveSuccess"));
@@ -184,8 +276,7 @@ export function WeeklySchedule() {
         const daySchedule = schedule.find((d) => d.dayOfWeek === dayOfWeek) || {
           dayOfWeek,
           isAvailable: false,
-          startTime: "09:00",
-          endTime: "17:00",
+          timeRanges: [{ startTime: "09:00", endTime: "17:00" }],
         };
 
         return (
@@ -211,24 +302,59 @@ export function WeeklySchedule() {
               </span>
             </label>
 
-            {/* Time Inputs */}
+            {/* Time Ranges */}
             {daySchedule.isAvailable ? (
-              <div className="flex items-center gap-1.5 sm:gap-2 pl-0 sm:pl-8">
-                <TimePicker
-                  value={daySchedule.startTime}
-                  onChange={(value) =>
-                    handleTimeChange(dayOfWeek, "startTime", value)
-                  }
-                  className="flex-1"
-                />
-                <span className="text-slate-400 shrink-0">—</span>
-                <TimePicker
-                  value={daySchedule.endTime}
-                  onChange={(value) =>
-                    handleTimeChange(dayOfWeek, "endTime", value)
-                  }
-                  className="flex-1"
-                />
+              <div className="flex flex-col gap-2 pl-0 sm:pl-8">
+                {daySchedule.timeRanges.map((range, rangeIndex) => (
+                  <div
+                    key={rangeIndex}
+                    className="flex items-center gap-1.5 sm:gap-2"
+                  >
+                    <TimePicker
+                      value={range.startTime}
+                      onChange={(value) =>
+                        handleRangeTimeChange(
+                          dayOfWeek,
+                          rangeIndex,
+                          "startTime",
+                          value,
+                        )
+                      }
+                      className="flex-1"
+                    />
+                    <span className="text-slate-400 shrink-0">—</span>
+                    <TimePicker
+                      value={range.endTime}
+                      onChange={(value) =>
+                        handleRangeTimeChange(
+                          dayOfWeek,
+                          rangeIndex,
+                          "endTime",
+                          value,
+                        )
+                      }
+                      className="flex-1"
+                    />
+                    {daySchedule.timeRanges.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveRange(dayOfWeek, rangeIndex)}
+                        className="p-1.5 rounded-md hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors shrink-0"
+                        aria-label={t("removeRange")}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handleAddRange(dayOfWeek)}
+                  className="flex items-center gap-1.5 text-sm text-orange-400 hover:text-orange-300 transition-colors self-start mt-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  {t("addRange")}
+                </button>
               </div>
             ) : (
               <span className="text-slate-500 text-sm pl-0 sm:pl-8">

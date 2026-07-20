@@ -220,7 +220,6 @@ model Availability {
   updatedAt    DateTime          @updatedAt
   instructor   InstructorProfile @relation("WeeklyAvailability", fields: [instructorId], references: [id], onDelete: Cascade)
 
-  @@unique([instructorId, dayOfWeek])
   @@index([instructorId])
   @@map("availability")
 }

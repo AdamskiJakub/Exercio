@@ -217,162 +217,164 @@ export class SlotGenerationService {
         return `${exYear}-${exMonth}-${exDay}` === dateStr;
       });
 
-      let dayStartTime: string | null = null;
-      let dayEndTime: string | null = null;
       let isException = false;
+      let dayRanges: Array<{ startTime: string; endTime: string }> = [];
 
       if (exception) {
         if (!exception.isAvailable) {
           currentDate.setUTCDate(currentDate.getUTCDate() + 1);
           continue;
         }
-        dayStartTime = exception.startTime;
-        dayEndTime = exception.endTime;
+        if (exception.startTime && exception.endTime) {
+          dayRanges = [
+            { startTime: exception.startTime, endTime: exception.endTime },
+          ];
+        }
         isException = true;
       } else {
-        const weeklySlot = weeklyAvailability.find(
+        const weeklySlots = weeklyAvailability.filter(
           (slot) => slot.dayOfWeek === dayOfWeek && slot.isActive,
         );
 
-        if (!weeklySlot) {
+        if (weeklySlots.length === 0) {
           currentDate.setUTCDate(currentDate.getUTCDate() + 1);
           continue;
         }
 
-        dayStartTime = weeklySlot.startTime;
-        dayEndTime = weeklySlot.endTime;
+        dayRanges = weeklySlots.map((slot) => ({
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+        }));
       }
 
-      if (!dayStartTime || !dayEndTime) {
-        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-        continue;
-      }
+      // Generate slots for each time range in this day
+      for (const range of dayRanges) {
+        const [startHour, startMinute] = range.startTime.split(':').map(Number);
+        const [endHour, endMinute] = range.endTime.split(':').map(Number);
 
-      const [startHour, startMinute] = dayStartTime.split(':').map(Number);
-      const [endHour, endMinute] = dayEndTime.split(':').map(Number);
+        // Convert local time (from instructor panel) to UTC
+        // timezoneOffset = -(UTC - local), e.g. for Poland -120
+        // UTC_minutes = local_minutes + timezoneOffset
+        const startTotalMinutes = startHour * 60 + startMinute;
+        const endTotalMinutes = endHour * 60 + endMinute;
 
-      // Convert local time (from instructor panel) to UTC
-      // timezoneOffset = -(UTC - local), e.g. for Poland -120
-      // UTC_minutes = local_minutes + timezoneOffset
-      const startTotalMinutes = startHour * 60 + startMinute;
-      const endTotalMinutes = endHour * 60 + endMinute;
+        const rawStartUtcMinutes = startTotalMinutes + timezoneOffset;
+        const rawEndUtcMinutes = endTotalMinutes + timezoneOffset;
 
-      const rawStartUtcMinutes = startTotalMinutes + timezoneOffset;
-      const rawEndUtcMinutes = endTotalMinutes + timezoneOffset;
+        // Detect if the time wrapped to the previous/next UTC day
+        const startWrapsBack = rawStartUtcMinutes < 0;
+        const endWrapsBack = rawEndUtcMinutes < 0;
+        const startWrapsForward = rawStartUtcMinutes >= 24 * 60;
+        const endWrapsForward = rawEndUtcMinutes >= 24 * 60;
 
-      // Detect if the time wrapped to the previous/next UTC day
-      const startWrapsBack = rawStartUtcMinutes < 0;
-      const endWrapsBack = rawEndUtcMinutes < 0;
-      const startWrapsForward = rawStartUtcMinutes >= 24 * 60;
-      const endWrapsForward = rawEndUtcMinutes >= 24 * 60;
+        let startUtcMinutes = rawStartUtcMinutes;
+        let endUtcMinutes = rawEndUtcMinutes;
 
-      let startUtcMinutes = rawStartUtcMinutes;
-      let endUtcMinutes = rawEndUtcMinutes;
+        // Normalize to 0-1439 range (00:00-23:59)
+        while (startUtcMinutes < 0) startUtcMinutes += 24 * 60;
+        while (startUtcMinutes >= 24 * 60) startUtcMinutes -= 24 * 60;
+        while (endUtcMinutes < 0) endUtcMinutes += 24 * 60;
+        while (endUtcMinutes >= 24 * 60) endUtcMinutes -= 24 * 60;
 
-      // Normalize to 0-1439 range (00:00-23:59)
-      while (startUtcMinutes < 0) startUtcMinutes += 24 * 60;
-      while (startUtcMinutes >= 24 * 60) startUtcMinutes -= 24 * 60;
-      while (endUtcMinutes < 0) endUtcMinutes += 24 * 60;
-      while (endUtcMinutes >= 24 * 60) endUtcMinutes -= 24 * 60;
+        const utcStartHour = Math.floor(startUtcMinutes / 60);
+        const utcStartMinute = startUtcMinutes % 60;
+        const utcEndHour = Math.floor(endUtcMinutes / 60);
+        const utcEndMinute = endUtcMinutes % 60;
 
-      const utcStartHour = Math.floor(startUtcMinutes / 60);
-      const utcStartMinute = startUtcMinutes % 60;
-      const utcEndHour = Math.floor(endUtcMinutes / 60);
-      const utcEndMinute = endUtcMinutes % 60;
+        // Build day boundaries in pure UTC.
+        // If the local time wrapped to the previous/next UTC day (e.g. Poland 00:00 = UTC 22:00 previous day,
+        // or UTC-5 23:00 = UTC 04:00 next day), we must adjust the base date accordingly.
+        const slotStart = new Date(currentDate);
+        if (startWrapsBack) slotStart.setUTCDate(slotStart.getUTCDate() - 1);
+        if (startWrapsForward) slotStart.setUTCDate(slotStart.getUTCDate() + 1);
+        slotStart.setUTCHours(utcStartHour, utcStartMinute, 0, 0);
 
-      // Build day boundaries in pure UTC.
-      // If the local time wrapped to the previous/next UTC day (e.g. Poland 00:00 = UTC 22:00 previous day,
-      // or UTC-5 23:00 = UTC 04:00 next day), we must adjust the base date accordingly.
-      const slotStart = new Date(currentDate);
-      if (startWrapsBack) slotStart.setUTCDate(slotStart.getUTCDate() - 1);
-      if (startWrapsForward) slotStart.setUTCDate(slotStart.getUTCDate() + 1);
-      slotStart.setUTCHours(utcStartHour, utcStartMinute, 0, 0);
+        const dayEnd = new Date(currentDate);
+        if (endWrapsBack) dayEnd.setUTCDate(dayEnd.getUTCDate() - 1);
+        if (endWrapsForward) dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+        dayEnd.setUTCHours(utcEndHour, utcEndMinute, 0, 0);
 
-      const dayEnd = new Date(currentDate);
-      if (endWrapsBack) dayEnd.setUTCDate(dayEnd.getUTCDate() - 1);
-      if (endWrapsForward) dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
-      dayEnd.setUTCHours(utcEndHour, utcEndMinute, 0, 0);
+        while (slotStart < dayEnd) {
+          const slotEnd = new Date(
+            slotStart.getTime() + sessionDuration * 60 * 1000,
+          );
 
-      while (slotStart < dayEnd) {
-        const slotEnd = new Date(
-          slotStart.getTime() + sessionDuration * 60 * 1000,
-        );
-
-        if (slotEnd > dayEnd) {
-          break;
-        }
-
-        if (slotStart > minNoticeDate) {
-          const bookedSession = existingBookings.find((booking) => {
-            const bookingStart = new Date(booking.startTime);
-            const bookingEnd = new Date(booking.endTime);
-            return slotStart < bookingEnd && slotEnd > bookingStart;
-          });
-
-          const cancelledSession = cancelledBookings.find((booking) => {
-            const bookingStart = new Date(booking.startTime);
-            const bookingEnd = new Date(booking.endTime);
-            return slotStart < bookingEnd && slotEnd > bookingStart;
-          });
-
-          if (bookedSession) {
-            const clientName = this.formatClientName(bookedSession);
-            const clientEmail = this.formatClientEmail(bookedSession);
-
-            slots.push({
-              startTime: new Date(slotStart),
-              endTime: new Date(slotEnd),
-              isShortNotice: slotStart < minNoticeDate,
-              isException,
-              available: false,
-              booking: {
-                id: bookedSession.id,
-                status: bookedSession.status,
-                notes: this.asStringOrUndefined(bookedSession.notes),
-                clientName,
-                clientEmail,
-                cancellationReason: this.asStringOrUndefined(
-                  bookedSession.cancellationReason,
-                ),
-                cancelledBy: this.asStringOrUndefined(
-                  bookedSession.cancelledBy,
-                ),
-              },
-            });
-          } else if (cancelledSession) {
-            const clientName = this.formatClientName(cancelledSession);
-            const clientEmail = this.formatClientEmail(cancelledSession);
-
-            slots.push({
-              startTime: new Date(slotStart),
-              endTime: new Date(slotEnd),
-              isShortNotice: slotStart < minNoticeDate,
-              isException,
-              available: true,
-              booking: {
-                id: cancelledSession.id,
-                status: cancelledSession.status,
-                notes: cancelledSession.notes || undefined,
-                clientName,
-                clientEmail,
-                cancellationReason:
-                  cancelledSession.cancellationReason || undefined,
-                cancelledBy: cancelledSession.cancelledBy || undefined,
-              },
-            });
-          } else {
-            slots.push({
-              startTime: new Date(slotStart),
-              endTime: new Date(slotEnd),
-              isShortNotice: slotStart < minNoticeDate,
-              isException,
-              available: true,
-            });
+          if (slotEnd > dayEnd) {
+            break;
           }
-        }
 
-        // Advance slot using absolute Unix Timestamp
-        slotStart.setTime(slotStart.getTime() + sessionDuration * 60 * 1000);
+          if (slotStart > minNoticeDate) {
+            const bookedSession = existingBookings.find((booking) => {
+              const bookingStart = new Date(booking.startTime);
+              const bookingEnd = new Date(booking.endTime);
+              return slotStart < bookingEnd && slotEnd > bookingStart;
+            });
+
+            const cancelledSession = cancelledBookings.find((booking) => {
+              const bookingStart = new Date(booking.startTime);
+              const bookingEnd = new Date(booking.endTime);
+              return slotStart < bookingEnd && slotEnd > bookingStart;
+            });
+
+            if (bookedSession) {
+              const clientName = this.formatClientName(bookedSession);
+              const clientEmail = this.formatClientEmail(bookedSession);
+
+              slots.push({
+                startTime: new Date(slotStart),
+                endTime: new Date(slotEnd),
+                isShortNotice: slotStart < minNoticeDate,
+                isException,
+                available: false,
+                booking: {
+                  id: bookedSession.id,
+                  status: bookedSession.status,
+                  notes: this.asStringOrUndefined(bookedSession.notes),
+                  clientName,
+                  clientEmail,
+                  cancellationReason: this.asStringOrUndefined(
+                    bookedSession.cancellationReason,
+                  ),
+                  cancelledBy: this.asStringOrUndefined(
+                    bookedSession.cancelledBy,
+                  ),
+                },
+              });
+            } else if (cancelledSession) {
+              const clientName = this.formatClientName(cancelledSession);
+              const clientEmail = this.formatClientEmail(cancelledSession);
+
+              slots.push({
+                startTime: new Date(slotStart),
+                endTime: new Date(slotEnd),
+                isShortNotice: slotStart < minNoticeDate,
+                isException,
+                available: true,
+                booking: {
+                  id: cancelledSession.id,
+                  status: cancelledSession.status,
+                  notes: cancelledSession.notes || undefined,
+                  clientName,
+                  clientEmail,
+                  cancellationReason:
+                    cancelledSession.cancellationReason || undefined,
+                  cancelledBy: cancelledSession.cancelledBy || undefined,
+                },
+              });
+            } else {
+              slots.push({
+                startTime: new Date(slotStart),
+                endTime: new Date(slotEnd),
+                isShortNotice: slotStart < minNoticeDate,
+                isException,
+                available: true,
+              });
+            }
+          }
+
+          // Advance slot using absolute Unix Timestamp
+          slotStart.setTime(slotStart.getTime() + sessionDuration * 60 * 1000);
+        }
       }
 
       // Move to the next day using UTC methods

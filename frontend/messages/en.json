@@ -724,7 +724,10 @@
       "minutes": "min",
       "close": "Close",
       "calendarLoadError": "Error loading calendar",
-      "selectMedia": "Select Files"
+      "selectMedia": "Select Files",
+      "addRange": "Add time range",
+      "removeRange": "Remove time range",
+      "overlappingRanges": "Time ranges cannot overlap"
     },
     "profileForm": {
       "title": "Edit Your Profile",
