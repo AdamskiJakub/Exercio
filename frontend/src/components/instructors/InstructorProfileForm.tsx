@@ -329,6 +329,7 @@ export function InstructorProfileForm({
               {...register("bio")}
               id="bio"
               rows={5}
+              maxLength={1500}
               placeholder={t("bioPlaceholder")}
               className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
             />
