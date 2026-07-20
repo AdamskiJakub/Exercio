@@ -96,12 +96,10 @@ export class AvailabilityService {
     );
 
     // Check if availability for this day already exists
-    const existing = await this.prisma.availability.findUnique({
+    const existing = await this.prisma.availability.findFirst({
       where: {
-        instructorId_dayOfWeek: {
-          instructorId,
-          dayOfWeek: dto.dayOfWeek,
-        },
+        instructorId,
+        dayOfWeek: dto.dayOfWeek,
       },
     });
 
