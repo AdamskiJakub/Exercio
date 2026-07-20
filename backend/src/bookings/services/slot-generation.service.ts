@@ -281,10 +281,11 @@ export class SlotGenerationService {
       const utcEndMinute = endUtcMinutes % 60;
 
       // Build day boundaries in pure UTC.
-      // If the local time wrapped to the previous UTC day (e.g. Poland 00:00 = UTC 22:00 previous day),
-      // we must use the previous day as the base date, not currentDate.
+      // If the local time wrapped to the previous/next UTC day (e.g. Poland 00:00 = UTC 22:00 previous day,
+      // or UTC-5 23:00 = UTC 04:00 next day), we must adjust the base date accordingly.
       const slotStart = new Date(currentDate);
       if (startWrapsBack) slotStart.setUTCDate(slotStart.getUTCDate() - 1);
+      if (startWrapsForward) slotStart.setUTCDate(slotStart.getUTCDate() + 1);
       slotStart.setUTCHours(utcStartHour, utcStartMinute, 0, 0);
 
       const dayEnd = new Date(currentDate);
