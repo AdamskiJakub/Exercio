@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CityAutocomplete } from "@/components/ui/city-autocomplete";
 import { useEnterpriseApply } from "@/hooks/useEnterpriseApply";
 import { LegalCheckbox } from "@/components/ui/legal-checkbox";
 import type { CreateEnterpriseLeadDto } from "@/types/enterprise";
@@ -124,7 +125,7 @@ export function EnterpriseApplyForm() {
   return (
     <div className="space-y-8">
       <Card className="bg-slate-900/50 border-slate-800 p-8">
-        <p className="text-slate-300 text-sm mb-6 leading-relaxed">
+        <p className="text-slate-300 text-base mb-6 leading-relaxed">
           {t("subtitleForm")}
         </p>
 
@@ -243,10 +244,10 @@ export function EnterpriseApplyForm() {
               <Label htmlFor="city" className="text-white">
                 {t("city")}
               </Label>
-              <Input
+              <CityAutocomplete
                 id="city"
                 value={formData.city}
-                onChange={(e) => handleChange("city", e.target.value)}
+                onChange={(value) => handleChange("city", value)}
                 className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
                 placeholder={t("placeholders.city")}
               />

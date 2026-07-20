@@ -433,9 +433,12 @@ export class InstructorProfilesService {
       throw new ForbiddenException('You can only publish your own profile');
     }
 
+    // Preserve the instructor's previous booking preference.
+    // If they had disabled booking before hiding the profile,
+    // publishing should not re-enable it without their consent.
     return this.prisma.instructorProfile.update({
       where: { id: profileId },
-      data: { isDraft: false, isBookingEnabled: true },
+      data: { isDraft: false },
       include: {
         user: {
           select: {
