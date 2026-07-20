@@ -724,7 +724,10 @@
       "minutes": "min",
       "close": "Zamknij",
       "calendarLoadError": "Błąd ładowania kalendarza",
-      "selectMedia": "Wybierz pliki"
+      "selectMedia": "Wybierz pliki",
+      "addRange": "Dodaj przedział czasowy",
+      "removeRange": "Usuń przedział czasowy",
+      "overlappingRanges": "Przedziały czasowe nie mogą na siebie nachodzić"
     },
     "profileForm": {
       "title": "Edytuj Swój Profil",
