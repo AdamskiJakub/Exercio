@@ -15,7 +15,6 @@ import {
   Star,
   Users,
   Calendar,
-  TrendingUp,
   Edit,
   Eye,
   CheckCircle,
@@ -30,6 +29,7 @@ import {
   Building2,
   X,
   Check,
+  EyeOff,
 } from "lucide-react";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
@@ -41,11 +41,12 @@ import { BookingHistorySection } from "./BookingHistorySection";
 import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
 import { BookingsList } from "@/components/bookings/BookingsList";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useClearHistory } from "@/hooks/useClearHistory";
 import { useMyFavorites } from "@/hooks/useFavorites";
 import { useMyFollowedEnterprises } from "@/hooks/useFollow";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { useInstructorFollowerCount } from "@/hooks/useFollow";
 import { useSpecializations } from "@/hooks/useConfig";
 import {
   useMyEnterpriseInvitations,
@@ -56,6 +57,8 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { getInstructorName } from "@/lib/utils/user";
 import { getMediaUrl } from "@/lib/utils/media";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { useUpdateInstructorProfile } from "@/hooks/useUpdateInstructorProfile";
+import { usePublishInstructorProfile } from "@/hooks/usePublishInstructorProfile";
 
 export function InstructorDashboard() {
   const t = useTranslations("Dashboard.instructor");
@@ -92,7 +95,12 @@ export function InstructorDashboard() {
   } = useReviewFlow();
 
   const clearHistory = useClearHistory();
+  const { mutate: updateProfile } = useUpdateInstructorProfile();
+  const { mutate: publishProfile, isPending: isPublishing } =
+    usePublishInstructorProfile();
+  const { data: followerCount } = useInstructorFollowerCount(profile?.id ?? "");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [hideProfileOpen, setHideProfileOpen] = useState(false);
 
   // Filter upcoming bookings (pending or confirmed, in the future)
   // Use inline new Date() to avoid stale "now" values on long-lived mounts
@@ -303,15 +311,37 @@ export function InstructorDashboard() {
                 </>
               )}
             </div>
-            <Link
-              href={
-                `/instructors/${profile?.user?.username || ""}?from=${NAV_SOURCE.DASHBOARD}` as any
-              }
-              className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
-            >
-              <Eye className="w-4 h-4" />
-              {t("viewPublicProfile")}
-            </Link>
+            <div className="flex items-center gap-2">
+              {!profile.isDraft ? (
+                <button
+                  type="button"
+                  onClick={() => setHideProfileOpen(true)}
+                  className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-red-500/20 hover:border-red-500/40"
+                >
+                  <EyeOff className="w-4 h-4" />
+                  {t("hideProfile")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => publishProfile(profile.id)}
+                  disabled={isPublishing}
+                  className="px-5 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 hover:text-green-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-green-500/20 hover:border-green-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {isPublishing ? t("publishing") : t("publishProfile")}
+                </button>
+              )}
+              <Link
+                href={
+                  `/instructors/${profile?.user?.username || ""}?from=${NAV_SOURCE.DASHBOARD}` as any
+                }
+                className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
+              >
+                <Eye className="w-4 h-4" />
+                {t("viewPublicProfile")}
+              </Link>
+            </div>
           </div>
         </DashboardCard>
       )}
@@ -391,12 +421,12 @@ export function InstructorDashboard() {
           hoverColor="hover:border-orange-500"
         />
         <StatsCard
-          icon={TrendingUp}
+          icon={Heart}
           iconColor="text-purple-500"
           iconBgColor="bg-purple-500/10"
-          title={t("profileViews")}
-          value="—"
-          subtitle={t("thisMonth")}
+          title={t("followers")}
+          value={followerCount ?? "—"}
+          subtitle={t("followersSubtitle")}
           hoverColor="hover:border-orange-500"
           delay={4}
         />
@@ -623,6 +653,25 @@ export function InstructorDashboard() {
         confirmText={t("clear")}
         cancelText={t("cancel")}
       />
+
+      {profile && (
+        <ConfirmModal
+          isOpen={hideProfileOpen}
+          onClose={() => setHideProfileOpen(false)}
+          onConfirm={() => {
+            updateProfile({
+              profileId: profile.id,
+              data: { isDraft: true, isBookingEnabled: false },
+            });
+            setHideProfileOpen(false);
+          }}
+          title={t("hideProfile")}
+          description={t("hideProfileConfirm")}
+          confirmText={t("hideProfile")}
+          cancelText={t("cancel")}
+          variant="danger"
+        />
+      )}
 
       {/* Review Form Modal */}
       {selectedBookingForReview && (

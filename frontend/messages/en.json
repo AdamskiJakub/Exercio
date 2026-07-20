@@ -34,7 +34,9 @@
     "partners": {
       "title": "Partners who trust us",
       "description": "Run a studio, gym, or sports organization? Become a Founding Partner and help us build Poland's largest sports marketplace.",
-      "partnerFeniks": "Feniks Dance Studio"
+      "socialProof": "Trainers and studios from Białystok are already using Exercio to acquire new clients.",
+      "partnerFeniks": "Feniks Dance Studio",
+      "partnerFormAnalata": "Forma na lata"
     },
     "stats": {
       "trainers": "Verified Trainers",
@@ -80,7 +82,8 @@
     }
   },
   "Navigation": {
-    "contact": "Contact"
+    "contact": "Contact",
+    "forBusiness": "For Business"
   },
   "auth": {
     "loginSubtitle": "Sign in to your account",
@@ -254,6 +257,10 @@
       "availability": "Availability",
       "calendar": "Calendar",
       "viewPublicProfile": "View Public Profile",
+      "hideProfile": "Hide Profile",
+      "hideProfileConfirm": "Are you sure? Your profile will be hidden from search results and your booking calendar will be disabled. You can publish it again anytime.",
+      "publishProfile": "Publish Profile",
+      "publishing": "Publishing...",
       "profileStatus": "Profile Status",
       "draft": "Draft",
       "published": "Published",
@@ -262,7 +269,8 @@
       "averageRating": "Average Rating",
       "totalSessions": "Total Sessions",
       "activeClients": "Active Clients",
-      "profileViews": "Profile Views",
+      "followers": "Followers",
+      "followersSubtitle": "Companies & studios following your profile",
       "reviews": "reviews",
       "thisMonth": "this month",
       "allTime": "all time",
@@ -1678,6 +1686,7 @@
     "socialProofTitle": "First Exercio Partners",
     "socialProofSubtitle": "Meet the studios and organizations that have already joined the program and are co-creating the future of Poland's sports market with us.",
     "partnerFeniks": "Feniks Dance Studio",
+    "partnerFormAnalata": "Forma na lata",
     "ctaSectionTitle": "Become one of the first Exercio Partners",
     "ctaSectionSubtitle": "We're not looking for customers — we're looking for Partners who want to build something valuable together. If you run a studio, gym, or sports organization and see the potential in working together — fill out the form and let's talk.",
     "contactUs": "Contact us"

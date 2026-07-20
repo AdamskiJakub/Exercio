@@ -34,7 +34,9 @@
     "partners": {
       "title": "Partnerzy, którzy nam zaufali",
       "description": "Prowadzisz studio, siłownię lub organizację sportową? Zostań Partnerem Założycielskim i współtwórz z nami największy marketplace sportowy w Polsce.",
-      "partnerFeniks": "Studio Tańca Feniks"
+      "socialProof": "Już teraz trenerzy i studia z Białegostoku korzystają z Exercio, aby pozyskiwać nowych klientów.",
+      "partnerFeniks": "Studio Tańca Feniks",
+      "partnerFormAnalata": "Forma na lata"
     },
     "stats": {
       "trainers": "Zweryfikowanych Trenerów",
@@ -80,7 +82,8 @@
     }
   },
   "Navigation": {
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "forBusiness": "Dla Firm"
   },
   "auth": {
     "loginSubtitle": "Zaloguj się do swojego konta",
@@ -254,6 +257,10 @@
       "availability": "Dostępność",
       "calendar": "Kalendarz",
       "viewPublicProfile": "Zobacz Publiczny Profil",
+      "hideProfile": "Ukryj Profil",
+      "hideProfileConfirm": "Czy na pewno? Twój profil zostanie ukryty przed klientami, a kalendarz rezerwacji zostanie wyłączony. Możesz go opublikować ponownie w każdej chwili.",
+      "publishProfile": "Opublikuj Profil",
+      "publishing": "Publikowanie...",
       "profileStatus": "Status Profilu",
       "draft": "Szkic",
       "published": "Opublikowany",
@@ -262,7 +269,8 @@
       "averageRating": "Średnia Ocena",
       "totalSessions": "Wszystkie Sesje",
       "activeClients": "Aktywni Klienci",
-      "profileViews": "Wyświetlenia Profilu",
+      "followers": "Obserwujący",
+      "followersSubtitle": "Firmy i studia obserwujące Twój profil",
       "reviews": "recenzje",
       "thisMonth": "w tym miesiącu",
       "allTime": "wszystkie",
@@ -1678,6 +1686,7 @@
     "socialProofTitle": "Pierwsi Partnerzy Exercio",
     "socialProofSubtitle": "Poznaj studia i organizacje, które już dołączyły do programu i współtworzą z nami przyszłość rynku sportowego w Polsce.",
     "partnerFeniks": "Studio Tańca Feniks",
+    "partnerFormAnalata": "Forma na lata",
     "ctaSectionTitle": "Zostań jednym z pierwszych Partnerów Exercio",
     "ctaSectionSubtitle": "Nie szukamy klientów — szukamy Partnerów, którzy razem z nami chcą zbudować coś wartościowego. Jeśli prowadzisz studio, siłownię lub organizację sportową i widzisz potencjał we wspólnym działaniu — wypełnij formularz, a porozmawiamy.",
     "contactUs": "Skontaktuj się z nami"

@@ -633,6 +633,14 @@ export function UserMenu() {
             <div className="flex flex-col justify-between h-[calc(100%-120px)]">
               <div className="flex flex-col p-4 space-y-2">
                 <Link
+                  href="/partner"
+                  className="text-slate-300 hover:text-orange-500 transition-colors text-base font-medium text-center px-4 py-3 rounded-lg hover:bg-slate-800"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {navT("forBusiness")}
+                </Link>
+
+                <Link
                   href="/contact"
                   className="text-slate-300 hover:text-orange-500 transition-colors text-base font-medium text-center px-4 py-3 rounded-lg hover:bg-slate-800"
                   onClick={() => setMobileMenuOpen(false)}

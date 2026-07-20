@@ -199,7 +199,7 @@ async function bootstrap() {
         return true;
       }
 
-      if (req.path === '/auth/csrf-token') {
+      if (req.path === '/auth/csrf-token' || req.path === '/auth/login') {
         return true;
       }
       return false;

@@ -61,6 +61,7 @@ interface PartnerLogo {
   nameKey: string;
   logoSrc: string;
   href?: string;
+  bgWhite?: boolean;
 }
 
 const partners: PartnerLogo[] = [
@@ -69,6 +70,13 @@ const partners: PartnerLogo[] = [
     logoSrc:
       "https://stfeniks.pl/wp-content/uploads/2025/12/logo-stfeniks-pion-dark.png",
     href: "https://stfeniks.pl",
+    bgWhite: true,
+  },
+  {
+    nameKey: "partnerFormAnalata",
+    logoSrc: "/forma-na-lata-jakub-zolik.jpeg",
+    href: "https://formanalata.com/",
+    bgWhite: false,
   },
 ];
 
@@ -351,11 +359,13 @@ export default function PartnerPage() {
                   rel="noopener noreferrer"
                   className="flex flex-col items-center gap-3 group cursor-pointer"
                 >
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-4 group-hover:border-emerald-400 transition-all group-hover:shadow-lg group-hover:shadow-emerald-500/10">
+                  <div className="w-36 h-36 md:w-40 md:h-40 rounded-xl border border-transparent overflow-hidden flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-emerald-500/10 group-hover:border-emerald-400/50">
                     <img
                       src={partner.logoSrc}
                       alt={t(partner.nameKey)}
-                      className="max-w-full max-h-full object-contain"
+                      className={`w-full h-full object-cover ${
+                        partner.bgWhite ? "bg-white" : ""
+                      }`}
                       loading="lazy"
                     />
                   </div>

@@ -44,13 +44,23 @@ export function Navbar() {
               className="w-7 h-7 text-orange-500"
               aria-hidden="true"
             />
-            <span className="text-3xl tracking-wide font-medium bg-linear-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+            <span className="text-3xl tracking-wide font-medium text-white">
               Exercio
             </span>
           </Link>
 
           {/* Right side */}
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* For Business link — visible on md and up */}
+            <div className="hidden md:flex items-center">
+              <Link
+                href="/partner"
+                className="text-slate-300 hover:text-orange-500 transition-colors text-lg font-semibold px-4 py-2.5 rounded-lg hover:bg-slate-800/50"
+              >
+                {navT("forBusiness")}
+              </Link>
+            </div>
+
             {/* Contact link — visible on md and up */}
             <div className="hidden md:flex items-center">
               <Link
@@ -120,6 +130,14 @@ export function Navbar() {
                       </SheetHeader>
 
                       <div className="flex flex-col gap-3 p-6">
+                        <Link
+                          href="/partner"
+                          className="text-slate-300 hover:text-orange-500 transition-colors text-base font-medium text-center px-4 py-3 rounded-lg hover:bg-slate-800"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {navT("forBusiness")}
+                        </Link>
+
                         <Link
                           href="/contact"
                           className="text-slate-300 hover:text-orange-500 transition-colors text-base font-medium text-center px-4 py-3 rounded-lg hover:bg-slate-800"

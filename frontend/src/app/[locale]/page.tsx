@@ -46,6 +46,13 @@ const partners = [
     logoSrc:
       "https://stfeniks.pl/wp-content/uploads/2025/12/logo-stfeniks-pion-dark.png",
     href: "https://stfeniks.pl",
+    bgWhite: true,
+  },
+  {
+    nameKey: "partnerFormAnalata",
+    logoSrc: "/forma-na-lata-jakub-zolik.jpeg",
+    href: "https://formanalata.com/",
+    bgWhite: false,
   },
 ];
 
@@ -92,15 +99,18 @@ export default function Home() {
       <section className="bg-slate-950 pt-16">
         <div className="container mx-auto px-4 md:px-6">
           <div className="mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
               {t("partners.title")}
             </h2>
-            <p className="text-slate-400 text-base md:text-lg max-w-2xl mx-auto mb-10">
+            <p className="text-emerald-400/80 text-base md:text-lg font-medium mb-2 max-w-2xl mx-auto">
+              {t("partners.socialProof")}
+            </p>
+            <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto mb-10">
               {t("partners.description")}
             </p>
 
             {/* Partner logos */}
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
+            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
               {partners.map((partner, index) => (
                 <a
                   key={index}
@@ -109,11 +119,13 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="group"
                 >
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white border border-slate-200 flex items-center justify-center p-3 group-hover:border-emerald-400 transition-all group-hover:shadow-lg group-hover:shadow-emerald-500/10">
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-xl border border-transparent overflow-hidden flex items-center justify-center transition-all group-hover:shadow-lg group-hover:shadow-emerald-500/10 group-hover:border-emerald-400/50">
                     <img
                       src={partner.logoSrc}
                       alt={t(`partners.${partner.nameKey}`)}
-                      className="max-w-full max-h-full object-contain"
+                      className={`w-full h-full object-cover ${
+                        partner.bgWhite ? "bg-white" : ""
+                      }`}
                       loading="lazy"
                     />
                   </div>
