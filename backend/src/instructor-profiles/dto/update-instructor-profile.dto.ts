@@ -15,6 +15,7 @@ import { IsValidConfigId } from '../../common/validators/is-valid-config-id.vali
 
 export class UpdateInstructorProfileDto {
   @IsString()
+  @MaxLength(1500)
   @IsOptional()
   bio?: string | null;
 
