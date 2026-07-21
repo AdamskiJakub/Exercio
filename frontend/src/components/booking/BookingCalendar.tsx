@@ -26,6 +26,7 @@ interface BookingCalendarProps {
   instructorProfile: InstructorProfile;
   initialDate?: string;
   initialTime?: string;
+  currentUserId?: string;
 }
 
 export function BookingCalendar({
@@ -33,6 +34,7 @@ export function BookingCalendar({
   instructorProfile,
   initialDate,
   initialTime,
+  currentUserId,
 }: BookingCalendarProps) {
   const t = useTranslations("Booking");
   const locale = useLocale();
@@ -157,6 +159,11 @@ export function BookingCalendar({
   }
 
   function handleSlotClick(date: Date, time: string) {
+    // Block self-booking: instructor cannot book their own calendar
+    if (currentUserId && instructorProfile.userId === currentUserId) {
+      return;
+    }
+
     const daySlots = weekSlots.find((d) => isSameDay(d.date, date));
     const slot = daySlots?.slots.find((s) => s.time === time);
 
@@ -231,6 +238,9 @@ export function BookingCalendar({
   const canGoPrevious = currentWeekStart > today;
 
   // --- RENDER SLOT BUTTON (shared between mobile and desktop) ---
+  const isOwnProfile =
+    currentUserId !== undefined && instructorProfile.userId === currentUserId;
+
   const renderSlotButton = (slot: TimeSlot, date: Date) => {
     const isCancelled = slot.booking?.status === "CANCELLED";
     const isBooked = slot.booking && !isCancelled;
@@ -238,19 +248,21 @@ export function BookingCalendar({
       preselectedTime === slot.time &&
       isSameDay(date, parseISO(initialDate || ""));
 
-    const slotColor = isPreselected
-      ? "bg-orange-500/30 border-2 border-orange-400 text-orange-300 cursor-pointer ring-2 ring-orange-500/50"
-      : isBooked
-        ? "bg-red-500/20 border border-red-500/50 text-red-300 cursor-not-allowed"
-        : isCancelled
-          ? "bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/30 cursor-pointer"
-          : slot.available
-            ? slot.isException
-              ? "bg-purple-500/20 border border-purple-500/50 text-purple-300 hover:bg-purple-500/30 cursor-pointer"
-              : "bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30 cursor-pointer"
-            : "bg-slate-700/30 border border-slate-600 text-slate-500 cursor-not-allowed";
+    const slotColor = isOwnProfile
+      ? "bg-slate-700/30 border border-slate-600 text-slate-500 cursor-not-allowed opacity-50"
+      : isPreselected
+        ? "bg-orange-500/30 border-2 border-orange-400 text-orange-300 cursor-pointer ring-2 ring-orange-500/50"
+        : isBooked
+          ? "bg-red-500/20 border border-red-500/50 text-red-300 cursor-not-allowed"
+          : isCancelled
+            ? "bg-yellow-500/20 border border-yellow-500/50 text-yellow-300 hover:bg-yellow-500/30 cursor-pointer"
+            : slot.available
+              ? slot.isException
+                ? "bg-purple-500/20 border border-purple-500/50 text-purple-300 hover:bg-purple-500/30 cursor-pointer"
+                : "bg-green-500/20 border border-green-500/50 text-green-400 hover:bg-green-500/30 cursor-pointer"
+              : "bg-slate-700/30 border border-slate-600 text-slate-500 cursor-not-allowed";
 
-    const isClickable = slot.available && !isBooked;
+    const isClickable = !isOwnProfile && slot.available && !isBooked;
 
     return (
       <button

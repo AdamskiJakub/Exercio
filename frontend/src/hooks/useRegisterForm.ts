@@ -10,7 +10,7 @@ import {
 } from "@/lib/validations/register-form";
 import { apiClient } from "@/lib/api";
 import { normalizeApiError } from "@/lib/utils/error-handlers";
-import { generateUsernameFromEmail } from "@/lib/utils/username-generator";
+import { generateUsername } from "@/lib/utils/username-generator";
 
 interface UseRegisterFormOptions {
   intent: "client" | "instructor";
@@ -33,8 +33,12 @@ export function useRegisterForm({ intent }: UseRegisterFormOptions) {
     try {
       const { confirmPassword, agreeToTerms, ...registerData } = data;
 
-      // Auto-generate username from email with proper validation
-      const username = generateUsernameFromEmail(registerData.email);
+      // Auto-generate username from firstName + lastName if available, fallback to email
+      const username = generateUsername(
+        registerData.firstName,
+        registerData.lastName,
+        registerData.email,
+      );
 
       const locale = window.location.pathname.split("/")[1];
 
