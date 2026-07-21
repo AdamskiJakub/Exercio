@@ -1,11 +1,15 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { API_BASE_URL } from "@/lib/utils/api-url";
-import { getCsrfToken, fetchCsrfToken } from "@/lib/api";
+import { apiClient } from "@/lib/api";
 
 /**
- * Upload a single file using FormData (multipart/form-data).
+ * Upload a single file using axios with FormData (multipart/form-data).
+ *
+ * WHY AXIOS:
+ * Using the same apiClient (axios) that the rest of the app uses ensures
+ * consistent CORS handling, CSRF token injection (via interceptor), and
+ * cookie credentials (withCredentials: true).
  *
  * WHY FORMDATA:
  * multipart/form-data is one of the three "simple" CORS content types
@@ -14,87 +18,54 @@ import { getCsrfToken, fetchCsrfToken } from "@/lib/api";
  * mobile browsers where preflight requests often fail due to carrier
  * proxies, firewalls, or network configurations.
  *
- * Previously we sent raw binary with a custom Content-Type (e.g. image/jpeg),
- * which IS NOT a simple content type and always triggers a preflight.
- *
- * The backend uses Multer's FileInterceptor/FilesInterceptor which handles
- * multipart/form-data natively via the standard /upload/profile-photo and
- * /upload/gallery endpoints.
- *
  * @param fieldName - The form field name expected by the Multer interceptor:
  *   - "file" for profile-photo (FileInterceptor('file'))
  *   - "files" for gallery (FilesInterceptor('files'))
  */
-async function uploadWithFetch(
+async function uploadWithAxios(
   url: string,
   file: File,
   fieldName = "file",
 ): Promise<any> {
-  let response: Response;
-
-  // Build headers - include CSRF token if available (for session-based auth)
-  const headers: Record<string, string> = {
-    "X-File-Name": encodeURIComponent(file.name),
-  };
-
-  // If user is authenticated via JWT cookie, CSRF is skipped on backend.
-  // But include the token anyway as a safety net for edge cases.
-  let csrfToken = getCsrfToken();
-  if (!csrfToken) {
-    csrfToken = await fetchCsrfToken();
-  }
-  if (csrfToken) {
-    headers["X-CSRF-Token"] = csrfToken;
-  }
-
-  // Use FormData to send the file as multipart/form-data.
-  // This is a "simple" CORS content type and does NOT trigger a preflight.
   const formData = new FormData();
   formData.append(fieldName, file);
 
   try {
-    response = await fetch(`${API_BASE_URL}${url}`, {
-      method: "POST",
-      headers,
-      body: formData,
-      credentials: "include",
+    const response = await apiClient.post(url, formData, {
+      headers: {
+        "X-File-Name": encodeURIComponent(file.name),
+        // Let axios set Content-Type with boundary for multipart/form-data
+      },
     });
-  } catch (networkError) {
-    // "Failed to fetch" / TypeError is thrown for network-level failures:
-    //   - CORS preflight failure
-    //   - Network offline / timeout
-    //   - DNS resolution failure
-    //   - SSL/TLS handshake error (e.g. invalid cert on mobile)
-    //   - Connection refused / reset
-    //
-    // The browser hides the exact reason from JavaScript for security.
-    // We include a code prefix so the UI can detect the error type.
-    throw new Error("NETWORK_ERROR");
-  }
+    return response.data;
+  } catch (error: any) {
+    // Network error (no response from server)
+    if (!error.response) {
+      throw new Error("NETWORK_ERROR");
+    }
 
-  if (!response.ok) {
+    // Server responded with error status
+    const status = error.response.status;
     let bodyText = "";
     try {
-      bodyText = await response.text();
+      bodyText = JSON.stringify(error.response.data);
     } catch {
       bodyText = "(could not read body)";
     }
-    throw new Error(`HTTP_${response.status}: ${bodyText.slice(0, 200)}`);
+    throw new Error(`HTTP_${status}: ${bodyText.slice(0, 200)}`);
   }
-
-  return response.json();
 }
 
 /**
  * Upload multiple files by sending them one by one.
  * Gallery endpoint uses FilesInterceptor('files') so we send with fieldName="files".
  */
-async function uploadMultipleWithFetch(
+async function uploadMultipleWithAxios(
   url: string,
   files: File[],
 ): Promise<any> {
   // Send first file to get the array response
-  const firstResult = await uploadWithFetch(url, files[0], "files");
+  const firstResult = await uploadWithAxios(url, files[0], "files");
   const urls = firstResult.urls
     ? [...firstResult.urls]
     : firstResult.url
@@ -103,7 +74,7 @@ async function uploadMultipleWithFetch(
 
   // Send remaining files
   for (let i = 1; i < files.length; i++) {
-    const result = await uploadWithFetch(url, files[i], "files");
+    const result = await uploadWithAxios(url, files[i], "files");
     if (result.urls) {
       urls.push(...result.urls);
     } else if (result.url) {
@@ -117,7 +88,7 @@ async function uploadMultipleWithFetch(
 export function useUploadProfilePhoto() {
   return useMutation({
     mutationFn: async (file: File) => {
-      const data = await uploadWithFetch("/upload/profile-photo", file);
+      const data = await uploadWithAxios("/upload/profile-photo", file);
       return data.url as string;
     },
   });
@@ -126,7 +97,7 @@ export function useUploadProfilePhoto() {
 export function useUploadGalleryPhotos() {
   return useMutation({
     mutationFn: async (files: File[]) => {
-      const data = await uploadMultipleWithFetch("/upload/gallery", files);
+      const data = await uploadMultipleWithAxios("/upload/gallery", files);
       return data.urls as string[];
     },
   });
