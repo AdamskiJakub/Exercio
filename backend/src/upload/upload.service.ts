@@ -23,6 +23,8 @@ export class UploadService {
     'image/jpg',
     'image/png',
     'image/webp',
+    'image/heic',
+    'image/heif',
   ];
   private readonly allowedVideoMimeTypes = ['video/mp4', 'video/webm'];
   private readonly maxFileSize = 5 * 1024 * 1024; // 5MB

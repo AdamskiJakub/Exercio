@@ -16,11 +16,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UploadService } from './upload.service';
 
 // Match the allowed types with UploadService (include 'image/jpg' for JPEG compatibility)
+// HEIC/HEIF added for iOS compatibility (iPhone default photo format)
 const allowedImageTypes = [
   'image/jpeg',
   'image/jpg',
   'image/png',
   'image/webp',
+  'image/heic',
+  'image/heif',
 ];
 const allowedVideoTypes = ['video/mp4', 'video/webm'];
 
