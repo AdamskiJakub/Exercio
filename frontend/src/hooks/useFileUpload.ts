@@ -1,47 +1,73 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import { API_BASE_URL } from "@/lib/utils/api-url";
 
-/**
- * Upload a file using native fetch instead of axios.
- *
- * WHY NATIVE FETCH:
- * The axios CSRF interceptor in api.ts auto-fetches a CSRF token before every
- * state-changing request that lacks an Authorization header. On mobile browsers
- * (iOS Safari, Android Chrome), this sequential CSRF fetch + the subsequent
- * multipart/form-data POST can fail with status 0 / size 0 due to:
- *   - CORS preflight issues specific to multipart/form-data on mobile
- *   - Race conditions in the axios interceptor's async CSRF token fetch
- *   - Cloudflare WAF handling multipart requests differently on mobile
- *
- * Since upload endpoints are protected by JwtAuthGuard, and the JWT is stored
- * in an httpOnly cookie (access_token), the cookie is sent automatically with
- * credentials: "include". No Authorization header or CSRF token needed.
- *
- * See: backend/src/main.ts skipCsrfProtection (line 188-193)
- */
-async function uploadWithFetch(url: string, formData: FormData): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-  });
+// Bare axios instance - no interceptors, no CSRF, just withCredentials for JWT cookie
+const uploadClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
 
-  if (!response.ok) {
-    throw new Error(`Upload failed with status ${response.status}`);
+async function uploadWithAxios(
+  url: string,
+  file: File,
+  fieldName = "file",
+): Promise<any> {
+  const formData = new FormData();
+  formData.append(fieldName, file);
+
+  try {
+    const response = await uploadClient.post(url, formData);
+    return response.data;
+  } catch (error: any) {
+    // Network error (no response from server)
+    if (!error.response) {
+      throw new Error("NETWORK_ERROR");
+    }
+
+    // Server responded with error status
+    const status = error.response.status;
+    let bodyText = "";
+    try {
+      bodyText = JSON.stringify(error.response.data);
+    } catch {
+      bodyText = "(could not read body)";
+    }
+    throw new Error(`HTTP_${status}: ${bodyText.slice(0, 200)}`);
+  }
+}
+
+async function uploadMultipleWithAxios(
+  url: string,
+  files: File[],
+): Promise<any> {
+  // Send first file to get the array response
+  const firstResult = await uploadWithAxios(url, files[0], "files");
+  const urls = firstResult.urls
+    ? [...firstResult.urls]
+    : firstResult.url
+      ? [firstResult.url]
+      : [];
+
+  // Send remaining files
+  for (let i = 1; i < files.length; i++) {
+    const result = await uploadWithAxios(url, files[i], "files");
+    if (result.urls) {
+      urls.push(...result.urls);
+    } else if (result.url) {
+      urls.push(result.url);
+    }
   }
 
-  return response.json();
+  return { urls };
 }
 
 export function useUploadProfilePhoto() {
   return useMutation({
     mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const data = await uploadWithFetch("/upload/profile-photo", formData);
+      const data = await uploadWithAxios("/upload/profile-photo", file);
       return data.url as string;
     },
   });
@@ -50,12 +76,7 @@ export function useUploadProfilePhoto() {
 export function useUploadGalleryPhotos() {
   return useMutation({
     mutationFn: async (files: File[]) => {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const data = await uploadWithFetch("/upload/gallery", formData);
+      const data = await uploadMultipleWithAxios("/upload/gallery", files);
       return data.urls as string[];
     },
   });

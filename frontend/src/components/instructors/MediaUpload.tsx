@@ -160,6 +160,29 @@ export function MediaUpload(props: MediaUploadProps) {
           })),
         );
       }
+      // Show error to user
+      const message = error instanceof Error ? error.message : t("uploadError");
+
+      // Map known error codes to user-friendly messages
+      let userMessage: string;
+      if (message === "NETWORK_ERROR") {
+        userMessage = t("networkError");
+      } else if (message.startsWith("HTTP_")) {
+        const status = message.split(":")[0].replace("HTTP_", "");
+        if (status === "403") {
+          userMessage = t("forbiddenError");
+        } else if (status === "413") {
+          userMessage = t("fileTooLargeError");
+        } else if (status === "415") {
+          userMessage = t("invalidFormatError");
+        } else {
+          userMessage = `${t("serverError")} (${status})`;
+        }
+      } else {
+        userMessage = message;
+      }
+
+      toast.error(userMessage);
     }
 
     // Reset input
