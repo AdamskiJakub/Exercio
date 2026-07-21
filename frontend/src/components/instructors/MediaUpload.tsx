@@ -1,35 +1,47 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { Upload, X, Loader2, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { MediaUploadProps } from './types';
-import { getMediaUrl, IS_DEVELOPMENT, isVideoUrl } from '@/lib/utils/media';
-import { toast } from 'sonner';
+import { useState, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { Upload, X, Loader2, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MediaUploadProps } from "./types";
+import { getMediaUrl, IS_DEVELOPMENT, isVideoUrl } from "@/lib/utils/media";
+import { toast } from "sonner";
 
 export function MediaUpload(props: MediaUploadProps) {
-  const { variant, onMediaChange, onUpload, isUploading, label, hint, acceptVideo = false } = props;
-  const currentMediaUrl = variant === 'avatar' ? props.currentMediaUrl : undefined;
-  const currentMediaUrls = variant === 'gallery' ? (props.currentMediaUrls || []) : [];
-  const maxFiles = variant === 'gallery' ? (props.maxFiles || 10) : 1;
+  const {
+    variant,
+    onMediaChange,
+    onUpload,
+    isUploading,
+    label,
+    hint,
+    acceptVideo = false,
+  } = props;
+  const currentMediaUrl =
+    variant === "avatar" ? props.currentMediaUrl : undefined;
+  const currentMediaUrls =
+    variant === "gallery" ? props.currentMediaUrls || [] : [];
+  const maxFiles = variant === "gallery" ? props.maxFiles || 10 : 1;
 
-  const t = useTranslations('Dashboard.profileForm');
-  const [previews, setPreviews] = useState<Array<{ url: string; type: 'image' | 'video'; isBlob?: boolean }>>(
-    variant === 'avatar' && currentMediaUrl
-      ? [{ url: currentMediaUrl, type: 'image', isBlob: false }]
-      : currentMediaUrls.map(url => ({
+  const t = useTranslations("Dashboard.profileForm");
+  const [previews, setPreviews] = useState<
+    Array<{ url: string; type: "image" | "video"; isBlob?: boolean }>
+  >(
+    variant === "avatar" && currentMediaUrl
+      ? [{ url: currentMediaUrl, type: "image", isBlob: false }]
+      : currentMediaUrls.map((url) => ({
           url,
-          type: isVideoUrl(url) ? 'video' : 'image',
-          isBlob: false
-        }))
+          type: isVideoUrl(url) ? "video" : "image",
+          isBlob: false,
+        })),
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Cleanup blob URLs on unmount or when previews change
   useEffect(() => {
     return () => {
-      previews.forEach(preview => {
+      previews.forEach((preview) => {
         if (preview.isBlob) {
           URL.revokeObjectURL(preview.url);
         }
@@ -38,34 +50,44 @@ export function MediaUpload(props: MediaUploadProps) {
   }, [previews]);
 
   const getAcceptedTypes = () => {
-    const imageTypes = 'image/jpeg,image/png,image/webp';
-    const videoTypes = 'video/mp4,video/webm';
+    // HEIC/HEIF added for iOS compatibility
+    const imageTypes = "image/jpeg,image/png,image/webp,image/heic,image/heif";
+    const videoTypes = "video/mp4,video/webm";
     return acceptVideo ? `${imageTypes},${videoTypes}` : imageTypes;
   };
 
   const validateFile = (file: File): string | null => {
     const maxSize = 5 * 1024 * 1024; // 5MB
-    
+
     if (file.size > maxSize) {
-      return t('maxFileSize');
+      return t("maxFileSize");
     }
 
-    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const allowedVideoTypes = ['video/mp4', 'video/webm'];
-    
-    if (file.type.startsWith('video/')) {
+    // HEIC/HEIF added for iOS compatibility
+    const allowedImageTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/heic",
+      "image/heif",
+    ];
+    const allowedVideoTypes = ["video/mp4", "video/webm"];
+
+    if (file.type.startsWith("video/")) {
       if (!acceptVideo || !allowedVideoTypes.includes(file.type)) {
-        return t('invalidVideoFormat');
+        return t("invalidVideoFormat");
       }
       // TODO: Check video duration (requires loading video metadata)
     } else if (!allowedImageTypes.includes(file.type)) {
-      return t('invalidImageFormat');
+      return t("invalidImageFormat");
     }
 
     return null;
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) return;
 
@@ -79,70 +101,81 @@ export function MediaUpload(props: MediaUploadProps) {
     }
 
     // For avatar variant, only allow one file
-    if (variant === 'avatar' && files.length > 1) {
-      toast.error(t('onlyOneFile'));
+    if (variant === "avatar" && files.length > 1) {
+      toast.error(t("onlyOneFile"));
       return;
     }
 
     // For gallery variant, check max files
-    if (variant === 'gallery' && previews.length + files.length > maxFiles) {
-      toast.error(t('maximumFilesReached'));
+    if (variant === "gallery" && previews.length + files.length > maxFiles) {
+      toast.error(t("maximumFilesReached"));
       return;
     }
 
     try {
       // Create previews
-      const newPreviews = files.map(file => ({
+      const newPreviews = files.map((file) => ({
         url: URL.createObjectURL(file),
-        type: file.type.startsWith('video/') ? 'video' as const : 'image' as const,
-        isBlob: true
+        type: file.type.startsWith("video/")
+          ? ("video" as const)
+          : ("image" as const),
+        isBlob: true,
       }));
 
-      if (variant === 'avatar') {
+      if (variant === "avatar") {
         setPreviews(newPreviews);
         // Upload single file for avatar
         const uploadResult = await onUpload(files[0]);
-        setPreviews([{ url: uploadResult, type: 'image', isBlob: false }]);
+        setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
         onMediaChange(uploadResult);
       } else {
         setPreviews([...previews, ...newPreviews]);
         // Upload multiple files for gallery
         const uploadResult = await onUpload(files);
         const newUrls = [...currentMediaUrls, ...uploadResult];
-        setPreviews(newUrls.map(url => ({
-          url,
-          type: isVideoUrl(url) ? 'video' : 'image',
-          isBlob: false
-        })));
+        setPreviews(
+          newUrls.map((url) => ({
+            url,
+            type: isVideoUrl(url) ? "video" : "image",
+            isBlob: false,
+          })),
+        );
         onMediaChange(newUrls);
       }
     } catch (error) {
       // Revert previews on error
-      if (variant === 'avatar') {
-        setPreviews(currentMediaUrl ? [{ url: currentMediaUrl, type: 'image', isBlob: false }] : []);
+      if (variant === "avatar") {
+        setPreviews(
+          currentMediaUrl
+            ? [{ url: currentMediaUrl, type: "image", isBlob: false }]
+            : [],
+        );
       } else {
-        setPreviews(currentMediaUrls.map(url => ({
-          url,
-          type: url.endsWith('.mp4') || url.endsWith('.webm') ? 'video' : 'image',
-          isBlob: false
-        })));
+        setPreviews(
+          currentMediaUrls.map((url) => ({
+            url,
+            type:
+              url.endsWith(".mp4") || url.endsWith(".webm") ? "video" : "image",
+            isBlob: false,
+          })),
+        );
       }
     }
 
     // Reset input
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const handleRemove = (index?: number) => {
-    if (variant === 'avatar') {
+    if (variant === "avatar") {
       // Revoke blob URL if it exists
       if (previews[0]?.isBlob) {
         URL.revokeObjectURL(previews[0].url);
       }
       setPreviews([]);
-      onMediaChange('');
+      onMediaChange("");
     } else if (index !== undefined) {
       // Revoke blob URL if it exists
       if (previews[index]?.isBlob) {
@@ -155,20 +188,24 @@ export function MediaUpload(props: MediaUploadProps) {
     }
   };
 
-  if (variant === 'avatar') {
+  if (variant === "avatar") {
     return (
       <div className="space-y-3">
         <label className="text-base font-semibold text-slate-200">
           {label}
         </label>
         {hint && <p className="text-sm text-slate-400">{hint}</p>}
-        
+
         {/* Mobile: Stack vertically, Desktop: Side by side */}
         <div className="flex flex-col sm:flex-row sm:items-start gap-4 pb-4 mt-2">
           {previews[0] ? (
             <div className="relative size-32 rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 shrink-0 mx-auto sm:mx-0">
               <img
-                src={previews[0].isBlob ? previews[0].url : getMediaUrl(previews[0].url)}
+                src={
+                  previews[0].isBlob
+                    ? previews[0].url
+                    : getMediaUrl(previews[0].url)
+                }
                 alt="Profile preview"
                 className="size-full object-cover"
               />
@@ -198,21 +235,21 @@ export function MediaUpload(props: MediaUploadProps) {
               {isUploading ? (
                 <>
                   <Loader2 className="size-4 sm:size-4 mr-2 shrink-0 animate-spin" />
-                  <span className="truncate">{t('uploading')}</span>
+                  <span className="truncate">{t("uploading")}</span>
                 </>
               ) : previews[0] ? (
                 <>
                   <Upload className="size-4 sm:size-4 mr-2 shrink-0" />
-                  <span className="truncate">{t('changePhoto')}</span>
+                  <span className="truncate">{t("changePhoto")}</span>
                 </>
               ) : (
                 <>
                   <Upload className="size-4 sm:size-4 mr-2 shrink-0" />
-                  <span className="truncate">{t('selectPhoto')}</span>
+                  <span className="truncate">{t("selectPhoto")}</span>
                 </>
               )}
             </Button>
-            
+
             {previews[0] && (
               <Button
                 type="button"
@@ -223,13 +260,21 @@ export function MediaUpload(props: MediaUploadProps) {
                 className="w-full cursor-pointer h-11 sm:h-10"
               >
                 <X className="size-4 sm:size-4 mr-2 shrink-0" />
-                <span className="truncate">{t('removePhoto')}</span>
+                <span className="truncate">{t("removePhoto")}</span>
               </Button>
             )}
-            
+
             <p className="text-xs text-slate-400">
-              {t('maxFileSize')} • {acceptVideo ? t('acceptedFormatsWithVideo') : t('acceptedFormats')}
-              {acceptVideo && <><br />{t('videoMaxDuration')}</>}
+              {t("maxFileSize")} •{" "}
+              {acceptVideo
+                ? t("acceptedFormatsWithVideo")
+                : t("acceptedFormats")}
+              {acceptVideo && (
+                <>
+                  <br />
+                  {t("videoMaxDuration")}
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -240,15 +285,16 @@ export function MediaUpload(props: MediaUploadProps) {
   // Gallery variant
   return (
     <div className="space-y-2">
-      <label className="text-base font-semibold text-slate-200">
-        {label}
-      </label>
+      <label className="text-base font-semibold text-slate-200">{label}</label>
       {hint && <p className="text-sm text-slate-400">{hint}</p>}
-      
+
       <div className="grid grid-cols-3 gap-4 pb-4 mt-2">
         {previews.map((preview, index) => (
-          <div key={index} className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 group">
-            {preview.type === 'video' ? (
+          <div
+            key={index}
+            className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 group"
+          >
+            {preview.type === "video" ? (
               <div className="relative size-full">
                 <video
                   src={getMediaUrl(preview.url)}
@@ -266,7 +312,7 @@ export function MediaUpload(props: MediaUploadProps) {
                 className="size-full object-cover"
               />
             )}
-            
+
             <Button
               type="button"
               variant="ghost"
@@ -274,13 +320,13 @@ export function MediaUpload(props: MediaUploadProps) {
               onClick={() => handleRemove(index)}
               disabled={isUploading}
               className="absolute top-2 right-2 size-6 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-              aria-label={t('removeMedia')}
+              aria-label={t("removeMedia")}
             >
               <X className="size-4" />
             </Button>
           </div>
         ))}
-        
+
         {previews.length < maxFiles && (
           <button
             type="button"
@@ -293,7 +339,9 @@ export function MediaUpload(props: MediaUploadProps) {
             ) : (
               <>
                 <Upload className="size-5 sm:size-6 text-slate-500" />
-                <span className="text-[10px] sm:text-xs text-slate-500 text-center leading-tight">{t('selectMedia')}</span>
+                <span className="text-[10px] sm:text-xs text-slate-500 text-center leading-tight">
+                  {t("selectMedia")}
+                </span>
               </>
             )}
           </button>
@@ -309,10 +357,11 @@ export function MediaUpload(props: MediaUploadProps) {
         disabled={isUploading}
         multiple
       />
-      
+
       <p className="text-xs text-slate-500">
-        {t('maxFileSize')} • {acceptVideo ? t('acceptedFormatsWithVideo') : t('acceptedFormats')}
-        {acceptVideo && <> • {t('videoMaxDuration')}</>}
+        {t("maxFileSize")} •{" "}
+        {acceptVideo ? t("acceptedFormatsWithVideo") : t("acceptedFormats")}
+        {acceptVideo && <> • {t("videoMaxDuration")}</>}
       </p>
     </div>
   );

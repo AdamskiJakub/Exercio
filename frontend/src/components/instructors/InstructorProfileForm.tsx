@@ -274,7 +274,10 @@ export function InstructorProfileForm({
           router.push("/dashboard/profile/preview");
         },
         onError: (error) => {
-          toast.error(`${t("updateError")}: ${error.message}`);
+          const message = error.message?.includes("Gallery can have at most 10")
+            ? t("galleryMaxSizeError")
+            : error.message;
+          toast.error(`${t("updateError")}: ${message}`);
         },
       },
     );
