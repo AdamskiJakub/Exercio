@@ -2,38 +2,74 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/lib/utils/api-url";
+import { getCsrfToken, fetchCsrfToken } from "@/lib/api";
 
 /**
- * Upload a file using native fetch with application/octet-stream body.
+ * Upload a single file using FormData (multipart/form-data).
  *
- * WHY NOT FORMDATA:
- * On Android, fetch() with FormData (multipart/form-data) triggers a CORS
- * preflight (OPTIONS) which can fail on some mobile browsers. By sending the
- * file as raw binary (application/octet-stream) with filename in a header,
- * the request becomes a "simple" CORS request (no preflight needed).
+ * WHY FORMDATA:
+ * multipart/form-data is one of the three "simple" CORS content types
+ * (along with application/x-www-form-urlencoded and text/plain) that do
+ * NOT trigger a CORS preflight (OPTIONS) request. This is critical for
+ * mobile browsers where preflight requests often fail due to carrier
+ * proxies, firewalls, or network configurations.
  *
- * The backend Multer config is bypassed - instead we read the raw body and
- * reconstruct the file manually in UploadService.
+ * Previously we sent raw binary with a custom Content-Type (e.g. image/jpeg),
+ * which IS NOT a simple content type and always triggers a preflight.
+ *
+ * The backend uses Multer's FileInterceptor/FilesInterceptor which handles
+ * multipart/form-data natively via the standard /upload/profile-photo and
+ * /upload/gallery endpoints.
+ *
+ * @param fieldName - The form field name expected by the Multer interceptor:
+ *   - "file" for profile-photo (FileInterceptor('file'))
+ *   - "files" for gallery (FilesInterceptor('files'))
  */
-async function uploadWithFetch(url: string, file: File): Promise<any> {
+async function uploadWithFetch(
+  url: string,
+  file: File,
+  fieldName = "file",
+): Promise<any> {
   let response: Response;
+
+  // Build headers - include CSRF token if available (for session-based auth)
+  const headers: Record<string, string> = {
+    "X-File-Name": encodeURIComponent(file.name),
+  };
+
+  // If user is authenticated via JWT cookie, CSRF is skipped on backend.
+  // But include the token anyway as a safety net for edge cases.
+  let csrfToken = getCsrfToken();
+  if (!csrfToken) {
+    csrfToken = await fetchCsrfToken();
+  }
+  if (csrfToken) {
+    headers["X-CSRF-Token"] = csrfToken;
+  }
+
+  // Use FormData to send the file as multipart/form-data.
+  // This is a "simple" CORS content type and does NOT trigger a preflight.
+  const formData = new FormData();
+  formData.append(fieldName, file);
 
   try {
     response = await fetch(`${API_BASE_URL}${url}`, {
       method: "POST",
-      headers: {
-        "Content-Type": file.type || "application/octet-stream",
-        "X-File-Name": encodeURIComponent(file.name),
-      },
-      body: file, // Send raw File as body (no FormData wrapper)
+      headers,
+      body: formData,
       credentials: "include",
     });
   } catch (networkError) {
-    const msg =
-      networkError instanceof TypeError
-        ? `[DEBUG] NetworkError: ${networkError.message}`
-        : `[DEBUG] ${String(networkError)}`;
-    throw new Error(msg);
+    // "Failed to fetch" / TypeError is thrown for network-level failures:
+    //   - CORS preflight failure
+    //   - Network offline / timeout
+    //   - DNS resolution failure
+    //   - SSL/TLS handshake error (e.g. invalid cert on mobile)
+    //   - Connection refused / reset
+    //
+    // The browser hides the exact reason from JavaScript for security.
+    // We include a code prefix so the UI can detect the error type.
+    throw new Error("NETWORK_ERROR");
   }
 
   if (!response.ok) {
@@ -43,9 +79,7 @@ async function uploadWithFetch(url: string, file: File): Promise<any> {
     } catch {
       bodyText = "(could not read body)";
     }
-    throw new Error(
-      `[DEBUG] HTTP ${response.status}: ${bodyText.slice(0, 200)}`,
-    );
+    throw new Error(`HTTP_${response.status}: ${bodyText.slice(0, 200)}`);
   }
 
   return response.json();
@@ -53,15 +87,14 @@ async function uploadWithFetch(url: string, file: File): Promise<any> {
 
 /**
  * Upload multiple files by sending them one by one.
- * Gallery endpoint accepts multiple files, but we send individually
- * to avoid multipart/form-data preflight on mobile.
+ * Gallery endpoint uses FilesInterceptor('files') so we send with fieldName="files".
  */
 async function uploadMultipleWithFetch(
   url: string,
   files: File[],
 ): Promise<any> {
   // Send first file to get the array response
-  const firstResult = await uploadWithFetch(url, files[0]);
+  const firstResult = await uploadWithFetch(url, files[0], "files");
   const urls = firstResult.urls
     ? [...firstResult.urls]
     : firstResult.url
@@ -70,7 +103,7 @@ async function uploadMultipleWithFetch(
 
   // Send remaining files
   for (let i = 1; i < files.length; i++) {
-    const result = await uploadWithFetch(url, files[i]);
+    const result = await uploadWithFetch(url, files[i], "files");
     if (result.urls) {
       urls.push(...result.urls);
     } else if (result.url) {
@@ -84,7 +117,7 @@ async function uploadMultipleWithFetch(
 export function useUploadProfilePhoto() {
   return useMutation({
     mutationFn: async (file: File) => {
-      const data = await uploadWithFetch("/upload/raw/profile-photo", file);
+      const data = await uploadWithFetch("/upload/profile-photo", file);
       return data.url as string;
     },
   });
@@ -93,7 +126,7 @@ export function useUploadProfilePhoto() {
 export function useUploadGalleryPhotos() {
   return useMutation({
     mutationFn: async (files: File[]) => {
-      const data = await uploadMultipleWithFetch("/upload/raw/gallery", files);
+      const data = await uploadMultipleWithFetch("/upload/gallery", files);
       return data.urls as string[];
     },
   });
