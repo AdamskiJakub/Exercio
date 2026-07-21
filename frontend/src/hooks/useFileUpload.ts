@@ -22,14 +22,34 @@ import { API_BASE_URL } from "@/lib/utils/api-url";
  * See: backend/src/main.ts skipCsrfProtection (line 188-193)
  */
 async function uploadWithFetch(url: string, formData: FormData): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${url}`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+  } catch (networkError) {
+    // Network error (CORS, DNS, connection refused, etc.)
+    const msg =
+      networkError instanceof TypeError
+        ? `[DEBUG] NetworkError: ${networkError.message}`
+        : `[DEBUG] ${String(networkError)}`;
+    throw new Error(msg);
+  }
 
   if (!response.ok) {
-    throw new Error(`Upload failed with status ${response.status}`);
+    // Try to read response body for more details
+    let bodyText = "";
+    try {
+      bodyText = await response.text();
+    } catch {
+      bodyText = "(could not read body)";
+    }
+    throw new Error(
+      `[DEBUG] HTTP ${response.status}: ${bodyText.slice(0, 200)}`,
+    );
   }
 
   return response.json();

@@ -160,6 +160,10 @@ export function MediaUpload(props: MediaUploadProps) {
           })),
         );
       }
+      // Show error to user
+      const message =
+        error instanceof Error ? error.message : t("uploadError");
+      toast.error(message);
     }
 
     // Reset input
