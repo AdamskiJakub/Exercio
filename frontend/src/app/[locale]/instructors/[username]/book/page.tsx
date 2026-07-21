@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { BookingCalendar } from "@/components/booking/BookingCalendar";
 import { resolveApiBaseUrl } from "@/lib/utils/api-url";
+import { useAuthStore } from "@/stores/auth-store";
 import type { InstructorProfile } from "@/types";
 
 interface BookingPageProps {
@@ -17,6 +18,7 @@ interface BookingPageProps {
 export default function BookingPage({ params }: BookingPageProps) {
   const searchParams = useSearchParams();
   const t = useTranslations("Booking");
+  const user = useAuthStore((state) => state.user);
   const [profile, setProfile] = useState<InstructorProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -161,6 +163,7 @@ export default function BookingPage({ params }: BookingPageProps) {
             instructorProfile={profile}
             initialDate={initialDate}
             initialTime={initialTime}
+            currentUserId={user?.id}
           />
         </div>
       </div>

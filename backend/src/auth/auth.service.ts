@@ -13,6 +13,7 @@ import { randomInt } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { VERIFICATION_CODE_EXPIRY_MS, BCRYPT_SALT_ROUNDS } from './constants';
 import type { Language } from '../email/email.types';
+import { slugifyToAscii } from '../common/slug-utils';
 
 @Injectable()
 export class AuthService {
@@ -279,12 +280,7 @@ export class AuthService {
     // Use firstName + lastName if available, otherwise fall back to a random slug
     const baseUsername =
       [firstName, lastName].filter(Boolean).length > 0
-        ? [firstName, lastName]
-            .filter(Boolean)
-            .join('-')
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '-')
-            .replace(/^-|-$/g, '')
+        ? slugifyToAscii([firstName, lastName].filter(Boolean).join(' '))
         : `user-${Date.now().toString(36)}`;
 
     let username = baseUsername;
