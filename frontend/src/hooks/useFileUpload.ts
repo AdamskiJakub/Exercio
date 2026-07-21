@@ -1,15 +1,16 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api";
+import axios from "axios";
+import { API_BASE_URL } from "@/lib/utils/api-url";
 
 /**
- * Upload a single file using axios with FormData (multipart/form-data).
+ * Upload a single file using a bare axios instance (no CSRF interceptors).
  *
- * WHY AXIOS:
- * Using the same apiClient (axios) that the rest of the app uses ensures
- * consistent CORS handling, CSRF token injection (via interceptor), and
- * cookie credentials (withCredentials: true).
+ * WHY BARE AXIOS (not apiClient):
+ * The apiClient has a CSRF interceptor that adds X-CSRF-Token header for
+ * state-changing requests without Authorization header. This custom header
+ * triggers a CORS preflight (OPTIONS) which fails on mobile networks.
  *
  * WHY FORMDATA:
  * multipart/form-data is one of the three "simple" CORS content types
@@ -18,10 +19,21 @@ import { apiClient } from "@/lib/api";
  * mobile browsers where preflight requests often fail due to carrier
  * proxies, firewalls, or network configurations.
  *
+ * NO CUSTOM HEADERS:
+ * Custom headers like X-File-Name or X-CSRF-Token trigger CORS preflight.
+ * The file name is already embedded in the multipart body by the browser.
+ *
  * @param fieldName - The form field name expected by the Multer interceptor:
  *   - "file" for profile-photo (FileInterceptor('file'))
  *   - "files" for gallery (FilesInterceptor('files'))
  */
+
+// Bare axios instance - no interceptors, no CSRF, just withCredentials for JWT cookie
+const uploadClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+
 async function uploadWithAxios(
   url: string,
   file: File,
@@ -31,12 +43,7 @@ async function uploadWithAxios(
   formData.append(fieldName, file);
 
   try {
-    const response = await apiClient.post(url, formData, {
-      headers: {
-        "X-File-Name": encodeURIComponent(file.name),
-        // Let axios set Content-Type with boundary for multipart/form-data
-      },
-    });
+    const response = await uploadClient.post(url, formData);
     return response.data;
   } catch (error: any) {
     // Network error (no response from server)
