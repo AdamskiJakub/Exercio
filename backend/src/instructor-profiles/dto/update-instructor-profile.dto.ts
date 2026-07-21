@@ -75,6 +75,7 @@ export class UpdateInstructorProfileDto {
 
   @IsArray()
   @IsString({ each: true })
+  @ArrayMaxSize(10, { message: 'Gallery can have at most 10 photos/videos' })
   @IsOptional()
   gallery?: string[];
 

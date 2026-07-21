@@ -412,16 +412,19 @@ export class BookingNotificationHelper {
   ): { bookingDate: string; bookingTime: string } {
     const locale = language === 'pl' ? 'pl-PL' : 'en-GB';
     const date = startTime ?? new Date();
+    const timeZone = 'Europe/Warsaw';
     return {
       bookingDate: date.toLocaleDateString(locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone,
       }),
       bookingTime: date.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone,
       }),
     };
   }
