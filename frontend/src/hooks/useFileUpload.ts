@@ -4,30 +4,6 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { API_BASE_URL } from "@/lib/utils/api-url";
 
-/**
- * Upload a single file using a bare axios instance (no CSRF interceptors).
- *
- * WHY BARE AXIOS (not apiClient):
- * The apiClient has a CSRF interceptor that adds X-CSRF-Token header for
- * state-changing requests without Authorization header. This custom header
- * triggers a CORS preflight (OPTIONS) which fails on mobile networks.
- *
- * WHY FORMDATA:
- * multipart/form-data is one of the three "simple" CORS content types
- * (along with application/x-www-form-urlencoded and text/plain) that do
- * NOT trigger a CORS preflight (OPTIONS) request. This is critical for
- * mobile browsers where preflight requests often fail due to carrier
- * proxies, firewalls, or network configurations.
- *
- * NO CUSTOM HEADERS:
- * Custom headers like X-File-Name or X-CSRF-Token trigger CORS preflight.
- * The file name is already embedded in the multipart body by the browser.
- *
- * @param fieldName - The form field name expected by the Multer interceptor:
- *   - "file" for profile-photo (FileInterceptor('file'))
- *   - "files" for gallery (FilesInterceptor('files'))
- */
-
 // Bare axios instance - no interceptors, no CSRF, just withCredentials for JWT cookie
 const uploadClient = axios.create({
   baseURL: API_BASE_URL,
@@ -63,10 +39,6 @@ async function uploadWithAxios(
   }
 }
 
-/**
- * Upload multiple files by sending them one by one.
- * Gallery endpoint uses FilesInterceptor('files') so we send with fieldName="files".
- */
 async function uploadMultipleWithAxios(
   url: string,
   files: File[],
