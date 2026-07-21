@@ -12,9 +12,12 @@ export interface InstructorProfile {
   id: string;
   sessionDuration: number;
   sessionPrice: number;
+  photoUrl: string | null;
+  specializations: string[];
 }
 
 export interface InstructorUser extends BookingUser {
+  username: string;
   instructorProfile: InstructorProfile | null;
 }
 

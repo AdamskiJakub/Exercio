@@ -35,11 +35,14 @@ export class BookingQueryService {
             email: true,
             firstName: true,
             lastName: true,
+            username: true,
             instructorProfile: {
               select: {
                 id: true,
                 sessionDuration: true,
                 sessionPrice: true,
+                photoUrl: true,
+                specializations: true,
               },
             },
           },

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { format, addDays, parseISO, isPast, isToday } from "date-fns";
 import { Calendar, Play, ArrowRight } from "lucide-react";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/auth-store";
 import { InstructorHero } from "./InstructorHero";
@@ -88,11 +88,19 @@ export function NewPublicInstructorProfile({
 
   const handleBookingClick = () => {
     if (!profile.user?.username) return;
-    router.push({
-      pathname: "/instructors/[username]/book",
-      params: { username: profile.user.username },
-    });
+    router.push(`/instructors/${profile.user.username}/book`);
   };
+
+  // Handle slot click from QuickAvailability: navigate to /book with date/time params
+  const handleSlotClick = useCallback(
+    (date: string, time: string) => {
+      if (!profile.user?.username) return;
+      router.push(
+        `/instructors/${profile.user.username}/book?date=${date}&time=${time}`,
+      );
+    },
+    [router, profile.user?.username],
+  );
 
   // Combine photoUrl and gallery for lightbox
   const allMedia = [
@@ -148,6 +156,7 @@ export function NewPublicInstructorProfile({
         <InstructorHero
           profile={profile}
           onBookClick={handleBookingClick}
+          onNearestSlotClick={handleSlotClick}
           nearestSlot={nearestSlot}
         />
 
@@ -159,6 +168,7 @@ export function NewPublicInstructorProfile({
           <QuickAvailability
             instructorProfileId={profile.id}
             username={profile.user?.username || ""}
+            onSlotClick={handleSlotClick}
           />
         )}
 

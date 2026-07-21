@@ -58,6 +58,20 @@ function getCities(): City[] {
   return parsedCities;
 }
 
+function normalizeDiacritics(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/ą/g, "a")
+    .replace(/ć/g, "c")
+    .replace(/ę/g, "e")
+    .replace(/ł/g, "l")
+    .replace(/ń/g, "n")
+    .replace(/ó/g, "o")
+    .replace(/ś/g, "s")
+    .replace(/ź/g, "z")
+    .replace(/ż/g, "z");
+}
+
 export function useCityAutocomplete(): UseCityAutocompleteReturn {
   const [query, setQuery] = useState("");
 
@@ -67,10 +81,11 @@ export function useCityAutocomplete(): UseCityAutocompleteReturn {
     const trimmed = query.trim();
     if (trimmed.length < 2) return [];
 
-    const lowerQuery = trimmed.toLowerCase();
+    const normalizedQuery = normalizeDiacritics(trimmed);
 
     return allCities.filter((city) => {
-      return city.name.toLowerCase().includes(lowerQuery);
+      const normalizedName = normalizeDiacritics(city.name);
+      return normalizedName.includes(normalizedQuery);
     });
   }, [query, allCities]);
 

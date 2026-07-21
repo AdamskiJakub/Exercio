@@ -10,6 +10,7 @@ import { CreateInstructorProfileDto } from './dto/create-instructor-profile.dto'
 import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto';
 import { StaticConfigService } from '../config/config.service';
 import { getInstructorOrderBy } from '../common/sort-utils';
+import { buildInstructorSearchOrClause } from '../common/search-utils';
 
 // Shared Prisma include for enterprise memberships (used across multiple queries)
 export const enterpriseMembershipsInclude = {
@@ -101,16 +102,10 @@ export class InstructorProfilesService {
     };
 
     if (filters.q) {
-      where.OR = [
-        { user: { firstName: { contains: filters.q, mode: 'insensitive' } } },
-        { user: { lastName: { contains: filters.q, mode: 'insensitive' } } },
-        { user: { username: { contains: filters.q, mode: 'insensitive' } } },
-        { bio: { contains: filters.q, mode: 'insensitive' } },
-        { tagline: { contains: filters.q, mode: 'insensitive' } },
-        { tags: { has: filters.q } },
-        { specializations: { has: filters.q } },
-        { city: { contains: filters.q, mode: 'insensitive' } },
-      ];
+      const orClause = buildInstructorSearchOrClause(filters.q);
+      if (orClause) {
+        where.OR = orClause;
+      }
     }
 
     if (filters.city) {
