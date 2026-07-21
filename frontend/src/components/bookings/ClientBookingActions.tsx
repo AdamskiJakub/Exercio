@@ -30,7 +30,7 @@ export function ClientBookingActions({
         variant="destructive"
         onClick={() => onCancelClick(booking)}
         disabled={isCancelPending}
-        className="h-8 px-3 md:w-full"
+        className="h-8 px-3 w-full cursor-pointer"
       >
         <XCircle className="w-4 h-4 mr-1" />
         {t("cancelSession")}
@@ -46,7 +46,7 @@ export function ClientBookingActions({
           size="sm"
           onClick={() => onAcceptManual?.(booking.id)}
           disabled={isAcceptPending}
-          className="bg-green-500 md:w-full hover:bg-green-600 text-white h-8 px-3"
+          className="bg-green-500 w-full hover:bg-green-600 text-white h-8 px-3 cursor-pointer"
         >
           <Check className="w-4 h-4 mr-1" />
           {t("acceptBooking")}
@@ -56,7 +56,7 @@ export function ClientBookingActions({
           variant="destructive"
           onClick={() => onCancelClick(booking)}
           disabled={isCancelPending}
-          className="h-8 px-3 md:w-full"
+          className="h-8 px-3 w-full cursor-pointer"
         >
           <XCircle className="w-4 h-4 mr-1" />
           {t("rejectBooking")}
@@ -73,7 +73,7 @@ export function ClientBookingActions({
         variant="destructive"
         onClick={() => onCancelClick(booking)}
         disabled={isCancelPending}
-        className="h-8 px-3 md:w-full"
+        className="h-8 px-3 w-full cursor-pointer"
       >
         <XCircle className="w-4 h-4 mr-1" />
         {t("cancelSession")}

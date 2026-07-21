@@ -6,8 +6,9 @@ import {
   getEnterpriseOrderBy,
 } from '../common/sort-utils';
 import { disciplinesData } from '../modules/catalog/disciplines/disciplines.data';
-import { slugifyToAscii } from '../common/slug-utils';
+import { slugifyToAscii, removePolishDiacritics } from '../common/slug-utils';
 import { categoriesData } from '../modules/catalog/categories/categories.data';
+import { buildInstructorSearchOrClause } from '../common/search-utils';
 
 interface SearchFilters {
   q?: string;
@@ -458,30 +459,26 @@ export class SearchService {
    * Supports prefix search for autocomplete.
    */
   async getCities(q?: string): Promise<string[]> {
-    const cityFilter = q
-      ? { city: { contains: q, mode: 'insensitive' as const } }
-      : {};
+    const normalizedQuery = q ? removePolishDiacritics(q.toLowerCase()) : '';
 
     const [instructorCities, enterpriseCities] = await Promise.all([
       this.prisma.instructorProfile.findMany({
         where: {
-          ...cityFilter,
           city: { not: null },
           isDraft: false,
         },
         select: { city: true },
         distinct: ['city'],
-        take: 50,
+        take: 200,
       }),
       this.prisma.enterpriseProfile.findMany({
         where: {
-          ...cityFilter,
           city: { not: null },
           status: 'ACTIVE',
         },
         select: { city: true },
         distinct: ['city'],
-        take: 50,
+        take: 200,
       }),
     ]);
 
@@ -489,7 +486,13 @@ export class SearchService {
     instructorCities.forEach((c) => c.city && cities.add(c.city));
     enterpriseCities.forEach((c) => c.city && cities.add(c.city));
 
-    return Array.from(cities).sort();
+    const filtered = Array.from(cities).filter((city) => {
+      if (!normalizedQuery) return true;
+      const normalizedCity = removePolishDiacritics(city.toLowerCase());
+      return normalizedCity.includes(normalizedQuery);
+    });
+
+    return filtered.sort();
   }
 
   private async searchInstructors(
@@ -504,16 +507,10 @@ export class SearchService {
     const where: any = { isDraft: false };
 
     if (q) {
-      where.OR = [
-        { user: { firstName: { contains: q, mode: 'insensitive' } } },
-        { user: { lastName: { contains: q, mode: 'insensitive' } } },
-        { user: { username: { contains: q, mode: 'insensitive' } } },
-        { bio: { contains: q, mode: 'insensitive' } },
-        { tagline: { contains: q, mode: 'insensitive' } },
-        { tags: { has: q } },
-        { specializations: { has: q } },
-        { city: { contains: q, mode: 'insensitive' } },
-      ];
+      const orClause = buildInstructorSearchOrClause(q);
+      if (orClause) {
+        where.OR = orClause;
+      }
     }
 
     if (city) {

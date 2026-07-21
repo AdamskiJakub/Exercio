@@ -29,12 +29,14 @@ import { FollowInstructorButton } from "./FollowInstructorButton";
 interface InstructorHeroProps {
   profile: InstructorProfile;
   onBookClick: () => void;
+  onNearestSlotClick?: (date: string, time: string) => void;
   nearestSlot: { date: string; time: string } | null;
 }
 
 export function InstructorHero({
   profile,
   onBookClick,
+  onNearestSlotClick,
   nearestSlot,
 }: InstructorHeroProps) {
   const { user } = useAuthStore();
@@ -345,9 +347,15 @@ export function InstructorHero({
                 <p className="text-lg font-semibold text-white">
                   {isNearestSlotTomorrow ? t("tomorrow") : nearestSlotDay}
                 </p>
-                <p className="text-3xl font-bold text-orange-400 mt-1">
+                <button
+                  onClick={() =>
+                    onNearestSlotClick?.(nearestSlot.date, nearestSlot.time)
+                  }
+                  className="text-3xl font-bold text-orange-400 mt-1 hover:text-orange-300 transition-colors cursor-pointer"
+                  title={t("chooseTerm")}
+                >
                   {nearestSlot.time}
-                </p>
+                </button>
               </div>
             )}
 

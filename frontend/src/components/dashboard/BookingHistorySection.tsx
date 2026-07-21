@@ -170,14 +170,14 @@ export function BookingHistorySection({
     <>
       {/* Tab buttons */}
       {isTabbed && tabs && (
-        <div className="flex gap-1 mb-4 bg-slate-700/50 rounded-lg p-1">
+        <div className="flex gap-1 mb-4 bg-slate-700/50 rounded-lg p-1 overflow-x-auto scrollbar-thin">
           {(Object.entries(tabs) as [BookingTab, BookingTabConfig][]).map(
             ([tabKey, config]) => (
               <button
                 key={tabKey}
                 onClick={() => handleTabChange(tabKey)}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all flex-1 justify-center",
+                  "flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all flex-1 justify-center whitespace-nowrap",
                   activeTab === tabKey
                     ? "bg-orange-500 text-white shadow-sm"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-600/50",
@@ -193,13 +193,13 @@ export function BookingHistorySection({
 
       {/* Status filter tabs */}
       {currentBookings.length > 0 && (
-        <div className="flex gap-1 mb-4 bg-slate-700/50 rounded-lg p-1">
+        <div className="flex gap-1 mb-4 bg-slate-700/50 rounded-lg p-1 overflow-x-auto scrollbar-thin">
           {STATUS_FILTERS.map((filter) => (
             <button
               key={filter.key}
               onClick={() => handleStatusFilterChange(filter.key)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all flex-1 justify-center",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all flex-1 justify-center whitespace-nowrap",
                 statusFilter === filter.key
                   ? "bg-orange-500 text-white shadow-sm"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-600/50",
