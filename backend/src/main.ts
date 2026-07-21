@@ -207,6 +207,14 @@ async function bootstrap() {
       ) {
         return true;
       }
+
+      // Skip CSRF for upload endpoints - they use multipart/form-data (FormData)
+      // which cannot include CSRF headers without triggering CORS preflight.
+      // Uploads are protected by JWT authentication (access_token cookie or Bearer header).
+      if (req.path?.startsWith('/upload/')) {
+        return true;
+      }
+
       return false;
     },
     errorConfig: {
