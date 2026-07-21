@@ -827,6 +827,7 @@
       "invalidImageFormat": "Please upload only JPEG, PNG, or WebP image files",
       "onlyOneFile": "Please upload only one file",
       "maximumFilesReached": "Maximum number of files reached",
+      "galleryMaxSizeError": "Gallery can have at most 10 photos/videos",
       "gallery": "Gallery",
       "galleryPlaceholder": "Upload photos and videos to showcase your work",
       "saveProfile": "Save Profile",

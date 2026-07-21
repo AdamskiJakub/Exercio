@@ -827,6 +827,7 @@
       "invalidImageFormat": "Proszę przesłać tylko pliki graficzne w formacie JPEG, PNG lub WebP",
       "onlyOneFile": "Proszę przesłać tylko jeden plik",
       "maximumFilesReached": "Osiągnięto maksymalną liczbę plików",
+      "galleryMaxSizeError": "Galeria może zawierać maksymalnie 10 zdjęć/filmów",
       "gallery": "Galeria",
       "galleryPlaceholder": "Prześlij zdjęcia i filmy prezentujące Twoją pracę",
       "saveProfile": "Zapisz Profil",
