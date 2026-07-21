@@ -53,15 +53,15 @@ export function PendingReviewsSection({
           animate={{ opacity: 1, y: 0 }}
           className={
             variant === "instructor"
-              ? "bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5 flex items-center justify-between gap-4"
-              : "bg-orange-500/10 border border-orange-500/20 rounded-xl p-5 flex items-center justify-between gap-4"
+              ? "bg-linear-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
+              : "bg-orange-500/10 border border-orange-500/20 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4"
           }
         >
-          <div className="flex items-center gap-4 min-w-0">
+          <div className="flex items-center gap-4 min-w-0 w-full sm:w-auto">
             <div className="p-3 bg-orange-500/10 rounded-lg shrink-0">
               <Star className="w-6 h-6 text-orange-400" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-white font-semibold text-base">
                 {variant === "instructor"
                   ? t("reviewBannerTitle", { count: pendingReviewCount })
@@ -92,8 +92,8 @@ export function PendingReviewsSection({
             }
             className={
               variant === "instructor"
-                ? "px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all hover:scale-105 text-base shrink-0 shadow-lg shadow-amber-500/20"
-                : "px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors whitespace-nowrap shrink-0"
+                ? "w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg transition-all hover:scale-105 text-base shadow-lg shadow-amber-500/20"
+                : "w-full sm:w-auto px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-semibold transition-colors whitespace-nowrap"
             }
           >
             {t("reviewBannerAction")}

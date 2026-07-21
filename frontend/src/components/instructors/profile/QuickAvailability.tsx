@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   format,
@@ -12,28 +12,30 @@ import {
 } from "date-fns";
 import { pl, enUS } from "date-fns/locale";
 import { Clock, Calendar, ChevronRight } from "lucide-react";
-import { useRouter } from "@/i18n/routing";
+import { useRouter } from "next/navigation";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
 import { Button } from "@/components/ui/button";
 
 interface QuickAvailabilityProps {
   instructorProfileId: string;
   username: string;
+  onSlotClick?: (date: string, time: string) => void;
 }
 
 export function QuickAvailability({
   instructorProfileId,
   username,
+  onSlotClick,
 }: QuickAvailabilityProps) {
   const t = useTranslations("InstructorProfile");
   const locale = useLocale();
   const dateLocale = locale === "pl" ? pl : enUS;
   const router = useRouter();
 
-  // Fetch next 7 days of slots
+  // Fetch next 3 days of slots
   const today = new Date();
   const startDate = format(today, "yyyy-MM-dd");
-  const endDate = format(addDays(today, 7), "yyyy-MM-dd");
+  const endDate = format(addDays(today, 3), "yyyy-MM-dd");
 
   const {
     data: slots,
@@ -61,30 +63,30 @@ export function QuickAvailability({
       dayMap.get(dateKey)!.times.push(timeStr);
     }
 
-    // Convert to array, sort by date, limit to 3 days, max 5 slots per day
+    // Convert to array, sort by date, limit to 3 days, show ALL slots (no limit)
     return Array.from(dayMap.values())
       .sort((a, b) => a.date.localeCompare(b.date))
-      .slice(0, 3)
-      .map((day) => ({
-        ...day,
-        times: day.times.slice(0, 5),
-      }));
+      .slice(0, 3);
   }, [slots]);
 
-  const handleSlotClick = (date: string, time: string) => {
-    router.push({
-      pathname: "/instructors/[username]/book",
-      params: { username },
-      query: { date, time },
-    });
-  };
+  const handleSlotClick = useCallback(
+    (date: string, time: string) => {
+      if (onSlotClick) {
+        onSlotClick(date, time);
+      } else {
+        // Fallback: navigate to book page
+        router.push(
+          `/instructors/${username}/book?date=${date}&time=${time}#booking-calendar`,
+        );
+      }
+    },
+    [onSlotClick, router, username],
+  );
 
-  const handleFullCalendar = () => {
-    router.push({
-      pathname: "/instructors/[username]/book",
-      params: { username },
-    });
-  };
+  const handleFullCalendar = useCallback(() => {
+    // Navigate to the full booking page
+    router.push(`/instructors/${username}/book`);
+  }, [router, username]);
 
   return (
     <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-2xl p-8 lg:p-10">
