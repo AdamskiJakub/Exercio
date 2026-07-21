@@ -26,6 +26,8 @@ export function buildInstructorSearchOrClause(
       { user: { username: { contains: q, mode: 'insensitive' as const } } },
       { bio: { contains: q, mode: 'insensitive' as const } },
       { tagline: { contains: q, mode: 'insensitive' as const } },
+      { tags: { has: q } },
+      { specializations: { has: q } },
       { city: { contains: q, mode: 'insensitive' as const } },
     ];
   }
