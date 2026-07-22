@@ -80,7 +80,9 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <link rel="icon" href="/icon.png" type="image/png" sizes="64x64" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.png" type="image/png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
       </head>
       <body className="min-h-full flex flex-col  bg-slate-950">
         <NextIntlClientProvider messages={messages}>
