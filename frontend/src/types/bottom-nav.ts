@@ -6,9 +6,9 @@ export interface BottomNavBarProps {
     text: string;
     onClick?: () => void;
     disabled?: boolean;
-    variant?: 'primary' | 'secondary';
+    variant?: "primary" | "secondary" | "enterprise";
     icon?: React.ReactNode;
-    type?: 'button' | 'submit';
+    type?: "button" | "submit";
     form?: string;
   };
 }
