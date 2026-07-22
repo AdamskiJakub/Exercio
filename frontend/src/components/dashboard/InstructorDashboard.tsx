@@ -38,6 +38,7 @@ import { DashboardHeader } from "./DashboardHeader";
 import { PendingReviewsSection } from "./PendingReviewsSection";
 import { RecentReviewsSection } from "./RecentReviewsSection";
 import { BookingHistorySection } from "./BookingHistorySection";
+import { InstructorCard } from "@/components/ui/instructor-card";
 import { FavoriteTrainersSection } from "./FavoriteTrainersSection";
 import { BookingsList } from "@/components/bookings/BookingsList";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
@@ -545,54 +546,24 @@ export function InstructorDashboard() {
               </div>
             ) : recentlyViewed && recentlyViewed.length > 0 ? (
               <div className="space-y-2">
-                {recentlyViewed.map((instructor) => {
-                  const name =
-                    [instructor.firstName, instructor.lastName]
-                      .filter(Boolean)
-                      .join(" ") || instructor.username;
-                  const primarySpecId = instructor.specializations?.[0];
-                  const primarySpec = primarySpecId
-                    ? specializations.find((s) => s.id === primarySpecId)
-                    : undefined;
-                  const primarySpecName = primarySpec
-                    ? locale === "pl"
-                      ? primarySpec.namePl
-                      : primarySpec.nameEn
-                    : null;
-                  return (
-                    <Link
-                      key={instructor.id}
-                      href={`/instructors/${instructor.username}` as any}
-                      className="flex items-center gap-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500/50 rounded-xl overflow-hidden transition-colors duration-300 group p-4"
-                    >
-                      <UserAvatar
-                        photoUrl={instructor.photoUrl}
-                        avatarUrl={instructor.avatarUrl}
-                        firstName={instructor.firstName}
-                        lastName={instructor.lastName}
-                        size="md"
-                        alt={name}
-                      />
-                      <div className="flex-1 min-w-0 text-left">
-                        <h4 className="text-sm font-semibold text-white truncate">
-                          {name}
-                        </h4>
-                        {primarySpecName && (
-                          <p className="text-xs text-slate-400 mt-0.5 truncate">
-                            {primarySpecName}
-                          </p>
-                        )}
-                        {instructor.city && (
-                          <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
-                            <MapPin className="size-3" />
-                            <span>{instructor.city}</span>
-                          </div>
-                        )}
-                      </div>
+                {recentlyViewed.map((instructor) => (
+                  <InstructorCard
+                    key={instructor.id}
+                    instructor={{
+                      username: instructor.username,
+                      firstName: instructor.firstName,
+                      lastName: instructor.lastName,
+                      photoUrl: instructor.photoUrl,
+                      avatarUrl: instructor.avatarUrl,
+                      specializations: instructor.specializations,
+                      city: instructor.city,
+                    }}
+                    avatarSize="md"
+                    rightIcon={
                       <Clock className="w-4 h-4 text-slate-500 shrink-0" />
-                    </Link>
-                  );
-                })}
+                    }
+                  />
+                ))}
               </div>
             ) : (
               <EmptyStateCard

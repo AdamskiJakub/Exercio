@@ -43,7 +43,9 @@ export function EnterpriseCard({
             <AvatarImage
               src={getMediaUrl(enterprise.logoUrl)}
               alt={enterprise.companyName}
-              className={hasLogo ? "object-contain rounded-lg" : ""}
+              // object-cover is safe here because backend sharp().trim().resize(256,256,fit:'outside')
+              // removes transparent padding and scales the logo to fill the square container
+              className={hasLogo ? "object-cover rounded-lg" : ""}
             />
             <AvatarFallback className="bg-emerald-900/30 text-emerald-300 text-2xl font-bold rounded-xl">
               {initials}
@@ -168,6 +170,10 @@ export function EnterpriseCard({
     <Link
       href={`/${locale}/enterprise/${enterprise.slug}`}
       className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-xl"
+      aria-label={
+        t("viewProfile", { name: enterprise.companyName }) ||
+        `View ${enterprise.companyName} profile`
+      }
     >
       {cardContent}
     </Link>

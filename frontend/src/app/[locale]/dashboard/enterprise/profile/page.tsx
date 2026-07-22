@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useMyEnterpriseProfile } from "@/hooks/useEnterpriseProfile";
 import {
@@ -12,7 +13,6 @@ import { useArrayField } from "@/hooks/useArrayField";
 import { useUploadHandler } from "@/hooks/useUploadHandler";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { BottomNavBar } from "@/components/ui/bottom-nav-bar";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Save } from "lucide-react";
 import { toast } from "sonner";
@@ -34,6 +34,8 @@ import { EnterpriseProfileFaq } from "@/components/enterprise/EnterpriseProfileF
 
 export default function EnterpriseProfilePage() {
   const t = useTranslations("Dashboard.enterprise");
+  const locale = useLocale();
+  const router = useRouter();
   const { isChecking, user } = useAuthGuard({ requireAuth: true });
   const { data: profile, isLoading: profileLoading } = useMyEnterpriseProfile();
   const queryClient = useQueryClient();
@@ -198,6 +200,8 @@ export default function EnterpriseProfilePage() {
       await apiClient.patch(`/enterprise/${profile.id}`, form);
       queryClient.invalidateQueries({ queryKey: ["my-enterprise-profile"] });
       toast.success(t("profileUpdated"));
+      // Redirect to public profile so the user can see how it looks
+      router.push(`/${locale}/enterprise/${profile.slug}`);
     } catch (error: any) {
       toast.error(t("profileUpdateFailed"), {
         description: error.response?.data?.message || error.message,
@@ -222,6 +226,7 @@ export default function EnterpriseProfilePage() {
         </div>
 
         <motion.form
+          id="enterprise-profile-form"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
@@ -376,23 +381,20 @@ export default function EnterpriseProfilePage() {
               onChange={handleChange}
             />
           </div>
-
-          <div className="pt-4">
-            <Button
-              type="submit"
-              disabled={isSaving}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-8 py-2.5 text-base font-semibold"
-            >
-              <Save className="w-4 h-4 mr-2" aria-hidden="true" />
-              {isSaving ? t("saving") : t("saveChanges")}
-            </Button>
-          </div>
         </motion.form>
       </div>
 
       <BottomNavBar
         backText={t("backToDashboard") || "Back to Dashboard"}
         backHref="/dashboard"
+        actionButton={{
+          text: isSaving ? t("saving") : t("saveChanges"),
+          type: "submit",
+          form: "enterprise-profile-form",
+          disabled: isSaving,
+          variant: "enterprise",
+          icon: <Save className="size-4 sm:size-5" />,
+        }}
       />
     </div>
   );

@@ -48,10 +48,18 @@ export function BottomNavBar({
               onClick={actionButton.onClick}
               disabled={actionButton.disabled}
               variant={
-                actionButton.variant === "secondary" ? "secondary" : "primary"
+                actionButton.variant === "secondary"
+                  ? "secondary"
+                  : actionButton.variant === "enterprise"
+                    ? "default"
+                    : "primary"
               }
               size="xl"
-              className="flex-1 sm:flex-none sm:min-w-50 cursor-pointer"
+              className={`flex-1 sm:flex-none sm:min-w-50 cursor-pointer ${
+                actionButton.variant === "enterprise"
+                  ? "bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-500/20"
+                  : ""
+              }`}
             >
               {actionButton.icon && (
                 <span className="mr-1.5 sm:mr-2 shrink-0">

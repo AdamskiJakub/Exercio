@@ -80,7 +80,7 @@ export function EnterpriseProfilePage({
         onNavigate={scrollToSection}
       />
 
-      <div className="max-w-7xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12">
         <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-12">
           {/* Left column (70%) */}
           <div className="space-y-16 min-w-0">
