@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/dto/create-notification.dto';
 import { StaticConfigService } from '../config/config.service';
+import { buildInstructorSearchOrClause } from '../common/search-utils';
 import type { CreateInvitationDto } from './dto/create-invitation.dto';
 
 @Injectable()
@@ -377,19 +378,10 @@ export class EnterpriseInvitationsService {
     };
 
     if (query) {
-      where.OR = [
-        {
-          user: {
-            OR: [
-              { firstName: { contains: query, mode: 'insensitive' } },
-              { lastName: { contains: query, mode: 'insensitive' } },
-              { username: { contains: query, mode: 'insensitive' } },
-            ],
-          },
-        },
-        { tags: { has: query } },
-        { specializations: { has: query } },
-      ];
+      const orClause = buildInstructorSearchOrClause(query);
+      if (orClause) {
+        where.OR = orClause;
+      }
     }
 
     if (city) {

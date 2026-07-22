@@ -1,18 +1,10 @@
 "use client";
 
-import {
-  Heart,
-  MapPin,
-  Trash2,
-  Building2,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { Heart, Trash2, Building2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToggleFavorite } from "@/hooks/useFavorites";
-import { useSpecializations } from "@/hooks/useConfig";
 import { Link } from "@/i18n/routing";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { UserAvatar } from "@/components/ui/user-avatar";
+import { InstructorCard } from "@/components/ui/instructor-card";
 import { motion } from "framer-motion";
 import { cardVariants } from "@/lib/animations";
 import { useShowMore } from "@/hooks/useShowMore";
@@ -109,7 +101,6 @@ export function FavoritesContent({
                 key={fav.id}
                 favorite={fav}
                 index={index}
-                locale={locale}
                 onRemove={() =>
                   toggleMutation.mutate({
                     instructorProfileId: fav.id,
@@ -153,89 +144,47 @@ export function FavoritesContent({
 function FavoriteCard({
   favorite,
   index,
-  locale,
   onRemove,
   isRemoving,
 }: {
   favorite: FavoriteInstructor;
   index: number;
-  locale: string;
   onRemove: () => void;
   isRemoving: boolean;
 }) {
-  const fullName =
-    [favorite.user.firstName, favorite.user.lastName]
-      .filter(Boolean)
-      .join(" ") || favorite.user.username;
-
-  const { specializations } = useSpecializations();
-  const primarySpecId = favorite.specializations?.[0];
-  const primarySpec = primarySpecId
-    ? specializations.find((s) => s.id === primarySpecId)
-    : undefined;
-  const primarySpecName = primarySpec
-    ? locale === "pl"
-      ? primarySpec.namePl
-      : primarySpec.nameEn
-    : null;
-
   return (
     <motion.div
       variants={cardVariants}
       initial="hidden"
       animate="visible"
       custom={index * 0.05}
-      className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700 hover:border-orange-500/50 rounded-xl overflow-hidden transition-colors duration-300"
     >
-      <Link
-        href={`/instructors/${favorite.user.username}` as any}
-        className="flex items-center gap-4 p-4"
-      >
-        {/* Avatar */}
-        <UserAvatar
-          photoUrl={favorite.photoUrl}
-          firstName={favorite.user?.firstName}
-          lastName={favorite.user?.lastName}
-          size="md"
-          alt={fullName}
-        />
-
-        {/* Info */}
-        <div className="flex-1 min-w-0 text-left">
-          <div className="flex items-center gap-2">
-            <h4 className="text-sm font-semibold text-white truncate">
-              {fullName}
-            </h4>
-            {favorite.verified && (
-              <span className="size-3.5 rounded-full bg-orange-500 shrink-0" />
-            )}
-          </div>
-          {primarySpecName && (
-            <p className="text-xs text-slate-400 mt-0.5">{primarySpecName}</p>
-          )}
-          {favorite.city && (
-            <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
-              <MapPin className="size-3" />
-              <span>{favorite.city}</span>
-            </div>
-          )}
-        </div>
-      </Link>
-
-      {/* Remove button */}
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onRemove();
+      <InstructorCard
+        instructor={{
+          username: favorite.user.username,
+          firstName: favorite.user.firstName,
+          lastName: favorite.user.lastName,
+          photoUrl: favorite.photoUrl,
+          specializations: favorite.specializations,
+          city: favorite.city,
         }}
-        disabled={isRemoving}
-        className="absolute top-3 right-3 p-1.5 rounded-full text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-        title="Usuń z ulubionych"
-        aria-label="Usuń z ulubionych"
-      >
-        <Trash2 className="size-4" aria-hidden="true" />
-      </button>
+        avatarSize="md"
+        action={
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onRemove();
+            }}
+            disabled={isRemoving}
+            className="p-1.5 rounded-full text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            title="Usuń z ulubionych"
+            aria-label="Usuń z ulubionych"
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+          </button>
+        }
+      />
     </motion.div>
   );
 }

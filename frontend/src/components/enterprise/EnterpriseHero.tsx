@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   MapPin,
@@ -33,6 +34,8 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
   const { data: isFollowing, isLoading: isCheckLoading } =
     useIsFollowingEnterprise(enterprise.id);
   const toggleMutation = useToggleFollowEnterprise();
+
+  const [logoError, setLogoError] = useState(false);
 
   const initials = enterprise.companyName
     .split(" ")
@@ -73,18 +76,19 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
 
         {/* Bottom info block — inside the hero, aligned with content container */}
         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 lg:p-10">
-          <div className="max-w-7xl mx-auto px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8">
             <div className="flex items-end justify-between gap-6">
               {/* LEFT: logo + company info */}
               <div className="flex items-end gap-4 sm:gap-6 min-w-0">
                 {/* Logo — white background card, bigger to match heading height */}
                 <div className="shrink-0">
-                  <div className="w-24 h-24 sm:w-29.5 sm:h-29.5 rounded-xl overflow-hidden bg-white p-1.5 shadow-2xl ring-2 ring-white/40">
-                    {enterprise.logoUrl ? (
+                  <div className="w-24 h-24 sm:w-29.5 sm:h-29.5 rounded-xl overflow-hidden bg-white shadow-2xl ring-2 ring-white/40">
+                    {enterprise.logoUrl && !logoError ? (
                       <img
                         src={getMediaUrl(enterprise.logoUrl)}
                         alt={`${enterprise.companyName} logo`}
-                        className="w-full h-full object-contain rounded-lg"
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={() => setLogoError(true)}
                       />
                     ) : (
                       <div
@@ -215,7 +219,7 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
       </div>
 
       {/* Mobile CTA buttons (visible only on small screens) */}
-      <div className="max-w-7xl mx-auto px-8 sm:hidden mt-4">
+      <div className="max-w-7xl mx-auto px-4 sm:hidden mt-4">
         {canFollow && (
           <div className="mb-2">
             <FollowButton

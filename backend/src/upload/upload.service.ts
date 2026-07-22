@@ -11,6 +11,7 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
+import sharp from 'sharp';
 
 @Injectable()
 export class UploadService {
@@ -104,12 +105,41 @@ export class UploadService {
     const ext = this.getExtensionFromMimeType(file.mimetype);
     const filename = `${uuid}${ext}`;
 
+    // Process PNG: auto-trim transparent padding and resize to fit the logo container
+    // NOTE: Only PNG is processed because only PNG supports transparency (alpha channel).
+    // JPEG/WebP logos don't have transparent padding to trim, so sharp processing is skipped for them.
+    let body: Buffer = file.buffer;
+    let contentType = file.mimetype;
+
+    if (file.mimetype === 'image/png') {
+      try {
+        body = await sharp(file.buffer)
+          .trim() // removes transparent/empty edges
+          .resize(256, 256, {
+            fit: 'outside', // scales up to fill at least one dimension (no margins added)
+            withoutEnlargement: false, // allow upscaling small logos
+          })
+          .png()
+          .toBuffer();
+
+        this.logger.log(
+          `Trimmed PNG: ${filename} (${file.buffer.length}B → ${body.length}B)`,
+        );
+      } catch (err) {
+        this.logger.warn(
+          `Failed to process PNG with sharp, falling back to original: ${filename}`,
+          err,
+        );
+        body = file.buffer;
+      }
+    }
+
     // Upload to R2
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: filename,
-      Body: file.buffer,
-      ContentType: file.mimetype,
+      Body: body,
+      ContentType: contentType,
     });
 
     try {

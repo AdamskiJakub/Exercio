@@ -48,7 +48,7 @@ export function UserAvatar({
   return (
     <div className={`relative inline-flex ${className}`}>
       <Avatar
-        className={`${sizeClasses[size]} cursor-pointer border-2 border-slate-700 hover:border-orange-500 transition-colors ${bgWhite ? "bg-white p-0.5" : ""}`}
+        className={`${sizeClasses[size]} cursor-pointer border-2 border-slate-700 hover:border-orange-500 transition-colors ${bgWhite ? "bg-white" : ""}`}
       >
         <AvatarImage src={src} alt={alt} />
         <AvatarFallback
