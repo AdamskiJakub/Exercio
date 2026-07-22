@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import {
   MapPin,
@@ -36,6 +36,11 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
   const toggleMutation = useToggleFollowEnterprise();
 
   const [logoError, setLogoError] = useState(false);
+
+  // Reset logo error state when the logo URL changes (e.g., client-side navigation between enterprises)
+  useEffect(() => {
+    setLogoError(false);
+  }, [enterprise.logoUrl]);
 
   const initials = enterprise.companyName
     .split(" ")
