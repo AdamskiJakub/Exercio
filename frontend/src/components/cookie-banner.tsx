@@ -56,15 +56,6 @@ export function CookieBanner() {
     setVisible(false);
   };
 
-  const handleDecline = () => {
-    saveCookieConsent(false, {
-      functional: false,
-      analytics: false,
-      marketing: false,
-    });
-    setVisible(false);
-  };
-
   if (!visible) return null;
 
   return (
