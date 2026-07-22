@@ -23,14 +23,44 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
+  private async resolveUniqueUsername(baseUsername: string): Promise<string> {
+    // Check if the base username is already taken
+    const existing = await this.prisma.user.findUnique({
+      where: { username: baseUsername },
+    });
+
+    if (!existing) {
+      return baseUsername;
+    }
+
+    let counter = 2;
+    const maxAttempts = 100;
+
+    while (counter <= maxAttempts) {
+      const candidate = `${baseUsername}-${counter}`;
+      const taken = await this.prisma.user.findUnique({
+        where: { username: candidate },
+      });
+      if (!taken) {
+        return candidate;
+      }
+      counter++;
+    }
+
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    return `${baseUsername}-${randomSuffix}`;
+  }
+
   private async createUserWithProfile(dto: RegisterDto, language: Language) {
     const hashedPassword = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
 
     const isInstructor = dto.role === 'INSTRUCTOR';
 
+    const username = await this.resolveUniqueUsername(dto.username);
+
     const data: any = {
       email: dto.email,
-      username: dto.username,
+      username,
       password: hashedPassword,
       firstName: dto.firstName,
       lastName: dto.lastName,
