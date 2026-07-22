@@ -95,6 +95,10 @@ export function saveCookieConsent(
   try {
     localStorage.setItem(CONSENT_KEY, JSON.stringify(consent));
     setConsentCookieFlag();
+    // Dispatch custom event so other components in the same tab can react immediately
+    window.dispatchEvent(
+      new CustomEvent("cookie-consent-change", { detail: consent }),
+    );
   } catch (error) {
     console.error("Failed to save cookie consent:", error);
   }
