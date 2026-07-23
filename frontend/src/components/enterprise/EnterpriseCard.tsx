@@ -38,7 +38,7 @@ export function EnterpriseCard({
         {/* Logo Section */}
         <div className="shrink-0">
           <Avatar
-            className={`w-24 h-24 sm:w-28 sm:h-28 border-2 border-emerald-500/30 group-hover:border-emerald-500 transition-colors rounded-xl ${hasLogo ? "bg-white p-1" : ""}`}
+            className={`w-24 h-24 sm:w-28 sm:h-28 border-2 border-emerald-500/30 group-hover:border-emerald-500 transition-colors rounded-xl ${hasLogo ? "bg-white" : ""}`}
           >
             <AvatarImage
               src={getMediaUrl(enterprise.logoUrl)}

@@ -1,9 +1,8 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
-import { DollarSign, ArrowRight } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 interface PricingItem {
   label: string;
@@ -52,12 +51,6 @@ export function EnterpriseProfilePricingDisplay({
                   }).format(item.price)
                 : item.price}
             </p>
-            <div className="mt-auto pt-4">
-              <Button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white gap-2">
-                {t("contactUs")}
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </Button>
-            </div>
           </Card>
         ))}
       </div>
