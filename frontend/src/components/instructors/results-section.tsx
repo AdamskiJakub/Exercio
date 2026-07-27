@@ -90,8 +90,8 @@ export function ResultsSection({
             role="status"
             aria-live="polite"
           >
-            {isMixed && instructors.length > 0 && hasEnterprises
-              ? `${t("instructorCount", { count: total ?? 0 })} · ${t("enterpriseCount", { count: enterpriseTotal ?? enterprises.length })}`
+            {isMixed && (total ?? 0) > 0 && (enterpriseTotal ?? 0) > 0
+              ? `${t("instructorCount", { count: total ?? 0 })} · ${t("enterpriseCount", { count: enterpriseTotal ?? 0 })}`
               : isEnterpriseOnly
                 ? t("enterpriseCount", {
                     count: enterpriseTotal ?? enterprises?.length ?? 0,
