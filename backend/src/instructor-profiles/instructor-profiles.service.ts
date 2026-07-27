@@ -11,6 +11,7 @@ import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto'
 import { StaticConfigService } from '../config/config.service';
 import { getInstructorOrderBy } from '../common/sort-utils';
 import { buildInstructorSearchOrClause } from '../common/search-utils';
+import { fetchInstructorReviewStats } from '../common/review-utils';
 
 // Shared Prisma include for enterprise memberships (used across multiple queries)
 export const enterpriseMembershipsInclude = {
@@ -153,14 +154,12 @@ export class InstructorProfilesService {
     if (filters.minRating !== undefined) {
       // Use raw SQL to find instructor IDs that meet the minRating threshold
       // (at least 5 reviews with average rating >= minRating)
-      // NOTE: booking.instructorId = user.id, and profile.userId = user.id,
-      // so we filter by profile.userId using the qualifying IDs from the subquery
       const qualifyingInstructorIds = await this.prisma.$queryRaw<
         Array<{ instructor_id: string }>
       >`
         SELECT b."instructorId" AS instructor_id
-        FROM "Review" r
-        JOIN "Booking" b ON b."id" = r."bookingId"
+        FROM "reviews" r
+        JOIN "bookings" b ON b."id" = r."bookingId"
         GROUP BY b."instructorId"
         HAVING COUNT(*) >= 5 AND AVG(r.rating) >= ${filters.minRating}
       `;
@@ -169,11 +168,64 @@ export class InstructorProfilesService {
         qualifyingInstructorIds.map((row) => row.instructor_id),
       );
 
-      // Filter profiles to only those that match the instructor IDs from the subquery
-      // We need to map profile.userId (which is the instructor's user ID) to the instructorId in Booking
-      // Actually, profile.id is the instructorProfile.id, and booking.instructorId is the user ID
-      // So we filter by profile.userId (which is the user ID = instructorId in Booking)
       where.userId = { in: Array.from(qualifyingIds) };
+    }
+
+    // For rating and most-reviewed, use in-memory sorting with review aggregation
+    if (filters.sortBy === 'rating' || filters.sortBy === 'most-reviewed') {
+      const [allProfiles, total] = await Promise.all([
+        this.prisma.instructorProfile.findMany({
+          where,
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+              },
+            },
+            ...enterpriseMembershipsInclude,
+          },
+        }),
+        this.prisma.instructorProfile.count({ where }),
+      ]);
+
+      // Fetch review stats via raw SQL (shared utility)
+      const reviewStats = await fetchInstructorReviewStats(this.prisma);
+
+      const enriched = allProfiles.map((profile) => {
+        const stats = reviewStats.get(profile.userId) || {
+          avgRating: 0,
+          reviewCount: 0,
+        };
+        return {
+          ...profile,
+          _avgRating: stats.avgRating,
+          _reviewCount: stats.reviewCount,
+        };
+      });
+
+      if (filters.sortBy === 'rating') {
+        enriched.sort((a, b) => b._avgRating - a._avgRating);
+      } else {
+        enriched.sort((a, b) => b._reviewCount - a._reviewCount);
+      }
+
+      const paginated = enriched.slice(skip, skip + limit);
+
+      const filteredProfiles = paginated.map((profile) =>
+        this.filterValidProfileFields(profile),
+      );
+
+      return {
+        data: filteredProfiles,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      };
     }
 
     const orderBy = getInstructorOrderBy(filters.sortBy);
@@ -200,31 +252,9 @@ export class InstructorProfilesService {
       this.prisma.instructorProfile.count({ where }),
     ]);
 
-    const filteredProfiles = profiles.map((profile) => {
-      const validSpecializations = profile.specializations.filter((spec) =>
-        this.configService.isValidSpecialization(spec),
-      );
-
-      // Ensure at least one valid specialization exists (primary is specializations[0])
-      // If all are invalid, log warning but keep profile (UI will handle gracefully)
-      if (
-        profile.specializations.length > 0 &&
-        validSpecializations.length === 0
-      ) {
-        this.logger.warn(
-          `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
-        );
-      }
-
-      return {
-        ...profile,
-        tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
-        specializations: validSpecializations,
-        goals: profile.goals.filter((goal) =>
-          this.configService.isValidGoal(goal),
-        ),
-      };
-    });
+    const filteredProfiles = profiles.map((profile) =>
+      this.filterValidProfileFields(profile),
+    );
 
     return {
       data: filteredProfiles,
@@ -413,6 +443,36 @@ export class InstructorProfilesService {
         },
       },
     });
+  }
+
+  /**
+   * Filter profile fields to only include valid config values (tags, specializations, goals).
+   * Logs a warning if all specializations are invalid.
+   */
+  private filterValidProfileFields(profile: any): any {
+    const validSpecializations = profile.specializations.filter(
+      (spec: string) => this.configService.isValidSpecialization(spec),
+    );
+
+    if (
+      profile.specializations.length > 0 &&
+      validSpecializations.length === 0
+    ) {
+      this.logger.warn(
+        `Profile ${profile.id} has no valid specializations. Original: ${profile.specializations.join(', ')}`,
+      );
+    }
+
+    return {
+      ...profile,
+      tags: profile.tags.filter((tag: string) =>
+        this.configService.isValidTag(tag),
+      ),
+      specializations: validSpecializations,
+      goals: profile.goals.filter((goal: string) =>
+        this.configService.isValidGoal(goal),
+      ),
+    };
   }
 
   async publish(profileId: string, userId: string) {

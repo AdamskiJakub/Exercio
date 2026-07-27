@@ -10,10 +10,10 @@ export function getInstructorOrderBy(sortBy?: string): any {
     case 'price-desc':
       return { sessionPrice: 'desc' };
     case 'rating':
-      // TODO: implement with review aggregation subquery
+      // Handled in-memory in searchInstructorsRaw / searchInstructors
       return { createdAt: 'desc' };
     case 'most-reviewed':
-      // TODO: implement with review count subquery
+      // Handled in-memory in searchInstructorsRaw / searchInstructors
       return { createdAt: 'desc' };
     case 'newest':
       return { createdAt: 'desc' };
@@ -34,9 +34,6 @@ export function getEnterpriseOrderBy(sortBy?: string): any {
       return { companyName: 'asc' };
     case 'name-desc':
       return { companyName: 'desc' };
-    case 'rating':
-      // TODO: implement with review aggregation subquery
-      return { createdAt: 'desc' };
     default:
       return { createdAt: 'desc' };
   }

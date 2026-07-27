@@ -17,10 +17,18 @@ export class SearchController {
     @Query('sortBy') sortBy?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('goals') goals?: string | string[],
+    @Query('priceMin') priceMin?: string,
+    @Query('priceMax') priceMax?: string,
   ) {
     const parseNumeric = (value?: string): number | undefined => {
       if (!value) return undefined;
       const parsed = parseInt(value, 10);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    };
+    const parseNumericFloat = (value?: string): number | undefined => {
+      if (!value) return undefined;
+      const parsed = parseFloat(value);
       return Number.isFinite(parsed) ? parsed : undefined;
     };
 
@@ -43,6 +51,9 @@ export class SearchController {
       sortBy,
       page: parseNumeric(page),
       limit: parseNumeric(limit),
+      goals: Array.isArray(goals) ? goals : goals ? [goals] : undefined,
+      priceMin: parseNumericFloat(priceMin),
+      priceMax: parseNumericFloat(priceMax),
     });
   }
 

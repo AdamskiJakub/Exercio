@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { enterpriseMembershipsInclude } from '../instructor-profiles/instructor-profiles.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -9,6 +10,11 @@ import { disciplinesData } from '../modules/catalog/disciplines/disciplines.data
 import { slugifyToAscii, removePolishDiacritics } from '../common/slug-utils';
 import { categoriesData } from '../modules/catalog/categories/categories.data';
 import { buildInstructorSearchOrClause } from '../common/search-utils';
+import {
+  calculateInstructorScore,
+  calculateEnterpriseScore,
+} from '../common/quality-score';
+import { fetchInstructorReviewStats } from '../common/review-utils';
 
 interface SearchFilters {
   q?: string;
@@ -21,6 +27,17 @@ interface SearchFilters {
   sortBy?: string;
   page?: number;
   limit?: number;
+  goals?: string[];
+  priceMin?: number;
+  priceMax?: number;
+}
+
+export interface SearchFeedItem {
+  type: 'instructor' | 'enterprise';
+  createdAt: Date;
+  data: Record<string, unknown>;
+  /** Quality score used for sortBy=relevance sorting */
+  score?: number;
 }
 
 @Injectable()
@@ -43,19 +60,18 @@ export class SearchService {
       .map((d) => d.key);
   }
 
-  async search(filters: SearchFilters) {
-    const page = Math.max(1, filters.page || 1);
-    const limit = Math.min(50, Math.max(1, filters.limit || 20));
-    const type = filters.type || 'all';
-
-    // Resolve category to discipline keys
+  /**
+   * Resolve category → disciplines mapping and merge with explicit filters.
+   * Shared between search() and searchAllFeed() to avoid duplication.
+   */
+  private resolveCategoryDisciplines(filters: SearchFilters): {
+    categoryDisciplines: string[] | undefined;
+    allDisciplines: string[] | undefined;
+    instructorSpecializations: string[] | undefined;
+  } {
     let categoryDisciplines: string[] | undefined;
     if (filters.category) {
       categoryDisciplines = this.getDisciplinesByCategory(filters.category);
-      if (categoryDisciplines.length === 0) {
-        // Category not found or has no disciplines — return empty
-        return {};
-      }
     }
 
     // Merge category disciplines with explicit disciplines filter
@@ -63,32 +79,141 @@ export class SearchService {
       ? [...new Set([...filters.disciplines, ...(categoryDisciplines || [])])]
       : categoryDisciplines;
 
+    // For instructors, category disciplines map to specializations
+    const instructorSpecializations = filters.specializations
+      ? [
+          ...new Set([
+            ...filters.specializations,
+            ...(categoryDisciplines || []),
+          ]),
+        ]
+      : categoryDisciplines;
+
+    return { categoryDisciplines, allDisciplines, instructorSpecializations };
+  }
+
+  /**
+   * Extract a sortable name from a SearchFeedItem, regardless of type.
+   */
+  private getItemName(item: SearchFeedItem): string {
+    if (item.type === 'instructor') {
+      return ((item.data as Record<string, unknown>)?.fullName as string) || '';
+    }
+    return (
+      ((item.data as Record<string, unknown>)?.companyName as string) || ''
+    );
+  }
+
+  async search(filters: SearchFilters) {
+    const type = filters.type || 'all';
+
+    if (type === 'all') {
+      return this.searchAllFeed(filters);
+    }
+
+    const page = Math.max(1, filters.page || 1);
+    const limit = Math.min(50, Math.max(1, filters.limit || 20));
+
+    const { categoryDisciplines, allDisciplines, instructorSpecializations } =
+      this.resolveCategoryDisciplines(filters);
+
+    if (filters.category && categoryDisciplines?.length === 0) {
+      return {};
+    }
+
+    // For relevance sorting on single-type views, use raw queries + in-memory scoring
+    // (same quality-score logic as searchAllFeed)
+    if (filters.sortBy === 'relevance') {
+      if (type === 'instructors') {
+        const raw = await this.searchInstructorsRaw(
+          filters.q,
+          filters.city,
+          filters.tags,
+          instructorSpecializations,
+          filters.sortBy,
+          filters.goals,
+          filters.priceMin,
+          filters.priceMax,
+        );
+        const reviewStats = await fetchInstructorReviewStats(this.prisma);
+        const scored = raw.map((i) => {
+          const stats = reviewStats.get((i as any).userId) || {
+            avgRating: 0,
+            reviewCount: 0,
+          };
+          return {
+            ...i,
+            _score: calculateInstructorScore({
+              isDraft: i.isDraft,
+              photoUrl: i.photoUrl,
+              bio: i.bio,
+              specializations: i.specializations,
+              availability: i.availability,
+              isBookingEnabled: i.isBookingEnabled,
+              createdAt: i.createdAt,
+              reviewCount: stats.reviewCount,
+              averageRating: stats.avgRating,
+            }),
+          };
+        });
+        scored.sort((a, b) => b._score - a._score);
+        const total = scored.length;
+        const start = (page - 1) * limit;
+        const paginated = scored.slice(start, start + limit);
+        return { instructors: { data: paginated, total } };
+      }
+
+      if (type === 'enterprises') {
+        const raw = await this.searchEnterprisesRaw(
+          filters.q,
+          filters.city,
+          filters.tags,
+          allDisciplines,
+          filters.sortBy,
+        );
+        const scored = raw.map((e) => ({
+          ...e,
+          _score: calculateEnterpriseScore({
+            status: e.status,
+            logoUrl: e.logoUrl,
+            coverUrl: e.coverUrl,
+            description: e.description,
+            instructorCount: e.instructorCount,
+            gallery: e.gallery,
+            openingHours: e.openingHours,
+            createdAt: e.createdAt,
+          }),
+        }));
+        scored.sort((a, b) => b._score - a._score);
+        const total = scored.length;
+        const start = (page - 1) * limit;
+        const paginated = scored.slice(start, start + limit);
+        return { enterprises: { data: paginated, total } };
+      }
+    }
+
+    // Standard path for non-relevance sorting (uses Prisma orderBy with skip/take)
     const result: {
       instructors?: { data: any[]; total: number };
       enterprises?: { data: any[]; total: number };
     } = {};
 
-    if (type === 'all' || type === 'instructors') {
+    if (type === 'instructors') {
       result.instructors = await this.searchInstructors(
         filters.q,
         filters.city,
         filters.tags,
-        // For instructors, category disciplines map to specializations
-        filters.specializations
-          ? [
-              ...new Set([
-                ...filters.specializations,
-                ...(categoryDisciplines || []),
-              ]),
-            ]
-          : categoryDisciplines,
+        instructorSpecializations,
         page,
         limit,
         filters.sortBy,
+        filters.goals,
+        filters.priceMin,
+        filters.priceMax,
       );
     }
 
-    if (type === 'all' || type === 'enterprises') {
+    if (type === 'enterprises') {
       result.enterprises = await this.searchEnterprises(
         filters.q,
         filters.city,
@@ -101,6 +226,150 @@ export class SearchService {
     }
 
     return result;
+  }
+
+  /**
+   * Search both instructors and enterprises, returning a single mixed feed
+   * with unified pagination. Sorting strategy depends on sortBy:
+   * - 'newest' (default): interleave 1:1 (instructor, enterprise, instructor, enterprise...)
+   * - 'name-asc' / 'name-desc': global sort by name across both types
+   */
+  async searchAllFeed(filters: SearchFilters) {
+    const page = Math.max(1, filters.page || 1);
+    const limit = Math.min(50, Math.max(1, filters.limit || 10));
+
+    const { categoryDisciplines, allDisciplines, instructorSpecializations } =
+      this.resolveCategoryDisciplines(filters);
+
+    if (filters.category && categoryDisciplines?.length === 0) {
+      return {
+        items: [],
+        total: 0,
+        instructorTotal: 0,
+        enterpriseTotal: 0,
+        page,
+        totalPages: 0,
+      };
+    }
+
+    // Fetch ALL matching records (no skip/take) — pagination is applied in-memory after sorting
+    const [instructors, enterprises] = await Promise.all([
+      this.searchInstructorsRaw(
+        filters.q,
+        filters.city,
+        filters.tags,
+        instructorSpecializations,
+        filters.sortBy,
+        filters.goals,
+        filters.priceMin,
+        filters.priceMax,
+      ),
+      this.searchEnterprisesRaw(
+        filters.q,
+        filters.city,
+        filters.tags,
+        allDisciplines,
+        filters.sortBy,
+      ),
+    ]);
+
+    // Fetch review stats for quality score calculation (only needed for relevance sorting)
+    const needsReviewStats = !filters.sortBy || filters.sortBy === 'relevance';
+    const reviewStats = needsReviewStats
+      ? await fetchInstructorReviewStats(this.prisma)
+      : new Map<string, { avgRating: number; reviewCount: number }>();
+
+    // Build typed feed items with quality scores
+    const instructorItems: SearchFeedItem[] = instructors.map((i) => {
+      const stats = reviewStats.get((i as any).userId) || {
+        avgRating: 0,
+        reviewCount: 0,
+      };
+      return {
+        type: 'instructor' as const,
+        createdAt: i.createdAt,
+        data: i,
+        score: calculateInstructorScore({
+          isDraft: i.isDraft,
+          photoUrl: i.photoUrl,
+          bio: i.bio,
+          specializations: i.specializations,
+          availability: i.availability,
+          isBookingEnabled: i.isBookingEnabled,
+          createdAt: i.createdAt,
+          reviewCount: stats.reviewCount,
+          averageRating: stats.avgRating,
+        }),
+      };
+    });
+
+    const enterpriseItems: SearchFeedItem[] = enterprises.map((e) => ({
+      type: 'enterprise' as const,
+      createdAt: e.createdAt,
+      data: e,
+      score: calculateEnterpriseScore({
+        status: e.status,
+        logoUrl: e.logoUrl,
+        coverUrl: e.coverUrl,
+        description: e.description,
+        instructorCount: e.instructorCount,
+        gallery: e.gallery,
+        openingHours: e.openingHours,
+        createdAt: e.createdAt,
+      }),
+    }));
+
+    // Apply sorting strategy based on sortBy
+    const sortBy = filters.sortBy || 'relevance';
+    let items: SearchFeedItem[];
+
+    if (sortBy === 'relevance') {
+      // Sort by quality score descending (highest quality profiles first)
+      const allItems = [...instructorItems, ...enterpriseItems];
+      allItems.sort((a, b) => (b.score || 0) - (a.score || 0));
+      items = allItems;
+    } else if (sortBy === 'name-asc' || sortBy === 'name-desc') {
+      // Global sort by name across both types
+      const allItems = [...instructorItems, ...enterpriseItems];
+      allItems.sort((a, b) => {
+        const aName = this.getItemName(a);
+        const bName = this.getItemName(b);
+        const cmp = aName.localeCompare(bName, 'pl');
+        return sortBy === 'name-asc' ? cmp : -cmp;
+      });
+      items = allItems;
+    } else {
+      // Default (newest): interleave 1:1 — instructor, enterprise, instructor, enterprise...
+      // Each group is already sorted by createdAt desc from the raw queries
+      const feed: SearchFeedItem[] = [];
+      let i = 0;
+      let e = 0;
+      while (i < instructorItems.length || e < enterpriseItems.length) {
+        if (i < instructorItems.length) {
+          feed.push(instructorItems[i++]);
+        }
+        if (e < enterpriseItems.length) {
+          feed.push(enterpriseItems[e++]);
+        }
+      }
+      items = feed;
+    }
+
+    const total = items.length;
+    const instructorTotal = instructors.length;
+    const enterpriseTotal = enterprises.length;
+    const totalPages = Math.ceil(total / limit);
+    const start = (page - 1) * limit;
+    const paginatedItems = items.slice(start, start + limit);
+
+    return {
+      items: paginatedItems,
+      total,
+      instructorTotal,
+      enterpriseTotal,
+      page,
+      totalPages,
+    };
   }
 
   /**
@@ -495,16 +764,16 @@ export class SearchService {
     return filtered.sort();
   }
 
-  private async searchInstructors(
+  private buildInstructorWhere(
     q?: string,
     city?: string,
     tags?: string[],
     specializations?: string[],
-    page: number = 1,
-    limit: number = 20,
-    sortBy?: string,
-  ) {
-    const where: any = { isDraft: false };
+    goals?: string[],
+    priceMin?: number,
+    priceMax?: number,
+  ): Prisma.InstructorProfileWhereInput {
+    const where: Prisma.InstructorProfileWhereInput = { isDraft: false };
 
     if (q) {
       const orClause = buildInstructorSearchOrClause(q);
@@ -527,53 +796,32 @@ export class SearchService {
       where.specializations = { hasSome: specializations };
     }
 
-    const skip = (page - 1) * limit;
+    // Filter by goals (OR logic — any selected goal matches)
+    if (goals && goals.length > 0) {
+      where.goals = { hasSome: goals };
+    }
 
-    const orderBy = getInstructorOrderBy(sortBy);
+    // Filter by price range
+    if (priceMin !== undefined || priceMax !== undefined) {
+      where.hourlyRate = {};
+      if (priceMin !== undefined) {
+        where.hourlyRate.gte = priceMin;
+      }
+      if (priceMax !== undefined) {
+        where.hourlyRate.lte = priceMax;
+      }
+    }
 
-    const [data, total] = await Promise.all([
-      this.prisma.instructorProfile.findMany({
-        where,
-        skip,
-        take: limit,
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              firstName: true,
-              lastName: true,
-              role: true,
-            },
-          },
-          ...enterpriseMembershipsInclude,
-        },
-        orderBy,
-      }),
-      this.prisma.instructorProfile.count({ where }),
-    ]);
-
-    const transformedData = data.map((profile) => ({
-      ...profile,
-      username: profile.user?.username || '',
-      fullName: profile.user
-        ? `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()
-        : '',
-    }));
-
-    return { data: transformedData, total };
+    return where;
   }
 
-  private async searchEnterprises(
+  private buildEnterpriseWhere(
     q?: string,
     city?: string,
     tags?: string[],
     disciplines?: string[],
-    page: number = 1,
-    limit: number = 20,
-    sortBy?: string,
-  ) {
-    const where: any = { status: 'ACTIVE' };
+  ): Prisma.EnterpriseProfileWhereInput {
+    const where: Prisma.EnterpriseProfileWhereInput = { status: 'ACTIVE' };
 
     if (q) {
       where.OR = [
@@ -599,8 +847,220 @@ export class SearchService {
       where.disciplines = { hasSome: disciplines };
     }
 
-    const skip = (page - 1) * limit;
+    return where;
+  }
 
+  /**
+   * Fetch all matching instructor profiles without pagination (used by searchAllFeed).
+   * Returns records with fullName/username flattened from user relation.
+   */
+  private async searchInstructorsRaw(
+    q?: string,
+    city?: string,
+    tags?: string[],
+    specializations?: string[],
+    sortBy?: string,
+    goals?: string[],
+    priceMin?: number,
+    priceMax?: number,
+  ) {
+    const where = this.buildInstructorWhere(
+      q,
+      city,
+      tags,
+      specializations,
+      goals,
+      priceMin,
+      priceMax,
+    );
+
+    // For rating and most-reviewed, we need in-memory sorting with review aggregation
+    if (sortBy === 'rating' || sortBy === 'most-reviewed') {
+      const data = await this.prisma.instructorProfile.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+            },
+          },
+          ...enterpriseMembershipsInclude,
+        },
+      });
+
+      const reviewStats = await fetchInstructorReviewStats(this.prisma);
+      const enriched = this.enrichWithReviewStats(data, reviewStats);
+
+      if (sortBy === 'rating') {
+        enriched.sort((a, b) => b._avgRating - a._avgRating);
+      } else {
+        enriched.sort((a, b) => b._reviewCount - a._reviewCount);
+      }
+
+      return enriched;
+    }
+
+    const orderBy = getInstructorOrderBy(sortBy);
+
+    const data = await this.prisma.instructorProfile.findMany({
+      where,
+      orderBy,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+          },
+        },
+        ...enterpriseMembershipsInclude,
+      },
+    });
+
+    return data.map((profile) => this.flattenUserFields(profile));
+  }
+
+  /**
+   * Fetch all matching enterprise profiles without pagination (used by searchAllFeed).
+   * Returns records with instructorCount flattened from _count.
+   */
+  private async searchEnterprisesRaw(
+    q?: string,
+    city?: string,
+    tags?: string[],
+    disciplines?: string[],
+    sortBy?: string,
+  ) {
+    const where = this.buildEnterpriseWhere(q, city, tags, disciplines);
+    const orderBy = getEnterpriseOrderBy(sortBy);
+
+    const enterprises = await this.prisma.enterpriseProfile.findMany({
+      where,
+      orderBy,
+      include: {
+        _count: {
+          select: {
+            instructors: {
+              where: { status: 'ACCEPTED' },
+            },
+          },
+        },
+      },
+    });
+
+    // Transform to match the shape expected by frontend EnterpriseListing
+    return enterprises.map(({ _count, ...rest }) => ({
+      ...rest,
+      instructorCount: _count.instructors,
+    }));
+  }
+
+  private async searchInstructors(
+    q?: string,
+    city?: string,
+    tags?: string[],
+    specializations?: string[],
+    page: number = 1,
+    limit: number = 20,
+    sortBy?: string,
+    goals?: string[],
+    priceMin?: number,
+    priceMax?: number,
+  ) {
+    const where = this.buildInstructorWhere(
+      q,
+      city,
+      tags,
+      specializations,
+      goals,
+      priceMin,
+      priceMax,
+    );
+
+    // For rating and most-reviewed, fetch all matching profiles, sort in-memory, then paginate
+    if (sortBy === 'rating' || sortBy === 'most-reviewed') {
+      const [allData, total] = await Promise.all([
+        this.prisma.instructorProfile.findMany({
+          where,
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                role: true,
+              },
+            },
+            ...enterpriseMembershipsInclude,
+          },
+        }),
+        this.prisma.instructorProfile.count({ where }),
+      ]);
+
+      const reviewStats = await fetchInstructorReviewStats(this.prisma);
+      const enriched = this.enrichWithReviewStats(allData, reviewStats);
+
+      if (sortBy === 'rating') {
+        enriched.sort((a, b) => b._avgRating - a._avgRating);
+      } else {
+        enriched.sort((a, b) => b._reviewCount - a._reviewCount);
+      }
+
+      const skip = (page - 1) * limit;
+      const paginated = enriched.slice(skip, skip + limit);
+      return { data: paginated, total };
+    }
+
+    const skip = (page - 1) * limit;
+    const orderBy = getInstructorOrderBy(sortBy);
+
+    const [data, total] = await Promise.all([
+      this.prisma.instructorProfile.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+            },
+          },
+          ...enterpriseMembershipsInclude,
+        },
+        orderBy,
+      }),
+      this.prisma.instructorProfile.count({ where }),
+    ]);
+
+    const transformedData = data.map((profile) =>
+      this.flattenUserFields(profile),
+    );
+
+    return { data: transformedData, total };
+  }
+
+  private async searchEnterprises(
+    q?: string,
+    city?: string,
+    tags?: string[],
+    disciplines?: string[],
+    page: number = 1,
+    limit: number = 20,
+    sortBy?: string,
+  ) {
+    const where = this.buildEnterpriseWhere(q, city, tags, disciplines);
+    const skip = (page - 1) * limit;
     const orderBy = getEnterpriseOrderBy(sortBy);
 
     const [enterprises, total] = await Promise.all([
@@ -628,5 +1088,43 @@ export class SearchService {
     }));
 
     return { data, total };
+  }
+
+  /**
+   * Enrich instructor profiles with review stats (avgRating, reviewCount) and flatten user fields.
+   * Used by both searchInstructorsRaw and searchInstructors for rating/most-reviewed sorting.
+   */
+  private enrichWithReviewStats(
+    profiles: any[],
+    reviewStats: Map<string, { avgRating: number; reviewCount: number }>,
+  ): any[] {
+    return profiles.map((profile) => {
+      const stats = reviewStats.get(profile.userId) || {
+        avgRating: 0,
+        reviewCount: 0,
+      };
+      return {
+        ...profile,
+        username: profile.user?.username || '',
+        fullName: profile.user
+          ? `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()
+          : '',
+        _avgRating: stats.avgRating,
+        _reviewCount: stats.reviewCount,
+      };
+    });
+  }
+
+  /**
+   * Flatten user relation fields (username, fullName) from instructor profile query results.
+   */
+  private flattenUserFields(profile: any): any {
+    return {
+      ...profile,
+      username: profile.user?.username || '',
+      fullName: profile.user
+        ? `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()
+        : '',
+    };
   }
 }
