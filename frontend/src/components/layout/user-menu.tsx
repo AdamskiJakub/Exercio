@@ -484,7 +484,7 @@ export function UserMenu() {
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="relative rounded-full outline-none"
+                className="relative rounded-full outline-none cursor-pointer"
               >
                 <UserAvatar
                   src={avatarUrl}
@@ -510,6 +510,7 @@ export function UserMenu() {
                     firstName={user.firstName}
                     lastName={user.lastName}
                     bgWhite={user.role === "ENTERPRISE"}
+                    noHover
                   />
                   <UserInfo
                     firstName={user.firstName}

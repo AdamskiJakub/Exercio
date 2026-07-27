@@ -40,6 +40,14 @@ export interface ResultsSectionProps {
   page?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  /** Feed items for type=all — single mixed list sorted by createdAt */
+  items?: Array<
+    | { type: "instructor"; data: InstructorListing }
+    | {
+        type: "enterprise";
+        data: import("@/types/enterprise").EnterpriseListing;
+      }
+  >;
 }
 
 // Base props shared by both variants

@@ -103,6 +103,7 @@ export default function InstructorsPage() {
             <ResultsSection
               instructors={instructors}
               enterprises={enterprises}
+              items={items}
               filters={filters}
               updateFilter={updateFilter}
               total={total}

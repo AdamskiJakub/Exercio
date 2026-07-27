@@ -851,10 +851,8 @@
     },
     "support": {
       "title": "Pomoc",
-      "helpCenter": "Centrum Pomocy",
       "contact": "Kontakt",
-      "faq": "FAQ",
-      "safety": "Bezpieczeństwo"
+      "faq": "FAQ"
     },
     "legal": {
       "title": "Informacje Prawne",
@@ -939,10 +937,6 @@
     },
     "enterprises": "Partnerzy",
     "instructors": "Instruktorzy"
-  },
-  "Help": {
-    "title": "Centrum Pomocy",
-    "comingSoon": "Strona w przygotowaniu"
   },
   "Contact": {
     "title": "Kontakt",
@@ -1047,10 +1041,6 @@
       "agreeToTermsRequired": "Musisz zaakceptować Regulamin i Politykę Prywatności",
       "errorGeneric": "Coś poszło nie tak. Spróbuj ponownie później."
     }
-  },
-  "Safety": {
-    "title": "Bezpieczeństwo",
-    "comingSoon": "Strona w przygotowaniu"
   },
   "Privacy": {
     "title": "Polityka Prywatności",
@@ -1351,7 +1341,7 @@
       "reasonLabel": "Powód odrzucenia",
       "reasonPlaceholder": "Np. Nie mogę w tym terminie, jestem niedostępny...",
       "reasonRequired": "Powód jest wymagany",
-      "cancel": "Anuluj",
+      "cancel": "Cofnij",
       "confirm": "Odrzuć rezerwację",
       "clientNotification": "{clientName} otrzyma powiadomienie z powodem odrzucenia."
     },

@@ -48,11 +48,13 @@ export function useInstructorFilters() {
           if (Array.isArray(value) && value.length > 0) {
             query[key] = value;
           }
+        } else if (key === "type") {
+          // Always include type in URL so refresh preserves the selection
+          query[key] = String(value);
         } else if (
           value !== undefined &&
           value !== null &&
           value !== "all" &&
-          value !== "instructors" &&
           value !== ""
         ) {
           query[key] = String(value);
@@ -121,12 +123,12 @@ export function useInstructorFilters() {
     [filters, updateURL],
   );
 
-  // Clear all filters
+  // Clear all filters — preserves current type selection
   const clearFilters = useCallback(() => {
     const clearedFilters: InstructorFilters = {
       city: "",
       specialization: "",
-      type: "instructors",
+      type: filters.type || "instructors",
       experience: "all",
       availability: "all",
       gender: "all",
@@ -134,7 +136,7 @@ export function useInstructorFilters() {
     };
     setFilters(clearedFilters);
     router.push("/instructors");
-  }, [router]);
+  }, [router, filters.type]);
 
   const hasActiveFilters =
     filters.city !== "" ||

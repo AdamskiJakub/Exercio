@@ -851,10 +851,8 @@
     },
     "support": {
       "title": "Support",
-      "helpCenter": "Help Center",
       "contact": "Contact",
-      "faq": "FAQ",
-      "safety": "Safety"
+      "faq": "FAQ"
     },
     "legal": {
       "title": "Legal",
@@ -939,10 +937,6 @@
     },
     "enterprises": "Enterprises",
     "instructors": "Instructors"
-  },
-  "Help": {
-    "title": "Help Center",
-    "comingSoon": "Page coming soon"
   },
   "Contact": {
     "title": "Contact",
@@ -1047,10 +1041,6 @@
       "agreeToTermsRequired": "You must accept the Terms of Service and Privacy Policy",
       "errorGeneric": "Something went wrong. Please try again later."
     }
-  },
-  "Safety": {
-    "title": "Safety",
-    "comingSoon": "Page coming soon"
   },
   "Privacy": {
     "title": "Privacy Policy",
@@ -1351,7 +1341,7 @@
       "reasonLabel": "Rejection reason",
       "reasonPlaceholder": "E.g., Not available at this time, schedule conflict...",
       "reasonRequired": "Reason is required",
-      "cancel": "Cancel",
+      "cancel": "Go back",
       "confirm": "Reject booking",
       "clientNotification": "{clientName} will receive a notification with the rejection reason."
     },
