@@ -5,10 +5,8 @@ export const footerLinks = {
     { href: "/partner", translationKey: "platform.forBusiness" },
   ],
   support: [
-    { href: "/help", translationKey: "support.helpCenter" },
     { href: "/contact", translationKey: "support.contact" },
     { href: "/contact#faq", translationKey: "support.faq" },
-    { href: "/safety", translationKey: "support.safety" },
   ],
   legal: [
     { href: "/privacy", translationKey: "legal.privacy" },

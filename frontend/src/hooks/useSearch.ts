@@ -18,6 +18,21 @@ interface SearchResponse {
   };
 }
 
+/** Response from /search?type=all — a single mixed feed sorted by createdAt */
+interface FeedSearchResponse {
+  items: Array<{
+    type: "instructor" | "enterprise";
+    createdAt: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any;
+  }>;
+  total: number;
+  instructorTotal: number;
+  enterpriseTotal: number;
+  page: number;
+  totalPages: number;
+}
+
 interface InstructorProfileResponse {
   id: string;
   userId: string;
@@ -98,13 +113,15 @@ function transformToInstructorListing(
 export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
   const isEnterpriseOnly = filters.type === "enterprises";
   const isMixed = filters.type === "all";
+  const useSearchEndpoint =
+    isEnterpriseOnly || isMixed || filters.sortBy === "relevance";
 
   const query = useQuery({
     queryKey: ["unified-search", filters],
     enabled: true,
     queryFn: async () => {
-      if (isEnterpriseOnly || isMixed) {
-        // Use /search endpoint (returns both instructors + enterprises)
+      if (useSearchEndpoint) {
+        // Use /search endpoint (handles quality-score relevance for all types)
         const params = new URLSearchParams();
 
         if (filters.search) params.append("q", filters.search);
@@ -112,16 +129,28 @@ export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
         if (filters.tags && filters.tags.length > 0) {
           filters.tags.forEach((tag) => params.append("tags", tag));
         }
-        if (filters.type && filters.type !== "all")
+        // Map singular specialization to plural specializations array for /search
+        if (filters.specialization) {
+          params.append("specializations", filters.specialization);
+        }
+        if (filters.goals && filters.goals.length > 0) {
+          filters.goals.forEach((goal) => params.append("goals", goal));
+        }
+        if (filters.priceMin !== undefined)
+          params.append("priceMin", filters.priceMin.toString());
+        if (filters.priceMax !== undefined)
+          params.append("priceMax", filters.priceMax.toString());
+        if (filters.type) {
           params.append("type", filters.type);
+        }
         if (filters.sortBy) params.append("sortBy", filters.sortBy);
         if (filters.page) params.append("page", String(filters.page));
         if (filters.limit) params.append("limit", String(filters.limit));
 
         const queryString = params.toString();
-        const { data } = await apiClient.get<SearchResponse>(
-          `/search${queryString ? `?${queryString}` : ""}`,
-        );
+        const { data } = await apiClient.get<
+          SearchResponse | FeedSearchResponse
+        >(`/search${queryString ? `?${queryString}` : ""}`);
         return data;
       } else {
         // Use /instructor-profiles endpoint (instructors only with full filtering)
@@ -163,11 +192,36 @@ export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
   });
 
   const result = useMemo<UnifiedSearchResult>(() => {
-    const data = query.data as SearchResponse | undefined;
-    const instructors = data?.instructors?.data ?? [];
-    const enterprises = data?.enterprises?.data ?? [];
-    const instructorTotal = data?.instructors?.total ?? 0;
-    const enterpriseTotal = data?.enterprises?.total ?? 0;
+    const data = query.data as SearchResponse | FeedSearchResponse | undefined;
+
+    if (isMixed && data && "items" in data) {
+      // New feed format from searchAllFeed()
+      const feed = data as FeedSearchResponse;
+      const items: UnifiedSearchResult["items"] = feed.items.map(
+        (item) =>
+          ({
+            type: item.type,
+            data: item.data,
+          }) as UnifiedSearchResult["items"][number],
+      );
+
+      return {
+        items,
+        total: feed.instructorTotal,
+        enterpriseTotal: feed.enterpriseTotal,
+        page: feed.page,
+        totalPages: feed.totalPages,
+        isLoading: query.isLoading,
+        error: query.error as Error | null,
+      };
+    }
+
+    // Standard format (instructors-only or enterprises-only)
+    const searchResponse = data as SearchResponse | undefined;
+    const instructors = searchResponse?.instructors?.data ?? [];
+    const enterprises = searchResponse?.enterprises?.data ?? [];
+    const instructorTotal = searchResponse?.instructors?.total ?? 0;
+    const enterpriseTotal = searchResponse?.enterprises?.total ?? 0;
 
     // Build unified items array
     const items: UnifiedSearchResult["items"] = [
@@ -178,7 +232,6 @@ export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
     // Total count depends on mode:
     // - enterprises only: show enterprise count
     // - instructors only: show instructor count
-    // - mixed: show only instructor count (not enterprises)
     const total = isEnterpriseOnly ? enterpriseTotal : instructorTotal;
 
     // Pagination from the response
@@ -199,6 +252,7 @@ export function useSearch(filters: InstructorFilters): UnifiedSearchResult {
     query.isLoading,
     query.error,
     isEnterpriseOnly,
+    isMixed,
     filters.page,
     filters.limit,
   ]);

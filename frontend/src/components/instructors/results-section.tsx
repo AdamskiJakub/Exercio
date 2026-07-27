@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { InstructorCard } from "./instructor-card";
 import { EnterpriseCard } from "@/components/enterprise/EnterpriseCard";
@@ -15,6 +16,32 @@ import { Building2, Users } from "lucide-react";
 import type { InstructorFilters } from "@/types/filters";
 import type { ResultsSectionProps } from "./types";
 
+/** Sort options available for each type filter */
+const SORT_OPTIONS: Record<string, { value: string; labelKey: string }[]> = {
+  all: [
+    { value: "relevance", labelKey: "sortBy.relevance" },
+    { value: "newest", labelKey: "sortBy.newest" },
+    { value: "name-asc", labelKey: "sortBy.nameAsc" },
+    { value: "name-desc", labelKey: "sortBy.nameDesc" },
+  ],
+  enterprises: [
+    { value: "relevance", labelKey: "sortBy.relevance" },
+    { value: "newest", labelKey: "sortBy.newest" },
+    { value: "name-asc", labelKey: "sortBy.nameAsc" },
+    { value: "name-desc", labelKey: "sortBy.nameDesc" },
+  ],
+  instructors: [
+    { value: "relevance", labelKey: "sortBy.relevance" },
+    { value: "rating", labelKey: "sortBy.rating" },
+    { value: "most-reviewed", labelKey: "sortBy.mostReviewed" },
+    { value: "price-asc", labelKey: "sortBy.priceAsc" },
+    { value: "price-desc", labelKey: "sortBy.priceDesc" },
+    { value: "name-asc", labelKey: "sortBy.nameAsc" },
+    { value: "name-desc", labelKey: "sortBy.nameDesc" },
+    { value: "newest", labelKey: "sortBy.newest" },
+  ],
+};
+
 export function ResultsSection({
   instructors,
   enterprises,
@@ -25,11 +52,30 @@ export function ResultsSection({
   page = 1,
   totalPages = 1,
   onPageChange,
+  items,
 }: ResultsSectionProps) {
   const t = useTranslations("InstructorsPage");
   const isEnterpriseOnly = filters.type === "enterprises";
   const isMixed = filters.type === "all";
   const hasEnterprises = enterprises && enterprises.length > 0;
+
+  // Reset sortBy when type changes to an option that doesn't support current sortBy
+  useEffect(() => {
+    const typeKey = filters.type || "instructors";
+    const allowed = SORT_OPTIONS[typeKey] || SORT_OPTIONS.instructors;
+    const isAllowed = allowed.some(
+      (opt: { value: string }) => opt.value === filters.sortBy,
+    );
+    if (!isAllowed) {
+      updateFilter("sortBy", "newest" as InstructorFilters["sortBy"]);
+    }
+  }, [filters.type]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Compute available sort options based on current type
+  const sortOptions = useMemo(() => {
+    const typeKey = filters.type || "instructors";
+    return SORT_OPTIONS[typeKey] || SORT_OPTIONS.instructors;
+  }, [filters.type]);
 
   return (
     <main
@@ -60,7 +106,7 @@ export function ResultsSection({
 
         <div className="w-full sm:w-auto sm:min-w-50">
           <Select
-            value={filters.sortBy || "relevance"}
+            value={filters.sortBy || sortOptions[0]?.value || "newest"}
             onValueChange={(value) =>
               updateFilter("sortBy", value as InstructorFilters["sortBy"])
             }
@@ -76,65 +122,39 @@ export function ResultsSection({
               sideOffset={8}
               className="bg-slate-900 border-slate-700 w-(--radix-select-trigger-width)"
             >
-              <SelectItem
-                value="relevance"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-              >
-                {t("sortBy.relevance")}
-              </SelectItem>
-              <SelectItem
-                value="rating"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-              >
-                {t("sortBy.rating")}
-              </SelectItem>
-              <SelectItem
-                value="most-reviewed"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-              >
-                {t("sortBy.mostReviewed")}
-              </SelectItem>
-              {!isEnterpriseOnly && (
-                <>
-                  <SelectItem
-                    value="price-asc"
-                    className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-                  >
-                    {t("sortBy.priceAsc")}
-                  </SelectItem>
-                  <SelectItem
-                    value="price-desc"
-                    className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-                  >
-                    {t("sortBy.priceDesc")}
-                  </SelectItem>
-                </>
-              )}
-              <SelectItem
-                value="name-asc"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-              >
-                {t("sortBy.nameAsc")}
-              </SelectItem>
-              <SelectItem
-                value="name-desc"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-              >
-                {t("sortBy.nameDesc")}
-              </SelectItem>
-              <SelectItem
-                value="newest"
-                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
-              >
-                {t("sortBy.newest")}
-              </SelectItem>
+              {sortOptions.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 py-3 cursor-pointer"
+                >
+                  {t(option.labelKey)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div className="space-y-8">
-        {instructors.length > 0 || hasEnterprises ? (
+        {isMixed && items && items.length > 0 ? (
+          /* Mixed feed: single list sorted by createdAt */
+          <div className="space-y-4">
+            {items.map((item, index) =>
+              item.type === "instructor" ? (
+                <InstructorCard
+                  key={`inst-${item.data.id}`}
+                  instructor={item.data}
+                />
+              ) : (
+                <EnterpriseCard
+                  key={`ent-${item.data.id}-${index}`}
+                  enterprise={item.data}
+                />
+              ),
+            )}
+          </div>
+        ) : instructors.length > 0 || hasEnterprises ? (
           <>
             {isMixed ? (
               <>
