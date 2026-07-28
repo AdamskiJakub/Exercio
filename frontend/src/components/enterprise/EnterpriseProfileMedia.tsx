@@ -97,7 +97,7 @@ function MediaUploadRow({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={field.isUploading}
-          className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0"
+          className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
           aria-label={`Upload ${uploadLabel} from computer`}
         >
           {field.isUploading ? (
@@ -218,7 +218,7 @@ export function EnterpriseProfileMedia({
             type="button"
             onClick={() => galleryInputRef.current?.click()}
             disabled={gallery.isUploading}
-            className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0"
+            className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
             aria-label={t("uploadGallery") || "Upload images from computer"}
           >
             {gallery.isUploading ? (

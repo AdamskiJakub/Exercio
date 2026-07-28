@@ -7,19 +7,27 @@ import {
 } from 'class-validator';
 import { Injectable } from '@nestjs/common';
 import { StaticConfigService } from '../../config/config.service';
+import { CatalogService } from '../../modules/catalog/catalog.service';
 
 @ValidatorConstraint({ name: 'isValidConfigId', async: false })
 @Injectable()
 export class IsValidConfigIdConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly configService: StaticConfigService) {}
+  constructor(
+    private readonly configService: StaticConfigService,
+    private readonly catalogService: CatalogService,
+  ) {}
 
   validate(value: string | string[], args: ValidationArguments): boolean {
     const [type] = args.constraints;
     const ids = Array.isArray(value) ? value : [value];
 
     switch (type) {
-      case 'tag':
-        return ids.every((id) => this.configService.isValidTag(id));
+      case 'tag': {
+        const validTagKeys = new Set(
+          this.catalogService.getTags().map((t) => t.key),
+        );
+        return ids.every((id) => validTagKeys.has(id));
+      }
       case 'specialization':
         return ids.every((id) => this.configService.isValidSpecialization(id));
       case 'goal':

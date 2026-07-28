@@ -349,6 +349,47 @@ export const disciplinesData: Discipline[] = [
     indexable: true,
     icon: '💑',
   },
+  {
+    id: 'disc_zumba',
+    key: 'zumba',
+    categoryId: 'cat_dance',
+    names: { pl: 'Zumba', en: 'Zumba' },
+    slugs: { pl: 'zumba', en: 'zumba' },
+    synonyms: ['zumba', 'zumba fitness', 'zumba dance', 'zumba trening'],
+    seo: {
+      titleTemplate: 'Zumba — {city} | Exercio',
+      descriptionTemplate:
+        'Zajęcia zumby — {city} — energetyczny trening taneczny. Sprawdź instruktorów zumby i kluby fitness.',
+    },
+    popularity: 84,
+    enabled: true,
+    indexable: true,
+    icon: '💃',
+  },
+  {
+    id: 'disc_contemporary',
+    key: 'contemporary',
+    categoryId: 'cat_dance',
+    names: { pl: 'Taniec współczesny', en: 'Contemporary Dance' },
+    slugs: { pl: 'taniec-wspolczesny', en: 'contemporary-dance' },
+    synonyms: [
+      'taniec współczesny',
+      'contemporary',
+      'contemporary dance',
+      'modern jazz',
+      'jazz dance',
+      'taniec nowoczesny',
+    ],
+    seo: {
+      titleTemplate: 'Taniec współczesny — {city} | Exercio',
+      descriptionTemplate:
+        'Zajęcia tańca współczesnego — {city} — contemporary, modern jazz. Sprawdź szkoły tańca i instruktorów.',
+    },
+    popularity: 76,
+    enabled: true,
+    indexable: true,
+    icon: '💃',
+  },
 
   // === FITNESS ===
   {
@@ -484,6 +525,73 @@ export const disciplinesData: Discipline[] = [
     indexable: true,
     icon: '🏃',
   },
+  {
+    id: 'disc_ems',
+    key: 'ems',
+    categoryId: 'cat_fitness',
+    names: { pl: 'EMS Training', en: 'EMS Training' },
+    slugs: { pl: 'ems', en: 'ems' },
+    synonyms: [
+      'ems',
+      'ems training',
+      'trening ems',
+      'elektrostymulacja mięśni',
+      'ems fitness',
+    ],
+    seo: {
+      titleTemplate: 'EMS Training — {city} | Exercio',
+      descriptionTemplate:
+        'Trening EMS — {city} — elektrostymulacja mięśni. Sprawdź studia EMS i trenerów. Efektywny trening w 20 minut.',
+    },
+    popularity: 78,
+    enabled: true,
+    indexable: true,
+    icon: '⚡',
+  },
+  {
+    id: 'disc_spinning',
+    key: 'spinning',
+    categoryId: 'cat_fitness',
+    names: { pl: 'Spinning', en: 'Spinning' },
+    slugs: { pl: 'spinning', en: 'spinning' },
+    synonyms: [
+      'spinning',
+      'indoor cycling',
+      'rowerek stacjonarny',
+      'jazda na rowerze stacjonarnym',
+    ],
+    seo: {
+      titleTemplate: 'Spinning — {city} | Exercio',
+      descriptionTemplate:
+        'Zajęcia spinning — {city} — trening na rowerkach stacjonarnych. Sprawdź instruktorów i kluby fitness.',
+    },
+    popularity: 82,
+    enabled: true,
+    indexable: true,
+    icon: '🚴',
+  },
+  {
+    id: 'disc_functional_training',
+    key: 'functional-training',
+    categoryId: 'cat_fitness',
+    names: { pl: 'Trening funkcjonalny', en: 'Functional Training' },
+    slugs: { pl: 'trening-funkcjonalny', en: 'functional-training' },
+    synonyms: [
+      'trening funkcjonalny',
+      'functional training',
+      'trening funkcyjny',
+      'functional fitness',
+    ],
+    seo: {
+      titleTemplate: 'Trening funkcjonalny — {city} | Exercio',
+      descriptionTemplate:
+        'Trening funkcjonalny — {city} — popraw sprawność w codziennym życiu. Sprawdź instruktorów treningu funkcjonalnego.',
+    },
+    popularity: 80,
+    enabled: true,
+    indexable: true,
+    icon: '🏋️',
+  },
 
   // === YOGA ===
   {
@@ -585,6 +693,23 @@ export const disciplinesData: Discipline[] = [
     indexable: true,
     icon: '⚽',
   },
+  {
+    id: 'disc_squash',
+    key: 'squash',
+    categoryId: 'cat_sports',
+    names: { pl: 'Squash', en: 'Squash' },
+    slugs: { pl: 'squash', en: 'squash' },
+    synonyms: ['squash', 'trening squasha', 'nauka squasha', 'trener squasha'],
+    seo: {
+      titleTemplate: 'Squash — {city} | Exercio',
+      descriptionTemplate:
+        'Trening squasha — {city} — nauka i doskonalenie gry. Sprawdź trenerów squasha i kluby.',
+    },
+    popularity: 74,
+    enabled: true,
+    indexable: true,
+    icon: '🏸',
+  },
 
   // === NUTRITION ===
   {
@@ -673,5 +798,22 @@ export const disciplinesData: Discipline[] = [
     enabled: true,
     indexable: true,
     icon: '💆',
+  },
+  {
+    id: 'disc_osteopathy',
+    key: 'osteopathy',
+    categoryId: 'cat_recovery',
+    names: { pl: 'Osteopatia', en: 'Osteopathy' },
+    slugs: { pl: 'osteopatia', en: 'osteopathy' },
+    synonyms: ['osteopatia', 'osteopathy', 'osteopata', 'terapia manualna'],
+    seo: {
+      titleTemplate: 'Osteopatia — {city} | Exercio',
+      descriptionTemplate:
+        'Osteopatia — {city} — znajdź osteopatę. Terapia manualna, leczenie bólu i rehabilitacja.',
+    },
+    popularity: 76,
+    enabled: true,
+    indexable: true,
+    icon: '🦴',
   },
 ];

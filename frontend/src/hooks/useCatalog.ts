@@ -89,15 +89,16 @@ function fetchCatalog(): Promise<CatalogResponse> {
         tags: (mod.mockTags || []).map(
           (t: {
             id: string;
-            nameEn: string;
-            namePl: string;
-            categories?: string[];
+            key: string;
+            names: { pl: string; en: string };
+            categoryIds: string[];
+            enabled: boolean;
           }) => ({
             id: t.id,
-            key: t.id,
-            names: { pl: t.namePl, en: t.nameEn },
-            categoryIds: t.categories || [],
-            enabled: true,
+            key: t.key,
+            names: t.names,
+            categoryIds: t.categoryIds,
+            enabled: t.enabled,
           }),
         ),
         goals: (mod.mockGoals || []).map(

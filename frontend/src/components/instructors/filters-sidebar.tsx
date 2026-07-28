@@ -13,6 +13,22 @@ import { useTags, useGoals, getTagName, getGoalName } from "@/hooks/useConfig";
 import type { FiltersSidebarProps } from "./types";
 import type { InstructorFilters, SearchFilters } from "@/types/filters";
 
+// Map old specialization IDs (from StaticConfigService) to new catalog category IDs
+const SPECIALIZATION_TO_CATEGORY: Record<string, string> = {
+  "personal-training": "cat_personal_training",
+  "fitness-cardio": "cat_fitness",
+  "yoga-mobility": "cat_yoga",
+  dance: "cat_dance",
+  "martial-arts": "cat_martial_arts",
+  sports: "cat_sports",
+  nutrition: "cat_nutrition",
+  recovery: "cat_recovery",
+};
+
+function mapSpecializationToCategory(spec: string): string {
+  return SPECIALIZATION_TO_CATEGORY[spec] || spec;
+}
+
 export function FiltersSidebar({
   filters,
   updateFilter,
@@ -27,7 +43,11 @@ export function FiltersSidebar({
   const { goals, loading: goalsLoading } = useGoals();
 
   const availableTags = filters.specialization
-    ? tags.filter((tag) => tag.categories.includes(filters.specialization!))
+    ? tags.filter((tag) =>
+        tag.categoryIds.includes(
+          mapSpecializationToCategory(filters.specialization!),
+        ),
+      )
     : tags;
 
   const isLoading = tagsLoading || goalsLoading;
@@ -126,17 +146,17 @@ export function FiltersSidebar({
                 }}
               >
                 {availableTags.map((tag) => {
-                  const isChecked = filters.tags?.includes(tag.id) || false;
+                  const isChecked = filters.tags?.includes(tag.key) || false;
                   return (
                     <label
                       key={tag.id}
-                      htmlFor={`tag-${tag.id}`}
+                      htmlFor={`tag-${tag.key}`}
                       className="flex items-center gap-3 px-2 py-2 rounded-lg cursor-pointer hover:bg-slate-800/50 transition-colors group"
                     >
                       <Checkbox
-                        id={`tag-${tag.id}`}
+                        id={`tag-${tag.key}`}
                         checked={isChecked}
-                        onCheckedChange={() => toggleTag(tag.id)}
+                        onCheckedChange={() => toggleTag(tag.key)}
                         className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 cursor-pointer"
                         aria-label={getTagName(tag, locale)}
                       />

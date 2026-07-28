@@ -122,7 +122,7 @@ export default function EnterpriseNewsPage() {
             {!showForm && (
               <Button
                 onClick={() => setShowForm(true)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-6 text-base font-semibold"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-6 text-base font-semibold cursor-pointer"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {t("createNews")}

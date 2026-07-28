@@ -112,7 +112,7 @@ export function EnterpriseNewsList({
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => onEdit(news)}
-                  className="p-2 text-slate-400 hover:text-emerald-400 transition-colors"
+                  className="p-2 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
                   aria-label={t("editNews")}
                 >
                   <Edit className="w-4 h-4" aria-hidden="true" />
@@ -121,14 +121,14 @@ export function EnterpriseNewsList({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onDelete(news.id)}
-                      className="p-2 text-red-400 hover:text-red-300 transition-colors"
+                      className="p-2 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
                       aria-label={t("confirmDeleteNews")}
                     >
                       <Trash2 className="w-4 h-4" aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => onDeleteConfirm(null)}
-                      className="p-2 text-slate-400 hover:text-slate-300 transition-colors text-xs"
+                      className="p-2 text-slate-400 hover:text-slate-300 transition-colors text-xs cursor-pointer"
                       aria-label={t("cancel") || "Cancel delete"}
                     >
                       {t("cancel") || "Cancel"}
@@ -137,7 +137,7 @@ export function EnterpriseNewsList({
                 ) : (
                   <button
                     onClick={() => onDeleteConfirm(news.id)}
-                    className="p-2 text-slate-400 hover:text-red-400 transition-colors"
+                    className="p-2 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
                     aria-label={t("deleteNews")}
                   >
                     <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -159,7 +159,7 @@ export function EnterpriseNewsList({
           </p>
           <Button
             onClick={onCreateNew}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer"
           >
             <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
             {t("createNews")}

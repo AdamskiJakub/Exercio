@@ -52,7 +52,7 @@ export function PostDetailModal({
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
           aria-label={t("close") || "Close"}
         >
           <X className="w-5 h-5" aria-hidden="true" />
