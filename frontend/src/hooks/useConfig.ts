@@ -9,9 +9,10 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_INSTRUCTORS === "true";
 // ============= TYPES =============
 export interface Tag {
   id: string;
-  nameEn: string;
-  namePl: string;
-  categories: string[];
+  key: string;
+  names: { pl: string; en: string };
+  categoryIds: string[];
+  enabled: boolean;
 }
 
 export interface Specialization {
@@ -58,7 +59,7 @@ function fetchTags(): Promise<Tag[]> {
   }
 
   tagsPromise = apiClient
-    .get<Tag[]>("/config/tags")
+    .get<Tag[]>("/catalog/tags")
     .then((res) => res.data)
     .then((data: Tag[]) => {
       tagsCache = data;
@@ -240,7 +241,7 @@ export function prefetchGoals() {
 
 // Tag helpers
 export function getTagName(tag: Tag, locale: string) {
-  return locale === "pl" ? tag.namePl : tag.nameEn;
+  return locale === "pl" ? tag.names.pl : tag.names.en;
 }
 
 export function getTagById(id: string): Tag | undefined {

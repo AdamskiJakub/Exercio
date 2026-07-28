@@ -58,7 +58,7 @@ export function EnterpriseProfileAmenities({
               id={field}
               checked={values[field] === true}
               onCheckedChange={(checked: boolean) => onChange(field, checked)}
-              className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
+              className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600 cursor-pointer"
             />
             <Label
               htmlFor={field}

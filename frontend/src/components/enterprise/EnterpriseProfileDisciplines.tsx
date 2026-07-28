@@ -1,42 +1,31 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useDisciplines, getDisciplineNameByKey } from "@/hooks/useCatalog";
 
 interface EnterpriseProfileDisciplinesProps {
   disciplines: string[];
   onChange: (values: string[]) => void;
 }
 
-const PRESET_DISCIPLINES = [
-  "strengthTraining",
-  "cardio",
-  "yoga",
-  "pilates",
-  "dance",
-  "martialArts",
-  "swimming",
-  "crossfit",
-  "calisthenics",
-  "rehabilitation",
-  "sportsMassage",
-  "nutritionCoaching",
-  "boxing",
-  "zumba",
-  "spinning",
-  "functionalTraining",
-];
-
 export function EnterpriseProfileDisciplines({
   disciplines,
   onChange,
 }: EnterpriseProfileDisciplinesProps) {
   const t = useTranslations("Dashboard.enterprise");
-  const dp = useTranslations("Dashboard.enterprise.disciplinesPresets");
+  const locale = useLocale();
+  const { disciplines: catalogDisciplines, loading } = useDisciplines();
   const [customValue, setCustomValue] = useState("");
+
+  // Only show enabled disciplines from the catalog
+  const presetDisciplines = useMemo(
+    () => catalogDisciplines.filter((d) => d.enabled),
+    [catalogDisciplines],
+  );
 
   const togglePreset = (value: string) => {
     if (disciplines.includes(value)) {
@@ -58,6 +47,10 @@ export function EnterpriseProfileDisciplines({
     onChange(disciplines.filter((v) => v !== value));
   };
 
+  const getPresetName = (key: string): string => {
+    return getDisciplineNameByKey(key, locale);
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -74,7 +67,7 @@ export function EnterpriseProfileDisciplines({
               variant="secondary"
               className="bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-3 py-1 text-sm"
             >
-              {dp.has(value) ? dp(value) : value}
+              {getPresetName(value)}
               <button
                 type="button"
                 onClick={() => remove(value)}
@@ -88,23 +81,30 @@ export function EnterpriseProfileDisciplines({
         </div>
       )}
 
-      {/* Preset options */}
-      <div className="flex flex-wrap gap-2">
-        {PRESET_DISCIPLINES.map((value) => (
-          <button
-            key={value}
-            type="button"
-            onClick={() => togglePreset(value)}
-            className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-              disciplines.includes(value)
-                ? "bg-emerald-600 text-white border-emerald-500"
-                : "bg-slate-800 text-slate-300 border-slate-700 hover:border-emerald-500/50"
-            }`}
-          >
-            {dp(value)}
-          </button>
-        ))}
-      </div>
+      {/* Preset options from catalog */}
+      {loading ? (
+        <div className="text-sm text-slate-400">{t("disciplinesLoading")}</div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {presetDisciplines.map((discipline) => (
+            <button
+              key={discipline.key}
+              type="button"
+              onClick={() => togglePreset(discipline.key)}
+              className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                disciplines.includes(discipline.key)
+                  ? "bg-emerald-600 text-white border-emerald-500"
+                  : "bg-slate-800 text-slate-300 border-slate-700 hover:border-emerald-500/50"
+              }`}
+            >
+              {discipline.icon && (
+                <span className="mr-1">{discipline.icon}</span>
+              )}
+              {getDisciplineNameByKey(discipline.key, locale)}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Custom input */}
       <div className="flex gap-2">
@@ -123,7 +123,7 @@ export function EnterpriseProfileDisciplines({
         <button
           type="button"
           onClick={addCustom}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
         >
           +
         </button>

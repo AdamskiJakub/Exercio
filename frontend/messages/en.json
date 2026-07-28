@@ -496,6 +496,7 @@
       },
       "disciplines": "Disciplines",
       "disciplinesHint": "What disciplines do you offer?",
+      "disciplinesLoading": "Loading disciplines...",
       "disciplinesPresets": {
         "strengthTraining": "Strength Training",
         "cardio": "Cardio",
