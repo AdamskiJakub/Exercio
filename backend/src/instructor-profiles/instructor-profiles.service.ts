@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorProfileDto } from './dto/create-instructor-profile.dto';
 import { UpdateInstructorProfileDto } from './dto/update-instructor-profile.dto';
 import { StaticConfigService } from '../config/config.service';
+import { CatalogService } from '../modules/catalog/catalog.service';
 import { getInstructorOrderBy } from '../common/sort-utils';
 import { buildInstructorSearchOrClause } from '../common/search-utils';
 import { fetchInstructorReviewStats } from '../common/review-utils';
@@ -59,6 +60,7 @@ export class InstructorProfilesService {
   constructor(
     private prisma: PrismaService,
     private configService: StaticConfigService,
+    private catalogService: CatalogService,
   ) {}
 
   /**
@@ -341,9 +343,13 @@ export class InstructorProfilesService {
     });
 
     // contactMessage is always public if set (shown in contact section)
+    const validTagKeys = new Set(
+      this.catalogService.getTags().map((t) => t.key),
+    );
+
     return {
       ...profile,
-      tags: profile.tags.filter((tag) => this.configService.isValidTag(tag)),
+      tags: profile.tags.filter((tag) => validTagKeys.has(tag)),
       specializations: profile.specializations.filter((spec) =>
         this.configService.isValidSpecialization(spec),
       ),
@@ -463,11 +469,13 @@ export class InstructorProfilesService {
       );
     }
 
+    const validTagKeys = new Set(
+      this.catalogService.getTags().map((t) => t.key),
+    );
+
     return {
       ...profile,
-      tags: profile.tags.filter((tag: string) =>
-        this.configService.isValidTag(tag),
-      ),
+      tags: profile.tags.filter((tag: string) => validTagKeys.has(tag)),
       specializations: validSpecializations,
       goals: profile.goals.filter((goal: string) =>
         this.configService.isValidGoal(goal),

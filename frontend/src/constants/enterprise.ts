@@ -61,6 +61,10 @@ export const AMENITY_ITEMS = [
 /**
  * Known preset values for i18n resolution.
  * Used by resolvePreset() to avoid MISSING_MESSAGE errors for custom values.
+ *
+ * NOTE: Disciplines are NOT listed here — they are resolved dynamically
+ * from the catalog (disciplines.data.ts) via getDisciplineNameByKey().
+ * Only targetAudience and languages still use i18n presets.
  */
 export const KNOWN_PRESETS = {
   targetAudiencePresets: new Set([
@@ -72,24 +76,6 @@ export const KNOWN_PRESETS = {
     "intermediate",
     "advanced",
     "professional",
-  ]),
-  disciplinesPresets: new Set([
-    "strengthTraining",
-    "cardio",
-    "yoga",
-    "pilates",
-    "dance",
-    "martialArts",
-    "swimming",
-    "crossfit",
-    "calisthenics",
-    "rehabilitation",
-    "sportsMassage",
-    "nutritionCoaching",
-    "boxing",
-    "zumba",
-    "spinning",
-    "functionalTraining",
   ]),
   languagesPresets: new Set([
     "polish",

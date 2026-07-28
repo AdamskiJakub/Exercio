@@ -60,7 +60,7 @@ export function EnterpriseProfileHighlights({
             <button
               type="button"
               onClick={() => onRemove(index)}
-              className="p-2 text-red-400 hover:text-red-300 transition-colors"
+              className="p-2 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
               aria-label={`${t("removeHighlight") || "Remove highlight"} ${index + 1}`}
             >
               <X className="w-4 h-4" aria-hidden="true" />
@@ -70,7 +70,7 @@ export function EnterpriseProfileHighlights({
         <Button
           type="button"
           onClick={onAdd}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white w-full"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white w-full cursor-pointer"
         >
           <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
           {t("addHighlight") || "Add stat"}

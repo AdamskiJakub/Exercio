@@ -58,7 +58,7 @@ export function EnterpriseProfileBusinessType({
           </SelectTrigger>
           <SelectContent className="bg-slate-800 border-slate-700 text-white">
             {BUSINESS_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
+              <SelectItem key={type} value={type} className="cursor-pointer">
                 {bt(BUSINESS_TYPE_I18N_MAP[type])}
               </SelectItem>
             ))}

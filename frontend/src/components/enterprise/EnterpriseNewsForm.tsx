@@ -106,7 +106,7 @@ export function EnterpriseNewsForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-slate-400 hover:text-white transition-colors"
+          className="text-slate-400 hover:text-white transition-colors cursor-pointer"
           aria-label={t("cancel") || "Cancel"}
         >
           <span className="text-sm">{t("cancel") || "Cancel"}</span>
@@ -173,7 +173,7 @@ export function EnterpriseNewsForm({
         <Button
           type="submit"
           disabled={isSaving}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-8 text-base font-semibold"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-8 text-base font-semibold cursor-pointer"
         >
           {isSaving ? t("savingNews") : t("publish")}
         </Button>
@@ -181,7 +181,7 @@ export function EnterpriseNewsForm({
           type="button"
           onClick={onCancel}
           variant="destructive"
-          className="h-11 px-8"
+          className="h-11 px-8 cursor-pointer"
         >
           {t("cancel") || "Cancel"}
         </Button>

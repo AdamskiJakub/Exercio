@@ -45,6 +45,22 @@ const MAX_TAGS = 8;
 const MAX_GOALS = 4;
 const MAX_ADDITIONAL_SPECIALIZATIONS = 2;
 
+// Map old specialization IDs (from StaticConfigService) to new catalog category IDs
+const SPECIALIZATION_TO_CATEGORY: Record<string, string> = {
+  "personal-training": "cat_personal_training",
+  "fitness-cardio": "cat_fitness",
+  "yoga-mobility": "cat_yoga",
+  dance: "cat_dance",
+  "martial-arts": "cat_martial_arts",
+  sports: "cat_sports",
+  nutrition: "cat_nutrition",
+  recovery: "cat_recovery",
+};
+
+function mapSpecializationToCategory(spec: string): string {
+  return SPECIALIZATION_TO_CATEGORY[spec] || spec;
+}
+
 interface InstructorProfileFormProps {
   profile?: InstructorProfile | InstructorListing;
   user: Pick<User, "email" | "phone">;
@@ -199,7 +215,11 @@ export function InstructorProfileForm({
 
   // Get available tags based on primary category
   const availableTags = selectedPrimaryCategory
-    ? tags.filter((tag) => tag.categories.includes(selectedPrimaryCategory))
+    ? tags.filter((tag) =>
+        tag.categoryIds.includes(
+          mapSpecializationToCategory(selectedPrimaryCategory),
+        ),
+      )
     : tags;
 
   // Toggle functions
@@ -471,7 +491,7 @@ export function InstructorProfileForm({
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
                 {availableTags.map((tag) => {
-                  const isChecked = selectedTags.includes(tag.id);
+                  const isChecked = selectedTags.includes(tag.key);
                   const isDisabled =
                     !isChecked && selectedTags.length >= MAX_TAGS;
                   return (
@@ -486,7 +506,7 @@ export function InstructorProfileForm({
                       <Checkbox
                         checked={isChecked}
                         disabled={isDisabled}
-                        onCheckedChange={() => toggleTag(tag.id)}
+                        onCheckedChange={() => toggleTag(tag.key)}
                         className="border-slate-600 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                       />
                       <span

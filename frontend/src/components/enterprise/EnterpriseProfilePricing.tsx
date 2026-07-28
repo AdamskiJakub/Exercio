@@ -72,7 +72,7 @@ export function EnterpriseProfilePricing({
             <button
               type="button"
               onClick={() => onRemove(index)}
-              className="mt-7 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+              className="mt-7 p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
               aria-label={t("removePricingItem")}
             >
               <Trash2 className="w-4 h-4" />
@@ -84,7 +84,7 @@ export function EnterpriseProfilePricing({
       <Button
         type="button"
         onClick={onAdd}
-        className="bg-emerald-600 hover:bg-emerald-500 text-white w-full"
+        className="bg-emerald-600 hover:bg-emerald-500 text-white w-full cursor-pointer"
       >
         <Plus className="w-4 h-4 mr-2" />
         {t("addPricingItem")}

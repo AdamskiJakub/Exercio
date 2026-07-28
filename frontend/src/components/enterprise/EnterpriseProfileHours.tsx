@@ -27,7 +27,7 @@ export function EnterpriseProfileHours({
       <button
         type="button"
         onClick={onToggle}
-        className="flex items-center justify-between w-full"
+        className="flex items-center justify-between w-full cursor-pointer"
         aria-expanded={showHours}
         aria-controls="opening-hours-panel"
       >

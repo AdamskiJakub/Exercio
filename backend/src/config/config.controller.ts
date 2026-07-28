@@ -5,11 +5,6 @@ import { StaticConfigService } from './config.service';
 export class ConfigController {
   constructor(private readonly configService: StaticConfigService) {}
 
-  @Get('tags')
-  getTags() {
-    return this.configService.getAllTags();
-  }
-
   @Get('specializations')
   getSpecializations() {
     return this.configService.getAllSpecializations();

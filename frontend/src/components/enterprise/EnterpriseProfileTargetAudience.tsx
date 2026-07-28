@@ -90,7 +90,7 @@ export function EnterpriseProfileTargetAudience({
             key={value}
             type="button"
             onClick={() => togglePreset(value)}
-            className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-sm border transition-colors cursor-pointer ${
               targetAudience.includes(value)
                 ? "bg-emerald-600 text-white border-emerald-500"
                 : "bg-slate-800 text-slate-300 border-slate-700 hover:border-emerald-500/50"
@@ -118,7 +118,7 @@ export function EnterpriseProfileTargetAudience({
         <button
           type="button"
           onClick={addCustom}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
         >
           +
         </button>
