@@ -231,7 +231,9 @@ export function InstructorCard({
             {/* Tags/Skills */}
             <div className="flex flex-wrap gap-2">
               {instructor.tags?.slice(0, 3).map((tagId) => {
-                const tag = tags.find((t) => t.key === tagId);
+                const tag =
+                  tags.find((t) => t.key === tagId) ||
+                  tags.find((t) => t.id === tagId);
                 if (!tag) return null;
                 return (
                   <Badge

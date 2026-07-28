@@ -133,7 +133,9 @@ export function AboutSection({ profile }: AboutSectionProps) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {profile.tags.map((tagId) => {
-                  const tag = tags.find((t) => t.key === tagId);
+                  const tag =
+                    tags.find((t) => t.key === tagId) ||
+                    tags.find((t) => t.id === tagId);
                   return tag ? (
                     <Badge
                       key={tagId}

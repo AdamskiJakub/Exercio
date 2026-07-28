@@ -104,7 +104,7 @@ export function InstructorProfileForm({
   useEffect(() => {
     if (!tagsLoading && tags.length > 0 && profile?.tags) {
       const validTags = profile.tags.filter((tag: string) =>
-        tags.some((t) => t.id === tag),
+        tags.some((t) => t.id === tag || t.key === tag),
       );
       setSelectedTags(validTags);
     }
@@ -491,7 +491,9 @@ export function InstructorProfileForm({
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-2">
                 {availableTags.map((tag) => {
-                  const isChecked = selectedTags.includes(tag.key);
+                  const isChecked =
+                    selectedTags.includes(tag.key) ||
+                    selectedTags.includes(tag.id);
                   const isDisabled =
                     !isChecked && selectedTags.length >= MAX_TAGS;
                   return (

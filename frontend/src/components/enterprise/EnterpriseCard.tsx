@@ -136,7 +136,9 @@ export function EnterpriseCard({
           {/* Tags */}
           <div className="flex flex-wrap gap-2 pt-2">
             {enterprise.tags?.slice(0, 3).map((tagId) => {
-              const tag = tags.find((t) => t.key === tagId);
+              const tag =
+                tags.find((t) => t.key === tagId) ||
+                tags.find((t) => t.id === tagId);
               if (!tag) return null;
               return (
                 <Badge
