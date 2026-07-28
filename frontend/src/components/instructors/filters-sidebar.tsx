@@ -146,7 +146,10 @@ export function FiltersSidebar({
                 }}
               >
                 {availableTags.map((tag) => {
-                  const isChecked = filters.tags?.includes(tag.key) || false;
+                  const isChecked =
+                    filters.tags?.includes(tag.key) ||
+                    filters.tags?.includes(tag.id) ||
+                    false;
                   return (
                     <label
                       key={tag.id}
