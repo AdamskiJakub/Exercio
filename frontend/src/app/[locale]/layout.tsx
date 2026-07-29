@@ -34,11 +34,11 @@ export async function generateMetadata({
   if (locale === "pl") {
     return {
       title: {
-        default: "Exercio — Znajdź swojego idealnego trenera",
+        default: "Exercio — Znajdź instruktorów, studia i kluby sportowe",
         template: "%s — Exercio",
       },
       description:
-        "Rynek trenerów personalnych, instruktorów fitness i specjalistów od wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
+        "Odkrywaj instruktorów, studia treningowe, szkoły tańca, siłownie i ekspertów wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
       openGraph: {
         siteName: "Exercio",
         type: "website",
@@ -49,11 +49,11 @@ export async function generateMetadata({
 
   return {
     title: {
-      default: "Exercio — Find Your Perfect Trainer",
+      default: "Exercio — Find Instructors, Studios and Sports Clubs",
       template: "%s — Exercio",
     },
     description:
-      "Marketplace for personal trainers, fitness instructors, and wellness professionals. Browse profiles, check availability, and book online training.",
+      "Discover instructors, training studios, dance schools, gyms and wellness experts. Browse profiles, check availability and book training online.",
     openGraph: {
       siteName: "Exercio",
       type: "website",

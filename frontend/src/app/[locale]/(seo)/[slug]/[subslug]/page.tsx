@@ -145,12 +145,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const catName = getLocalizedName(category.names, locale);
   const title =
     locale === "pl"
-      ? `${catName} w ${cityName} — znajdź instruktorów i kluby | Exercio`
-      : `${catName} in ${cityName} — find instructors and clubs | Exercio`;
+      ? `${catName} w ${cityName} — znajdź instruktorów i obiekty | Exercio`
+      : `${catName} in ${cityName} — find instructors and venues | Exercio`;
   const description =
     locale === "pl"
-      ? `Znajdź najlepszych instruktorów i kluby ${catName.toLowerCase()} w ${cityName}. Sprawdź opinie, cennik i dostępne terminy.`
-      : `Find the best instructors and clubs for ${catName.toLowerCase()} in ${cityName}. Check reviews, prices and availability.`;
+      ? `Znajdź najlepszych instruktorów i obiekty ${catName.toLowerCase()} w ${cityName}. Sprawdź opinie, cennik i dostępne terminy.`
+      : `Find the best instructors and venues for ${catName.toLowerCase()} in ${cityName}. Check reviews, prices and availability.`;
 
   return {
     title,

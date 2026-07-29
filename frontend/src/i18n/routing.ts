@@ -34,11 +34,11 @@ export const routing = defineRouting({
       en: "/register/instructor",
     },
     "/partner": {
-      pl: "/dla-firm",
+      pl: "/dla-partnerow",
       en: "/partner",
     },
     "/enterprise/apply": {
-      pl: "/dla-firm/aplikuj",
+      pl: "/dla-partnerow/aplikuj",
       en: "/enterprise/apply",
     },
     "/forgot-password": {

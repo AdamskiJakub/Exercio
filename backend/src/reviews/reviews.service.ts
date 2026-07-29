@@ -402,7 +402,7 @@ export class ReviewsService {
       reviewCount,
       ratingLabel:
         reviewCount === 0
-          ? 'New Trainer'
+          ? 'New Instructor'
           : reviewCount < 5
             ? `${reviewCount} reviews collected`
             : null,

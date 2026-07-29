@@ -5,7 +5,7 @@ import {
   IsEnum,
   IsBoolean,
 } from 'class-validator';
-import { EnterpriseCategory } from '@prisma/client';
+import { EnterpriseCategory, EnterpriseStatus } from '@prisma/client';
 
 export class UpdateEnterpriseProfileDto {
   @IsString()
@@ -160,4 +160,8 @@ export class UpdateEnterpriseProfileDto {
 
   @IsOptional()
   faq?: { question: string; answer: string }[];
+
+  @IsEnum(EnterpriseStatus)
+  @IsOptional()
+  status?: EnterpriseStatus;
 }

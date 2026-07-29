@@ -436,7 +436,7 @@ function CityView({
               <p className="text-base text-slate-400">
                 {t("cityDescription", {
                   defaultValue:
-                    "Znajdź najlepszych trenerów personalnych, instruktorów i kluby fitness w {city}. Porównaj opinie, cennik i dostępne terminy.",
+                    "Znajdź najlepszych instruktorów i obiekty w {city}. Porównaj opinie, cennik i dostępne terminy.",
                   city: cityName,
                 })}
               </p>
