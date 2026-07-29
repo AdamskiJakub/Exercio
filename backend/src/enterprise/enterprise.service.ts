@@ -4,6 +4,7 @@ import {
   Logger,
   ForbiddenException,
 } from '@nestjs/common';
+import { EnterpriseStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EnterpriseBaseService } from './enterprise-base.service';
 import type { UpdateEnterpriseProfileDto } from './dto/update-enterprise-profile.dto';
@@ -137,18 +138,29 @@ export class EnterpriseService extends EnterpriseBaseService {
   ) {
     await this.verifyOwnership(profileId, userId, 'update the profile');
 
-    const updated = await this.prisma.enterpriseProfile.update({
-      where: { id: profileId },
-      data: dto,
-    });
-
-    if (dto.status === 'ACTIVE') {
-      await this.grantFoundingPartnerIfEligible(profileId).catch((err) => {
-        this.logger.warn(
-          `Failed to auto-grant Founding Partner badge: ${err.stack}`,
-        );
+    // Wrap status update and badge grant in a single transaction
+    // to prevent inconsistent state (ACTIVE profile without badge)
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const profile = await tx.enterpriseProfile.update({
+        where: { id: profileId },
+        data: dto,
       });
-    }
+
+      if (
+        dto.status === EnterpriseStatus.ACTIVE &&
+        FOUNDING_PARTNER_CONFIG.enabled
+      ) {
+        await this.executeGrantInTransaction(tx, profileId, false).catch(
+          (err) => {
+            this.logger.warn(
+              `Failed to auto-grant Founding Partner badge: ${err.stack}`,
+            );
+          },
+        );
+      }
+
+      return profile;
+    });
 
     return updated;
   }
