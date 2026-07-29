@@ -1,31 +1,38 @@
 # 🏋️ Exercio
 
-> Platform connecting fitness & wellness professionals with clients
+> Marketplace for sports instructors, dance schools, gyms and wellness professionals.
 
-Modern web application for booking training sessions, managing schedules, and growing your coaching business.
+A modern marketplace connecting sports instructors, studios and active people — with booking, reviews, and profile management.
 
 ---
 
 ## 🎯 Overview
 
-Exercio is a marketplace platform designed for the fitness and wellness industry. It enables trainers, instructors, and coaches to showcase their services, manage availability, and accept bookings from clients.
+Exercio is a marketplace platform for the fitness and wellness industry. It enables trainers, instructors, and sports organizations to showcase their services, manage availability, accept bookings, and grow their business.
 
-**Target Users:**
+**Who it's for:**
 
 - 👨‍🏫 Personal trainers, yoga instructors, dance teachers
+- 🏢 Dance schools, gyms, sports studios
 - 💆 Massage therapists, physiotherapists, wellness coaches
 - 🏃 Clients looking for professional training services
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
-- 🔐 **User Authentication** - Secure JWT-based auth with role management
-- 👤 **Profile Management** - Rich instructor profiles with media galleries
-- 📅 **Availability System** - Flexible scheduling with weekly patterns and exceptions
-- 📖 **Booking System** - Session reservation with conflict detection
-- 🌍 **Internationalization** - Full Polish & English support
-- 📱 **Responsive Design** - Mobile-first UI with modern components
+- 👤 **Instructor Profiles** — Rich profiles with media galleries, specializations, and pricing
+- 🏢 **Enterprise Profiles** — Studio & organization pages with instructor teams
+- 📖 **Booking System** — Session reservation with conflict detection and calendar sync
+- ⭐ **Reviews** — Post-session ratings and feedback
+- ❤️ **Favorites** — Save and follow favorite instructors and studios
+- 🔍 **Search & Filters** — Advanced search by discipline, city, specialization, and goals
+- 🌍 **Multi-language** — Full Polish & English support (next-intl)
+- 🔔 **Notifications** — Real-time booking and profile updates
+- 📅 **Availability Management** — Flexible scheduling with weekly patterns and exceptions
+- 📊 **Dashboard** — Manage bookings, reviews, and profile analytics
+- 📱 **Mobile Responsive** — Fully responsive design across all devices
+- 🔐 **Authentication** — Secure JWT-based auth with Google & Facebook OAuth
 
 ---
 
@@ -33,146 +40,43 @@ Exercio is a marketplace platform designed for the fitness and wellness industry
 
 ### Backend
 
-- **NestJS** - Progressive Node.js framework
-- **Prisma ORM** - Type-safe database access with PostgreSQL
-- **JWT** - Authentication & authorization
-- **TypeScript** - Type safety across the stack
+- **NestJS** — Progressive Node.js framework
+- **TypeScript** — Type safety across the stack
+- **Prisma ORM** — Type-safe database access
+- **PostgreSQL** — Relational database
+- **JWT** — Authentication & authorization
 
 ### Frontend
 
-- **Next.js 15** - React framework with App Router
-- **Tailwind CSS** - Utility-first styling
-- **shadcn/ui** - High-quality UI components
-- **TanStack Query** - Server state management
-- **next-intl** - i18n solution
+- **Next.js 15** — React framework with App Router
+- **TypeScript** — Type safety across the stack
+- **Tailwind CSS** — Utility-first styling
+- **shadcn/ui** — High-quality UI components
+- **TanStack Query** — Server state management
+- **next-intl** — Internationalization (pl/en)
 
 ### Infrastructure
 
-- **Docker Compose** - Local development environment
-- **PostgreSQL** - Relational database
+- **Docker** — Containerized development & deployment
+- **Cloudflare R2** — Object storage for media uploads
 
 ---
 
-## 🚀 Getting Started
+## 🚧 Current Status
 
-### Prerequisites
+Exercio is currently in **Private Beta**.
 
-- Node.js 18+
-- Docker Desktop
-- pnpm (recommended) or npm
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/AdamskiJakub/exercio.git
-   cd exercio
-   ```
-
-2. **Start the database**
-
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Backend setup**
-
-   ```bash
-   cd backend
-   pnpm install
-
-   # Setup database
-   pnpm run prisma:generate
-   pnpm run prisma:migrate:dev
-
-   # Start development server
-   pnpm run start:dev
-   ```
-
-4. **Frontend setup** (in new terminal)
-
-   ```bash
-   cd frontend
-   pnpm install
-   pnpm run dev
-   ```
-
-5. **Access the application**
-   - Frontend: [http://localhost:3000](http://localhost:3000)
-   - Backend API: [http://localhost:3001](http://localhost:3001)
-   - Prisma Studio: `pnpm run prisma:studio` (in backend folder)
-
----
-
-## 📁 Project Structure
-
-```
-exercio/
-├── backend/              # NestJS REST API
-│   ├── src/
-│   │   ├── auth/        # Authentication module
-│   │   ├── users/       # User management
-│   │   ├── bookings/    # Booking system
-│   │   └── ...
-│   └── prisma/          # Database schema & migrations
-│
-├── frontend/            # Next.js application
-│   ├── src/
-│   │   ├── app/        # App Router pages
-│   │   ├── components/ # React components
-│   │   └── ...
-│   └── messages/       # i18n translations
-│
-└── docker-compose.yml  # PostgreSQL container
-```
-
----
-
-## � Development
-
-### Environment Variables
-
-Create `.env` files in backend and frontend directories:
-
-**Backend (.env)**
-
-```env
-DATABASE_URL="postgresql://..."
-JWT_SECRET="your-secret-key"
-CORS_ORIGIN="http://localhost:3000"
-```
-
-**Frontend (.env.local)**
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
-```
-
-### Useful Commands
-
-```bash
-# Backend
-pnpm run start:dev          # Start dev server
-pnpm run build              # Build for production
-pnpm run prisma:studio      # Open database GUI
-pnpm run lint               # Run ESLint
-
-# Frontend
-pnpm run dev                # Start dev server
-pnpm run build              # Build for production
-pnpm run lint               # Run ESLint
-```
+The platform is being tested together with the first instructors and sports organizations before the public launch.
 
 ---
 
 ## 📝 License
 
-This is a private project.
+Private Beta — All rights reserved.
 
 ---
 
-## � Author
+## 👤 Author
 
 **Jakub Adamski**
 
