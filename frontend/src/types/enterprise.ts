@@ -72,6 +72,7 @@ export interface EnterpriseProfile {
   subscriptionStatus: string | null;
   subscribedAt: string | null;
   subscriptionExpiresAt: string | null;
+  foundingPartnerGrantedAt: string | null;
   createdAt: string;
   updatedAt: string;
   instructors?: EnterpriseInstructorWithProfile[];
@@ -148,6 +149,7 @@ export interface EnterpriseListing {
   category: EnterpriseCategory;
   tags: string[];
   verified: boolean;
+  foundingPartnerGrantedAt: string | null;
   averageRating?: number | null;
   reviewCount?: number;
   instructorCount?: number;

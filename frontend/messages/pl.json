@@ -1,12 +1,12 @@
 {
   "HomePage": {
     "hero": {
-      "title": "Znajdź Idealnego",
-      "titleHighlight": "Trenera",
-      "description": "Połącz się z profesjonalnymi trenerami, instruktorami i ekspertami wellness. Rezerwuj sesje, śledź postępy i osiągaj swoje cele fitness.",
-      "searchPlaceholder": "Szukaj po nazwisku, firmie, siłowni...",
+      "title": "Znajdź instruktora lub",
+      "titleHighlight": "miejsce do treningu",
+      "description": "Odkrywaj instruktorów, studia treningowe, szkoły tańca, siłownie i ekspertów wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
+      "searchPlaceholder": "Kogo lub czego szukasz?",
       "searchLabel": "Wyszukiwanie po słowach kluczowych",
-      "primaryCta": "Szukaj Trenerów",
+      "primaryCta": "Szukaj",
       "citySearchLabel": "Wyszukaj miasto",
       "citySearchPlaceholder": "🔍 Miasto...",
       "specializationLabel": "Wybierz specjalizację",
@@ -39,7 +39,7 @@
       "partnerFormAnalata": "Forma na lata"
     },
     "stats": {
-      "trainers": "Zweryfikowanych Trenerów",
+      "trainers": "Zweryfikowanych Instruktorów",
       "sessions": "Zarezerwowanych Sesji",
       "rating": "Średnia Ocena"
     }
@@ -83,7 +83,7 @@
   },
   "Navigation": {
     "contact": "Kontakt",
-    "forBusiness": "Dla Firm"
+    "forBusiness": "Dla Partnerów"
   },
   "auth": {
     "loginSubtitle": "Zaloguj się do swojego konta",
@@ -166,7 +166,7 @@
     "clientRoleDesc": "Znajdź idealnego instruktora dla siebie",
     "clientFeature1": "Zamawiaj sesje i zarządzaj rezerwacjami",
     "clientFeature2": "Przeglądaj historię swoich sesji",
-    "clientFeature3": "Zapisuj ulubionych trenerów",
+    "clientFeature3": "Zapisuj ulubionych instruktorów",
     "registerAsClient": "Załóż konto Klienta",
     "clientBadge": "Szukam instruktora",
     "instructorRole": "Instruktor",
@@ -207,7 +207,7 @@
     "becomeInstructorPhoneInfo": "Podaj numer telefonu, aby klienci mogli się z Tobą kontaktować",
     "processing": "Przetwarzanie...",
     "oauthProviderConflict": "Ten adres email jest już zarejestrowany przez {provider}. Zaloguj się przez {provider}.",
-    "forBusinesses": "Dla Firm",
+    "forBusinesses": "Dla Partnerów",
     "forBusinessesDesc": "Pokaż swoją ofertę, buduj zespół instruktorów i rozwijaj swoją społeczność.",
     "businessFeature1": "Publiczny profil firmy",
     "businessFeature2": "Zapraszaj instruktorów do zespołu",
@@ -216,7 +216,7 @@
     "businessBadge": "Prowadzę szkołę lub klub",
     "whyExercioTitle": "Dlaczego Exercio?",
     "whyExercioFeature1": "Zweryfikowane profile instruktorów",
-    "whyExercioFeature2": "Firmy mogą budować własne zespoły trenerów",
+    "whyExercioFeature2": "Firmy mogą budować własne zespoły instruktorów",
     "whyExercioFeature3": "Wszystko w jednym miejscu — instruktorzy, szkoły i klienci",
     "activationTitle": "Aktywuj konto",
     "activationSubtitle": "Ustaw hasło, aby aktywować swoje konto partnerskie",
@@ -303,7 +303,7 @@
       "myUpcomingSessions": "Moje Nadchodzące Sesje",
       "noUpcomingSessions": "Brak nadchodzących sesji",
       "bookAsClientDescription": "Tutaj zobaczysz sesje, które zarezerwowałeś u innych instruktorów",
-      "favoriteTrainers": "Ulubieni Trenerzy",
+      "favoriteTrainers": "Ulubieni Instruktorzy",
       "asInstructor": "Jako instruktor",
       "asClient": "Jako klient",
       "recentlyViewed": "Ostatnio oglądani",
@@ -513,7 +513,13 @@
         "boxing": "Boks",
         "zumba": "Zumba",
         "spinning": "Spinning",
-        "functionalTraining": "Trening funkcjonalny"
+        "functionalTraining": "Trening funkcjonalny",
+        "hip-hop": "Hip-Hop",
+        "ballet": "Balet",
+        "wedding-dance": "Taniec weselny",
+        "salsa": "Salsa",
+        "bachata": "Bachata",
+        "contemporary": "Taniec współczesny"
       },
       "languages": "Języki",
       "languagesPlaceholder": "np. Polski, Angielski, Niemiecki",
@@ -557,15 +563,15 @@
       "accountSettings": "Ustawienia Konta",
       "upcomingBookings": "Nadchodzące Rezerwacje",
       "completedSessions": "Ukończone Sesje",
-      "favoriteTrainers": "Ulubieni Trenerzy",
+      "favoriteTrainers": "Ulubieni Instruktorzy",
       "nextWeek": "w przyszłym tygodniu",
       "allTime": "wszystkie",
       "saved": "zapisani",
       "myTrainings": "Moje Treningi",
       "myTrainingsDescription": "Sesje, które zarezerwowałeś jako klient",
-      "findTrainers": "Znajdź Trenerów",
-      "browseDescription": "Odkryj i połącz się z profesjonalnymi trenerami zgodnymi z Twoimi celami",
-      "browseTrainers": "Przeglądaj Trenerów",
+      "findTrainers": "Znajdź Instruktorów",
+      "browseDescription": "Odkryj i połącz się z profesjonalnymi instruktorami zgodnymi z Twoimi celami",
+      "browseTrainers": "Przeglądaj Instruktorów",
       "upcomingSessions": "Nadchodzące Sesje",
       "reviewsToGive": "Recenzje do Wystawienia",
       "messages": "Wiadomości",
@@ -846,9 +852,9 @@
     "tagline": "Połącz się z najlepszymi trenerami fitness i wellness w Polsce.",
     "platform": {
       "title": "Platforma",
-      "findTrainers": "Znajdź Trenerów",
+      "findTrainers": "Znajdź Instruktorów",
       "becomeInstructor": "Zostań Instruktorem",
-      "forBusiness": "Dla Firm"
+      "forBusiness": "Dla Partnerów"
     },
     "support": {
       "title": "Pomoc",
@@ -923,20 +929,20 @@
       "nameDesc": "Nazwa: Z-A"
     },
     "resultsAriaLabel": "Wyniki wyszukiwania",
-    "noResults": "Nie znaleziono trenerów",
+    "noResults": "Nie znaleziono wyników",
     "noResultsDescription": "Spróbuj zmienić filtry lub wyszukaj w innym mieście",
-    "resultsCount": "{count} {count, plural, one {trener} few {trenerów} many {trenerów} other {trenerów}}",
+    "resultsCount": "{count} {count, plural, one {wynik} few {wyniki} many {wyników} other {wyników}}",
     "instructorCount": "{count} {count, plural, one {instruktor} few {instruktorów} many {instruktorów} other {instruktorów}}",
-    "enterpriseCount": "{count} {count, plural, one {partner} few {partnerów} many {partnerów} other {partnerów}}",
+    "enterpriseCount": "{count} {count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
     "instructorsSection": "Instruktorzy",
-    "enterprisesSection": "Partnerzy",
+    "enterprisesSection": "Obiekty",
     "instructorsFailed": "Nie można załadować listy instruktorów. Spróbuj ponownie później.",
     "type": {
       "all": "Wszystko",
       "instructors": "Instruktorzy",
-      "enterprises": "Partnerzy"
+      "enterprises": "Obiekty"
     },
-    "enterprises": "Partnerzy",
+    "enterprises": "Obiekty",
     "instructors": "Instruktorzy"
   },
   "Contact": {
@@ -949,19 +955,19 @@
     "faqSubtitle": "Szybkie odpowiedzi na najczęstsze pytania dotyczące Exercio",
     "faq": {
       "bookTrainer": {
-        "question": "Jak zarezerwować trenera?",
-        "answer": "Przeglądaj katalog trenerów, znajdź trenera odpowiadającego Twoim celom i kliknij \"Zarezerwuj sesję\" na jego profilu. Wybierz preferowaną datę i godzinę, a następnie potwierdź rezerwację. Trener otrzyma powiadomienie i potwierdzi sesję."
+        "question": "Jak zarezerwować instruktora?",
+        "answer": "Przeglądaj katalog instruktorów, znajdź instruktora odpowiadającego Twoim celom i kliknij \"Zarezerwuj sesję\" na jego profilu. Wybierz preferowaną datę i godzinę, a następnie potwierdź rezerwację. Instruktor otrzyma powiadomienie i potwierdzi sesję."
       },
       "cancelBooking": {
         "question": "Czy mogę anulować rezerwację?",
         "answer": "Tak, możesz anulować rezerwację bezpłatnie w określonym terminie (zwykle 24 godziny przed sesją). Przejdź do panelu, znajdź rezerwację i kliknij \"Anuluj\". W przypadku rezerwacji gościnnych użyj linku anulowania z e-maila potwierdzającego."
       },
       "becomeTrainer": {
-        "question": "Jak zostać trenerem na Exercio?",
+        "question": "Jak zostać instruktorem na Exercio?",
         "answer": "Możesz zarejestrować się bezpośrednio jako instruktor podczas zakładania konta. Jeśli już masz konto klienta, nie musisz zakładać nowego — przejdź do panelu klienta i kliknij \"Zostań instruktorem\". Wypełnij swój profil doświadczeniem, specjalizacjami i dostępnością, a po opublikowaniu klienci będą mogli Cię znaleźć i rezerwować."
       },
       "profileNotVisible": {
-        "question": "Dlaczego nie widzę swojego profilu trenera?",
+        "question": "Dlaczego nie widzę swojego profilu instruktora?",
         "answer": "Twój profil musi być opublikowany, aby był widoczny w wynikach wyszukiwania. Przejdź do panelu, edytuj profil i kliknij \"Opublikuj profil\". Upewnij się, że wszystkie wymagane pola są wypełnione przed publikacją."
       },
       "paymentMethods": {
@@ -1411,17 +1417,17 @@
     "title": "Strona Nie Znaleziona",
     "description": "Strona, której szukasz, nie istnieje lub została przeniesiona. Pomóżmy Ci wrócić na właściwą ścieżkę.",
     "goHome": "Strona Główna",
-    "browseTrainers": "Przeglądaj Trenerów"
+    "browseTrainers": "Przeglądaj Instruktorów"
   },
   "Favorites": {
     "addToFavorites": "Dodaj do ulubionych",
     "removeFromFavorites": "Usuń z ulubionych",
-    "myFavorites": "Ulubieni Trenerzy",
-    "noFavorites": "Nie masz jeszcze ulubionych trenerów",
-    "noFavoritesDescription": "Przeglądaj dostępnych trenerów i dodaj ich do ulubionych, aby mieć ich zawsze pod ręką.",
-    "favoriteTrainers": "Ulubieni Trenerzy",
+    "myFavorites": "Ulubieni Instruktorzy",
+    "noFavorites": "Nie masz jeszcze ulubionych instruktorów",
+    "noFavoritesDescription": "Przeglądaj dostępnych instruktorów i dodaj ich do ulubionych, aby mieć ich zawsze pod ręką.",
+    "favoriteTrainers": "Ulubieni Instruktorzy",
     "saved": "zapisani",
-    "browseTrainers": "Przeglądaj Trenerów",
+    "browseTrainers": "Przeglądaj Instruktorów",
     "addedToast": "Dodano do ulubionych!",
     "removedToast": "Usunięto z ulubionych",
     "errorToast": "Nie udało się zmienić statusu ulubionych",
@@ -1435,7 +1441,7 @@
     "followedEnterprises": "Obserwowane Firmy",
     "noFollowedEnterprises": "Nie obserwujesz jeszcze żadnych firm",
     "noFollowedEnterprisesDescription": "Przeglądaj firmy i obserwuj je, aby być na bieżąco z ich nowościami i ofertami.",
-    "favoriteTrainers": "Ulubieni Trenerzy",
+    "favoriteTrainers": "Ulubieni Instruktorzy",
     "browseEnterprises": "Przeglądaj firmy",
     "noFollowedInstructors": "Nie obserwujesz jeszcze żadnych instruktorów",
     "noFollowedInstructorsDescription": "Przeglądaj instruktorów i obserwuj ich, aby mieć ich pod ręką.",
@@ -1543,12 +1549,27 @@
       "SWIMMING_POOL": "Basen / Szkoła Pływania",
       "MARTIAL_ARTS": "Sztuki Walki",
       "OTHER": "Inne"
-    }
+    },
+    "foundingPartner": "Founding Partner",
+    "foundingPartnerBadge": "◆ Founding Partner",
+    "foundingPartnerTooltip": "Ten partner jest członkiem-założycielem Exercio — premium status, pierwszy rok gratis, priorytetowe wsparcie i wpływ na roadmapę.",
+    "foundingPartnerModalTitle": "Program Founding Partners",
+    "foundingPartnerModalDesc": "Founding Partners to pierwsi partnerzy, którzy dołączyli do Exercio w fazie rozwoju platformy. Otrzymują oni stałą odznakę, pierwszy rok współpracy gratis, priorytetowe wsparcie oraz wpływ na rozwój platformy.",
+    "foundingPartnerBenefits": "Korzyści:",
+    "foundingPartnerBenefit1": "Stała odznaka na profilu",
+    "foundingPartnerBenefit2": "365 dni współpracy gratis od daty publikacji profilu",
+    "foundingPartnerBenefit3": "Priorytetowe wsparcie techniczne",
+    "foundingPartnerBenefit4": "Wpływ na roadmapę produktu",
+    "foundingPartnerPricing": "Cennik po pierwszym roku:",
+    "foundingPartnerPricingStarter": "Starter — 79 zł/mies.",
+    "foundingPartnerPricingGrowth": "Growth — 149 zł/mies.",
+    "foundingPartnerCount": "{count} / {limit} miejsc zajętych"
   },
   "EnterpriseCard": {
     "verified": "Zweryfikowany",
     "viewProfile": "Zobacz profil",
     "partner": "Partner",
+    "foundingPartner": "◆ Founding Partner",
     "instructor": "instruktor",
     "instructors": "instruktorów",
     "categories": {
@@ -1585,7 +1606,7 @@
       }
     },
     "founderProgramTitle": "Program Partnerów Założycielskich",
-    "founderProgramDesc": "Obecnie zapraszamy pierwsze firmy do współtworzenia Exercio. Partnerzy otrzymują bezpłatny dostęp do platformy na etapie jej rozwoju oraz możliwość zgłaszania pomysłów i wpływania na kierunek rozwoju nowych funkcji. Naszym celem jest stworzenie największej platformy łączącej klientów z instruktorami i firmami sportowymi w Polsce.",
+    "founderProgramDesc": "Obecnie zapraszamy pierwsze firmy do współtworzenia Exercio. Partnerzy Założyciele otrzymują pierwszy rok współpracy bezpłatnie (365 dni od daty publikacji profilu), priorytetowe wsparcie techniczne oraz możliwość zgłaszania pomysłów i wpływania na kierunek rozwoju nowych funkcji. Naszym celem jest stworzenie największej platformy łączącej klientów z instruktorami i firmami sportowymi w Polsce.",
     "howItWorks": {
       "title": "Jak wygląda współpraca",
       "step1": "Wypełniasz formularz",
@@ -1643,7 +1664,8 @@
     },
     "error": {
       "generic": "Wystąpił błąd podczas wysyłania. Spróbuj ponownie później.",
-      "emailInUse": "Ten adres e-mail jest już przetwarzany. Skontaktujemy się wkrótce."
+      "emailInUse": "Ten adres e-mail jest już przetwarzany. Skontaktujemy się wkrótce.",
+      "foundingPartnerCount": "Nie można załadować licznika miejsc."
     }
   },
   "PartnerPage": {
@@ -1670,7 +1692,7 @@
     "buildingTogetherPoint4": "Udział w programie jest obecnie bezpłatny — zapraszamy pierwszych Partnerów do wspólnego budowania fundamentów platformy",
     "buildingTogetherPoint5": "Naszym celem jest stworzenie największego marketplace'u sportowego w Polsce, który połączy profesjonalistów z klientami w każdej dyscyplinie",
     "founderProgramTitle": "🚀 Program Partnerów Założycielskich",
-    "founderProgramDesc": "Obecnie zapraszamy pierwsze studia i organizacje sportowe do wspólnego rozwoju Exercio. Partnerzy otrzymują bezpłatny dostęp do platformy podczas etapu rozwoju oraz możliwość wpływania na kierunek produktu. To wyjątkowa okazja, aby być częścią czegoś nowego — od samego początku.",
+    "founderProgramDesc": "Obecnie zapraszamy pierwsze studia i organizacje sportowe do wspólnego rozwoju Exercio. Partnerzy Założyciele otrzymują pierwszy rok współpracy bezpłatnie (365 dni od daty publikacji profilu), priorytetowe wsparcie techniczne oraz możliwość wpływania na kierunek produktu. To wyjątkowa okazja, aby być częścią czegoś nowego — od samego początku.",
     "howItWorksTitle": "Jak wygląda współpraca",
     "howItWorksSubtitle": "Proces jest prosty i nastawiony na partnerskie relacje.",
     "step1Title": "Wyślij zgłoszenie",
@@ -1698,7 +1720,7 @@
     "findInCityDesc": "Wybierz miasto, aby znaleźć najlepszych instruktorów i kluby.",
     "browseAll": "Przeglądaj wszystkich",
     "cityTitle": "Trening i fitness w {city}",
-    "cityDescription": "Znajdź najlepszych trenerów personalnych, instruktorów i kluby fitness w {city}. Porównaj opinie, cennik i dostępne terminy.",
+    "cityDescription": "Znajdź najlepszych instruktorów i obiekty w {city}. Porównaj opinie, cennik i dostępne terminy.",
     "results": "Dostępni specjaliści",
     "ctaTitle": "Jesteś instruktorem {discipline} w {city}?",
     "ctaDescription": "Dodaj swój profil do Exercio i zacznij otrzymywać nowych klientów.",

@@ -1,12 +1,15 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
+  Delete,
   Param,
   Body,
   UseGuards,
   Req,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { EnterpriseService } from './enterprise.service';
 import { UpdateEnterpriseProfileDto } from './dto/update-enterprise-profile.dto';
@@ -62,5 +65,51 @@ export class EnterpriseController {
     }
 
     return this.enterpriseService.update(id, user.id, dto);
+  }
+
+  // ─── Founding Partner Endpoints ────────────────────────────────────
+
+  /**
+   * Public: Get current Founding Partner count (for frontend counter).
+   */
+  @Get('founding-partners/count')
+  async getFoundingPartnerCount() {
+    return this.enterpriseService.getFoundingPartnerCount();
+  }
+
+  /**
+   * Admin: Force-grant Founding Partner badge (emergency use).
+   */
+  @Post(':id/grant-founding-partner')
+  @UseGuards(JwtAuthGuard)
+  async grantFoundingPartner(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as AuthenticatedUser;
+
+    if (!user || user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only admins can grant Founding Partner badges',
+      );
+    }
+
+    await this.enterpriseService.grantFoundingPartner(id);
+    return { message: 'Founding Partner badge granted' };
+  }
+
+  /**
+   * Admin: Revoke Founding Partner badge (emergency use).
+   */
+  @Delete(':id/founding-partner')
+  @UseGuards(JwtAuthGuard)
+  async revokeFoundingPartner(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as AuthenticatedUser;
+
+    if (!user || user.role !== 'ADMIN') {
+      throw new ForbiddenException(
+        'Only admins can revoke Founding Partner badges',
+      );
+    }
+
+    await this.enterpriseService.revokeFoundingPartner(id);
+    return { message: 'Founding Partner badge revoked' };
   }
 }

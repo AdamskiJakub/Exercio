@@ -1,17 +1,17 @@
 {
   "HomePage": {
     "hero": {
-      "title": "Find Your Perfect",
-      "titleHighlight": "Trainer",
-      "description": "Connect with professional trainers, instructors, and wellness experts. Book sessions, track progress, and achieve your fitness goals.",
-      "searchPlaceholder": "Search by name, company, gym...",
+      "title": "Find an instructor or",
+      "titleHighlight": "training place",
+      "description": "Discover instructors, training studios, dance schools, gyms and wellness experts. Browse profiles, check availability and book training online.",
+      "searchPlaceholder": "Who or what are you looking for?",
       "searchLabel": "Keyword search",
-      "primaryCta": "Search Trainers",
+      "primaryCta": "Search",
       "citySearchLabel": "Search city",
       "citySearchPlaceholder": "🔍 City...",
       "specializationLabel": "Select specialization",
       "specializationPlaceholder": "💪 Specialization...",
-      "browseButton": "Browse Trainers",
+      "browseButton": "Browse Instructors",
       "signUpButton": "Sign Up"
     },
     "features": {
@@ -39,7 +39,7 @@
       "partnerFormAnalata": "Forma na lata"
     },
     "stats": {
-      "trainers": "Verified Trainers",
+      "trainers": "Verified Instructors",
       "sessions": "Sessions Booked",
       "rating": "Average Rating"
     }
@@ -83,7 +83,7 @@
   },
   "Navigation": {
     "contact": "Contact",
-    "forBusiness": "For Business"
+    "forBusiness": "For Partners"
   },
   "auth": {
     "loginSubtitle": "Sign in to your account",
@@ -166,7 +166,7 @@
     "clientRoleDesc": "Find the perfect instructor for you",
     "clientFeature1": "Book sessions and manage reservations",
     "clientFeature2": "Browse your session history",
-    "clientFeature3": "Save your favorite trainers",
+    "clientFeature3": "Save your favorite instructors",
     "registerAsClient": "Create Client Account",
     "clientBadge": "I'm looking for an instructor",
     "instructorRole": "Instructor",
@@ -216,7 +216,7 @@
     "businessBadge": "I run a school or club",
     "whyExercioTitle": "Why Exercio?",
     "whyExercioFeature1": "Verified instructor profiles",
-    "whyExercioFeature2": "Companies can build their own trainer teams",
+    "whyExercioFeature2": "Companies can build their own instructor teams",
     "whyExercioFeature3": "Everything in one place — instructors, schools and clients",
     "activationTitle": "Activate Account",
     "activationSubtitle": "Set your password to activate your partner account",
@@ -303,7 +303,7 @@
       "myUpcomingSessions": "My Upcoming Sessions",
       "noUpcomingSessions": "No upcoming sessions",
       "bookAsClientDescription": "Here you'll see sessions you've booked with other instructors",
-      "favoriteTrainers": "Favorite Trainers",
+      "favoriteTrainers": "Favorite Instructors",
       "asInstructor": "As Instructor",
       "asClient": "As Client",
       "recentlyViewed": "Recently Viewed",
@@ -513,7 +513,13 @@
         "boxing": "Boxing",
         "zumba": "Zumba",
         "spinning": "Spinning",
-        "functionalTraining": "Functional Training"
+        "functionalTraining": "Functional Training",
+        "hip-hop": "Hip-Hop",
+        "ballet": "Ballet",
+        "wedding-dance": "Wedding Dance",
+        "salsa": "Salsa",
+        "bachata": "Bachata",
+        "contemporary": "Contemporary Dance"
       },
       "languages": "Languages",
       "languagesPlaceholder": "e.g. English, Polish, German",
@@ -557,15 +563,15 @@
       "accountSettings": "Account Settings",
       "upcomingBookings": "Upcoming Bookings",
       "completedSessions": "Completed Sessions",
-      "favoriteTrainers": "Favorite Trainers",
+      "favoriteTrainers": "Favorite Instructors",
       "nextWeek": "next week",
       "allTime": "all time",
       "saved": "saved",
       "myTrainings": "My Trainings",
       "myTrainingsDescription": "Sessions you've booked as a client",
-      "findTrainers": "Find Trainers",
-      "browseDescription": "Discover and connect with professional trainers that match your goals",
-      "browseTrainers": "Browse Trainers",
+      "findTrainers": "Find Instructors",
+      "browseDescription": "Discover and connect with professional instructors that match your goals",
+      "browseTrainers": "Browse Instructors",
       "upcomingSessions": "Upcoming Sessions",
       "reviewsToGive": "Reviews to Give",
       "messages": "Messages",
@@ -846,9 +852,9 @@
     "tagline": "Connect with the best fitness and wellness trainers in Poland.",
     "platform": {
       "title": "Platform",
-      "findTrainers": "Find Trainers",
+      "findTrainers": "Find Instructors",
       "becomeInstructor": "Become Instructor",
-      "forBusiness": "For Business"
+      "forBusiness": "For Partners"
     },
     "support": {
       "title": "Support",
@@ -923,20 +929,20 @@
       "nameDesc": "Name: Z-A"
     },
     "resultsAriaLabel": "Search results",
-    "noResults": "No trainers found",
+    "noResults": "No results found",
     "noResultsDescription": "Try adjusting your filters or search in a different city",
-    "resultsCount": "{count} {count, plural, one {trainer} other {trainers}}",
+    "resultsCount": "{count} {count, plural, one {result} other {results}}",
     "instructorCount": "{count} {count, plural, one {instructor} other {instructors}}",
-    "enterpriseCount": "{count} {count, plural, one {partner} other {partners}}",
+    "enterpriseCount": "{count} {count, plural, one {venue} other {venues}}",
     "instructorsSection": "Instructors",
-    "enterprisesSection": "Partners",
+    "enterprisesSection": "Venues",
     "instructorsFailed": "Failed to load instructors. Please try again later.",
     "type": {
       "all": "All",
       "instructors": "Instructors",
-      "enterprises": "Enterprises"
+      "enterprises": "Venues"
     },
-    "enterprises": "Enterprises",
+    "enterprises": "Venues",
     "instructors": "Instructors"
   },
   "Contact": {
@@ -949,24 +955,24 @@
     "faqSubtitle": "Quick answers to common questions about Exercio",
     "faq": {
       "bookTrainer": {
-        "question": "How do I book a trainer?",
-        "answer": "Browse our trainer directory, find a trainer that matches your goals, and click \"Book a Session\" on their profile. Select your preferred date and time, then confirm your booking. The trainer will receive a notification and confirm your session."
+        "question": "How do I book an instructor?",
+        "answer": "Browse our instructor directory, find an instructor that matches your goals, and click \"Book a Session\" on their profile. Select your preferred date and time, then confirm your booking. The instructor will receive a notification and confirm your session."
       },
       "cancelBooking": {
         "question": "Can I cancel a booking?",
         "answer": "Yes, you can cancel a booking free of charge up to the specified notice period (usually 24 hours before the session). Go to your dashboard, find the booking, and click \"Cancel\". For guest bookings, use the cancellation link from your confirmation email."
       },
       "becomeTrainer": {
-        "question": "How do I become a trainer on Exercio?",
+        "question": "How do I become an instructor on Exercio?",
         "answer": "You can register directly as an instructor when creating an account. If you already have a client account, there's no need to create a new one — go to your client dashboard and click \"Become an Instructor\". Fill in your profile with experience, specializations, and availability. Once published, clients will be able to find and book you."
       },
       "profileNotVisible": {
-        "question": "Why can't I see my trainer profile?",
+        "question": "Why can't I see my instructor profile?",
         "answer": "Your profile needs to be published to be visible in search results. Go to your dashboard, edit your profile, and click \"Publish Profile\". Make sure all required fields are filled in before publishing."
       },
       "paymentMethods": {
         "question": "What payment methods are available?",
-        "answer": "Trainers can accept various payment methods including cash, card payments, BLIK, and bank transfers. The available options are set by each trainer and displayed on their profile. Payment is arranged directly between you and the trainer."
+        "answer": "Instructors can accept various payment methods including cash, card payments, BLIK, and bank transfers. The available options are set by each instructor and displayed on their profile. Payment is arranged directly between you and the instructor."
       },
       "contactSupport": {
         "question": "How can I contact Exercio support?",
@@ -1411,17 +1417,17 @@
     "title": "Page Not Found",
     "description": "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
     "goHome": "Go Home",
-    "browseTrainers": "Browse Trainers"
+    "browseTrainers": "Browse Instructors"
   },
   "Favorites": {
     "addToFavorites": "Add to Favorites",
     "removeFromFavorites": "Remove from Favorites",
-    "myFavorites": "Favorite Trainers",
-    "noFavorites": "No favorite trainers yet",
-    "noFavoritesDescription": "Browse available trainers and add them to your favorites to keep them at your fingertips.",
-    "favoriteTrainers": "Favorite Trainers",
+    "myFavorites": "Favorite Instructors",
+    "noFavorites": "No favorite instructors yet",
+    "noFavoritesDescription": "Browse available instructors and add them to your favorites to keep them at your fingertips.",
+    "favoriteTrainers": "Favorite Instructors",
     "saved": "saved",
-    "browseTrainers": "Browse Trainers",
+    "browseTrainers": "Browse Instructors",
     "addedToast": "Added to favorites!",
     "removedToast": "Removed from favorites",
     "errorToast": "Failed to update favorites",
@@ -1435,7 +1441,7 @@
     "followedEnterprises": "Followed Companies",
     "noFollowedEnterprises": "No followed companies yet",
     "noFollowedEnterprisesDescription": "Browse companies and follow them to stay updated on their news and offers.",
-    "favoriteTrainers": "Favorite Trainers",
+    "favoriteTrainers": "Favorite Instructors",
     "browseEnterprises": "Browse companies",
     "noFollowedInstructors": "No followed instructors yet",
     "noFollowedInstructorsDescription": "Browse instructors and follow them to keep them at hand.",
@@ -1543,12 +1549,27 @@
       "SWIMMING_POOL": "Swimming Pool / Swim School",
       "MARTIAL_ARTS": "Martial Arts",
       "OTHER": "Other"
-    }
+    },
+    "foundingPartner": "Founding Partner",
+    "foundingPartnerBadge": "◆ Founding Partner",
+    "foundingPartnerTooltip": "This partner is an Exercio Founding Member — premium status, first year free, priority support, and roadmap influence.",
+    "foundingPartnerModalTitle": "Founding Partner Program",
+    "foundingPartnerModalDesc": "Founding Partners are the first partners who joined Exercio during the platform's development phase. They receive a permanent badge, first year free, priority support, and influence over the product roadmap.",
+    "foundingPartnerBenefits": "Benefits:",
+    "foundingPartnerBenefit1": "Permanent badge on profile",
+    "foundingPartnerBenefit2": "365 days free from profile publish date",
+    "foundingPartnerBenefit3": "Priority technical support",
+    "foundingPartnerBenefit4": "Influence on product roadmap",
+    "foundingPartnerPricing": "Pricing after first year:",
+    "foundingPartnerPricingStarter": "Starter — 79 PLN/month",
+    "foundingPartnerPricingGrowth": "Growth — 149 PLN/month",
+    "foundingPartnerCount": "{count} / {limit} spots filled"
   },
   "EnterpriseCard": {
     "verified": "Verified",
     "viewProfile": "View profile",
     "partner": "Partner",
+    "foundingPartner": "◆ Founding Partner",
     "instructor": "instructor",
     "instructors": "instructors",
     "categories": {
@@ -1585,7 +1606,7 @@
       }
     },
     "founderProgramTitle": "Founding Partners Program",
-    "founderProgramDesc": "We are currently inviting the first businesses to co-create Exercio. Partners receive free access to the platform during its development phase and the ability to suggest ideas and influence the direction of new features. Our goal is to create the largest platform connecting clients with instructors and sports businesses in Poland.",
+    "founderProgramDesc": "We are currently inviting the first businesses to co-create Exercio. Founding Partners receive the first year free (365 days from profile publish date), priority technical support, and the ability to suggest ideas and influence the direction of new features. Our goal is to create the largest platform connecting clients with instructors and sports businesses in Poland.",
     "howItWorks": {
       "title": "How the partnership works",
       "step1": "Fill out the form",
@@ -1643,7 +1664,8 @@
     },
     "error": {
       "generic": "An error occurred while submitting. Please try again later.",
-      "emailInUse": "This email is already being processed. We'll get back to you soon."
+      "emailInUse": "This email is already being processed. We'll get back to you soon.",
+      "foundingPartnerCount": "Unable to load spot counter."
     }
   },
   "PartnerPage": {
@@ -1670,7 +1692,7 @@
     "buildingTogetherPoint4": "Participation in the program is currently free — we invite the first Partners to help build the platform's foundations",
     "buildingTogetherPoint5": "Our goal is to create Poland's largest sports marketplace, connecting professionals with clients across every discipline",
     "founderProgramTitle": "🚀 Founding Partners Program",
-    "founderProgramDesc": "We are currently inviting the first studios and sports organizations to co-develop Exercio. Partners receive free access to the platform during the development phase and the ability to influence the product direction. This is a unique opportunity to be part of something new — from the very beginning.",
+    "founderProgramDesc": "We are currently inviting the first studios and sports organizations to co-develop Exercio. Founding Partners receive the first year free (365 days from profile publish date), priority technical support, and the ability to influence the product direction. This is a unique opportunity to be part of something new — from the very beginning.",
     "howItWorksTitle": "How the partnership works",
     "howItWorksSubtitle": "The process is simple and focused on building partner relationships.",
     "step1Title": "Submit your application",
@@ -1698,7 +1720,7 @@
     "findInCityDesc": "Choose a city to find the best instructors and clubs.",
     "browseAll": "Browse all",
     "cityTitle": "Training and fitness in {city}",
-    "cityDescription": "Find the best personal trainers, instructors and fitness clubs in {city}. Compare reviews, prices and availability.",
+    "cityDescription": "Find the best instructors and venues in {city}. Compare reviews, prices and availability.",
     "results": "Available specialists",
     "ctaTitle": "Are you a {discipline} instructor in {city}?",
     "ctaDescription": "Add your profile to Exercio and start receiving new clients.",

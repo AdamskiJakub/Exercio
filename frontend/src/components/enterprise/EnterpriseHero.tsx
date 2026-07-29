@@ -21,6 +21,7 @@ import {
 } from "@/hooks/useFollow";
 import { FollowButton } from "@/components/follow/FollowButton";
 import type { EnterpriseProfile } from "@/types/enterprise";
+import { FoundingPartnerBadge } from "./FoundingPartnerBadge";
 
 interface EnterpriseHeroProps {
   enterprise: EnterpriseProfile;
@@ -145,6 +146,9 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
                   </div>
                   {/* Badge row */}
                   <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {enterprise.foundingPartnerGrantedAt && (
+                      <FoundingPartnerBadge variant="profile" />
+                    )}
                     {enterprise.instructors &&
                       enterprise.instructors.length > 0 && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-white/10 backdrop-blur-sm rounded-full text-xs text-slate-200">

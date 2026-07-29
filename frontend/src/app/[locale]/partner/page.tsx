@@ -74,7 +74,7 @@ const partners: PartnerLogo[] = [
   },
   {
     nameKey: "partnerFormAnalata",
-    logoSrc: "/forma-na-lata-jakub-zolik.jpeg",
+    logoSrc: "/forma-na-lata-jakub-zolik.png",
     href: "https://formanalata.com/",
     bgWhite: false,
   },

@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EnterpriseBaseService } from './enterprise-base.service';
 import type { UpdateEnterpriseProfileDto } from './dto/update-enterprise-profile.dto';
+import { FOUNDING_PARTNER_CONFIG } from './enterprise.constants';
 
 @Injectable()
 export class EnterpriseService extends EnterpriseBaseService {
@@ -131,9 +137,126 @@ export class EnterpriseService extends EnterpriseBaseService {
   ) {
     await this.verifyOwnership(profileId, userId, 'update the profile');
 
-    return this.prisma.enterpriseProfile.update({
+    const updated = await this.prisma.enterpriseProfile.update({
       where: { id: profileId },
       data: dto,
     });
+
+    if (dto.status === 'ACTIVE') {
+      await this.grantFoundingPartnerIfEligible(profileId).catch((err) => {
+        this.logger.warn(
+          `Failed to auto-grant Founding Partner badge: ${err.stack}`,
+        );
+      });
+    }
+
+    return updated;
+  }
+
+  /**
+   * Shared logic: check profile exists, check already has badge, check limit, then grant.
+   * Used by both auto-grant (silent) and admin force-grant (throws).
+   */
+  private async executeGrantInTransaction(
+    tx: any,
+    enterpriseId: string,
+    throwOnAlreadyHasBadge: boolean,
+  ): Promise<void> {
+    const profile = await tx.enterpriseProfile.findUnique({
+      where: { id: enterpriseId },
+      select: { foundingPartnerGrantedAt: true },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Enterprise profile not found');
+    }
+
+    if (profile.foundingPartnerGrantedAt) {
+      if (throwOnAlreadyHasBadge) {
+        throw new ForbiddenException(
+          'This enterprise already has the Founding Partner badge',
+        );
+      }
+      return;
+    }
+
+    const currentCount = await tx.enterpriseProfile.count({
+      where: { foundingPartnerGrantedAt: { not: null } },
+    });
+
+    if (currentCount >= FOUNDING_PARTNER_CONFIG.limit) {
+      if (throwOnAlreadyHasBadge) {
+        throw new ForbiddenException(
+          `Founding Partner limit reached (${currentCount}/${FOUNDING_PARTNER_CONFIG.limit})`,
+        );
+      }
+      this.logger.warn(
+        `Founding Partner limit reached (${currentCount}/${FOUNDING_PARTNER_CONFIG.limit}). Cannot grant to ${enterpriseId}.`,
+      );
+      return;
+    }
+
+    await tx.enterpriseProfile.update({
+      where: { id: enterpriseId },
+      data: { foundingPartnerGrantedAt: new Date() },
+    });
+
+    this.logger.log(
+      `Founding Partner badge granted to enterprise ${enterpriseId} (slot ${currentCount + 1}/${FOUNDING_PARTNER_CONFIG.limit})`,
+    );
+  }
+
+  async grantFoundingPartnerIfEligible(enterpriseId: string): Promise<void> {
+    if (!FOUNDING_PARTNER_CONFIG.enabled) {
+      return;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await this.executeGrantInTransaction(tx, enterpriseId, false);
+    });
+  }
+
+  async grantFoundingPartner(enterpriseId: string): Promise<void> {
+    if (!FOUNDING_PARTNER_CONFIG.enabled) {
+      throw new ForbiddenException('Founding Partner program is disabled');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await this.executeGrantInTransaction(tx, enterpriseId, true);
+    });
+  }
+
+  async revokeFoundingPartner(enterpriseId: string): Promise<void> {
+    const profile = await this.prisma.enterpriseProfile.findUnique({
+      where: { id: enterpriseId },
+      select: { foundingPartnerGrantedAt: true },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Enterprise profile not found');
+    }
+
+    if (!profile.foundingPartnerGrantedAt) {
+      throw new ForbiddenException(
+        'This enterprise does not have the Founding Partner badge',
+      );
+    }
+
+    await this.prisma.enterpriseProfile.update({
+      where: { id: enterpriseId },
+      data: { foundingPartnerGrantedAt: null },
+    });
+
+    this.logger.log(
+      `[ADMIN] Founding Partner badge revoked from enterprise ${enterpriseId}`,
+    );
+  }
+
+  async getFoundingPartnerCount(): Promise<{ count: number; limit: number }> {
+    const count = await this.prisma.enterpriseProfile.count({
+      where: { foundingPartnerGrantedAt: { not: null } },
+    });
+
+    return { count, limit: FOUNDING_PARTNER_CONFIG.limit };
   }
 }

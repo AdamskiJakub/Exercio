@@ -16,6 +16,7 @@ import { useSpecializations, getSpecializationName } from "@/hooks/useConfig";
 
 export function HeroSearchBar() {
   const t = useTranslations("HomePage");
+  const tInstructors = useTranslations("InstructorsPage");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
   const {
@@ -25,6 +26,8 @@ export function HeroSearchBar() {
     search,
     setSearch,
     setSpecialization,
+    type,
+    setType,
     handleSearch,
   } = useHomeSearch();
   const { specializations, loading } = useSpecializations();
@@ -83,6 +86,41 @@ export function HeroSearchBar() {
                   {category.icon} {getSpecializationName(category, locale)}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex-1">
+          <Select value={type} onValueChange={setType}>
+            <SelectTrigger
+              className="h-14 text-lg bg-slate-800/50 border-2 border-slate-700 text-white focus-visible:border-orange-500 w-full px-4 cursor-pointer"
+              aria-label={tInstructors("filters.type")}
+            >
+              <SelectValue placeholder={tInstructors("filters.type")} />
+            </SelectTrigger>
+            <SelectContent
+              position="popper"
+              className="bg-slate-900 border-slate-700 w-(--radix-select-trigger-width)"
+              sideOffset={8}
+            >
+              <SelectItem
+                value="all"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 cursor-pointer py-3"
+              >
+                {tInstructors("type.all")}
+              </SelectItem>
+              <SelectItem
+                value="instructors"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 cursor-pointer py-3"
+              >
+                {tInstructors("type.instructors")}
+              </SelectItem>
+              <SelectItem
+                value="enterprises"
+                className="text-base text-white hover:bg-slate-800 focus:bg-slate-800 cursor-pointer py-3"
+              >
+                {tInstructors("type.enterprises")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

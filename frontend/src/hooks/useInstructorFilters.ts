@@ -20,8 +20,7 @@ export function useInstructorFilters() {
     city: searchParams.get("city") || "",
     specialization: searchParams.get("specialization") || "",
     search: searchParams.get("search") || "",
-    type:
-      (searchParams.get("type") as InstructorFilters["type"]) || "instructors",
+    type: (searchParams.get("type") as InstructorFilters["type"]) || "all",
     tags: (() => {
       const tags = searchParams.getAll("tags");
       return tags.length > 0 ? tags : undefined;
@@ -128,7 +127,7 @@ export function useInstructorFilters() {
     const clearedFilters: InstructorFilters = {
       city: "",
       specialization: "",
-      type: filters.type || "instructors",
+      type: filters.type || "all",
       experience: "all",
       availability: "all",
       gender: "all",

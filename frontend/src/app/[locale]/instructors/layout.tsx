@@ -9,13 +9,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (locale === "pl") {
     return {
-      title: "Znajdź instruktora — Exercio",
+      title: "Znajdź instruktorów i obiekty — Exercio",
       description:
-        "Przeglądaj profile trenerów personalnych, instruktorów fitness, fizjoterapeutów i innych specjalistów. Filtruj po mieście, specjalizacji i dostępności.",
+        "Przeglądaj profile instruktorów, trenerów, studiów treningowych, siłowni i klubów sportowych. Filtruj po mieście, specjalizacji i dostępności.",
       openGraph: {
-        title: "Znajdź instruktora — Exercio",
+        title: "Znajdź instruktorów i obiekty — Exercio",
         description:
-          "Przeglądaj profile trenerów personalnych, instruktorów fitness, fizjoterapeutów i innych specjalistów.",
+          "Przeglądaj profile instruktorów, trenerów, studiów treningowych, siłowni i klubów sportowych.",
         locale: "pl_PL",
         siteName: "Exercio",
       },
@@ -23,13 +23,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: "Find an Instructor — Exercio",
+    title: "Find Instructors & Venues — Exercio",
     description:
-      "Browse profiles of personal trainers, fitness instructors, physiotherapists and other wellness professionals. Filter by city, specialization and availability.",
+      "Browse profiles of instructors, training studios, gyms and sports clubs. Filter by city, specialization and availability.",
     openGraph: {
-      title: "Find an Instructor — Exercio",
+      title: "Find Instructors & Venues — Exercio",
       description:
-        "Browse profiles of personal trainers, fitness instructors, physiotherapists and other wellness professionals.",
+        "Browse profiles of instructors, training studios, gyms and sports clubs.",
       locale: "en_US",
       siteName: "Exercio",
     },

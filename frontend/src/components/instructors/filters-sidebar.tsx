@@ -89,7 +89,7 @@ export function FiltersSidebar({
               {t("filters.type")}
             </label>
             <Select
-              value={filters.type || "instructors"}
+              value={filters.type || "all"}
               onValueChange={(value) =>
                 updateFilter("type", value as SearchFilters["type"])
               }

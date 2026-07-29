@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { EnterpriseApplyForm } from "./EnterpriseApplyForm";
 import {
@@ -8,32 +10,54 @@ import {
   CheckCircle2,
   Sparkles,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/lib/utils/api-url";
 
 const benefits = [
   {
-    icon: <Building2 className="w-6 h-6 text-emerald-500" />,
+    icon: <Building2 className="w-6 h-6 text-emerald-500" aria-hidden="true" />,
     titleKey: "benefits.instructors.title",
     descKey: "benefits.instructors.description",
   },
   {
-    icon: <Users className="w-6 h-6 text-emerald-500" />,
+    icon: <Users className="w-6 h-6 text-emerald-500" aria-hidden="true" />,
     titleKey: "benefits.visibility.title",
     descKey: "benefits.visibility.description",
   },
   {
-    icon: <Image className="w-6 h-6 text-emerald-500" />,
+    icon: <Image className="w-6 h-6 text-emerald-500" aria-hidden="true" />,
     titleKey: "benefits.management.title",
     descKey: "benefits.management.description",
   },
   {
-    icon: <Search className="w-6 h-6 text-emerald-500" />,
+    icon: <Search className="w-6 h-6 text-emerald-500" aria-hidden="true" />,
     titleKey: "benefits.brand.title",
     descKey: "benefits.brand.description",
   },
 ];
 
+async function fetchFoundingPartnerCount(): Promise<{
+  count: number;
+  limit: number;
+}> {
+  const res = await fetch(`${API_BASE_URL}/enterprise/founding-partners/count`);
+  if (!res.ok) return { count: 0, limit: 50 };
+  return res.json();
+}
+
 export function EnterpriseApplyPage() {
   const t = useTranslations("EnterpriseApply");
+  const epT = useTranslations("EnterpriseProfile");
+
+  const {
+    data: fpCount,
+    isLoading: fpCountLoading,
+    isError: fpCountError,
+  } = useQuery({
+    queryKey: ["founding-partner-count"],
+    queryFn: fetchFoundingPartnerCount,
+    refetchInterval: 60_000,
+  });
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -84,13 +108,15 @@ export function EnterpriseApplyPage() {
             </div>
 
             {/* Founding Partners Program */}
-            <div className="relative overflow-hidden rounded-xl border border-emerald-500/20 bg-linear-to-br from-emerald-950/40 via-slate-900 to-teal-950/40 p-6">
-              <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl" />
+            <div className="relative overflow-hidden rounded-xl border border-amber-500/20 bg-linear-to-br from-amber-950/40 via-slate-900 to-orange-950/40 p-6">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl" />
               <div className="relative">
-                <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 mb-4">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
-                  <span className="text-emerald-300 text-xs font-medium">
-                    {t("title")}
+                <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-full px-3 py-1 mb-4">
+                  <span className="text-amber-400 text-sm" aria-hidden="true">
+                    ◆
+                  </span>
+                  <span className="text-amber-300 text-xs font-medium">
+                    {epT("foundingPartner")}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">
@@ -99,6 +125,47 @@ export function EnterpriseApplyPage() {
                 <p className="text-sm text-slate-300 leading-relaxed">
                   {t("founderProgramDesc")}
                 </p>
+
+                {/* Founding Partner Counter */}
+                {fpCountLoading && (
+                  <div className="mt-4 flex items-center gap-3 bg-slate-900/50 border border-amber-500/20 rounded-lg px-4 py-3">
+                    <div className="w-5 h-5 rounded-full bg-slate-700 animate-pulse" />
+                    <div className="h-4 w-40 bg-slate-700 rounded animate-pulse" />
+                  </div>
+                )}
+                {fpCountError && (
+                  <div className="mt-4 flex items-center gap-3 bg-slate-900/50 border border-red-500/20 rounded-lg px-4 py-3">
+                    <p className="text-sm text-slate-400">
+                      {t("error.foundingPartnerCount")}
+                    </p>
+                  </div>
+                )}
+                {fpCount && !fpCountLoading && !fpCountError && (
+                  <div className="mt-4 flex items-center gap-3 bg-slate-900/50 border border-amber-500/20 rounded-lg px-4 py-3">
+                    <span
+                      className="text-amber-400 text-lg shrink-0"
+                      aria-hidden="true"
+                    >
+                      ◆
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-amber-300">
+                        {epT("foundingPartnerCount", {
+                          count: fpCount.count,
+                          limit: fpCount.limit,
+                        })}
+                      </p>
+                      <div className="w-full bg-slate-700 rounded-full h-1.5 mt-1.5 max-w-40">
+                        <div
+                          className="bg-linear-to-r from-amber-500 to-orange-500 h-1.5 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${Math.min((fpCount.count / fpCount.limit) * 100, 100)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
