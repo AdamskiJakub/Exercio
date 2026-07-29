@@ -160,7 +160,7 @@ export class EnterpriseService extends EnterpriseBaseService {
   private async executeGrantInTransaction(
     tx: any,
     enterpriseId: string,
-    throwOnAlreadyHasBadge: boolean,
+    throwOnConflict: boolean,
   ): Promise<void> {
     const profile = await tx.enterpriseProfile.findUnique({
       where: { id: enterpriseId },
@@ -172,7 +172,7 @@ export class EnterpriseService extends EnterpriseBaseService {
     }
 
     if (profile.foundingPartnerGrantedAt) {
-      if (throwOnAlreadyHasBadge) {
+      if (throwOnConflict) {
         throw new ForbiddenException(
           'This enterprise already has the Founding Partner badge',
         );
@@ -185,7 +185,7 @@ export class EnterpriseService extends EnterpriseBaseService {
     });
 
     if (currentCount >= FOUNDING_PARTNER_CONFIG.limit) {
-      if (throwOnAlreadyHasBadge) {
+      if (throwOnConflict) {
         throw new ForbiddenException(
           `Founding Partner limit reached (${currentCount}/${FOUNDING_PARTNER_CONFIG.limit})`,
         );

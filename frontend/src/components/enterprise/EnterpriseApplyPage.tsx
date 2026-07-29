@@ -41,7 +41,9 @@ async function fetchFoundingPartnerCount(): Promise<{
   limit: number;
 }> {
   const res = await fetch(`${API_BASE_URL}/enterprise/founding-partners/count`);
-  if (!res.ok) return { count: 0, limit: 50 };
+  if (!res.ok) {
+    throw new Error("Failed to fetch Founding Partner count");
+  }
   return res.json();
 }
 

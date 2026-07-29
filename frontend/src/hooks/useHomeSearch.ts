@@ -29,8 +29,9 @@ export function useHomeSearch() {
         query.search = search.trim();
       }
 
-      // Always include type so the listing page preserves the selection
-      query.type = type;
+      if (type !== "all") {
+        query.type = type;
+      }
 
       router.push({ pathname: "/instructors", query });
     },
