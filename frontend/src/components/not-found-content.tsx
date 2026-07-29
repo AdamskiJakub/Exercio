@@ -18,7 +18,7 @@ export function NotFoundContent({
   title = "Page not found",
   description = "The page you are looking for does not exist or has been moved.",
   goHome = "Go home",
-  browseTrainers = "Browse trainers",
+  browseTrainers = "Browse instructors",
 }: NotFoundContentProps) {
   return (
     <div className="min-h-[80vh] flex items-center justify-center">

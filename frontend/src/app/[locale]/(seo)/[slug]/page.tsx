@@ -79,12 +79,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const name = getLocalizedName(category.names, locale);
     const title =
       locale === "pl"
-        ? `${name} — znajdź instruktorów i kluby | Exercio`
-        : `${name} — find instructors and clubs | Exercio`;
+        ? `${name} — znajdź instruktorów i obiekty | Exercio`
+        : `${name} — find instructors and venues | Exercio`;
     const description =
       locale === "pl"
-        ? `Znajdź najlepszych instruktorów i kluby w kategorii ${name.toLowerCase()}. Sprawdź opinie, cennik i dostępne terminy.`
-        : `Find the best instructors and clubs in ${name.toLowerCase()}. Check reviews, prices and availability.`;
+        ? `Znajdź najlepszych instruktorów i obiekty w kategorii ${name.toLowerCase()}. Sprawdź opinie, cennik i dostępne terminy.`
+        : `Find the best instructors and venues in ${name.toLowerCase()}. Check reviews, prices and availability.`;
 
     return {
       title,
@@ -115,12 +115,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cityName = resolved.cityName!;
   const title =
     locale === "pl"
-      ? `Trenerzy i kluby fitness w ${cityName} | Exercio`
-      : `Fitness trainers and clubs in ${cityName} | Exercio`;
+      ? `Instruktorzy i obiekty w ${cityName} | Exercio`
+      : `Instructors and venues in ${cityName} | Exercio`;
   const description =
     locale === "pl"
-      ? `Znajdź najlepszych trenerów personalnych, instruktorów i kluby fitness w ${cityName}. Sprawdź opinie, cennik i dostępne terminy.`
-      : `Find the best personal trainers, instructors and fitness clubs in ${cityName}. Check reviews, prices and availability.`;
+      ? `Znajdź najlepszych instruktorów i obiekty w ${cityName}. Sprawdź opinie, cennik i dostępne terminy.`
+      : `Find the best instructors and venues in ${cityName}. Check reviews, prices and availability.`;
 
   return {
     title,
@@ -277,8 +277,8 @@ export default async function SlugPage({ params }: Props) {
     "@type": "CollectionPage",
     name:
       locale === "pl"
-        ? `Trenerzy i kluby fitness w ${cityName}`
-        : `Fitness trainers and clubs in ${cityName}`,
+        ? `Instruktorzy i obiekty w ${cityName}`
+        : `Instructors and venues in ${cityName}`,
     url: `${siteUrl}/${locale}/${slug}`,
     about: {
       "@type": "City",

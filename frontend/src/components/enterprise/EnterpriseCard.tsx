@@ -9,6 +9,7 @@ import { MapPinIcon, StarIcon, Building2, Users } from "lucide-react";
 import { getMediaUrl } from "@/lib/utils/media";
 import { useTags, getTagName } from "@/hooks/useConfig";
 import type { EnterpriseListing } from "@/types/enterprise";
+import { FoundingPartnerBadge } from "./FoundingPartnerBadge";
 
 interface EnterpriseCardProps {
   enterprise: EnterpriseListing;
@@ -72,17 +73,23 @@ export function EnterpriseCard({
                 )}
               </h3>
               <div className="flex items-center gap-2 mt-1">
-                {enterprise.category && (
-                  <p className="text-sm text-slate-400">
-                    {t(`categories.${enterprise.category}`)}
-                  </p>
+                {enterprise.foundingPartnerGrantedAt && (
+                  <FoundingPartnerBadge variant="card" />
                 )}
-                <Badge
-                  variant="secondary"
-                  className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 text-xs"
-                >
-                  {t("partner")}
-                </Badge>
+                {!enterprise.foundingPartnerGrantedAt &&
+                  enterprise.category && (
+                    <p className="text-sm text-slate-400">
+                      {t(`categories.${enterprise.category}`)}
+                    </p>
+                  )}
+                {!enterprise.foundingPartnerGrantedAt && (
+                  <Badge
+                    variant="secondary"
+                    className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 text-xs"
+                  >
+                    {t("partner")}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>

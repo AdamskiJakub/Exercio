@@ -13,13 +13,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (locale === "pl") {
     return {
-      title: "Exercio — Znajdź swojego idealnego trenera",
+      title: "Exercio — Znajdź instruktorów, studia i kluby sportowe",
       description:
-        "Rynek trenerów personalnych, instruktorów fitness i specjalistów od wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
+        "Odkrywaj instruktorów, studia treningowe, szkoły tańca, siłownie i ekspertów wellness. Przeglądaj profile, sprawdź dostępność i zarezerwuj trening online.",
       openGraph: {
-        title: "Exercio — Znajdź swojego idealnego trenera",
+        title: "Exercio — Znajdź instruktorów, studia i kluby sportowe",
         description:
-          "Rynek trenerów personalnych, instruktorów fitness i specjalistów od wellness.",
+          "Odkrywaj instruktorów, studia treningowe, szkoły tańca, siłownie i ekspertów wellness.",
         locale: "pl_PL",
         siteName: "Exercio",
       },
@@ -27,13 +27,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: "Exercio — Find Your Perfect Trainer",
+    title: "Exercio — Find Instructors, Studios and Sports Clubs",
     description:
-      "Marketplace for personal trainers, fitness instructors, and wellness professionals. Browse profiles, check availability, and book online training.",
+      "Discover instructors, training studios, dance schools, gyms and wellness experts. Browse profiles, check availability and book training online.",
     openGraph: {
-      title: "Exercio — Find Your Perfect Trainer",
+      title: "Exercio — Find Instructors, Studios and Sports Clubs",
       description:
-        "Marketplace for personal trainers, fitness instructors, and wellness professionals.",
+        "Discover instructors, training studios, dance schools, gyms and wellness experts.",
       locale: "en_US",
       siteName: "Exercio",
     },
@@ -50,7 +50,7 @@ const partners = [
   },
   {
     nameKey: "partnerFormAnalata",
-    logoSrc: "/forma-na-lata-jakub-zolik.jpeg",
+    logoSrc: "/forma-na-lata-jakub-zolik.png",
     href: "https://formanalata.com/",
     bgWhite: false,
   },
