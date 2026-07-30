@@ -411,6 +411,7 @@ model EnterpriseProfile {
   subscribedAt    DateTime?
   subscriptionExpiresAt DateTime?
 
+  isDraft                 Boolean            @default(true)
   foundingPartnerGrantedAt DateTime?
 
   createdAt       DateTime         @default(now())

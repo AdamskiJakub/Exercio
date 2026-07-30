@@ -82,6 +82,11 @@ export default async function EnterprisePage({ params }: Props) {
     notFound();
   }
 
+  // If the profile is a draft (not published), return 404
+  if (enterprise.isDraft) {
+    notFound();
+  }
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exercio.app";
 
   const jsonLd = {

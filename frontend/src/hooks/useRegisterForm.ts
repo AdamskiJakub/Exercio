@@ -57,6 +57,11 @@ export function useRegisterForm({ intent }: UseRegisterFormOptions) {
       // Save signup intent before redirecting to verify-email
       sessionStorage.setItem("signupIntent", intent);
 
+      // If registering as instructor, set flag to show welcome modal on first dashboard visit
+      if (intent === "instructor") {
+        sessionStorage.setItem("showWelcomeModal", "true");
+      }
+
       window.location.href = `/${locale}/verify-email?email=${encodeURIComponent(registerData.email)}`;
     } catch (err: any) {
       if (err.response?.status === 409) {
