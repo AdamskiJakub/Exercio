@@ -64,7 +64,7 @@ export function FollowedInstructorsSection({
         </p>
         <NextLink
           href="/instructors"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-xl transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors"
         >
           {t("browseInstructors")}
         </NextLink>
