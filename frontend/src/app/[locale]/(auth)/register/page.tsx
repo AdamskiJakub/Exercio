@@ -2,14 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
 import { AuthHeader } from "@/components/ui/auth-header";
 import { RoleCard } from "@/components/auth/RoleCard";
-import {
-  UserRound,
-  Dumbbell,
-  Building2,
-  Shield,
-  Users,
-  CheckCircle,
-} from "lucide-react";
+import { UserRound, Dumbbell, Building2 } from "lucide-react";
 import type { Metadata } from "next";
 
 type Props = {
@@ -32,7 +25,7 @@ export default async function RegisterPage({ params }: Props) {
 
   return (
     <div className="flex items-center justify-center py-16 px-4">
-      <div className="max-w-5xl w-full mx-auto space-y-10">
+      <div className="max-w-5xl w-full mx-auto space-y-8">
         <AuthHeader
           title={t("registerAs")}
           subtitle={t("chooseRoleDescription")}
@@ -85,7 +78,19 @@ export default async function RegisterPage({ params }: Props) {
             badge={t("instructorBadge")}
             badgeColor="text-orange-400"
             badgeBgColor="bg-orange-500/10"
-          />
+          >
+            {/* Instructor benefit callout */}
+            <div className="mb-4">
+              <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+                <p className="text-sm font-semibold text-orange-300 mb-1">
+                  {t("instructorBenefitTitle")}
+                </p>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  {t("instructorBenefitDesc")}
+                </p>
+              </div>
+            </div>
+          </RoleCard>
 
           {/* ENTERPRISE / "DLA FIRM" CARD */}
           <RoleCard
@@ -109,73 +114,43 @@ export default async function RegisterPage({ params }: Props) {
             badge={t("businessBadge")}
             badgeColor="text-emerald-400"
             badgeBgColor="bg-emerald-500/10"
-          />
+          >
+            {/* Partner benefit callout */}
+            <div className="mb-4">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+                <p className="text-sm font-semibold text-emerald-300 mb-2">
+                  {t("businessBenefitTitle")}
+                </p>
+                <ul className="space-y-1.5">
+                  <li className="flex items-start gap-1.5 text-sm text-slate-300">
+                    <span className="text-emerald-400 shrink-0 mt-0.5">•</span>
+                    <span>{t("businessBenefit1")}</span>
+                  </li>
+                  <li className="flex items-start gap-1.5 text-sm text-slate-300">
+                    <span className="text-emerald-400 shrink-0 mt-0.5">•</span>
+                    <span>{t("businessBenefit2")}</span>
+                  </li>
+                  <li className="flex items-start gap-1.5 text-sm text-slate-300">
+                    <span className="text-emerald-400 shrink-0 mt-0.5">•</span>
+                    <span>{t("businessBenefit3")}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </RoleCard>
         </div>
 
-        {/* WHY EXERCIO SECTION */}
-        <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-8">
-          <h2 className="text-xl font-bold text-white text-center mb-6">
-            {t("whyExercioTitle")}
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 mt-0.5">
-                <Shield
-                  className="w-5 h-5 text-emerald-500"
-                  aria-hidden="true"
-                />
-              </div>
-              <p className="text-slate-300 text-sm leading-relaxed">
-                {t("whyExercioFeature1")}
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 mt-0.5">
-                <Users
-                  className="w-5 h-5 text-emerald-500"
-                  aria-hidden="true"
-                />
-              </div>
-              <p className="text-slate-300 text-sm leading-relaxed">
-                {t("whyExercioFeature2")}
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 mt-0.5">
-                <CheckCircle
-                  className="w-5 h-5 text-emerald-500"
-                  aria-hidden="true"
-                />
-              </div>
-              <p className="text-slate-300 text-sm leading-relaxed">
-                {t("whyExercioFeature3")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center space-y-4">
-          <div>
-            <p className="text-slate-300 mb-2">{t("notReadyToRegister")}</p>
+        {/* Bottom: only login link */}
+        <div className="text-center pt-2">
+          <p className="text-slate-300 text-base">
+            {t("alreadyHaveAccount")}{" "}
             <Link
-              href="/instructors"
-              className="text-orange-500 hover:text-orange-400 font-semibold transition-colors text-lg"
+              href="/login"
+              className="text-orange-500 hover:text-orange-400 font-semibold transition-colors"
             >
-              {t("browseAsGuest")} →
+              {t("loginLink")}
             </Link>
-          </div>
-
-          <div className="pt-4 border-t border-slate-700">
-            <p className="text-slate-300 text-base">
-              {t("alreadyHaveAccount")}{" "}
-              <Link
-                href="/login"
-                className="text-orange-500 hover:text-orange-400 font-semibold transition-colors"
-              >
-                {t("loginLink")}
-              </Link>
-            </p>
-          </div>
+          </p>
         </div>
       </div>
     </div>

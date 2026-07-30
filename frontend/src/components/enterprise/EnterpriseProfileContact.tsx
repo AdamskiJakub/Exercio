@@ -38,7 +38,7 @@ export function EnterpriseProfileContact({
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-2 pt-4 border-t border-slate-700">
+      <div className="flex items-center gap-3 mb-2">
         <div className="p-2 bg-blue-500/10 rounded-lg">
           <Phone className="w-5 h-5 text-blue-400" aria-hidden="true" />
         </div>
@@ -145,7 +145,7 @@ export function EnterpriseProfileContact({
         </div>
       </div>
 
-      <div className="flex items-center gap-3 mb-2 pt-4 border-t border-slate-700">
+      <div className="flex items-center gap-3 mb-2 pt-4">
         <div className="p-2 bg-purple-500/10 rounded-lg">
           <LinkIcon className="w-5 h-5 text-purple-400" aria-hidden="true" />
         </div>

@@ -178,6 +178,7 @@ export class EnterpriseLeadsService {
           website: lead.website,
           city: lead.city,
           status: 'ACTIVE',
+          isDraft: true,
         },
       });
 

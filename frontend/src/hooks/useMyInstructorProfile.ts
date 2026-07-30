@@ -72,8 +72,7 @@ function transformToInstructorListing(
     username: profile.user.username,
     fullName,
     primarySpecialization: profile.specializations[0] || "personal-training",
-    availability:
-      (profile.availability as "online" | "in-person" | "both") || "both",
+    availability: profile.availability as "online" | "in-person" | "both",
     videoUrl: null,
     averageRating: undefined,
     reviewCount: undefined,

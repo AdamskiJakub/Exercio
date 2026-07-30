@@ -9,8 +9,6 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { InstructorProfileForm } from "@/components/instructors/InstructorProfileForm";
 import { BottomNavBar } from "@/components/ui/bottom-nav-bar";
 import { Eye } from "lucide-react";
-import { useEffect } from "react";
-import { toast } from "sonner";
 
 export default function EditProfilePage() {
   const t = useTranslations("Dashboard");
@@ -46,23 +44,8 @@ export default function EditProfilePage() {
   }
 
   const handleBackWithoutSaving = () => {
-    if (profile && profile.isDraft) {
-      // Use existing publish endpoint to remove draft flag
-      publishProfile(profile.id, {
-        onSuccess: () => {
-          toast.success(tProfile("profileVisibleAgain"));
-          router.push("/dashboard");
-        },
-        onError: (error: any) => {
-          toast.error(tProfile("errorPublishing"), {
-            description: error.response?.data?.message || error.message,
-          });
-        },
-      });
-    } else {
-      // Just go back if not draft
-      router.push("/dashboard");
-    }
+    // Just go back to dashboard without saving or publishing
+    router.push("/dashboard");
   };
 
   return (

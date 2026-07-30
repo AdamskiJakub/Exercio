@@ -128,6 +128,7 @@ export class UsersService {
               photoUrl: null,
               verified: false,
               yearsExperience: null,
+              isDraft: true,
             },
           },
         },
