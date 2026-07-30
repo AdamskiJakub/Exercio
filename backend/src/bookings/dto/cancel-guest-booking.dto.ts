@@ -1,4 +1,11 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CancelGuestBookingDto {
   @IsUUID()
@@ -11,6 +18,7 @@ export class CancelGuestBookingDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   cancellationReason?: string;
 
   @IsIn(['pl', 'en'])

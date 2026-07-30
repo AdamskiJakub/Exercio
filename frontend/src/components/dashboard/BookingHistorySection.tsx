@@ -289,9 +289,9 @@ export function BookingHistorySection({
                               : booking.status}
                         </span>
                         {isCancelled && booking.cancellationReason && (
-                          <span className="text-xs text-slate-500 italic truncate max-w-62.5">
-                            &mdash; {booking.cancellationReason}
-                          </span>
+                          <CancellationReason
+                            reason={booking.cancellationReason}
+                          />
                         )}
                       </div>
                     </div>
@@ -321,5 +321,23 @@ export function BookingHistorySection({
         </>
       )}
     </>
+  );
+}
+
+function CancellationReason({ reason }: { reason: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = reason.length > 40;
+
+  return (
+    <span
+      className={cn(
+        "text-sm transition-colors cursor-pointer",
+        expanded ? "text-slate-200" : "text-slate-300 truncate max-w-62.5",
+      )}
+      onClick={() => setExpanded(!expanded)}
+      title={isLong && !expanded ? reason : undefined}
+    >
+      &mdash; {expanded || !isLong ? reason : `${reason.slice(0, 40)}...`}
+    </span>
   );
 }

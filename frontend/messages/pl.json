@@ -1205,6 +1205,11 @@
       "socialMedia": "Media społecznościowe",
       "opensInNewTab": "Otwiera w nowej karcie"
     },
+    "payment": {
+      "title": "Informacje o płatności",
+      "acceptedMethods": "Akceptowane metody płatności",
+      "additionalInfo": "Dodatkowe informacje o płatności"
+    },
     "booking": {
       "ctaTitle": "Gotowy na zmianę?",
       "ctaSubtitle": "Zarezerwuj swoją pierwszą sesję już dziś!",

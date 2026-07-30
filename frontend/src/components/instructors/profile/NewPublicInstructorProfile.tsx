@@ -14,6 +14,7 @@ import { FeaturedReview } from "./FeaturedReview";
 import { AboutSection } from "./AboutSection";
 import { ReviewsSection } from "./ReviewsSection";
 import { ContactSection } from "./ContactSection";
+import { PaymentInfoSection } from "./PaymentInfoSection";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { BottomNavBar } from "@/components/ui/bottom-nav-bar";
 import { useAvailableSlots } from "@/hooks/useAvailableSlots";
@@ -244,7 +245,10 @@ export function NewPublicInstructorProfile({
         {/* SECTION 8: All Reviews */}
         <ReviewsSection instructorProfileId={profile.id} />
 
-        {/* SECTION 9: Contact */}
+        {/* SECTION 9: Payment Info */}
+        <PaymentInfoSection profile={profile} />
+
+        {/* SECTION 10: Contact */}
         <ContactSection profile={profile} />
       </div>
 
