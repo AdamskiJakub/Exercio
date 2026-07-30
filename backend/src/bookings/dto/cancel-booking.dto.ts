@@ -1,4 +1,10 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class CancelBookingDto {
   @IsIn(['client', 'instructor'])
@@ -7,6 +13,7 @@ export class CancelBookingDto {
 
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   cancellationReason?: string;
 
   @IsIn(['pl', 'en'])

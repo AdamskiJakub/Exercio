@@ -1205,6 +1205,11 @@
       "socialMedia": "Social Media",
       "opensInNewTab": "Opens in new tab"
     },
+    "payment": {
+      "title": "Payment Information",
+      "acceptedMethods": "Accepted Payment Methods",
+      "additionalInfo": "Additional Payment Information"
+    },
     "booking": {
       "ctaTitle": "Ready for Change?",
       "ctaSubtitle": "Book your first session today!",

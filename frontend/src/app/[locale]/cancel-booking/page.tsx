@@ -197,10 +197,15 @@ export default function CancelBookingPage() {
           <textarea
             id="cancel-reason"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= 500) {
+                setReason(e.target.value);
+              }
+            }}
             placeholder={t("reasonPlaceholder")}
             className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none resize-none"
             rows={3}
+            maxLength={500}
             disabled={cancelMutation.isPending}
           />
         </div>
