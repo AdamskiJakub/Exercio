@@ -179,6 +179,7 @@ export class EnterpriseLeadsService {
           city: lead.city,
           status: 'ACTIVE',
           isDraft: true,
+          targetAudience: [],
         },
       });
 
