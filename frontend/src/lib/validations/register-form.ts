@@ -28,12 +28,9 @@ export const createRegisterSchema = (
       firstName: createFirstNameSchema(t),
       lastName: createLastNameSchema(t),
       phone: phoneSchema,
-      agreeToTerms: z
-        .boolean()
-        .default(false)
-        .refine((val) => val === true, {
-          message: t("agreeToTermsRequired"),
-        }),
+      agreeToTerms: z.boolean().refine((val) => val === true, {
+        message: t("agreeToTermsRequired"),
+      }),
     })
     .refine(refiner.refine, {
       message: refiner.message,
