@@ -52,7 +52,8 @@ export function InstructorOnboardingChecklist({
     {
       key: "availability",
       labelKey: "onboardingAvailability",
-      href: "/dashboard/calendar",
+      href: "/dashboard/profile/edit",
+      sectionId: "section-rate",
       isComplete:
         profile.availability !== null && profile.availability !== undefined,
     },
