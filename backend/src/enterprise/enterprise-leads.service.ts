@@ -180,6 +180,8 @@ export class EnterpriseLeadsService {
           status: 'ACTIVE',
           isDraft: true,
           targetAudience: [],
+          disciplines: [],
+          languages: [],
         },
       });
 
