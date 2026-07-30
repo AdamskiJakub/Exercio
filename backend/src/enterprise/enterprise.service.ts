@@ -165,6 +165,25 @@ export class EnterpriseService extends EnterpriseBaseService {
     return updated;
   }
 
+  async publish(profileId: string, userId: string) {
+    const profile = await this.prisma.enterpriseProfile.findUnique({
+      where: { id: profileId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Enterprise profile not found');
+    }
+
+    if (profile.userId !== userId) {
+      throw new ForbiddenException('You can only publish your own profile');
+    }
+
+    return this.prisma.enterpriseProfile.update({
+      where: { id: profileId },
+      data: { isDraft: false },
+    });
+  }
+
   /**
    * Shared logic: check profile exists, check already has badge, check limit, then grant.
    * Used by both auto-grant (silent) and admin force-grant (throws).

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { scrollToSection } from "@/lib/utils/scroll";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useMyEnterpriseProfile } from "@/hooks/useEnterpriseProfile";
 import {
@@ -32,6 +33,41 @@ import { EnterpriseProfileAmenities } from "@/components/enterprise/EnterprisePr
 import { EnterpriseProfilePricing } from "@/components/enterprise/EnterpriseProfilePricing";
 import { EnterpriseProfileFaq } from "@/components/enterprise/EnterpriseProfileFaq";
 
+/**
+ * Inner component that uses useSearchParams.
+ * Must be wrapped in <Suspense> because Next.js 14+ requires it
+ * when useSearchParams is used in a page component.
+ */
+function ScrollHandler({ profile }: { profile: any }) {
+  const searchParams = useSearchParams();
+  const hasScrolled = useRef(false);
+
+  useEffect(() => {
+    if (hasScrolled.current) return;
+    const sectionId = searchParams?.get("scrollTo");
+    if (!sectionId) return;
+    if (!profile) return;
+    hasScrolled.current = true;
+
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    function tryScroll() {
+      const element = document.getElementById(sectionId!);
+      if (element) {
+        scrollToSection(sectionId!);
+      } else if (attempts < maxAttempts) {
+        attempts++;
+        requestAnimationFrame(tryScroll);
+      }
+    }
+
+    requestAnimationFrame(tryScroll);
+  }, [searchParams, profile]);
+
+  return null;
+}
+
 export default function EnterpriseProfilePage() {
   const t = useTranslations("Dashboard.enterprise");
   const locale = useLocale();
@@ -40,7 +76,6 @@ export default function EnterpriseProfilePage() {
   const { data: profile, isLoading: profileLoading } = useMyEnterpriseProfile();
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
-  const [showHours, setShowHours] = useState(false);
 
   const { mutateAsync: uploadPhoto, isPending: isUploadingLogo } =
     useUploadProfilePhoto();
@@ -213,6 +248,11 @@ export default function EnterpriseProfilePage() {
 
   return (
     <div className="min-h-screen bg-slate-900 p-4 md:p-8 pb-32">
+      {/* ScrollHandler uses useSearchParams - must be in Suspense */}
+      <Suspense fallback={null}>
+        <ScrollHandler profile={profile} />
+      </Suspense>
+
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
           <div>
@@ -233,52 +273,56 @@ export default function EnterpriseProfilePage() {
           aria-label={t("companyProfile")}
           className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 space-y-10"
         >
-          <EnterpriseProfileBasicInfo
-            companyName={form.companyName || ""}
-            shortDescription={form.shortDescription || ""}
-            description={form.description || ""}
-            onChange={handleChange}
-          />
+          <div id="section-description" className="scroll-mt-20">
+            <EnterpriseProfileBasicInfo
+              companyName={form.companyName || ""}
+              shortDescription={form.shortDescription || ""}
+              description={form.description || ""}
+              onChange={handleChange}
+            />
+          </div>
 
-          <EnterpriseProfileMedia
-            logo={{
-              url: form.logoUrl || "",
-              isUploading: isUploadingLogo,
-              onChange: handleLogoUpload,
-              onUrlChange: (value) =>
-                setForm((prev) => ({ ...prev, logoUrl: value })),
-              onRemove: handleRemoveLogo,
-            }}
-            cover={{
-              url: form.coverUrl || "",
-              isUploading: isUploadingCover,
-              onChange: handleCoverUpload,
-              onUrlChange: (value) =>
-                setForm((prev) => ({ ...prev, coverUrl: value })),
-              onRemove: handleRemoveCover,
-            }}
-            aboutImage={{
-              url: form.aboutImage || "",
-              isUploading: isUploadingAboutImage,
-              onChange: handleAboutImageUpload,
-              onUrlChange: (value) =>
-                setForm((prev) => ({ ...prev, aboutImage: value })),
-              onRemove: handleRemoveAboutImage,
-            }}
-            gallery={{
-              items: form.gallery || [],
-              isUploading: isUploadingGallery,
-              onChange: handleGalleryUpload,
-              onAdd: (url) =>
-                setForm((prev) => ({
-                  ...prev,
-                  gallery: [...(prev.gallery || []), url],
-                })),
-              onRemove: handleRemoveGalleryImage,
-            }}
-          />
+          <div id="section-logo" className="scroll-mt-20">
+            <EnterpriseProfileMedia
+              logo={{
+                url: form.logoUrl || "",
+                isUploading: isUploadingLogo,
+                onChange: handleLogoUpload,
+                onUrlChange: (value) =>
+                  setForm((prev) => ({ ...prev, logoUrl: value })),
+                onRemove: handleRemoveLogo,
+              }}
+              cover={{
+                url: form.coverUrl || "",
+                isUploading: isUploadingCover,
+                onChange: handleCoverUpload,
+                onUrlChange: (value) =>
+                  setForm((prev) => ({ ...prev, coverUrl: value })),
+                onRemove: handleRemoveCover,
+              }}
+              aboutImage={{
+                url: form.aboutImage || "",
+                isUploading: isUploadingAboutImage,
+                onChange: handleAboutImageUpload,
+                onUrlChange: (value) =>
+                  setForm((prev) => ({ ...prev, aboutImage: value })),
+                onRemove: handleRemoveAboutImage,
+              }}
+              gallery={{
+                items: form.gallery || [],
+                isUploading: isUploadingGallery,
+                onChange: handleGalleryUpload,
+                onAdd: (url) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    gallery: [...(prev.gallery || []), url],
+                  })),
+                onRemove: handleRemoveGalleryImage,
+              }}
+            />
+          </div>
 
-          <div className="pt-4 border-t border-slate-700">
+          <div id="section-business-type" className="scroll-mt-20">
             <EnterpriseProfileBusinessType
               businessType={form.businessType || ""}
               onChange={(value) =>
@@ -287,7 +331,10 @@ export default function EnterpriseProfilePage() {
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-700">
+          <div
+            id="section-target-audience"
+            className="scroll-mt-20 pt-4 border-t border-slate-700"
+          >
             <EnterpriseProfileTargetAudience
               targetAudience={form.targetAudience || []}
               onChange={(values) =>
@@ -296,7 +343,10 @@ export default function EnterpriseProfilePage() {
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-700">
+          <div
+            id="section-disciplines"
+            className="scroll-mt-20 pt-4 border-t border-slate-700"
+          >
             <EnterpriseProfileDisciplines
               disciplines={form.disciplines || []}
               onChange={(values) =>
@@ -326,11 +376,12 @@ export default function EnterpriseProfilePage() {
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-700">
+          <div
+            id="section-hours"
+            className="scroll-mt-20 pt-4 border-t border-slate-700"
+          >
             <EnterpriseProfileHours
               openingHours={form.openingHours || {}}
-              showHours={showHours}
-              onToggle={() => setShowHours(!showHours)}
               onUpdate={updateHours}
             />
           </div>
@@ -362,7 +413,7 @@ export default function EnterpriseProfilePage() {
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-700">
+          <div id="section-contact" className="scroll-mt-20">
             <EnterpriseProfileContact
               contact={{
                 email: form.email || "",

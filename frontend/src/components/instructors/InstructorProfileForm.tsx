@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations, useLocale } from "next-intl";
@@ -33,6 +35,7 @@ import { MediaUpload } from "@/components/instructors/MediaUpload";
 import { ContactSettingsSection } from "@/components/instructors/ContactSettingsSection";
 import { PaymentSettingsSection } from "@/components/instructors/PaymentSettingsSection";
 import { BookingSettings } from "@/components/settings/booking-settings";
+import { scrollToSection } from "@/lib/utils/scroll";
 import {
   Select,
   SelectContent,
@@ -41,8 +44,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const MAX_TAGS = 8;
-const MAX_GOALS = 4;
+const MAX_TAGS = 4;
+const MAX_GOALS = 3;
 const MAX_ADDITIONAL_SPECIALIZATIONS = 2;
 
 // Map old specialization IDs (from StaticConfigService) to new catalog category IDs
@@ -98,8 +101,24 @@ export function InstructorProfileForm({
     profile?.goals || [],
   );
   const [selectedAvailability, setSelectedAvailability] = useState<string>(
-    profile?.availability || "both",
+    profile?.availability ?? "",
   );
+
+  // Scroll to section from query param (e.g. ?scrollTo=section-bio) after component mounts
+  const searchParams = useSearchParams();
+  const hasScrolled = useRef(false);
+  useEffect(() => {
+    if (hasScrolled.current) return;
+    const sectionId = searchParams.get("scrollTo");
+    if (!sectionId) return;
+    hasScrolled.current = true;
+    // Use nested requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollToSection(sectionId);
+      });
+    });
+  }, [searchParams]);
 
   useEffect(() => {
     if (!tagsLoading && tags.length > 0 && profile?.tags) {
@@ -310,7 +329,7 @@ export function InstructorProfileForm({
       className="space-y-8"
     >
       {/* === BASIC INFO SECTION === */}
-      <div>
+      <div id="section-bio">
         <div className="mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
             <span className="text-2xl">👤</span>
@@ -364,7 +383,10 @@ export function InstructorProfileForm({
       </div>
 
       {/* === SPECIALIZATION SECTION === */}
-      <div className="pt-4 border-t border-slate-700/50">
+      <div
+        id="section-specializations"
+        className="pt-4 border-t border-slate-700/50"
+      >
         <div className="mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
             <span className="text-2xl">💪</span>
@@ -578,7 +600,7 @@ export function InstructorProfileForm({
       </div>
 
       {/* === LOCATION SECTION === */}
-      <div className="pt-4 border-t border-slate-700/50">
+      <div id="section-rate" className="pt-4 border-t border-slate-700/50">
         <div className="mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
             <span className="text-2xl">📍</span>
@@ -741,7 +763,7 @@ export function InstructorProfileForm({
       </div>
 
       {/* === CONTACT & MEDIA SECTION === */}
-      <div className="pt-4 border-t border-slate-700/50">
+      <div id="section-photo" className="pt-4 border-t border-slate-700/50">
         <div className="mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 flex items-center gap-2">
             <span className="text-2xl">📸</span>

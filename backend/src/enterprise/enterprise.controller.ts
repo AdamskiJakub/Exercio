@@ -67,6 +67,18 @@ export class EnterpriseController {
     return this.enterpriseService.update(id, user.id, dto);
   }
 
+  @Patch(':id/publish')
+  @UseGuards(JwtAuthGuard)
+  async publish(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as AuthenticatedUser;
+
+    if (!user) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    return this.enterpriseService.publish(id, user.id);
+  }
+
   // ─── Founding Partner Endpoints ────────────────────────────────────
 
   /**

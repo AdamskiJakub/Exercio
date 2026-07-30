@@ -164,4 +164,8 @@ export class UpdateEnterpriseProfileDto {
   @IsEnum(EnterpriseStatus)
   @IsOptional()
   status?: EnterpriseStatus;
+
+  @IsBoolean()
+  @IsOptional()
+  isDraft?: boolean;
 }

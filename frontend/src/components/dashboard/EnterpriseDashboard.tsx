@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMyEnterpriseProfile } from "@/hooks/useEnterpriseProfile";
+import { usePublishEnterpriseProfile } from "@/hooks/usePublishEnterpriseProfile";
 import { useAuthStore } from "@/stores/auth-store";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { DashboardHeader } from "./DashboardHeader";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { OnboardingChecklist } from "@/components/enterprise/OnboardingChecklist";
 import { getMediaUrl } from "@/lib/utils/media";
 import { useMyFollowedInstructors } from "@/hooks/useFollow";
@@ -22,10 +25,17 @@ import {
   Edit,
   Newspaper,
   Heart,
+  Clock,
+  CheckCircle,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import NextLink from "next/link";
 import type { EnterpriseNews } from "@/types/enterprise";
+import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function EnterpriseDashboard() {
   const t = useTranslations("Dashboard.enterprise");
@@ -33,6 +43,9 @@ export function EnterpriseDashboard() {
   const { data: followedInstructors, isLoading: followedInstructorsLoading } =
     useMyFollowedInstructors();
   const user = useAuthStore((state) => state.user);
+  const publishProfile = usePublishEnterpriseProfile();
+  const queryClient = useQueryClient();
+  const [hideProfileOpen, setHideProfileOpen] = useState(false);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -92,6 +105,98 @@ export function EnterpriseDashboard() {
 
       {/* Onboarding Checklist */}
       {profile && isApproved && <OnboardingChecklist profile={profile} />}
+
+      {/* Profile Status Card */}
+      {profile && isApproved && (
+        <DashboardCard
+          title={t("profileStatus")}
+          hoverable={true}
+          hoverColor="hover:border-orange-500"
+        >
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-2">
+              {profile.isDraft ? (
+                <>
+                  <Clock className="w-5 h-5 text-yellow-500" />
+                  <span className="text-yellow-500 font-medium">
+                    {t("draft")}
+                  </span>
+                  <span className="text-slate-400 text-sm ml-2">
+                    — {t("draftDescription")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <span className="text-green-500 font-medium">
+                    {t("published")}
+                  </span>
+                  <span className="text-slate-400 text-sm ml-2">
+                    — {t("publishedDescription")}
+                  </span>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {!profile.isDraft ? (
+                <button
+                  type="button"
+                  onClick={() => setHideProfileOpen(true)}
+                  className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-red-500/20 hover:border-red-500/40 cursor-pointer"
+                >
+                  <EyeOff className="w-4 h-4" />
+                  {t("hideProfile")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => publishProfile.mutate(profile.id)}
+                  disabled={publishProfile.isPending}
+                  className="px-5 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 hover:text-green-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-green-500/20 hover:border-green-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {publishProfile.isPending
+                    ? t("publishing")
+                    : t("publishProfile")}
+                </button>
+              )}
+              <Link
+                href={`/enterprise/${profile?.slug}?from=dashboard` as any}
+                className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
+              >
+                <Eye className="w-4 h-4" />
+                {t("viewPublicProfile")}
+              </Link>
+            </div>
+          </div>
+        </DashboardCard>
+      )}
+
+      {/* Hide Profile Confirmation Modal */}
+      <ConfirmModal
+        isOpen={hideProfileOpen}
+        onClose={() => setHideProfileOpen(false)}
+        onConfirm={async () => {
+          try {
+            await apiClient.patch(`/enterprise/${profile?.id}`, {
+              isDraft: true,
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["my-enterprise-profile"],
+            });
+            toast.success(t("profileHidden"));
+          } catch (error: any) {
+            toast.error(
+              error.response?.data?.message || t("profileHideFailed"),
+            );
+          }
+          setHideProfileOpen(false);
+        }}
+        title={t("hideProfileConfirm")}
+        confirmText={t("hideProfile")}
+        cancelText={t("cancel")}
+        variant="danger"
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

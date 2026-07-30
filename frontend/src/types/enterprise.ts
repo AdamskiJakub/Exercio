@@ -30,6 +30,7 @@ export interface EnterpriseProfile {
   userId: string;
   status: EnterpriseStatus;
   verified: boolean;
+  isDraft: boolean;
   companyName: string;
   slug: string;
   shortDescription: string | null;

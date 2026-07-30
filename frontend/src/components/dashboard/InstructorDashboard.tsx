@@ -31,6 +31,8 @@ import {
   Check,
   EyeOff,
 } from "lucide-react";
+import { InstructorOnboardingChecklist } from "./InstructorOnboardingChecklist";
+import { WelcomeModal } from "./WelcomeModal";
 import { StatsCard } from "./StatsCard";
 import { DashboardCard } from "./DashboardCard";
 import { EmptyStateCard } from "./EmptyStateCard";
@@ -206,6 +208,12 @@ export function InstructorDashboard() {
         ]}
       />
 
+      {/* 🟠 Onboarding Checklist — shown until profile is fully set up */}
+      {profile && <InstructorOnboardingChecklist profile={profile} />}
+
+      {/* 🎉 Welcome Modal — shown once after first registration */}
+      {profile && <WelcomeModal createdAt={profile.createdAt} />}
+
       {/* 🟨 GOLDEN ALERT — Review Banner (action required, shown first) */}
       {pendingReviewCount > 0 && pendingReviews && pendingReviews[0] && (
         <PendingReviewsSection
@@ -317,7 +325,7 @@ export function InstructorDashboard() {
                 <button
                   type="button"
                   onClick={() => setHideProfileOpen(true)}
-                  className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-red-500/20 hover:border-red-500/40"
+                  className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-red-500/20 hover:border-red-500/40 cursor-pointer"
                 >
                   <EyeOff className="w-4 h-4" />
                   {t("hideProfile")}
@@ -471,10 +479,6 @@ export function InstructorDashboard() {
           <RecentReviewsSection instructorProfileId={profile?.id} />
         </DashboardCard>
       </div>
-
-      {/* ============================================================ */}
-      {/* MOJE TRENINGI (JAKO KLIENT)                                   */}
-      {/* ============================================================ */}
       <div className="pt-8 text-center">
         <div className="flex items-center justify-center gap-3 mb-2">
           <Heart className="w-7 h-7 text-pink-400 shrink-0" />
