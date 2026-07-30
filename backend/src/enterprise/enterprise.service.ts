@@ -23,7 +23,7 @@ export class EnterpriseService extends EnterpriseBaseService {
    */
   async findAllActive(): Promise<{ slug: string; updatedAt: Date }[]> {
     return this.prisma.enterpriseProfile.findMany({
-      where: { status: 'ACTIVE' },
+      where: { status: 'ACTIVE', isDraft: false },
       select: { slug: true, updatedAt: true },
     });
   }
