@@ -56,8 +56,8 @@ export class EnterpriseService extends EnterpriseBaseService {
   }
 
   async findBySlug(slug: string) {
-    const profile = await this.prisma.enterpriseProfile.findUnique({
-      where: { slug },
+    const profile = await this.prisma.enterpriseProfile.findFirst({
+      where: { slug, isDraft: false },
       include: {
         instructors: {
           where: { status: 'ACCEPTED' },
