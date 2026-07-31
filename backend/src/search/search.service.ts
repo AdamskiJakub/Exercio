@@ -821,7 +821,10 @@ export class SearchService {
     tags?: string[],
     disciplines?: string[],
   ): Prisma.EnterpriseProfileWhereInput {
-    const where: Prisma.EnterpriseProfileWhereInput = { status: 'ACTIVE' };
+    const where: Prisma.EnterpriseProfileWhereInput = {
+      status: 'ACTIVE',
+      isDraft: false,
+    };
 
     if (q) {
       where.OR = [
