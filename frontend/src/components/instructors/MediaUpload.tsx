@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Upload, X, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageCropModal } from "@/components/ui/ImageCropModal";
-import { blobToFile, processImage } from "@/lib/utils/cropImage";
+import { blobToFile, isHeic, processImage } from "@/lib/utils/cropImage";
 import { MediaUploadProps } from "./types";
 import { getMediaUrl, IS_DEVELOPMENT, isVideoUrl } from "@/lib/utils/media";
 import { toast } from "sonner";
@@ -119,7 +119,26 @@ export function MediaUpload(props: MediaUploadProps) {
 
     // For avatar variant, open the crop modal instead of uploading directly.
     if (variant === "avatar") {
-      setCropFile(files[0]);
+      const file = files[0];
+      // HEIC/HEIF cannot be decoded by browsers, so the crop modal would fail
+      // to render (fileToDataUrl rejects -> modal closes immediately). Upload
+      // them directly instead — the backend converts HEIC/HEIF via sharp.
+      if (isHeic(file)) {
+        try {
+          setIsCropping(true);
+          const uploadResult = await props.onUpload(file);
+          setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
+          props.onMediaChange(uploadResult);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : t("uploadError");
+          toast.error(message);
+        } finally {
+          setIsCropping(false);
+        }
+      } else {
+        setCropFile(file);
+      }
       // Reset input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -138,10 +157,14 @@ export function MediaUpload(props: MediaUploadProps) {
       }));
 
       // Compress/resize image files before upload so R2 never stores raw
-      // multi-megabyte phone photos. Videos are uploaded as-is.
+      // multi-megabyte phone photos. Videos are uploaded as-is. HEIC/HEIF
+      // cannot be decoded by the browser, so upload them raw — the backend
+      // converts them via sharp.
       const uploadFiles = await Promise.all(
         files.map(async (file) =>
-          file.type.startsWith("video/") ? file : processImage(file, "gallery"),
+          file.type.startsWith("video/") || isHeic(file)
+            ? file
+            : processImage(file, "gallery"),
         ),
       );
 
