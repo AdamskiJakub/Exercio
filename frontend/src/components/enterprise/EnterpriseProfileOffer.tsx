@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Building2, Users, BookOpen, Languages } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { resolvePreset } from "@/constants/enterprise";
-import { useDisciplines, getDisciplineNameByKey } from "@/hooks/useCatalog";
+import { useResolveDisciplineName } from "@/hooks/useCatalog";
 import type { EnterpriseProfile } from "@/types/enterprise";
 
 interface EnterpriseProfileOfferProps {
@@ -16,8 +16,7 @@ export function EnterpriseProfileOffer({
 }: EnterpriseProfileOfferProps) {
   const t = useTranslations("EnterpriseProfile");
   const tp = useTranslations("Dashboard.enterprise");
-  const locale = useLocale();
-  const { disciplines: catalogDisciplines } = useDisciplines();
+  const resolve = useResolveDisciplineName();
 
   const hasOffer =
     enterprise.businessType ||
@@ -26,23 +25,6 @@ export function EnterpriseProfileOffer({
     (enterprise.disciplines && enterprise.disciplines.length > 0);
 
   if (!hasOffer) return null;
-
-  const getDisciplineDisplayName = (key: string): string => {
-    // Try catalog first (for new catalog-based keys)
-    const name = getDisciplineNameByKey(key, locale);
-    if (name !== key) return name;
-    // Fallback: try legacy i18n presets (for old camelCase keys in DB)
-    try {
-      const legacyName = tp(`disciplinesPresets.${key}`);
-      if (legacyName && !legacyName.startsWith("disciplinesPresets.")) {
-        return legacyName;
-      }
-    } catch {
-      // ignore
-    }
-    // Final fallback: display the key as-is
-    return key;
-  };
 
   return (
     <section
@@ -116,7 +98,7 @@ export function EnterpriseProfileOffer({
                     key={index}
                     className="px-2 py-0.5 bg-slate-800 rounded text-xs text-slate-200"
                   >
-                    {getDisciplineDisplayName(item)}
+                    {resolve(item)}
                   </span>
                 ))}
               </div>

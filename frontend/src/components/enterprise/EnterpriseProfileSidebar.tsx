@@ -13,6 +13,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DAYS_OF_WEEK, SOCIAL_PLATFORMS } from "@/constants/enterprise";
+import { normalizeWebsiteUrl } from "@/lib/utils/media";
 import type { EnterpriseProfile } from "@/types/enterprise";
 
 interface EnterpriseProfileSidebarProps {
@@ -74,7 +75,7 @@ export function EnterpriseProfileSidebar({
           )}
           {enterprise.website && (
             <a
-              href={enterprise.website}
+              href={normalizeWebsiteUrl(enterprise.website)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 text-slate-300 hover:text-emerald-500 transition-colors group"

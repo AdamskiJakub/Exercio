@@ -49,7 +49,8 @@
       "description": "Run a studio, gym, or sports organization? Become a Founding Partner and help us build Poland's largest sports marketplace.",
       "socialProof": "Trainers and studios from Białystok are already using Exercio to acquire new clients.",
       "partnerFeniks": "Feniks Dance Studio",
-      "partnerFormAnalata": "Forma na lata"
+      "partnerFormAnalata": "Forma na lata",
+      "partnerTrenujZPolozna": "Trenuj z położną"
     },
     "stats": {
       "trainers": "Verified Instructors",
@@ -1766,6 +1767,7 @@
     "socialProofSubtitle": "Meet the studios and organizations that have already joined the program and are co-creating the future of Poland's sports market with us.",
     "partnerFeniks": "Feniks Dance Studio",
     "partnerFormAnalata": "Forma na lata",
+    "partnerTrenujZPolozna": "Trenuj z położną",
     "ctaSectionTitle": "Become one of the first Exercio Partners",
     "ctaSectionSubtitle": "We're not looking for customers — we're looking for Partners who want to build something valuable together. If you run a studio, gym, or sports organization and see the potential in working together — fill out the form and let's talk.",
     "contactUs": "Contact us"

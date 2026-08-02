@@ -13,7 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getMediaUrl } from "@/lib/utils/media";
+import { getMediaUrl, normalizeWebsiteUrl } from "@/lib/utils/media";
 import { useAuthStore } from "@/stores/auth-store";
 import {
   useIsFollowingEnterprise,
@@ -177,7 +177,11 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
         </a>
       )}
       {enterprise.website && (
-        <a href={enterprise.website} target="_blank" rel="noopener noreferrer">
+        <a
+          href={normalizeWebsiteUrl(enterprise.website)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Button className="w-full bg-emerald-600 hover:bg-emerald-500 text-white gap-2 shadow-lg">
             <Globe className="w-4 h-4" aria-hidden="true" />
             {t("visitWebsite")}

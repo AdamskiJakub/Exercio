@@ -54,6 +54,12 @@ const partners = [
     href: "https://formanalata.com/",
     bgWhite: false,
   },
+  {
+    nameKey: "partnerTrenujZPolozna",
+    logoSrc: "/trenuj-z-polozna.png",
+    href: "https://trenujzpolozna.pl/",
+    bgWhite: false,
+  },
 ];
 
 export default function Home() {

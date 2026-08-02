@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { apiClient } from "@/lib/api";
 import type {
   CatalogDiscipline,
@@ -434,6 +435,57 @@ export function getDisciplineNameByKey(key: string, locale: string): string {
 export function getDisciplineNameById(id: string, locale: string): string {
   const discipline = getDisciplineById(id);
   return discipline ? getDisciplineName(discipline, locale) : id;
+}
+
+/**
+ * Maps legacy / alternative discipline keys to canonical catalog keys.
+ * Covers old preset values (e.g. "Fitness", "Zdrowy kręgosłup") and any
+ * future spelling variants, so they resolve to the catalog discipline name.
+ */
+export const DISCIPLINE_KEY_ALIASES: Record<string, string> = {
+  Fitness: "functional-training",
+  "Zdrowy kręgosłup": "stretching",
+  "Trening medyczny": "physiotherapy",
+};
+
+/**
+ * Pure resolver for discipline display names.
+ * 1. Resolves aliases to canonical catalog keys.
+ * 2. Looks up the catalog.
+ * 3. Falls back to the original key when nothing matches.
+ */
+export function resolveDisciplineName(key: string, locale: string): string {
+  const canonicalKey = DISCIPLINE_KEY_ALIASES[key] ?? key;
+  const discipline = getDisciplineByKey(canonicalKey);
+  return discipline ? getDisciplineName(discipline, locale) : key;
+}
+
+/**
+ * Hook-based resolver that also handles legacy `disciplinesPresets` i18n keys
+ * (e.g. "strengthTraining", "cardio") which are not part of the catalog.
+ * Components should use this instead of duplicating translation logic.
+ */
+export function useResolveDisciplineName(): (key: string) => string {
+  const locale = useLocale();
+  const t = useTranslations("Dashboard.enterprise");
+
+  return useCallback(
+    (key: string): string => {
+      const name = resolveDisciplineName(key, locale);
+      if (name !== key) return name;
+
+      const presetKey = `disciplinesPresets.${key}`;
+      if (t.has(presetKey)) {
+        const legacyName = t(presetKey);
+        if (legacyName && !legacyName.startsWith("disciplinesPresets.")) {
+          return legacyName;
+        }
+      }
+
+      return key;
+    },
+    [locale, t],
+  );
 }
 
 export function getDisciplinesByCategory(

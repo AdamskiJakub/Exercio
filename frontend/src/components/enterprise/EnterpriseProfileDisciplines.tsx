@@ -1,11 +1,11 @@
 "use client";
 
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState, useMemo } from "react";
-import { useDisciplines, getDisciplineNameByKey } from "@/hooks/useCatalog";
+import { useDisciplines, useResolveDisciplineName } from "@/hooks/useCatalog";
 
 interface EnterpriseProfileDisciplinesProps {
   disciplines: string[];
@@ -17,8 +17,8 @@ export function EnterpriseProfileDisciplines({
   onChange,
 }: EnterpriseProfileDisciplinesProps) {
   const t = useTranslations("Dashboard.enterprise");
-  const locale = useLocale();
   const { disciplines: catalogDisciplines, loading } = useDisciplines();
+  const resolve = useResolveDisciplineName();
   const [customValue, setCustomValue] = useState("");
 
   // Only show enabled disciplines from the catalog
@@ -47,22 +47,6 @@ export function EnterpriseProfileDisciplines({
     onChange(disciplines.filter((v) => v !== value));
   };
 
-  const getPresetName = (key: string): string => {
-    const name = getDisciplineNameByKey(key, locale);
-    if (name !== key) return name;
-
-    try {
-      const legacyName = t(`disciplinesPresets.${key}`);
-      if (legacyName && !legacyName.startsWith("disciplinesPresets.")) {
-        return legacyName;
-      }
-    } catch {
-      // ignore
-    }
-    // Final fallback: display the key as-is
-    return key;
-  };
-
   return (
     <div className="space-y-4">
       <div>
@@ -79,7 +63,7 @@ export function EnterpriseProfileDisciplines({
               variant="secondary"
               className="bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-3 py-1 text-sm"
             >
-              {getPresetName(value)}
+              {resolve(value)}
               <button
                 type="button"
                 onClick={() => remove(value)}
@@ -112,7 +96,7 @@ export function EnterpriseProfileDisciplines({
               {discipline.icon && (
                 <span className="mr-1">{discipline.icon}</span>
               )}
-              {getDisciplineNameByKey(discipline.key, locale)}
+              {resolve(discipline.key)}
             </button>
           ))}
         </div>
