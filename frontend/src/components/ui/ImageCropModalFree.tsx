@@ -132,9 +132,26 @@ export function ImageCropModalFree({
       unit: "px",
     };
 
+    // This is a free-form crop, so the user may resize the window to any
+    // aspect ratio. Derive the output dimensions from the crop's own aspect
+    // ratio (scaled to fit within the requested max output size) instead of
+    // forcing the fixed outputWidth/outputHeight — otherwise a non-3:1 crop
+    // would be stretched/distorted to the fixed cover ratio.
+    const cropAspect = naturalCrop.width / naturalCrop.height;
+    let outW = outputWidth;
+    let outH = outputHeight;
+    if (cropAspect >= 1) {
+      // Landscape or square: width is the limiting dimension.
+      outH = Math.round(outW / cropAspect);
+    } else {
+      // Portrait: height is the limiting dimension.
+      outH = outputHeight;
+      outW = Math.round(outH * cropAspect);
+    }
+
     const blob = await cropImage(imageSrc, naturalCrop, {
-      outputWidth,
-      outputHeight,
+      outputWidth: outW,
+      outputHeight: outH,
       format,
     });
     await onConfirm(blob);
