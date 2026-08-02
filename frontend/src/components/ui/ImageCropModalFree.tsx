@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { cropImage } from "@/lib/utils/cropImage";
+import { cropImage, fileToDataUrl } from "@/lib/utils/cropImage";
 
 export interface ImageCropModalFreeProps {
   /** Source image: File, Blob, or URL string. */
@@ -88,13 +88,15 @@ export function ImageCropModalFree({
       setImageUrl(imageSrc);
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (!cancelled && typeof reader.result === "string") {
-        setImageUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(imageSrc);
+    // Downscale large phone photos before encoding to a data URL so
+    // react-image-crop stays responsive on mobile (see fileToDataUrl).
+    fileToDataUrl(imageSrc)
+      .then((url) => {
+        if (!cancelled) setImageUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setImageUrl(null);
+      });
     return () => {
       cancelled = true;
     };
@@ -126,7 +128,7 @@ export function ImageCropModalFree({
 
   const handleConfirm = useCallback(async () => {
     if (!completedCrop?.width || !completedCrop.height) return;
-    if (!naturalSize || !displaySize) return;
+    if (!naturalSize || !displaySize || !imageUrl) return;
 
     try {
       // Scale the crop window from displayed-image pixels to natural pixels.
@@ -157,7 +159,10 @@ export function ImageCropModalFree({
         outW = Math.round(outH * cropAspect);
       }
 
-      const blob = await cropImage(imageSrc, naturalCrop, {
+      // Crop the same (downscaled) image that was displayed in the modal so
+      // the crop coordinates (scaled from display to natural pixels) map
+      // correctly. The output is still generated at the requested size.
+      const blob = await cropImage(imageUrl, naturalCrop, {
         outputWidth: outW,
         outputHeight: outH,
         format,
@@ -174,7 +179,7 @@ export function ImageCropModalFree({
     completedCrop,
     naturalSize,
     displaySize,
-    imageSrc,
+    imageUrl,
     outputWidth,
     outputHeight,
     format,

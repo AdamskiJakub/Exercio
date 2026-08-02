@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { cropImage } from "@/lib/utils/cropImage";
+import { cropImage, fileToDataUrl } from "@/lib/utils/cropImage";
 import { toast } from "sonner";
 
 export type CropShape = "rect" | "round";
@@ -95,13 +95,15 @@ function CropContent({
       setImageUrl(imageSrc);
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (!cancelled && typeof reader.result === "string") {
-        setImageUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(imageSrc);
+    // Downscale large phone photos before encoding to a data URL so
+    // react-easy-crop stays responsive on mobile (see fileToDataUrl).
+    fileToDataUrl(imageSrc)
+      .then((url) => {
+        if (!cancelled) setImageUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setImageUrl(null);
+      });
     return () => {
       cancelled = true;
     };
@@ -128,9 +130,12 @@ function CropContent({
   }, []);
 
   const handleConfirm = useCallback(async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels || !imageUrl) return;
     try {
-      const blob = await cropImage(imageSrc, croppedAreaPixels, {
+      // Crop the same (downscaled) image that was displayed in the modal so
+      // the crop coordinates from react-easy-crop map correctly. The output
+      // is still generated at the requested outputWidth/outputHeight.
+      const blob = await cropImage(imageUrl, croppedAreaPixels, {
         outputWidth,
         outputHeight,
         format,
@@ -145,7 +150,7 @@ function CropContent({
     }
   }, [
     croppedAreaPixels,
-    imageSrc,
+    imageUrl,
     outputWidth,
     outputHeight,
     format,
