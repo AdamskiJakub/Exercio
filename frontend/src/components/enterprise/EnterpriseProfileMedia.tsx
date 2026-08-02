@@ -9,6 +9,7 @@ import { ImageCropModal, type CropShape } from "@/components/ui/ImageCropModal";
 import { ImageCropModalFree } from "@/components/ui/ImageCropModalFree";
 import {
   blobToFile,
+  isHeic,
   loadImage,
   matchesAspectRatio,
   processImage,
@@ -150,6 +151,23 @@ function MediaUploadRow({
         }
         return;
       }
+    }
+
+    // HEIC/HEIF cannot be decoded by browsers, so the crop modal would fail
+    // to render. Upload them directly instead — the backend accepts HEIC/HEIF.
+    if (crop && field.onUploadFile && isHeic(file)) {
+      setIsCropping(true);
+      try {
+        const url = await field.onUploadFile(file);
+        field.onUrlChange(url);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : t("uploadFailed");
+        toast.error(message);
+      } finally {
+        setIsCropping(false);
+      }
+      return;
     }
 
     // If crop is configured and we have a single-file upload function,

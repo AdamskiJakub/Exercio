@@ -98,7 +98,6 @@ export function ImageCropModalFree({
         if (cancelled) return;
         setImageUrl(null);
         toast.error(t("error") || "Failed to load image");
-        onCancel();
       });
     return () => {
       cancelled = true;

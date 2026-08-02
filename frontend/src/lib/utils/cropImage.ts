@@ -24,7 +24,12 @@ export function loadImage(src: string | Blob): Promise<HTMLImageElement> {
     const url = typeof src === "string" ? src : URL.createObjectURL(src);
 
     const image = new Image();
-    image.crossOrigin = "anonymous";
+    // Only request CORS for remote http(s) images. Setting crossOrigin on
+    // data:/blob: URLs is unnecessary and can cause the load to fail in some
+    // browsers.
+    if (/^https?:\/\//i.test(url)) {
+      image.crossOrigin = "anonymous";
+    }
     image.onload = () => {
       if (typeof src !== "string") {
         URL.revokeObjectURL(url);
@@ -102,7 +107,18 @@ export function fileToDataUrl(file: Blob, maxDim = 2048): Promise<string> {
           reject(new Error("Failed to read image (cross-origin blocked)"));
         }
       };
-      img.onerror = () => reject(new Error("Failed to load image"));
+      img.onerror = () => {
+        const mime = file.type.toLowerCase();
+        if (mime === "image/heic" || mime === "image/heif") {
+          reject(
+            new Error(
+              "HEIC/HEIF images cannot be previewed in this browser. Please convert to JPEG/PNG.",
+            ),
+          );
+        } else {
+          reject(new Error("Failed to load image"));
+        }
+      };
       img.src = reader.result as string;
     };
     reader.onerror = () => reject(new Error("Failed to read image"));
@@ -360,4 +376,13 @@ export async function matchesAspectRatio(
   const image = await loadImage(file);
   const ratio = image.naturalWidth / image.naturalHeight;
   return Math.abs(ratio - aspectRatio) / aspectRatio <= tolerance;
+}
+
+/**
+ * Detect HEIC/HEIF files. Browsers cannot decode these formats for canvas /
+ * crop operations, so callers should bypass the crop modal and upload them
+ * directly (the backend converts HEIC/HEIF via sharp).
+ */
+export function isHeic(file: File | Blob): boolean {
+  return file.type === "image/heic" || file.type === "image/heif";
 }
