@@ -7,9 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImageCropModal, type CropShape } from "@/components/ui/ImageCropModal";
 import { ImageCropModalFree } from "@/components/ui/ImageCropModalFree";
-import { blobToFile } from "@/lib/utils/cropImage";
+import {
+  blobToFile,
+  matchesAspectRatio,
+  processImage,
+} from "@/lib/utils/cropImage";
 import { Image, Upload, Loader2, Plus, X } from "lucide-react";
 import { getMediaUrl, isVideoUrl } from "@/lib/utils/media";
+import { toast } from "sonner";
 import type { MediaField, GalleryField } from "@/types/enterprise";
 
 interface CropConfig {
@@ -21,6 +26,15 @@ interface CropConfig {
   cropShape?: CropShape;
   outputWidth?: number;
   outputHeight?: number;
+  /**
+   * Smart crop: if the uploaded image already matches the target aspect ratio
+   * (within tolerance), skip the crop modal and just resize + compress. Only
+   * used for free-form crops (covers) where a panoramic image needs no manual
+   * cropping.
+   */
+  smartAspect?: boolean;
+  /** Aspect-ratio tolerance for smartAspect (e.g. 0.1 = ±10%). */
+  smartTolerance?: number;
 }
 
 interface EnterpriseProfileMediaProps {
@@ -40,6 +54,7 @@ function MediaPreview({
   label: string;
 }) {
   const [imgError, setImgError] = useState(false);
+  const t = useTranslations("Dashboard.enterprise");
 
   return (
     <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden border border-slate-600 relative group">
@@ -58,8 +73,8 @@ function MediaPreview({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label={`${label} — remove`}
+        className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+        aria-label={`${label} — ${t("remove")}`}
       >
         <X className="w-3 h-3 text-white" aria-hidden="true" />
       </button>
@@ -87,14 +102,42 @@ function MediaUploadRow({
   const inputRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [isCropping, setIsCropping] = useState(false);
+  const t = useTranslations("Dashboard.enterprise");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     if (!file) return;
+
+    // Smart cover: if the image already matches the target aspect ratio,
+    // skip the crop modal and just resize + compress before uploading.
+    if (
+      crop?.smartAspect &&
+      crop.freeCrop &&
+      field.onUploadFile &&
+      (await matchesAspectRatio(
+        file,
+        crop.aspectRatio ?? 3,
+        crop.smartTolerance ?? 0.1,
+      ))
+    ) {
+      setIsCropping(true);
+      try {
+        const optimized = await processImage(file, "cover");
+        const url = await field.onUploadFile(optimized);
+        field.onUrlChange(url);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : t("uploadFailed");
+        toast.error(message);
+      } finally {
+        setIsCropping(false);
+      }
+      return;
+    }
 
     // If crop is configured and we have a single-file upload function,
     // open the crop modal instead of uploading directly.
@@ -114,8 +157,11 @@ function MediaUploadRow({
       const url = await field.onUploadFile(file);
       field.onUrlChange(url);
       setCropFile(null);
-    } catch {
+    } catch (error) {
       setCropFile(null);
+      const message =
+        error instanceof Error ? error.message : t("uploadFailed");
+      toast.error(message);
     } finally {
       setIsCropping(false);
     }
@@ -153,7 +199,7 @@ function MediaUploadRow({
           onClick={() => inputRef.current?.click()}
           disabled={field.isUploading}
           className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
-          aria-label={`Upload ${uploadLabel} from computer`}
+          aria-label={t("uploadFromComputer")}
         >
           {field.isUploading ? (
             <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -259,6 +305,11 @@ export function EnterpriseProfileMedia({
             aspectRatio: 3,
             outputWidth: 1920,
             outputHeight: 640,
+            // Smart cover: if the uploaded image is already close to 3:1
+            // (a ready-made banner), skip the crop modal and just resize +
+            // compress. Only phone photos / wrong ratios get the crop tool.
+            smartAspect: true,
+            smartTolerance: 0.1,
           }}
         />
       </div>
@@ -307,7 +358,7 @@ export function EnterpriseProfileMedia({
             type="button"
             onClick={handleAddGalleryImage}
             disabled={!newGalleryUrl.trim()}
-            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0"
+            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
             aria-label={t("addGalleryImage") || "Add gallery image"}
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
@@ -368,7 +419,7 @@ export function EnterpriseProfileMedia({
                 <button
                   type="button"
                   onClick={() => gallery.onRemove(index)}
-                  className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   aria-label={`${t("removeGalleryImage") || "Remove image"} ${index + 1}`}
                 >
                   <X className="w-3 h-3 text-white" aria-hidden="true" />

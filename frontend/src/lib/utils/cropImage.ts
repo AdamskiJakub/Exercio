@@ -1,13 +1,3 @@
-/**
- * Crop an image using the crop area provided by react-easy-crop and
- * produce a final Blob ready for upload.
- *
- * This is the "Opcja A" architecture: the crop happens client-side, the
- * canvas generates a final (already-cropped) image, and that image is
- * uploaded to R2. No crop metadata is stored — the uploaded file is the
- * final avatar/logo.
- */
-
 export interface CropArea {
   x: number;
   y: number;
@@ -95,21 +85,21 @@ export async function cropImage(
   );
 
   // Convert canvas to blob.
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (result) => {
-        if (result) {
-          resolve(result);
-        } else {
-          reject(new Error("Failed to generate image"));
-        }
-      },
-      format,
-      quality,
-    );
-  });
+  const formats = Array.from(new Set([format, "image/jpeg", "image/png"]));
 
-  return blob;
+  let blob: Blob | null = null;
+  let lastError: Error | null = null;
+
+  for (const fmt of formats) {
+    blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, fmt, quality);
+    });
+    if (blob) {
+      return blob;
+    }
+  }
+
+  throw new Error("Failed to generate image");
 }
 
 /**
@@ -123,4 +113,182 @@ export function blobToFile(blob: Blob, filename: string): File {
         ? "jpg"
         : "webp";
   return new File([blob], `${filename}.${ext}`, { type: blob.type });
+}
+
+/**
+ * Shared client-side image optimization pipeline.
+ *
+ * Every image uploaded to Exercio goes through this so that R2 only ever
+ * stores optimized files (WebP, reasonable dimensions) instead of raw
+ * multi-megabyte phone photos. This mirrors how Instagram/Facebook/Airbnb
+ * handle uploads: resize → compress → upload, never the reverse.
+ *
+ * The crop modals already resize to small output dimensions, so this is
+ * primarily used for gallery images (which are uploaded raw today) and for
+ * the "smart cover" flow (a panoramic image that needs no cropping).
+ */
+export type ImageProcessType =
+  | "avatar"
+  | "logo"
+  | "cover"
+  | "about"
+  | "gallery";
+
+export interface ImageProcessConfig {
+  /** Max output width in pixels. */
+  maxWidth: number;
+  /** Max output height in pixels. */
+  maxHeight: number;
+  /** Whether to preserve the source aspect ratio (fit within maxWidth/maxHeight). */
+  preserveAspect: boolean;
+  /** WebP/JPEG quality 0-1. */
+  quality: number;
+}
+
+const IMAGE_PROCESS_CONFIGS: Record<ImageProcessType, ImageProcessConfig> = {
+  avatar: {
+    maxWidth: 600,
+    maxHeight: 600,
+    preserveAspect: false,
+    quality: 0.85,
+  },
+  logo: { maxWidth: 600, maxHeight: 600, preserveAspect: false, quality: 0.9 },
+  cover: {
+    maxWidth: 1800,
+    maxHeight: 600,
+    preserveAspect: false,
+    quality: 0.85,
+  },
+  about: {
+    maxWidth: 900,
+    maxHeight: 1200,
+    preserveAspect: false,
+    quality: 0.85,
+  },
+  gallery: {
+    maxWidth: 1800,
+    maxHeight: 1800,
+    preserveAspect: true,
+    quality: 0.82,
+  },
+};
+
+export interface ProcessImageOptions {
+  /** Output format. Defaults to "image/webp". */
+  format?: "image/webp" | "image/jpeg" | "image/png";
+  /** Override the per-type quality (0-1). */
+  quality?: number;
+  /** Override the per-type max dimensions. */
+  maxWidth?: number;
+  maxHeight?: number;
+}
+
+/**
+ * Resize + compress an image file to the target dimensions for its type.
+ * Returns a File ready for upload. Falls back to JPEG/PNG on browsers that
+ * cannot encode WebP (e.g. iOS Safari).
+ */
+export async function processImage(
+  file: File | Blob,
+  type: ImageProcessType,
+  options: ProcessImageOptions = {},
+): Promise<File> {
+  const cfg = IMAGE_PROCESS_CONFIGS[type];
+  const format = options.format ?? "image/webp";
+  const quality = options.quality ?? cfg.quality;
+  const maxWidth = options.maxWidth ?? cfg.maxWidth;
+  const maxHeight = options.maxHeight ?? cfg.maxHeight;
+  const baseName =
+    file instanceof File ? file.name.replace(/\.[^.]+$/, "") : type;
+
+  const image = await loadImage(file);
+
+  let outW = image.naturalWidth;
+  let outH = image.naturalHeight;
+
+  if (cfg.preserveAspect) {
+    // Fit within maxWidth/maxHeight, preserving aspect ratio.
+    const scale = Math.min(maxWidth / outW, maxHeight / outH, 1);
+    outW = Math.max(1, Math.round(outW * scale));
+    outH = Math.max(1, Math.round(outH * scale));
+  } else {
+    // Fixed target box (cover-style): scale to fill, then center-crop.
+    const scale = Math.max(maxWidth / outW, maxHeight / outH);
+    const scaledW = Math.round(outW * scale);
+    const scaledH = Math.round(outH * scale);
+    const sx = (scaledW - maxWidth) / 2;
+    const sy = (scaledH - maxHeight) / 2;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = maxWidth;
+    canvas.height = maxHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("Canvas 2D context is not supported");
+    }
+    ctx.drawImage(
+      image,
+      sx,
+      sy,
+      maxWidth,
+      maxHeight,
+      0,
+      0,
+      maxWidth,
+      maxHeight,
+    );
+    return encodeCanvasToFile(canvas, format, quality, baseName);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = outW;
+  canvas.height = outH;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("Canvas 2D context is not supported");
+  }
+  ctx.drawImage(image, 0, 0, outW, outH);
+  return encodeCanvasToFile(canvas, format, quality, baseName);
+}
+
+/**
+ * Encode a canvas to a File, trying the requested format first and falling
+ * back to JPEG/PNG on browsers that cannot encode WebP (e.g. iOS Safari).
+ */
+async function encodeCanvasToFile(
+  canvas: HTMLCanvasElement,
+  format: string,
+  quality: number,
+  filename: string,
+): Promise<File> {
+  const formats = Array.from(new Set([format, "image/jpeg", "image/png"]));
+
+  for (const fmt of formats) {
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, fmt, quality);
+    });
+    if (blob) {
+      return blobToFile(blob, filename.replace(/\.[^.]+$/, ""));
+    }
+  }
+
+  throw new Error("Failed to generate image");
+}
+
+/**
+ * Detect whether an image already matches a target aspect ratio (within a
+ * tolerance). Used by the "smart cover" flow: if a panoramic image is already
+ * close to the cover ratio, we skip cropping and just resize + compress.
+ *
+ * @param aspectRatio - Target width/height ratio (e.g. 3 for a 3:1 cover).
+ * @param tolerance - Allowed relative deviation (e.g. 0.1 = ±10%).
+ */
+export async function matchesAspectRatio(
+  file: File | Blob,
+  aspectRatio: number,
+  tolerance = 0.1,
+): Promise<boolean> {
+  const image = await loadImage(file);
+  const ratio = image.naturalWidth / image.naturalHeight;
+  return Math.abs(ratio - aspectRatio) / aspectRatio <= tolerance;
 }

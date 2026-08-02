@@ -48,7 +48,19 @@ export function EnterpriseProfileDisciplines({
   };
 
   const getPresetName = (key: string): string => {
-    return getDisciplineNameByKey(key, locale);
+    const name = getDisciplineNameByKey(key, locale);
+    if (name !== key) return name;
+
+    try {
+      const legacyName = t(`disciplinesPresets.${key}`);
+      if (legacyName && !legacyName.startsWith("disciplinesPresets.")) {
+        return legacyName;
+      }
+    } catch {
+      // ignore
+    }
+    // Final fallback: display the key as-is
+    return key;
   };
 
   return (

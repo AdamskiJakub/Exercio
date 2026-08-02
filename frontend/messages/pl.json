@@ -9,7 +9,8 @@
     "fitCover": "Wypełnij ramkę",
     "cancel": "Anuluj",
     "save": "Zapisz",
-    "saving": "Zapisywanie..."
+    "saving": "Zapisywanie...",
+    "error": "Nie udało się zapisać zdjęcia"
   },
   "HomePage": {
     "hero": {
@@ -435,6 +436,8 @@
       "uploadAboutImage": "Prześlij zdjęcie z komputera",
       "aboutImagePreview": "Podgląd zdjęcia sekcji O nas",
       "removeAboutImage": "Usuń zdjęcie",
+      "remove": "Usuń",
+      "uploadFromComputer": "Prześlij z komputera",
       "aboutImageUploaded": "Zdjęcie sekcji O nas przesłane",
       "gallery": "Galeria",
       "galleryUrlPlaceholder": "Dodaj URL zdjęcia...",

@@ -40,14 +40,40 @@ export function EnterpriseProfilePage({
   const fromDashboard = searchParams.get("from") === "dashboard";
   const [activeSection, setActiveSection] = useState<string>("");
 
+  const hasOffer =
+    enterprise.businessType ||
+    (enterprise.targetAudience && enterprise.targetAudience.length > 0) ||
+    (enterprise.languages && enterprise.languages.length > 0) ||
+    (enterprise.disciplines && enterprise.disciplines.length > 0);
+
   const navItems = [
-    { id: SECTION_IDS.about, label: t("about"), icon: Info },
-    { id: SECTION_IDS.instructors, label: t("ourInstructors"), icon: Users },
-    { id: SECTION_IDS.news, label: t("news"), icon: Calendar },
-    { id: SECTION_IDS.whyUs, label: t("whyUs"), icon: Sparkles },
-    { id: SECTION_IDS.offer, label: t("offer"), icon: Building2 },
-    { id: SECTION_IDS.pricing, label: t("pricing"), icon: DollarSign },
-    { id: SECTION_IDS.gallery, label: t("gallery"), icon: ImageIcon },
+    ...(enterprise.description
+      ? [{ id: SECTION_IDS.about, label: t("about"), icon: Info }]
+      : []),
+    ...(enterprise.instructors && enterprise.instructors.length > 0
+      ? [
+          {
+            id: SECTION_IDS.instructors,
+            label: t("ourInstructors"),
+            icon: Users,
+          },
+        ]
+      : []),
+    ...(enterprise.news && enterprise.news.length > 0
+      ? [{ id: SECTION_IDS.news, label: t("news"), icon: Calendar }]
+      : []),
+    ...(enterprise.highlights && enterprise.highlights.length > 0
+      ? [{ id: SECTION_IDS.whyUs, label: t("whyUs"), icon: Sparkles }]
+      : []),
+    ...(hasOffer
+      ? [{ id: SECTION_IDS.offer, label: t("offer"), icon: Building2 }]
+      : []),
+    ...(enterprise.pricing && enterprise.pricing.length > 0
+      ? [{ id: SECTION_IDS.pricing, label: t("pricing"), icon: DollarSign }]
+      : []),
+    ...(enterprise.gallery && enterprise.gallery.length > 0
+      ? [{ id: SECTION_IDS.gallery, label: t("gallery"), icon: ImageIcon }]
+      : []),
   ];
 
   const scrollToSection = (id: string) => {

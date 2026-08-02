@@ -9,7 +9,8 @@
     "fitCover": "Fill frame",
     "cancel": "Cancel",
     "save": "Save",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "error": "Failed to save image"
   },
   "HomePage": {
     "hero": {
@@ -435,6 +436,8 @@
       "uploadAboutImage": "Upload image from computer",
       "aboutImagePreview": "About section image preview",
       "removeAboutImage": "Remove image",
+      "remove": "Remove",
+      "uploadFromComputer": "Upload from computer",
       "aboutImageUploaded": "About image uploaded",
       "gallery": "Gallery",
       "galleryUrlPlaceholder": "Add image URL...",

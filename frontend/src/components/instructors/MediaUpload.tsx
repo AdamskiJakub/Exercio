@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Upload, X, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImageCropModal } from "@/components/ui/ImageCropModal";
-import { blobToFile } from "@/lib/utils/cropImage";
+import { blobToFile, processImage } from "@/lib/utils/cropImage";
 import { MediaUploadProps } from "./types";
 import { getMediaUrl, IS_DEVELOPMENT, isVideoUrl } from "@/lib/utils/media";
 import { toast } from "sonner";
@@ -137,9 +137,17 @@ export function MediaUpload(props: MediaUploadProps) {
         isBlob: true,
       }));
 
+      // Compress/resize image files before upload so R2 never stores raw
+      // multi-megabyte phone photos. Videos are uploaded as-is.
+      const uploadFiles = await Promise.all(
+        files.map(async (file) =>
+          file.type.startsWith("video/") ? file : processImage(file, "gallery"),
+        ),
+      );
+
       // Upload multiple files for gallery
       setPreviews([...previews, ...newPreviews]);
-      const uploadResult = await onUpload(files);
+      const uploadResult = await onUpload(uploadFiles);
       const newUrls = [...currentMediaUrls, ...uploadResult];
       setPreviews(
         newUrls.map((url) => ({
@@ -170,18 +178,16 @@ export function MediaUpload(props: MediaUploadProps) {
     }
   };
 
-  // Confirm the cropped avatar: convert blob to File and upload.
   const handleCropConfirm = async (blob: Blob) => {
     if (!cropFile) return;
+
+    if (variant !== "avatar") return;
     setIsCropping(true);
     try {
       const file = blobToFile(blob, "avatar");
-      // We are in the avatar variant here, so onUpload is the single-file version.
-      const uploadResult = await (onUpload as (file: File) => Promise<string>)(
-        file,
-      );
+      const uploadResult = await props.onUpload(file);
       setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
-      (onMediaChange as (url: string) => void)(uploadResult);
+      props.onMediaChange(uploadResult);
       setCropFile(null);
     } catch (error) {
       const message = error instanceof Error ? error.message : t("uploadError");
@@ -233,7 +239,7 @@ export function MediaUpload(props: MediaUploadProps) {
                     ? previews[0].url
                     : getMediaUrl(previews[0].url)
                 }
-                alt="Profile preview"
+                alt=""
                 className="size-full object-cover"
               />
             </div>
@@ -349,7 +355,7 @@ export function MediaUpload(props: MediaUploadProps) {
             ) : (
               <img
                 src={preview.isBlob ? preview.url : getMediaUrl(preview.url)}
-                alt={`Gallery ${index + 1}`}
+                alt=""
                 className="size-full object-cover"
               />
             )}
