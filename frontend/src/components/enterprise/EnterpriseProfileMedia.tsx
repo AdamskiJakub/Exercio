@@ -114,29 +114,40 @@ function MediaUploadRow({
 
     // Smart cover: if the image already matches the target aspect ratio,
     // skip the crop modal and just resize + compress before uploading.
+    // Only attempt for image files — a non-image (e.g. a video selected via
+    // the file picker) can't be loaded as an image, so we fall through to the
+    // normal crop/upload flow instead of throwing an uncaught error.
     if (
       crop?.smartAspect &&
       crop.freeCrop &&
       field.onUploadFile &&
-      (await matchesAspectRatio(
-        file,
-        crop.aspectRatio ?? 3,
-        crop.smartTolerance ?? 0.1,
-      ))
+      file.type.startsWith("image/")
     ) {
-      setIsCropping(true);
+      let matches = false;
       try {
-        const optimized = await processImage(file, "cover");
-        const url = await field.onUploadFile(optimized);
-        field.onUrlChange(url);
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : t("uploadFailed");
-        toast.error(message);
-      } finally {
-        setIsCropping(false);
+        matches = await matchesAspectRatio(
+          file,
+          crop.aspectRatio ?? 3,
+          crop.smartTolerance ?? 0.1,
+        );
+      } catch {
+        matches = false;
       }
-      return;
+      if (matches) {
+        setIsCropping(true);
+        try {
+          const optimized = await processImage(file, "cover");
+          const url = await field.onUploadFile(optimized);
+          field.onUrlChange(url);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : t("uploadFailed");
+          toast.error(message);
+        } finally {
+          setIsCropping(false);
+        }
+        return;
+      }
     }
 
     // If crop is configured and we have a single-file upload function,
