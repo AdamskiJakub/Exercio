@@ -291,6 +291,7 @@ export default function EnterpriseProfilePage() {
                 onUrlChange: (value) =>
                   setForm((prev) => ({ ...prev, logoUrl: value })),
                 onRemove: handleRemoveLogo,
+                onUploadFile: uploadPhoto,
               }}
               cover={{
                 url: form.coverUrl || "",
@@ -299,6 +300,7 @@ export default function EnterpriseProfilePage() {
                 onUrlChange: (value) =>
                   setForm((prev) => ({ ...prev, coverUrl: value })),
                 onRemove: handleRemoveCover,
+                onUploadFile: uploadCover,
               }}
               aboutImage={{
                 url: form.aboutImage || "",
@@ -307,6 +309,7 @@ export default function EnterpriseProfilePage() {
                 onUrlChange: (value) =>
                   setForm((prev) => ({ ...prev, aboutImage: value })),
                 onRemove: handleRemoveAboutImage,
+                onUploadFile: uploadAboutImage,
               }}
               gallery={{
                 items: form.gallery || [],

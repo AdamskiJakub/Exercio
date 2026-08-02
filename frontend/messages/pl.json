@@ -1,4 +1,16 @@
 {
+  "ImageCrop": {
+    "title": "Dopasuj swoje zdjęcie",
+    "description": "Przeciągnij, aby przesunąć, i użyj suwaka, aby przybliżyć. Finalne zdjęcie zostanie zapisane w wybranej ramce.",
+    "freeDescription": "Przeciągnij rogi lub krawędzie ramki, aby ją przeskalować, a wewnątrz ramki, aby ją przesunąć.",
+    "zoom": "Przybliżenie",
+    "fit": "Dopasowanie",
+    "fitContain": "Całe zdjęcie",
+    "fitCover": "Wypełnij ramkę",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "saving": "Zapisywanie..."
+  },
   "HomePage": {
     "hero": {
       "title": "Znajdź instruktora lub",
