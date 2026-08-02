@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import { EnterpriseService } from './enterprise.service';
 import type { CreateEnterpriseLeadDto } from './dto/create-enterprise-lead.dto';
 import type { Language } from '../email/email.types';
 import * as crypto from 'crypto';
@@ -22,6 +23,7 @@ export class EnterpriseLeadsService {
     private prisma: PrismaService,
     private emailService: EmailService,
     private configService: ConfigService,
+    private enterpriseService: EnterpriseService,
   ) {}
 
   async create(dto: CreateEnterpriseLeadDto) {
@@ -197,6 +199,19 @@ export class EnterpriseLeadsService {
     this.logger.log(
       `Enterprise lead ${leadId} approved. User created: ${result.user.id}`,
     );
+
+    // Auto-grant Founding Partner badge if eligible (up to the configured limit)
+    try {
+      await this.enterpriseService.grantFoundingPartnerIfEligible(
+        result.profile.id,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to auto-grant Founding Partner badge for enterprise ${result.profile.id}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+    }
 
     // Send activation email to the partner with activation link
     try {

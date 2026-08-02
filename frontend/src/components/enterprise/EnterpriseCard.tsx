@@ -72,7 +72,7 @@ export function EnterpriseCard({
                   </span>
                 )}
               </h3>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-3">
                 {enterprise.foundingPartnerGrantedAt && (
                   <FoundingPartnerBadge variant="card" />
                 )}
