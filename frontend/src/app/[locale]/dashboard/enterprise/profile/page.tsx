@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UpdateEnterpriseProfileDto } from "@/types/enterprise";
+import { processImage } from "@/lib/utils/cropImage";
 import { EnterpriseProfileBasicInfo } from "@/components/enterprise/EnterpriseProfileBasicInfo";
 import { EnterpriseProfileMedia } from "@/components/enterprise/EnterpriseProfileMedia";
 import { EnterpriseProfileHours } from "@/components/enterprise/EnterpriseProfileHours";
@@ -33,11 +34,6 @@ import { EnterpriseProfileAmenities } from "@/components/enterprise/EnterprisePr
 import { EnterpriseProfilePricing } from "@/components/enterprise/EnterpriseProfilePricing";
 import { EnterpriseProfileFaq } from "@/components/enterprise/EnterpriseProfileFaq";
 
-/**
- * Inner component that uses useSearchParams.
- * Must be wrapped in <Suspense> because Next.js 14+ requires it
- * when useSearchParams is used in a page component.
- */
 function ScrollHandler({ profile }: { profile: any }) {
   const searchParams = useSearchParams();
   const hasScrolled = useRef(false);
@@ -184,7 +180,14 @@ export default function EnterpriseProfilePage() {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
     try {
-      const urls = await uploadGallery(files);
+      // Compress/resize image files before upload so R2 never stores raw
+      // multi-megabyte phone photos. Videos are uploaded as-is.
+      const uploadFiles = await Promise.all(
+        files.map(async (file) =>
+          file.type.startsWith("video/") ? file : processImage(file, "gallery"),
+        ),
+      );
+      const urls = await uploadGallery(uploadFiles);
       setForm((prev) => ({
         ...prev,
         gallery: [...(prev.gallery || []), ...urls],

@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { cropImage } from "@/lib/utils/cropImage";
 
 export interface ImageCropModalFreeProps {
@@ -75,8 +76,14 @@ export function ImageCropModalFree({
   } | null>(null);
 
   // Convert File/Blob to a data URL so react-image-crop can display it.
+  // Also reset any crop/size state from a previous image so stale values
+  // (captured at the previous onLoad) never leak into a new source image.
   useEffect(() => {
     let cancelled = false;
+    setCrop(undefined);
+    setCompletedCrop(null);
+    setNaturalSize(null);
+    setDisplaySize(null);
     if (typeof imageSrc === "string") {
       setImageUrl(imageSrc);
       return;
@@ -121,40 +128,48 @@ export function ImageCropModalFree({
     if (!completedCrop?.width || !completedCrop.height) return;
     if (!naturalSize || !displaySize) return;
 
-    // Scale the crop window from displayed-image pixels to natural pixels.
-    const scaleX = naturalSize.width / displaySize.width;
-    const scaleY = naturalSize.height / displaySize.height;
-    const naturalCrop: PixelCrop = {
-      x: completedCrop.x * scaleX,
-      y: completedCrop.y * scaleY,
-      width: completedCrop.width * scaleX,
-      height: completedCrop.height * scaleY,
-      unit: "px",
-    };
+    try {
+      // Scale the crop window from displayed-image pixels to natural pixels.
+      const scaleX = naturalSize.width / displaySize.width;
+      const scaleY = naturalSize.height / displaySize.height;
+      const naturalCrop: PixelCrop = {
+        x: completedCrop.x * scaleX,
+        y: completedCrop.y * scaleY,
+        width: completedCrop.width * scaleX,
+        height: completedCrop.height * scaleY,
+        unit: "px",
+      };
 
-    // This is a free-form crop, so the user may resize the window to any
-    // aspect ratio. Derive the output dimensions from the crop's own aspect
-    // ratio (scaled to fit within the requested max output size) instead of
-    // forcing the fixed outputWidth/outputHeight — otherwise a non-3:1 crop
-    // would be stretched/distorted to the fixed cover ratio.
-    const cropAspect = naturalCrop.width / naturalCrop.height;
-    let outW = outputWidth;
-    let outH = outputHeight;
-    if (cropAspect >= 1) {
-      // Landscape or square: width is the limiting dimension.
-      outH = Math.round(outW / cropAspect);
-    } else {
-      // Portrait: height is the limiting dimension.
-      outH = outputHeight;
-      outW = Math.round(outH * cropAspect);
+      // This is a free-form crop, so the user may resize the window to any
+      // aspect ratio. Derive the output dimensions from the crop's own aspect
+      // ratio (scaled to fit within the requested max output size) instead of
+      // forcing the fixed outputWidth/outputHeight — otherwise a non-3:1 crop
+      // would be stretched/distorted to the fixed cover ratio.
+      const cropAspect = naturalCrop.width / naturalCrop.height;
+      let outW = outputWidth;
+      let outH = outputHeight;
+      if (cropAspect >= 1) {
+        // Landscape or square: width is the limiting dimension.
+        outH = Math.round(outW / cropAspect);
+      } else {
+        // Portrait: height is the limiting dimension.
+        outH = outputHeight;
+        outW = Math.round(outH * cropAspect);
+      }
+
+      const blob = await cropImage(imageSrc, naturalCrop, {
+        outputWidth: outW,
+        outputHeight: outH,
+        format,
+      });
+      await onConfirm(blob);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : t("error") || "Failed to save image";
+      toast.error(message);
     }
-
-    const blob = await cropImage(imageSrc, naturalCrop, {
-      outputWidth: outW,
-      outputHeight: outH,
-      format,
-    });
-    await onConfirm(blob);
   }, [
     completedCrop,
     naturalSize,
@@ -164,6 +179,7 @@ export function ImageCropModalFree({
     outputHeight,
     format,
     onConfirm,
+    t,
   ]);
 
   return (
@@ -194,7 +210,7 @@ export function ImageCropModalFree({
             >
               <img
                 src={imageUrl}
-                alt="Crop preview"
+                alt=""
                 onLoad={onImageLoad}
                 className="max-h-80 w-auto"
               />

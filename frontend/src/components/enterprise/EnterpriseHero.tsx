@@ -190,21 +190,16 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
 
   return (
     <div className="relative" role="region" aria-label={enterprise.companyName}>
-      {/* ===== Cover banner ===== */}
-      {/* On mobile the image flows at its natural aspect ratio so the whole
-          image is always visible (no cropping, no black bars). On desktop it
-          becomes a fixed 3:1 banner with object-cover. */}
-      <div className="relative w-full md:aspect-[3/1] overflow-hidden bg-slate-800">
+      <div className="relative w-full md:aspect-3/1 overflow-hidden bg-slate-800">
         {enterprise.coverUrl ? (
           <img
             src={getMediaUrl(enterprise.coverUrl)}
             alt={`${enterprise.companyName} cover`}
-            className="w-full h-auto md:absolute md:inset-0 md:h-full md:w-full md:object-cover"
+            className="w-full h-auto md:absolute md:inset-0 md:h-full md:w-full"
           />
         ) : (
           <div className="w-full h-full md:absolute md:inset-0 bg-linear-to-br from-slate-700 via-slate-800 to-slate-900" />
         )}
-        {/* Dark gradient overlay at the bottom for legibility */}
         <div
           className="absolute inset-0 bg-linear-to-t from-black/85 via-black/40 to-transparent"
           aria-hidden="true"
@@ -225,7 +220,7 @@ export function EnterpriseHero({ enterprise }: EnterpriseHeroProps) {
       </div>
 
       {/* ===== Mobile/tablet: logo overlaps the cover, content below ===== */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         {/* Logo pulled up so it overlaps the bottom of the cover */}
         <div className="flex justify-center -mt-14 relative z-10">{logo}</div>
         <div className="max-w-7xl mx-auto px-4 mt-3">

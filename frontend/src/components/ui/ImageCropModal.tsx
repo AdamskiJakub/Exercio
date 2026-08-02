@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cropImage } from "@/lib/utils/cropImage";
+import { toast } from "sonner";
 
 export type CropShape = "rect" | "round";
 
@@ -21,6 +22,7 @@ export interface ImageCropModalProps {
   imageSrc: string | Blob;
   /** Aspect ratio of the crop window (width / height). */
   aspectRatio?: number;
+
   /** When true, derive the crop aspect from the image's natural dimensions. */
   freeAspect?: boolean;
   /** How the image is fitted inside the crop container. */
@@ -127,12 +129,20 @@ function CropContent({
 
   const handleConfirm = useCallback(async () => {
     if (!croppedAreaPixels) return;
-    const blob = await cropImage(imageSrc, croppedAreaPixels, {
-      outputWidth,
-      outputHeight,
-      format,
-    });
-    await onConfirm(blob);
+    try {
+      const blob = await cropImage(imageSrc, croppedAreaPixels, {
+        outputWidth,
+        outputHeight,
+        format,
+      });
+      await onConfirm(blob);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : t("error") || "Failed to save image";
+      toast.error(message);
+    }
   }, [
     croppedAreaPixels,
     imageSrc,
@@ -140,6 +150,7 @@ function CropContent({
     outputHeight,
     format,
     onConfirm,
+    t,
   ]);
 
   const zoomLabel = useMemo(() => `${Math.round(zoom * 100)}%`, [zoom]);
@@ -168,40 +179,49 @@ function CropContent({
         )}
       </div>
 
-      {/* Fit mode toggle: contain (whole image) vs cover (fill frame) */}
-      <div className="flex items-center gap-2 px-1">
-        <span className="text-sm text-slate-400 shrink-0">
-          {t("fit") || "Fit"}
-        </span>
-        <div className="flex rounded-lg overflow-hidden border border-slate-700 bg-slate-800/60">
-          <button
-            type="button"
-            onClick={() => setFitMode("contain")}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
-              fitMode === "contain"
-                ? "bg-orange-500/20 text-orange-300"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            {t("fitContain") || "Whole image"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFitMode("cover")}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
-              fitMode === "cover"
-                ? "bg-orange-500/20 text-orange-300"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            {t("fitCover") || "Fill frame"}
-          </button>
+      {/* Fit mode toggle: contain (whole image) vs cover (fill frame).
+          Hidden when freeAspect is enabled — the crop aspect then equals the
+          image's natural aspect, so contain vs cover produce the same result. */}
+      {!freeAspect && (
+        <div className="flex items-center gap-2 px-1">
+          <span className="text-sm text-slate-400 shrink-0">
+            {t("fit") || "Fit"}
+          </span>
+          <div className="flex rounded-lg overflow-hidden border border-slate-700 bg-slate-800/60">
+            <button
+              type="button"
+              onClick={() => setFitMode("contain")}
+              aria-pressed={fitMode === "contain"}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+                fitMode === "contain"
+                  ? "bg-orange-500/20 text-orange-300"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              {t("fitContain") || "Whole image"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFitMode("cover")}
+              aria-pressed={fitMode === "cover"}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+                fitMode === "cover"
+                  ? "bg-orange-500/20 text-orange-300"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              {t("fitCover") || "Fill frame"}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Zoom controls */}
       <div className="flex items-center gap-3 px-1">
-        <ZoomOut className="size-5 text-slate-400 shrink-0" />
+        <ZoomOut
+          className="size-5 text-slate-400 shrink-0"
+          aria-hidden="true"
+        />
         <input
           type="range"
           min={1}
@@ -212,7 +232,7 @@ function CropContent({
           className="flex-1 accent-orange-500 cursor-pointer"
           aria-label={t("zoom") || "Zoom"}
         />
-        <ZoomIn className="size-5 text-slate-400 shrink-0" />
+        <ZoomIn className="size-5 text-slate-400 shrink-0" aria-hidden="true" />
         <span className="w-12 text-right text-sm text-slate-400 tabular-nums">
           {zoomLabel}
         </span>

@@ -7,9 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImageCropModal, type CropShape } from "@/components/ui/ImageCropModal";
 import { ImageCropModalFree } from "@/components/ui/ImageCropModalFree";
-import { blobToFile } from "@/lib/utils/cropImage";
+import {
+  blobToFile,
+  loadImage,
+  matchesAspectRatio,
+  processImage,
+} from "@/lib/utils/cropImage";
 import { Image, Upload, Loader2, Plus, X } from "lucide-react";
 import { getMediaUrl, isVideoUrl } from "@/lib/utils/media";
+import { toast } from "sonner";
 import type { MediaField, GalleryField } from "@/types/enterprise";
 
 interface CropConfig {
@@ -21,6 +27,15 @@ interface CropConfig {
   cropShape?: CropShape;
   outputWidth?: number;
   outputHeight?: number;
+  /**
+   * Smart crop: if the uploaded image already matches the target aspect ratio
+   * (within tolerance), skip the crop modal and just resize + compress. Only
+   * used for free-form crops (covers) where a panoramic image needs no manual
+   * cropping.
+   */
+  smartAspect?: boolean;
+  /** Aspect-ratio tolerance for smartAspect (e.g. 0.1 = ±10%). */
+  smartTolerance?: number;
 }
 
 interface EnterpriseProfileMediaProps {
@@ -40,6 +55,7 @@ function MediaPreview({
   label: string;
 }) {
   const [imgError, setImgError] = useState(false);
+  const t = useTranslations("Dashboard.enterprise");
 
   return (
     <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden border border-slate-600 relative group">
@@ -58,8 +74,8 @@ function MediaPreview({
       <button
         type="button"
         onClick={onRemove}
-        className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label={`${label} — remove`}
+        className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+        aria-label={`${label} — ${t("remove")}`}
       >
         <X className="w-3 h-3 text-white" aria-hidden="true" />
       </button>
@@ -86,15 +102,55 @@ function MediaUploadRow({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropUrl, setCropUrl] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
+  const t = useTranslations("Dashboard.enterprise");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     if (!file) return;
+
+    // Smart cover: if the image already matches the target aspect ratio,
+    // skip the crop modal and just resize + compress before uploading.
+    // Only attempt for image files — a non-image (e.g. a video selected via
+    // the file picker) can't be loaded as an image, so we fall through to the
+    // normal crop/upload flow instead of throwing an uncaught error.
+    if (
+      crop?.smartAspect &&
+      crop.freeCrop &&
+      field.onUploadFile &&
+      file.type.startsWith("image/")
+    ) {
+      let matches = false;
+      try {
+        matches = await matchesAspectRatio(
+          file,
+          crop.aspectRatio ?? 3,
+          crop.smartTolerance ?? 0.1,
+        );
+      } catch {
+        matches = false;
+      }
+      if (matches) {
+        setIsCropping(true);
+        try {
+          const optimized = await processImage(file, "cover");
+          const url = await field.onUploadFile(optimized);
+          field.onUrlChange(url);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : t("uploadFailed");
+          toast.error(message);
+        } finally {
+          setIsCropping(false);
+        }
+        return;
+      }
+    }
 
     // If crop is configured and we have a single-file upload function,
     // open the crop modal instead of uploading directly.
@@ -114,8 +170,13 @@ function MediaUploadRow({
       const url = await field.onUploadFile(file);
       field.onUrlChange(url);
       setCropFile(null);
-    } catch {
+      setCropUrl(null);
+    } catch (error) {
       setCropFile(null);
+      setCropUrl(null);
+      const message =
+        error instanceof Error ? error.message : t("uploadFailed");
+      toast.error(message);
     } finally {
       setIsCropping(false);
     }
@@ -123,6 +184,58 @@ function MediaUploadRow({
 
   const handleCropCancel = () => {
     setCropFile(null);
+    setCropUrl(null);
+  };
+
+  // When the user pastes an image URL instead of uploading from the computer,
+  // we still want the crop/optimization pipeline to run. Fetch the remote image
+  // (crossOrigin so the canvas stays untainted), then either smart-skip the
+  // crop if it already matches the target ratio, or open the crop modal.
+  const handleUrlCrop = async (url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed || !crop || !field.onUploadFile) {
+      field.onUrlChange(trimmed);
+      return;
+    }
+
+    setIsCropping(true);
+    try {
+      // Fetch the remote image as a Blob so we can run it through the same
+      // resize/compress pipeline as a locally-picked file. This requires the
+      // remote server to allow CORS (R2/S3/Cloudinary do); otherwise we fall
+      // back to storing the URL as-is below.
+      const response = await fetch(trimmed);
+      if (!response.ok) throw new Error("Failed to fetch image");
+      const blob = await response.blob();
+
+      const image = await loadImage(blob);
+      const ratio = image.naturalWidth / image.naturalHeight;
+      const target = crop.aspectRatio ?? 3;
+      const tolerance = crop.smartTolerance ?? 0.1;
+
+      // Smart cover: if the remote image already matches the target ratio,
+      // resize + compress and upload it directly (no crop modal).
+      if (
+        crop.smartAspect &&
+        crop.freeCrop &&
+        Math.abs(ratio - target) / target <= tolerance
+      ) {
+        const optimized = await processImage(blob, "cover");
+        const uploaded = await field.onUploadFile(optimized);
+        field.onUrlChange(uploaded);
+        return;
+      }
+
+      // Otherwise open the crop modal with the remote URL as the source.
+      setCropUrl(trimmed);
+    } catch {
+      // If the URL can't be fetched/loaded as an image (CORS, invalid, etc.),
+      // fall back to storing it as-is so the user isn't blocked from saving
+      // their profile.
+      field.onUrlChange(trimmed);
+    } finally {
+      setIsCropping(false);
+    }
   };
 
   return (
@@ -137,6 +250,13 @@ function MediaUploadRow({
           id={inputId}
           value={field.url}
           onChange={(e) => field.onUrlChange(e.target.value)}
+          onBlur={(e) => handleUrlCrop(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleUrlCrop(e.currentTarget.value);
+            }
+          }}
           className="h-11 flex-1"
           placeholder={`https://example.com/${inputId}`}
         />
@@ -153,7 +273,7 @@ function MediaUploadRow({
           onClick={() => inputRef.current?.click()}
           disabled={field.isUploading}
           className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
-          aria-label={`Upload ${uploadLabel} from computer`}
+          aria-label={t("uploadFromComputer")}
         >
           {field.isUploading ? (
             <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -172,8 +292,8 @@ function MediaUploadRow({
 
       {crop?.freeCrop ? (
         <ImageCropModalFree
-          open={!!cropFile}
-          imageSrc={cropFile ?? ""}
+          open={!!cropFile || !!cropUrl}
+          imageSrc={cropFile ?? cropUrl ?? ""}
           aspectRatio={crop.aspectRatio ?? 3}
           outputWidth={crop.outputWidth ?? 1920}
           outputHeight={crop.outputHeight ?? crop.outputWidth ?? 640}
@@ -185,8 +305,8 @@ function MediaUploadRow({
       ) : (
         crop && (
           <ImageCropModal
-            open={!!cropFile}
-            imageSrc={cropFile ?? ""}
+            open={!!cropFile || !!cropUrl}
+            imageSrc={cropFile ?? cropUrl ?? ""}
             aspectRatio={crop.aspectRatio ?? 1}
             freeAspect={crop.freeAspect ?? false}
             objectFit={crop.objectFit ?? "contain"}
@@ -259,6 +379,11 @@ export function EnterpriseProfileMedia({
             aspectRatio: 3,
             outputWidth: 1920,
             outputHeight: 640,
+            // Smart cover: if the uploaded image is already close to 3:1
+            // (a ready-made banner), skip the crop modal and just resize +
+            // compress. Only phone photos / wrong ratios get the crop tool.
+            smartAspect: true,
+            smartTolerance: 0.1,
           }}
         />
       </div>
@@ -307,7 +432,7 @@ export function EnterpriseProfileMedia({
             type="button"
             onClick={handleAddGalleryImage}
             disabled={!newGalleryUrl.trim()}
-            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0"
+            className="h-11 px-4 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
             aria-label={t("addGalleryImage") || "Add gallery image"}
           >
             <Plus className="w-4 h-4" aria-hidden="true" />
@@ -368,7 +493,7 @@ export function EnterpriseProfileMedia({
                 <button
                   type="button"
                   onClick={() => gallery.onRemove(index)}
-                  className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 p-1 bg-red-500/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                   aria-label={`${t("removeGalleryImage") || "Remove image"} ${index + 1}`}
                 >
                   <X className="w-3 h-3 text-white" aria-hidden="true" />
