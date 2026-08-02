@@ -65,6 +65,10 @@ export function fileToDataUrl(file: Blob, maxDim = 2048): Promise<string> {
         return;
       }
       const img = new Image();
+      // Request CORS so that cross-origin images (e.g. a URL pasted into the
+      // crop modal) don't taint the canvas. Without this, canvas.toDataURL
+      // below would throw a SecurityError for cross-origin sources.
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         const { naturalWidth: w, naturalHeight: h } = img;
         const scale = Math.min(1, maxDim / Math.max(w, h));
@@ -93,7 +97,14 @@ export function fileToDataUrl(file: Blob, maxDim = 2048): Promise<string> {
             ? "image/webp"
             : "image/png"
           : "image/jpeg";
-        resolve(canvas.toDataURL(outType, 0.9));
+        // toDataURL throws a synchronous SecurityError if the canvas is tainted
+        // (cross-origin image without CORS). img.onerror can't catch it, so
+        // wrap it and reject explicitly to avoid a permanently pending promise.
+        try {
+          resolve(canvas.toDataURL(outType, 0.9));
+        } catch {
+          reject(new Error("Failed to read image (cross-origin blocked)"));
+        }
       };
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = reader.result as string;
