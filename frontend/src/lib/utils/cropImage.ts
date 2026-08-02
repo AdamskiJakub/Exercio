@@ -24,10 +24,9 @@ export function loadImage(src: string | Blob): Promise<HTMLImageElement> {
     const url = typeof src === "string" ? src : URL.createObjectURL(src);
 
     const image = new Image();
-    // Only request CORS for remote http(s) images. Setting crossOrigin on
-    // data:/blob: URLs is unnecessary and can cause the load to fail in some
-    // browsers.
-    if (/^https?:\/\//i.test(url)) {
+    // Only request CORS for remote images. Setting crossOrigin on data:/blob:
+    // URLs is unnecessary and can cause the load to fail in some browsers.
+    if (!/^(data|blob):/i.test(url)) {
       image.crossOrigin = "anonymous";
     }
     image.onload = () => {
