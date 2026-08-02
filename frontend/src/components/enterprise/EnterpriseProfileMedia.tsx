@@ -9,6 +9,7 @@ import { ImageCropModal, type CropShape } from "@/components/ui/ImageCropModal";
 import { ImageCropModalFree } from "@/components/ui/ImageCropModalFree";
 import {
   blobToFile,
+  loadImage,
   matchesAspectRatio,
   processImage,
 } from "@/lib/utils/cropImage";
@@ -101,6 +102,7 @@ function MediaUploadRow({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropUrl, setCropUrl] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
   const t = useTranslations("Dashboard.enterprise");
 
@@ -168,8 +170,10 @@ function MediaUploadRow({
       const url = await field.onUploadFile(file);
       field.onUrlChange(url);
       setCropFile(null);
+      setCropUrl(null);
     } catch (error) {
       setCropFile(null);
+      setCropUrl(null);
       const message =
         error instanceof Error ? error.message : t("uploadFailed");
       toast.error(message);
@@ -180,6 +184,58 @@ function MediaUploadRow({
 
   const handleCropCancel = () => {
     setCropFile(null);
+    setCropUrl(null);
+  };
+
+  // When the user pastes an image URL instead of uploading from the computer,
+  // we still want the crop/optimization pipeline to run. Fetch the remote image
+  // (crossOrigin so the canvas stays untainted), then either smart-skip the
+  // crop if it already matches the target ratio, or open the crop modal.
+  const handleUrlCrop = async (url: string) => {
+    const trimmed = url.trim();
+    if (!trimmed || !crop || !field.onUploadFile) {
+      field.onUrlChange(trimmed);
+      return;
+    }
+
+    setIsCropping(true);
+    try {
+      // Fetch the remote image as a Blob so we can run it through the same
+      // resize/compress pipeline as a locally-picked file. This requires the
+      // remote server to allow CORS (R2/S3/Cloudinary do); otherwise we fall
+      // back to storing the URL as-is below.
+      const response = await fetch(trimmed);
+      if (!response.ok) throw new Error("Failed to fetch image");
+      const blob = await response.blob();
+
+      const image = await loadImage(blob);
+      const ratio = image.naturalWidth / image.naturalHeight;
+      const target = crop.aspectRatio ?? 3;
+      const tolerance = crop.smartTolerance ?? 0.1;
+
+      // Smart cover: if the remote image already matches the target ratio,
+      // resize + compress and upload it directly (no crop modal).
+      if (
+        crop.smartAspect &&
+        crop.freeCrop &&
+        Math.abs(ratio - target) / target <= tolerance
+      ) {
+        const optimized = await processImage(blob, "cover");
+        const uploaded = await field.onUploadFile(optimized);
+        field.onUrlChange(uploaded);
+        return;
+      }
+
+      // Otherwise open the crop modal with the remote URL as the source.
+      setCropUrl(trimmed);
+    } catch {
+      // If the URL can't be fetched/loaded as an image (CORS, invalid, etc.),
+      // fall back to storing it as-is so the user isn't blocked from saving
+      // their profile.
+      field.onUrlChange(trimmed);
+    } finally {
+      setIsCropping(false);
+    }
   };
 
   return (
@@ -194,6 +250,13 @@ function MediaUploadRow({
           id={inputId}
           value={field.url}
           onChange={(e) => field.onUrlChange(e.target.value)}
+          onBlur={(e) => handleUrlCrop(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleUrlCrop(e.currentTarget.value);
+            }
+          }}
           className="h-11 flex-1"
           placeholder={`https://example.com/${inputId}`}
         />
@@ -229,8 +292,8 @@ function MediaUploadRow({
 
       {crop?.freeCrop ? (
         <ImageCropModalFree
-          open={!!cropFile}
-          imageSrc={cropFile ?? ""}
+          open={!!cropFile || !!cropUrl}
+          imageSrc={cropFile ?? cropUrl ?? ""}
           aspectRatio={crop.aspectRatio ?? 3}
           outputWidth={crop.outputWidth ?? 1920}
           outputHeight={crop.outputHeight ?? crop.outputWidth ?? 640}
@@ -242,8 +305,8 @@ function MediaUploadRow({
       ) : (
         crop && (
           <ImageCropModal
-            open={!!cropFile}
-            imageSrc={cropFile ?? ""}
+            open={!!cropFile || !!cropUrl}
+            imageSrc={cropFile ?? cropUrl ?? ""}
             aspectRatio={crop.aspectRatio ?? 1}
             freeAspect={crop.freeAspect ?? false}
             objectFit={crop.objectFit ?? "contain"}
