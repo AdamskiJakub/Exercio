@@ -274,6 +274,7 @@
       "publishedDescription": "Your profile is live and visible",
       "bookingsSectionTitle": "Online bookings",
       "bookingsDisabled": "Online bookings disabled",
+      "bookingsChecking": "Checking availability...",
       "bookingsNeedConfig": "Availability has not been configured.",
       "bookingsNeedConfigDescription": "To let clients make bookings, set your availability hours.",
       "configureCalendar": "Configure calendar",

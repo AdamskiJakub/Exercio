@@ -192,33 +192,35 @@ export function InstructorHero({
                     {t("instructorAt")}:
                   </span>
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2">
-                    {profile.enterpriseMemberships.map((membership) => {
-                      const org = membership.enterprise;
-                      return (
-                        <span
-                          key={membership.id}
-                          onClick={() =>
-                            router.push(`/${locale}/enterprise/${org.slug}`)
-                          }
-                          className="inline-flex items-center gap-2 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer group"
-                        >
-                          {org.logoUrl ? (
-                            <span className="w-8 h-8 rounded-full overflow-hidden border border-slate-600 bg-white shrink-0 inline-block">
-                              <img
-                                src={getMediaUrl(org.logoUrl)}
-                                alt={org.companyName}
-                                className="w-full h-full object-cover"
-                              />
+                    {profile.enterpriseMemberships
+                      .map((membership) => membership.enterprise)
+                      .filter(Boolean)
+                      .map((org) => {
+                        return (
+                          <span
+                            key={org.id}
+                            onClick={() =>
+                              router.push(`/${locale}/enterprise/${org.slug}`)
+                            }
+                            className="inline-flex items-center gap-2 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer group"
+                          >
+                            {org.logoUrl ? (
+                              <span className="w-8 h-8 rounded-full overflow-hidden border border-slate-600 bg-white shrink-0 inline-block">
+                                <img
+                                  src={getMediaUrl(org.logoUrl)}
+                                  alt={org.companyName}
+                                  className="w-full h-full object-cover"
+                                />
+                              </span>
+                            ) : (
+                              <Building2 className="size-5 shrink-0 text-slate-400 group-hover:text-orange-400" />
+                            )}
+                            <span className="text-base font-semibold text-slate-200">
+                              {org.companyName}
                             </span>
-                          ) : (
-                            <Building2 className="size-5 shrink-0 text-slate-400 group-hover:text-orange-400" />
-                          )}
-                          <span className="text-base font-semibold text-slate-200">
-                            {org.companyName}
                           </span>
-                        </span>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 </div>
               )}

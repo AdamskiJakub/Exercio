@@ -71,10 +71,15 @@ export function InstructorDashboard() {
   const tb = useTranslations("Booking");
   const locale = useLocale();
   const { data: profile, isLoading } = useMyInstructorProfile();
-  const { data: weeklyAvailability } = useMyWeeklyAvailability({
-    enabled: !!profile?.isBookingEnabled,
-  });
+  const { data: weeklyAvailability, isLoading: availabilityLoading } =
+    useMyWeeklyAvailability({
+      enabled: !!profile?.isBookingEnabled,
+    });
   const hasAvailability = !!weeklyAvailability && weeklyAvailability.length > 0;
+  // While the availability query is still loading, we don't yet know whether
+  // the calendar is configured — avoid flashing the "not configured" warning.
+  const availabilityUnknown =
+    !!profile?.isBookingEnabled && availabilityLoading;
   const { data: bookings, isLoading: bookingsLoading } =
     useMyBookings("instructor");
   const { data: reviewStats } = useInstructorReviewStats(profile?.id);
@@ -373,6 +378,13 @@ export function InstructorDashboard() {
                 <Circle className="w-5 h-5 text-slate-400" />
                 <span className="text-slate-300 font-medium">
                   {t("bookingsDisabled")}
+                </span>
+              </div>
+            ) : availabilityUnknown ? (
+              <div className="flex items-center gap-2">
+                <Circle className="w-5 h-5 text-slate-400" />
+                <span className="text-slate-300 font-medium">
+                  {t("bookingsChecking")}
                 </span>
               </div>
             ) : hasAvailability ? (

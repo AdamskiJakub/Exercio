@@ -274,6 +274,7 @@
       "publishedDescription": "Twój profil jest dostępny i widoczny",
       "bookingsSectionTitle": "Rezerwacje online",
       "bookingsDisabled": "Rezerwacje online wyłączone",
+      "bookingsChecking": "Sprawdzanie dostępności...",
       "bookingsNeedConfig": "Dostępność nie została skonfigurowana.",
       "bookingsNeedConfigDescription": "Aby klienci mogli dokonywać rezerwacji, ustaw godziny swojej dostępności.",
       "configureCalendar": "Skonfiguruj kalendarz",
