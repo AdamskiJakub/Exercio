@@ -42,6 +42,75 @@ export function loadImage(src: string | Blob): Promise<HTMLImageElement> {
 }
 
 /**
+ * Convert a File/Blob to a data URL, downscaling it to fit within a maximum
+ * dimension first. Downscaling before encoding is critical on mobile: phone
+ * photos are often 4000x3000+ (several MB), and encoding the raw file to a
+ * base64 data URL produces a huge string that react-easy-crop struggles to
+ * decode on Android — the crop modal appears to hang with a spinner and no
+ * image. By capping the working size we keep the modal responsive while the
+ * final crop output is still generated at full quality by `cropImage`.
+ *
+ * @param file - Source image file/blob.
+ * @param maxDim - Maximum width/height in pixels (default 2048). High enough
+ *   to keep 1920px cover crops sharp, low enough to keep the data URL small
+ *   enough for mobile to decode quickly.
+ * @returns A data URL string of the downscaled image.
+ */
+export function fileToDataUrl(file: Blob, maxDim = 2048): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        reject(new Error("Failed to read image"));
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        const { naturalWidth: w, naturalHeight: h } = img;
+        const scale = Math.min(1, maxDim / Math.max(w, h));
+        if (scale >= 1) {
+          // Small enough already — use the original data URL.
+          resolve(reader.result as string);
+          return;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(w * scale));
+        canvas.height = Math.max(1, Math.round(h * scale));
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas 2D context is not supported"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // Preserve transparency when downscaling — JPEG would flatten the alpha
+        // channel to a black background. Both PNG and WebP can carry an alpha
+        // channel (e.g. transparent logos), so keep their native format. Only
+        // opaque formats (JPEG/JPG) are re-encoded as JPEG.
+        const mime = file.type.toLowerCase();
+        const keepAlpha = mime === "image/png" || mime === "image/webp";
+        const outType = keepAlpha
+          ? mime === "image/webp"
+            ? "image/webp"
+            : "image/png"
+          : "image/jpeg";
+        // toDataURL throws a synchronous SecurityError if the canvas is tainted
+        // (cross-origin image without CORS). img.onerror can't catch it, so
+        // wrap it and reject explicitly to avoid a permanently pending promise.
+        try {
+          resolve(canvas.toDataURL(outType, 0.9));
+        } catch {
+          reject(new Error("Failed to read image (cross-origin blocked)"));
+        }
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = reader.result as string;
+    };
+    reader.onerror = () => reject(new Error("Failed to read image"));
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
  * Generate a cropped image Blob from a source image and a crop area.
  *
  * @param imageSrc - File, Blob, or URL of the source image.
