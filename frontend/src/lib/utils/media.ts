@@ -40,15 +40,18 @@ export function getMediaUrl(
  * @param url - The URL to normalize (e.g. "www.example.com" or "https://example.com")
  * @returns A URL safe to use in an href, or undefined if no URL provided
  */
+const SAFE_URL_PROTOCOLS = /^(https?|mailto|tel):/i;
+
 export function normalizeWebsiteUrl(
   url: string | null | undefined,
 ): string | undefined {
   if (!url) return undefined;
   const trimmed = url.trim();
   if (!trimmed) return undefined;
-  // Already has a protocol (http, https, mailto, tel, etc.)
+  // If it already has a protocol, only allow safe ones (http, https, mailto, tel).
+  // Reject dangerous schemes like javascript:, data:, vbscript: to avoid XSS.
   if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
-    return trimmed;
+    return SAFE_URL_PROTOCOLS.test(trimmed) ? trimmed : undefined;
   }
   return `https://${trimmed}`;
 }
