@@ -1,6 +1,7 @@
 "use client";
 
 import { useMyInstructorProfile } from "@/hooks/useMyInstructorProfile";
+import { useMyWeeklyAvailability } from "@/hooks/useMyWeeklyAvailability";
 import { useMyBookings } from "@/hooks/useMyBookings";
 import {
   useInstructorReviewStats,
@@ -30,6 +31,8 @@ import {
   X,
   Check,
   EyeOff,
+  Circle,
+  AlertTriangle,
 } from "lucide-react";
 import { InstructorOnboardingChecklist } from "./InstructorOnboardingChecklist";
 import { WelcomeModal } from "./WelcomeModal";
@@ -68,6 +71,10 @@ export function InstructorDashboard() {
   const tb = useTranslations("Booking");
   const locale = useLocale();
   const { data: profile, isLoading } = useMyInstructorProfile();
+  const { data: weeklyAvailability } = useMyWeeklyAvailability({
+    enabled: !!profile?.isBookingEnabled,
+  });
+  const hasAvailability = !!weeklyAvailability && weeklyAvailability.length > 0;
   const { data: bookings, isLoading: bookingsLoading } =
     useMyBookings("instructor");
   const { data: reviewStats } = useInstructorReviewStats(profile?.id);
@@ -296,7 +303,7 @@ export function InstructorDashboard() {
           hoverable={true}
           hoverColor="hover:border-orange-500"
         >
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               {profile.isDraft ? (
                 <>
@@ -320,12 +327,12 @@ export function InstructorDashboard() {
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto">
               {!profile.isDraft ? (
                 <button
                   type="button"
                   onClick={() => setHideProfileOpen(true)}
-                  className="px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-red-500/20 hover:border-red-500/40 cursor-pointer"
+                  className="order-2 md:order-1 w-full md:w-auto px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium border border-red-500/20 hover:border-red-500/40 cursor-pointer"
                 >
                   <EyeOff className="w-4 h-4" />
                   {t("hideProfile")}
@@ -335,7 +342,7 @@ export function InstructorDashboard() {
                   type="button"
                   onClick={() => publishProfile(profile.id)}
                   disabled={isPublishing}
-                  className="px-5 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 hover:text-green-300 rounded-lg transition-colors flex items-center gap-2 font-medium border border-green-500/20 hover:border-green-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="order-2 md:order-1 w-full md:w-auto px-5 py-2.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 hover:text-green-300 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium border border-green-500/20 hover:border-green-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <CheckCircle className="w-4 h-4" />
                   {isPublishing ? t("publishing") : t("publishProfile")}
@@ -345,57 +352,111 @@ export function InstructorDashboard() {
                 href={
                   `/instructors/${profile?.user?.username || ""}?from=${NAV_SOURCE.DASHBOARD}` as any
                 }
-                className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
+                className="order-1 md:order-2 w-full md:w-auto px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 font-medium"
               >
                 <Eye className="w-4 h-4" />
                 {t("viewPublicProfile")}
               </Link>
             </div>
           </div>
+
+          {/* Booking status — dependency between "accept online bookings" and calendar config */}
+          <div className="mt-4 pt-4 border-t border-slate-700/60">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="w-4 h-4 text-slate-400" />
+              <span className="text-sm font-semibold text-slate-200 uppercase tracking-wide">
+                {t("bookingsSectionTitle")}
+              </span>
+            </div>
+            {!profile.isBookingEnabled ? (
+              <div className="flex items-center gap-2">
+                <Circle className="w-5 h-5 text-slate-400" />
+                <span className="text-slate-300 font-medium">
+                  {t("bookingsDisabled")}
+                </span>
+              </div>
+            ) : hasAvailability ? (
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                <span className="text-green-500 font-medium">
+                  {t("bookingsReady")}
+                </span>
+                <span className="text-slate-400 text-sm ml-2">
+                  — {t("bookingsReadyDescription")}
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <span className="text-yellow-500 font-medium">
+                      {t("bookingsNeedConfig")}
+                    </span>
+                    <span className="text-slate-400 text-sm">
+                      {t("bookingsNeedConfigDescription")}
+                    </span>
+                  </div>
+                </div>
+                <Link
+                  href="/dashboard/calendar"
+                  className="w-full md:w-auto px-5 py-2.5 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 hover:text-orange-300 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium border border-orange-500/20 hover:border-orange-500/40"
+                >
+                  <Calendar className="w-4 h-4" />
+                  {t("configureCalendar")}
+                </Link>
+              </div>
+            )}
+          </div>
         </DashboardCard>
       )}
 
-      {/* Enterprise Affiliation — show if instructor belongs to an organization */}
-      {profile?.enterpriseMemberships?.[0]?.enterprise &&
-        (() => {
-          const org = profile.enterpriseMemberships[0].enterprise;
-          return (
-            <DashboardCard
-              title={t("affiliatedEnterprise")}
-              delay={0}
-              hoverable={true}
-              hoverColor="hover:border-orange-500"
-            >
-              <Link
-                href={`/enterprise/${org.slug}` as any}
-                className="flex items-center gap-4 group"
-              >
-                {org.logoUrl ? (
-                  <span className="w-12 h-12 rounded-xl overflow-hidden border border-slate-600 bg-white shrink-0">
-                    <img
-                      src={getMediaUrl(org.logoUrl)}
-                      alt={org.companyName}
-                      className="w-full h-full object-cover"
-                    />
-                  </span>
-                ) : (
-                  <span className="w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center shrink-0">
-                    <Building2 className="w-6 h-6 text-slate-400" />
-                  </span>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">
-                    {t("instructorAt")}
-                  </p>
-                  <p className="text-base font-semibold text-white group-hover:text-orange-400 transition-colors truncate">
-                    {org.companyName}
-                  </p>
-                </div>
-                <Building2 className="w-5 h-5 text-slate-500 group-hover:text-orange-400 transition-colors shrink-0" />
-              </Link>
-            </DashboardCard>
-          );
-        })()}
+      {/* Enterprise Affiliation — show all organizations the instructor belongs to */}
+      {profile?.enterpriseMemberships &&
+        profile.enterpriseMemberships.length > 0 && (
+          <DashboardCard
+            title={t("affiliatedEnterprise")}
+            delay={0}
+            hoverable={true}
+            hoverColor="hover:border-orange-500"
+          >
+            <div className="space-y-3">
+              {profile.enterpriseMemberships.map((membership) => {
+                const org = membership.enterprise;
+                return (
+                  <Link
+                    key={membership.id}
+                    href={`/enterprise/${org.slug}` as any}
+                    className="flex items-center gap-4 group"
+                  >
+                    {org.logoUrl ? (
+                      <span className="w-12 h-12 rounded-xl overflow-hidden border border-slate-600 bg-white shrink-0">
+                        <img
+                          src={getMediaUrl(org.logoUrl)}
+                          alt={org.companyName}
+                          className="w-full h-full object-cover"
+                        />
+                      </span>
+                    ) : (
+                      <span className="w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center shrink-0">
+                        <Building2 className="w-6 h-6 text-slate-400" />
+                      </span>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">
+                        {t("instructorAt")}
+                      </p>
+                      <p className="text-base font-semibold text-white group-hover:text-orange-400 transition-colors truncate">
+                        {org.companyName}
+                      </p>
+                    </div>
+                    <Building2 className="w-5 h-5 text-slate-500 group-hover:text-orange-400 transition-colors shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          </DashboardCard>
+        )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
