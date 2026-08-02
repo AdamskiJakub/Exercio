@@ -95,12 +95,15 @@ export function ImageCropModalFree({
         if (!cancelled) setImageUrl(url);
       })
       .catch(() => {
-        if (!cancelled) setImageUrl(null);
+        if (cancelled) return;
+        setImageUrl(null);
+        toast.error(t("error") || "Failed to load image");
+        onCancel();
       });
     return () => {
       cancelled = true;
     };
-  }, [imageSrc]);
+  }, [imageSrc, onCancel, t]);
 
   // Initialize the crop window once the image loads, centered with the
   // requested aspect ratio.

@@ -82,7 +82,18 @@ export function fileToDataUrl(file: Blob, maxDim = 2048): Promise<string> {
           return;
         }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
+        // Preserve transparency when downscaling — JPEG would flatten the alpha
+        // channel to a black background. Both PNG and WebP can carry an alpha
+        // channel (e.g. transparent logos), so keep their native format. Only
+        // opaque formats (JPEG/JPG) are re-encoded as JPEG.
+        const mime = file.type.toLowerCase();
+        const keepAlpha = mime === "image/png" || mime === "image/webp";
+        const outType = keepAlpha
+          ? mime === "image/webp"
+            ? "image/webp"
+            : "image/png"
+          : "image/jpeg";
+        resolve(canvas.toDataURL(outType, 0.9));
       };
       img.onerror = () => reject(new Error("Failed to load image"));
       img.src = reader.result as string;
