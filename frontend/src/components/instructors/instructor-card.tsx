@@ -44,15 +44,16 @@ export function InstructorCard({
 
   const router = useRouter();
 
-  // Get the first accepted enterprise membership
-  const enterpriseOrg = instructor.enterpriseMemberships?.[0]?.enterprise;
+  // Get all accepted enterprise memberships
+  const enterpriseOrgs =
+    instructor.enterpriseMemberships
+      ?.map((m) => m.enterprise)
+      .filter(Boolean) ?? [];
 
-  const handleOrgClick = (e: React.MouseEvent) => {
+  const handleOrgClick = (e: React.MouseEvent, slug: string) => {
     e.stopPropagation();
     e.preventDefault();
-    if (enterpriseOrg) {
-      router.push(`/${locale}/enterprise/${enterpriseOrg.slug}`);
-    }
+    router.push(`/${locale}/enterprise/${slug}`);
   };
 
   const cardContent = (
@@ -97,44 +98,54 @@ export function InstructorCard({
                 </p>
               )}
 
-              {/* Enterprise Organization - under name */}
-              {enterpriseOrg && (
-                <span
-                  onClick={handleOrgClick}
-                  onKeyDown={(e: React.KeyboardEvent) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      if (enterpriseOrg) {
-                        router.push(
-                          `/${locale}/enterprise/${enterpriseOrg.slug}`,
-                        );
-                      }
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  className="inline-flex items-center gap-1.5 mt-3 text-sm text-slate-400 hover:text-orange-400 transition-colors cursor-pointer"
-                >
-                  <Building2 className="size-4 shrink-0 text-slate-400" />
-                  <span className="text-slate-400 text-xs font-medium">
-                    {t("instructorAt")}:
-                  </span>
-                  {enterpriseOrg.logoUrl ? (
-                    <span className="w-5 h-5 rounded-full overflow-hidden bg-white shrink-0 inline-block border border-slate-700">
-                      <img
-                        src={getMediaUrl(enterpriseOrg.logoUrl)}
-                        alt={enterpriseOrg.companyName}
-                        className="w-full h-full object-cover"
-                      />
+              {/* Enterprise Organizations - under name */}
+              {enterpriseOrgs.length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-3">
+                  <span className="inline-flex items-center gap-1.5 text-sm text-slate-400">
+                    <Building2 className="size-4 shrink-0 text-slate-400" />
+                    <span className="text-slate-400 text-xs font-medium">
+                      {t("instructorAt")}:
                     </span>
-                  ) : (
-                    <Building2 className="size-4 shrink-0" />
-                  )}
-                  <span className="font-medium text-slate-300">
-                    {enterpriseOrg.companyName}
                   </span>
-                </span>
+                  {enterpriseOrgs.map((org, index) => (
+                    <span
+                      key={org.id}
+                      className="inline-flex items-center gap-1.5 text-sm text-slate-400"
+                    >
+                      <span
+                        onClick={(e) => handleOrgClick(e, org.slug)}
+                        onKeyDown={(e: React.KeyboardEvent) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            router.push(`/${locale}/enterprise/${org.slug}`);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-orange-400 transition-colors cursor-pointer"
+                      >
+                        {org.logoUrl ? (
+                          <span className="w-5 h-5 rounded-full overflow-hidden bg-white shrink-0 inline-block border border-slate-700">
+                            <img
+                              src={getMediaUrl(org.logoUrl)}
+                              alt={org.companyName}
+                              className="w-full h-full object-cover"
+                            />
+                          </span>
+                        ) : (
+                          <Building2 className="size-4 shrink-0" />
+                        )}
+                        <span className="font-medium text-slate-300">
+                          {org.companyName}
+                        </span>
+                      </span>
+                      {index < enterpriseOrgs.length - 1 && (
+                        <span className="text-slate-300">,</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 

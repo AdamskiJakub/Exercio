@@ -25,7 +25,11 @@ export function EnterpriseInstructors({
   }
 
   return (
-    <section className="space-y-6" aria-labelledby="instructors-heading">
+    <section
+      id="instructors"
+      className="space-y-6"
+      aria-labelledby="instructors-heading"
+    >
       <div className="flex items-center justify-between">
         <h2
           id="instructors-heading"
