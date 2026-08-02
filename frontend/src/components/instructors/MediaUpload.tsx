@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Upload, X, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ImageCropModal } from "@/components/ui/ImageCropModal";
+import { blobToFile } from "@/lib/utils/cropImage";
 import { MediaUploadProps } from "./types";
 import { getMediaUrl, IS_DEVELOPMENT, isVideoUrl } from "@/lib/utils/media";
 import { toast } from "sonner";
@@ -37,6 +39,9 @@ export function MediaUpload(props: MediaUploadProps) {
         })),
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // File currently being cropped (avatar variant)
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
 
   // Cleanup blob URLs on unmount or when previews change
   useEffect(() => {
@@ -112,6 +117,16 @@ export function MediaUpload(props: MediaUploadProps) {
       return;
     }
 
+    // For avatar variant, open the crop modal instead of uploading directly.
+    if (variant === "avatar") {
+      setCropFile(files[0]);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
     try {
       // Create previews
       const newPreviews = files.map((file) => ({
@@ -122,44 +137,28 @@ export function MediaUpload(props: MediaUploadProps) {
         isBlob: true,
       }));
 
-      if (variant === "avatar") {
-        setPreviews(newPreviews);
-        // Upload single file for avatar
-        const uploadResult = await onUpload(files[0]);
-        setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
-        onMediaChange(uploadResult);
-      } else {
-        setPreviews([...previews, ...newPreviews]);
-        // Upload multiple files for gallery
-        const uploadResult = await onUpload(files);
-        const newUrls = [...currentMediaUrls, ...uploadResult];
-        setPreviews(
-          newUrls.map((url) => ({
-            url,
-            type: isVideoUrl(url) ? "video" : "image",
-            isBlob: false,
-          })),
-        );
-        onMediaChange(newUrls);
-      }
+      // Upload multiple files for gallery
+      setPreviews([...previews, ...newPreviews]);
+      const uploadResult = await onUpload(files);
+      const newUrls = [...currentMediaUrls, ...uploadResult];
+      setPreviews(
+        newUrls.map((url) => ({
+          url,
+          type: isVideoUrl(url) ? "video" : "image",
+          isBlob: false,
+        })),
+      );
+      onMediaChange(newUrls);
     } catch (error) {
       // Revert previews on error
-      if (variant === "avatar") {
-        setPreviews(
-          currentMediaUrl
-            ? [{ url: currentMediaUrl, type: "image", isBlob: false }]
-            : [],
-        );
-      } else {
-        setPreviews(
-          currentMediaUrls.map((url) => ({
-            url,
-            type:
-              url.endsWith(".mp4") || url.endsWith(".webm") ? "video" : "image",
-            isBlob: false,
-          })),
-        );
-      }
+      setPreviews(
+        currentMediaUrls.map((url) => ({
+          url,
+          type:
+            url.endsWith(".mp4") || url.endsWith(".webm") ? "video" : "image",
+          isBlob: false,
+        })),
+      );
       // Show error to user
       const message = error instanceof Error ? error.message : t("uploadError");
       toast.error(message);
@@ -169,6 +168,31 @@ export function MediaUpload(props: MediaUploadProps) {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  // Confirm the cropped avatar: convert blob to File and upload.
+  const handleCropConfirm = async (blob: Blob) => {
+    if (!cropFile) return;
+    setIsCropping(true);
+    try {
+      const file = blobToFile(blob, "avatar");
+      // We are in the avatar variant here, so onUpload is the single-file version.
+      const uploadResult = await (onUpload as (file: File) => Promise<string>)(
+        file,
+      );
+      setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
+      (onMediaChange as (url: string) => void)(uploadResult);
+      setCropFile(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t("uploadError");
+      toast.error(message);
+    } finally {
+      setIsCropping(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropFile(null);
   };
 
   const handleRemove = (index?: number) => {
@@ -281,6 +305,20 @@ export function MediaUpload(props: MediaUploadProps) {
             </p>
           </div>
         </div>
+
+        {/* Avatar crop modal */}
+        <ImageCropModal
+          open={!!cropFile}
+          imageSrc={cropFile ?? ""}
+          aspectRatio={1}
+          cropShape="round"
+          outputWidth={600}
+          outputHeight={600}
+          format="image/webp"
+          isSaving={isCropping}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
       </div>
     );
   }

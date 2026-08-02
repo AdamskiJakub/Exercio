@@ -5,9 +5,23 @@ import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { ImageCropModal, type CropShape } from "@/components/ui/ImageCropModal";
+import { ImageCropModalFree } from "@/components/ui/ImageCropModalFree";
+import { blobToFile } from "@/lib/utils/cropImage";
 import { Image, Upload, Loader2, Plus, X } from "lucide-react";
 import { getMediaUrl, isVideoUrl } from "@/lib/utils/media";
 import type { MediaField, GalleryField } from "@/types/enterprise";
+
+interface CropConfig {
+  aspectRatio?: number;
+  freeAspect?: boolean;
+  objectFit?: "contain" | "cover";
+  /** Use the free-form resizable crop (react-image-crop) for covers/backgrounds. */
+  freeCrop?: boolean;
+  cropShape?: CropShape;
+  outputWidth?: number;
+  outputHeight?: number;
+}
 
 interface EnterpriseProfileMediaProps {
   logo: MediaField;
@@ -60,6 +74,7 @@ function MediaUploadRow({
   uploadLabel,
   previewLabel,
   showPreview,
+  crop,
 }: {
   field: MediaField;
   inputId: string;
@@ -67,8 +82,48 @@ function MediaUploadRow({
   uploadLabel: string;
   previewLabel: string;
   showPreview?: boolean;
+  crop?: CropConfig;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+    if (!file) return;
+
+    // If crop is configured and we have a single-file upload function,
+    // open the crop modal instead of uploading directly.
+    if (crop && field.onUploadFile) {
+      setCropFile(file);
+      return;
+    }
+
+    field.onChange(e);
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    if (!field.onUploadFile) return;
+    setIsCropping(true);
+    try {
+      const file = blobToFile(blob, inputId);
+      const url = await field.onUploadFile(file);
+      field.onUrlChange(url);
+      setCropFile(null);
+    } catch {
+      setCropFile(null);
+    } finally {
+      setIsCropping(false);
+    }
+  };
+
+  const handleCropCancel = () => {
+    setCropFile(null);
+  };
 
   return (
     <div className="space-y-2">
@@ -89,7 +144,7 @@ function MediaUploadRow({
           ref={inputRef}
           type="file"
           accept={accept}
-          onChange={field.onChange}
+          onChange={handleFileChange}
           className="hidden"
           disabled={field.isUploading}
         />
@@ -113,6 +168,37 @@ function MediaUploadRow({
           onRemove={field.onRemove}
           label={previewLabel}
         />
+      )}
+
+      {crop?.freeCrop ? (
+        <ImageCropModalFree
+          open={!!cropFile}
+          imageSrc={cropFile ?? ""}
+          aspectRatio={crop.aspectRatio ?? 3}
+          outputWidth={crop.outputWidth ?? 1920}
+          outputHeight={crop.outputHeight ?? crop.outputWidth ?? 640}
+          format="image/webp"
+          isSaving={isCropping}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
+      ) : (
+        crop && (
+          <ImageCropModal
+            open={!!cropFile}
+            imageSrc={cropFile ?? ""}
+            aspectRatio={crop.aspectRatio ?? 1}
+            freeAspect={crop.freeAspect ?? false}
+            objectFit={crop.objectFit ?? "contain"}
+            cropShape={crop.cropShape ?? "rect"}
+            outputWidth={crop.outputWidth ?? 600}
+            outputHeight={crop.outputHeight ?? crop.outputWidth ?? 600}
+            format="image/webp"
+            isSaving={isCropping}
+            onConfirm={handleCropConfirm}
+            onCancel={handleCropCancel}
+          />
+        )
       )}
     </div>
   );
@@ -153,6 +239,12 @@ export function EnterpriseProfileMedia({
           accept="image/jpeg,image/png,image/webp"
           uploadLabel={t("logoUrl") || "Logo"}
           previewLabel={t("logoPreview") || "Logo preview"}
+          crop={{
+            aspectRatio: 1,
+            cropShape: "rect",
+            outputWidth: 600,
+            outputHeight: 600,
+          }}
         />
         <MediaUploadRow
           field={cover}
@@ -160,6 +252,14 @@ export function EnterpriseProfileMedia({
           accept="image/jpeg,image/png,image/webp"
           uploadLabel={t("coverUrl") || "Cover Photo"}
           previewLabel={t("coverPreview") || "Cover preview"}
+          crop={{
+            // Free-form resizable crop (react-image-crop) — the user grabs the
+            // corners/edges to choose exactly which portion of the cover to keep.
+            freeCrop: true,
+            aspectRatio: 3,
+            outputWidth: 1920,
+            outputHeight: 640,
+          }}
         />
       </div>
 
@@ -170,6 +270,13 @@ export function EnterpriseProfileMedia({
           accept="image/jpeg,image/png,image/webp"
           uploadLabel={t("aboutImage") || "About Section Image"}
           previewLabel={t("aboutImagePreview") || "About section image preview"}
+          crop={{
+            // Portrait crop to match the tall "About Us" column (2 of 5 cols).
+            aspectRatio: 3 / 4,
+            cropShape: "rect",
+            outputWidth: 900,
+            outputHeight: 1200,
+          }}
         />
         <p className="text-sm text-slate-400">
           {t("aboutImageDescription") ||

@@ -1,4 +1,16 @@
 {
+  "ImageCrop": {
+    "title": "Adjust your photo",
+    "description": "Drag to reposition and use the slider to zoom. The final image will be saved in the selected frame.",
+    "freeDescription": "Drag the corners or edges of the frame to resize it, and drag inside to move it.",
+    "zoom": "Zoom",
+    "fit": "Fit",
+    "fitContain": "Whole image",
+    "fitCover": "Fill frame",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving..."
+  },
   "HomePage": {
     "hero": {
       "title": "Find an instructor or",

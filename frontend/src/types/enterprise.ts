@@ -237,6 +237,7 @@ export interface MediaField {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onUrlChange: (value: string) => void;
   onRemove: () => void;
+  onUploadFile?: (file: File) => Promise<string>;
 }
 
 export interface GalleryField {
