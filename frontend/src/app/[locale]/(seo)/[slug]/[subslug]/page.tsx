@@ -6,7 +6,6 @@ import {
   fetchCatalog,
 } from "@/lib/seo/fetch-seo-page";
 import { getLocalizedName } from "@/lib/catalog-types";
-import { isReservedSlug } from "@/lib/seo/reserved-slugs";
 import { deslugifyCity } from "@/lib/seo/slug-utils";
 import { SubslugPageClient } from "./SubslugPageClient";
 import type { CatalogCategory } from "@/lib/catalog-types";
@@ -90,15 +89,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = decodeURIComponent(rawSlug);
   const subslug = decodeURIComponent(rawSubslug);
 
-  // Block if subslug is a reserved slug (but allow city slugs which are in reserved set)
-  if (isReservedSlug(subslug)) {
-    // Check if this is a city+category page where subslug might be a city
-    const slugResolved = await resolveSlug(slug, locale);
-    if (slugResolved?.type !== "category") {
-      return { title: "Exercio" };
-    }
-  }
-
+  // resolveSubslug validates the combination (city+category or discipline+city)
+  // and returns null for invalid combos, which we turn into a 404 below.
   const resolved = await resolveSubslug(slug, subslug, locale);
   if (!resolved) {
     return { title: "Not Found" };
@@ -183,14 +175,8 @@ export default async function SubslugPage({ params }: Props) {
   const slug = decodeURIComponent(rawSlug);
   const subslug = decodeURIComponent(rawSubslug);
 
-  // Block if subslug is a reserved slug (but allow city slugs which are in reserved set)
-  if (isReservedSlug(subslug)) {
-    const slugResolved = await resolveSlug(slug, locale);
-    if (slugResolved?.type !== "category") {
-      notFound();
-    }
-  }
-
+  // resolveSubslug validates the combination (city+category or discipline+city)
+  // and returns null for invalid combos, which we turn into a 404 below.
   const resolved = await resolveSubslug(slug, subslug, locale);
   if (!resolved) {
     notFound();

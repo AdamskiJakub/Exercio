@@ -49,7 +49,8 @@
       "description": "Prowadzisz studio, siłownię lub organizację sportową? Zostań Partnerem Założycielskim i współtwórz z nami największy marketplace sportowy w Polsce.",
       "socialProof": "Już teraz trenerzy i studia z Białegostoku korzystają z Exercio, aby pozyskiwać nowych klientów.",
       "partnerFeniks": "Studio Tańca Feniks",
-      "partnerFormAnalata": "Forma na lata"
+      "partnerFormAnalata": "Forma na lata",
+      "partnerTrenujZPolozna": "Trenuj z położną"
     },
     "stats": {
       "trainers": "Zweryfikowanych Instruktorów",
@@ -1766,6 +1767,7 @@
     "socialProofSubtitle": "Poznaj studia i organizacje, które już dołączyły do programu i współtworzą z nami przyszłość rynku sportowego w Polsce.",
     "partnerFeniks": "Studio Tańca Feniks",
     "partnerFormAnalata": "Forma na lata",
+    "partnerTrenujZPolozna": "Trenuj z położną",
     "ctaSectionTitle": "Zostań jednym z pierwszych Partnerów Exercio",
     "ctaSectionSubtitle": "Nie szukamy klientów — szukamy Partnerów, którzy razem z nami chcą zbudować coś wartościowego. Jeśli prowadzisz studio, siłownię lub organizację sportową i widzisz potencjał we wspólnym działaniu — wypełnij formularz, a porozmawiamy.",
     "contactUs": "Skontaktuj się z nami"

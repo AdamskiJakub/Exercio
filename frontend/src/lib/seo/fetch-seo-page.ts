@@ -17,6 +17,24 @@ export interface SearchResponse {
   enterprises?: { data: EnterpriseListing[]; total: number };
 }
 
+/**
+ * Raw response from the /search?type=all endpoint — a single mixed feed
+ * sorted by createdAt. Matches the backend response shape.
+ */
+interface FeedSearchResponse {
+  items: Array<{
+    type: "instructor" | "enterprise";
+    createdAt: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any;
+  }>;
+  total: number;
+  instructorTotal: number;
+  enterpriseTotal: number;
+  page: number;
+  totalPages: number;
+}
+
 interface CatalogResponse {
   disciplines: CatalogDiscipline[];
   categories: CatalogCategory[];
@@ -73,9 +91,26 @@ export async function fetchSearchResults(params: {
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 
-  return fetchJson<SearchResponse>(
+  const raw = await fetchJson<FeedSearchResponse>(
     `${API_BASE_URL}/search?${searchParams.toString()}`,
   );
+  // Guard against null responses or unexpected shapes (e.g. an error object
+  // or a missing `items` array) so we never crash on .filter().
+  if (!raw?.items || !Array.isArray(raw.items)) return null;
+
+  // Transform the mixed feed into separate instructor/enterprise buckets
+  // matching the shape the SEO components expect.
+  const instructors = raw.items
+    .filter((item) => item.type === "instructor")
+    .map((item) => item.data as InstructorListing);
+  const enterprises = raw.items
+    .filter((item) => item.type === "enterprise")
+    .map((item) => item.data as EnterpriseListing);
+
+  return {
+    instructors: { data: instructors, total: raw.instructorTotal },
+    enterprises: { data: enterprises, total: raw.enterpriseTotal },
+  };
 }
 
 export async function fetchDisciplinesByCity(city: string): Promise<{
