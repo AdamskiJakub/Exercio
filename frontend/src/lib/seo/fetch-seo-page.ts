@@ -94,7 +94,9 @@ export async function fetchSearchResults(params: {
   const raw = await fetchJson<FeedSearchResponse>(
     `${API_BASE_URL}/search?${searchParams.toString()}`,
   );
-  if (!raw) return null;
+  // Guard against null responses or unexpected shapes (e.g. an error object
+  // or a missing `items` array) so we never crash on .filter().
+  if (!raw?.items || !Array.isArray(raw.items)) return null;
 
   // Transform the mixed feed into separate instructor/enterprise buckets
   // matching the shape the SEO components expect.

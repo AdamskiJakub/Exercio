@@ -48,6 +48,11 @@ export function normalizeWebsiteUrl(
   if (!url) return undefined;
   const trimmed = url.trim();
   if (!trimmed) return undefined;
+  // Protocol-relative URLs (e.g. "//example.com") inherit http/https and are safe.
+  // Normalize to an explicit https:// scheme to avoid "https:////example.com".
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
   // If it already has a protocol, only allow safe ones (http, https, mailto, tel).
   // Reject dangerous schemes like javascript:, data:, vbscript: to avoid XSS.
   if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
