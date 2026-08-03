@@ -55,6 +55,7 @@ interface BaseMediaUploadProps {
   isUploading: boolean;
   label: string;
   hint?: string;
+  onPendingDelete?: (url: string) => void;
 }
 
 // Avatar variant - single file upload

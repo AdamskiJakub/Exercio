@@ -12,6 +12,7 @@ import { useUpdateInstructorProfile } from "@/hooks/useUpdateInstructorProfile";
 import {
   useUploadProfilePhoto,
   useUploadGalleryPhotos,
+  deleteUploadedFile,
 } from "@/hooks/useFileUpload";
 import { toast } from "sonner";
 import {
@@ -103,6 +104,10 @@ export function InstructorProfileForm({
   const [selectedAvailability, setSelectedAvailability] = useState<string>(
     profile?.availability ?? "",
   );
+
+  // URLs of replaced/removed files whose R2 deletion is deferred until the
+  // profile is successfully saved (avoids data loss if the user cancels).
+  const pendingDeletesRef = useRef<string[]>([]);
 
   // Scroll to section from query param (e.g. ?scrollTo=section-bio) after component mounts
   const searchParams = useSearchParams();
@@ -310,6 +315,11 @@ export function InstructorProfileForm({
       {
         onSuccess: () => {
           toast.success(t("draftSaved"));
+          // Profile saved successfully — now it's safe to delete the
+          // replaced/removed files from R2.
+          const pending = pendingDeletesRef.current;
+          pendingDeletesRef.current = [];
+          pending.forEach((url) => void deleteUploadedFile(url));
           router.push("/dashboard/profile/preview");
         },
         onError: (error) => {
@@ -788,6 +798,7 @@ export function InstructorProfileForm({
             variant="avatar"
             currentMediaUrl={watch("photoUrl")}
             onMediaChange={(url) => setValue("photoUrl", url as string)}
+            onPendingDelete={(url) => pendingDeletesRef.current.push(url)}
             onUpload={async (file) => {
               return new Promise<string>((resolve, reject) => {
                 uploadPhoto(file as File, {
@@ -818,6 +829,7 @@ export function InstructorProfileForm({
                 : []
             }
             onMediaChange={(urls) => setValue("gallery", urls as string[])}
+            onPendingDelete={(url) => pendingDeletesRef.current.push(url)}
             onUpload={async (files) => {
               return new Promise<string[]>((resolve, reject) => {
                 uploadGallery(files as File[], {

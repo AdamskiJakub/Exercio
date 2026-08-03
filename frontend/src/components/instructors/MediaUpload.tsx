@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCropUpload } from "@/hooks/useCropUpload";
-import { deleteUploadedFile } from "@/hooks/useFileUpload";
 import { isHeic, processImage } from "@/lib/utils/cropImage";
 import { MediaUploadProps } from "./types";
 import { getMediaUrl, IS_DEVELOPMENT } from "@/lib/utils/media";
@@ -38,10 +37,11 @@ export function MediaUpload(props: MediaUploadProps) {
   const { handleFileChange, cropModal } = useCropUpload({
     uploadFile: props.onUpload as (file: File) => Promise<string>,
     onUrlChange: (url) => {
-      // If an avatar was already uploaded, delete the old one from R2
+      // If an avatar was already uploaded, defer the old one's R2 deletion
+      // until the form is saved (avoids data loss if the user cancels).
       const previous = previews[0];
       if (previous && !previous.isBlob && previous.url !== url) {
-        void deleteUploadedFile(previous.url);
+        props.onPendingDelete?.(previous.url);
       }
       setPreviews([{ url, type: "image", isBlob: false }]);
       (props.onMediaChange as (url: string) => void)(url);
@@ -189,9 +189,10 @@ export function MediaUpload(props: MediaUploadProps) {
 
   const handleRemove = (index?: number) => {
     if (variant === "avatar") {
-      // Delete the uploaded file from R2 (skip local blob URLs)
+      // Defer the uploaded file's R2 deletion until the form is saved
+      // (skip local blob URLs)
       if (previews[0] && !previews[0].isBlob) {
-        void deleteUploadedFile(previews[0].url);
+        props.onPendingDelete?.(previews[0].url);
       }
       // Revoke blob URL if it exists
       if (previews[0]?.isBlob) {
@@ -200,9 +201,10 @@ export function MediaUpload(props: MediaUploadProps) {
       setPreviews([]);
       onMediaChange("");
     } else if (index !== undefined) {
-      // Delete the uploaded file from R2 (skip local blob URLs)
+      // Defer the uploaded file's R2 deletion until the form is saved
+      // (skip local blob URLs)
       if (previews[index] && !previews[index].isBlob) {
-        void deleteUploadedFile(previews[index].url);
+        props.onPendingDelete?.(previews[index].url);
       }
       // Revoke blob URL if it exists
       if (previews[index]?.isBlob) {
