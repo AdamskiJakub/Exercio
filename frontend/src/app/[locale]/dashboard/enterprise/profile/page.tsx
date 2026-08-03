@@ -9,6 +9,7 @@ import { useMyEnterpriseProfile } from "@/hooks/useEnterpriseProfile";
 import {
   useUploadProfilePhoto,
   useUploadGalleryPhotos,
+  deleteUploadedFile,
 } from "@/hooks/useFileUpload";
 import { useArrayField } from "@/hooks/useArrayField";
 import { useUploadHandler } from "@/hooks/useUploadHandler";
@@ -20,7 +21,7 @@ import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UpdateEnterpriseProfileDto } from "@/types/enterprise";
-import { processImage } from "@/lib/utils/cropImage";
+import { isHeic, processImage } from "@/lib/utils/cropImage";
 import { EnterpriseProfileBasicInfo } from "@/components/enterprise/EnterpriseProfileBasicInfo";
 import { EnterpriseProfileMedia } from "@/components/enterprise/EnterpriseProfileMedia";
 import { EnterpriseProfileHours } from "@/components/enterprise/EnterpriseProfileHours";
@@ -157,11 +158,13 @@ export default function EnterpriseProfilePage() {
   const handleLogoUpload = useUploadHandler(uploadPhoto, setForm, "logoUrl", {
     successMessage: t("logoUploaded") || "Logo uploaded",
     errorMessage: t("uploadFailed") || "Upload failed",
+    onReplace: (oldValue) => void deleteUploadedFile(oldValue),
   });
 
   const handleCoverUpload = useUploadHandler(uploadCover, setForm, "coverUrl", {
     successMessage: t("coverUploaded") || "Cover photo uploaded",
     errorMessage: t("uploadFailed") || "Upload failed",
+    onReplace: (oldValue) => void deleteUploadedFile(oldValue),
   });
 
   const handleAboutImageUpload = useUploadHandler(
@@ -171,6 +174,7 @@ export default function EnterpriseProfilePage() {
     {
       successMessage: t("aboutImageUploaded") || "About image uploaded",
       errorMessage: t("uploadFailed") || "Upload failed",
+      onReplace: (oldValue) => void deleteUploadedFile(oldValue),
     },
   );
 
@@ -181,10 +185,12 @@ export default function EnterpriseProfilePage() {
     if (files.length === 0) return;
     try {
       // Compress/resize image files before upload so R2 never stores raw
-      // multi-megabyte phone photos. Videos are uploaded as-is.
+      // multi-megabyte phone photos.
       const uploadFiles = await Promise.all(
+        // HEIC/HEIF cannot be decoded by the browser, so upload them raw — the
+        // backend converts them via sharp (same as the instructor gallery).
         files.map(async (file) =>
-          file.type.startsWith("video/") ? file : processImage(file, "gallery"),
+          isHeic(file) ? file : processImage(file, "gallery"),
         ),
       );
       const urls = await uploadGallery(uploadFiles);
@@ -199,22 +205,35 @@ export default function EnterpriseProfilePage() {
   };
 
   const handleRemoveLogo = useCallback(() => {
-    setForm((prev) => ({ ...prev, logoUrl: "" }));
+    setForm((prev) => {
+      if (prev.logoUrl) void deleteUploadedFile(prev.logoUrl);
+      return { ...prev, logoUrl: "" };
+    });
   }, []);
 
   const handleRemoveCover = useCallback(() => {
-    setForm((prev) => ({ ...prev, coverUrl: "" }));
+    setForm((prev) => {
+      if (prev.coverUrl) void deleteUploadedFile(prev.coverUrl);
+      return { ...prev, coverUrl: "" };
+    });
   }, []);
 
   const handleRemoveAboutImage = useCallback(() => {
-    setForm((prev) => ({ ...prev, aboutImage: "" }));
+    setForm((prev) => {
+      if (prev.aboutImage) void deleteUploadedFile(prev.aboutImage);
+      return { ...prev, aboutImage: "" };
+    });
   }, []);
 
   const handleRemoveGalleryImage = useCallback((index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      gallery: (prev.gallery || []).filter((_, i) => i !== index),
-    }));
+    setForm((prev) => {
+      const removed = (prev.gallery || [])[index];
+      if (removed) void deleteUploadedFile(removed);
+      return {
+        ...prev,
+        gallery: (prev.gallery || []).filter((_, i) => i !== index),
+      };
+    });
   }, []);
 
   if (isChecking || !user || profileLoading) {

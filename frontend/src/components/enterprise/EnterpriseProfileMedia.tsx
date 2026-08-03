@@ -5,18 +5,11 @@ import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ImageCropModal, type CropShape } from "@/components/ui/ImageCropModal";
-import { ImageCropModalFree } from "@/components/ui/ImageCropModalFree";
-import {
-  blobToFile,
-  isHeic,
-  loadImage,
-  matchesAspectRatio,
-  processImage,
-} from "@/lib/utils/cropImage";
+import { type CropShape } from "@/components/ui/ImageCropModal";
+import { useCropUpload } from "@/hooks/useCropUpload";
+import { deleteUploadedFile } from "@/hooks/useFileUpload";
 import { Image, Upload, Loader2, Plus, X } from "lucide-react";
-import { getMediaUrl, isVideoUrl } from "@/lib/utils/media";
-import { toast } from "sonner";
+import { getMediaUrl } from "@/lib/utils/media";
 import type { MediaField, GalleryField } from "@/types/enterprise";
 
 interface CropConfig {
@@ -102,157 +95,36 @@ function MediaUploadRow({
   crop?: CropConfig;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [cropFile, setCropFile] = useState<File | null>(null);
-  const [cropUrl, setCropUrl] = useState<string | null>(null);
-  const [isCropping, setIsCropping] = useState(false);
   const t = useTranslations("Dashboard.enterprise");
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-    if (!file) return;
-
-    // Smart cover: if the image already matches the target aspect ratio,
-    // skip the crop modal and just resize + compress before uploading.
-    // Only attempt for image files — a non-image (e.g. a video selected via
-    // the file picker) can't be loaded as an image, so we fall through to the
-    // normal crop/upload flow instead of throwing an uncaught error.
-    if (
-      crop?.smartAspect &&
-      crop.freeCrop &&
-      field.onUploadFile &&
-      file.type.startsWith("image/")
-    ) {
-      let matches = false;
-      try {
-        matches = await matchesAspectRatio(
-          file,
-          crop.aspectRatio ?? 3,
-          crop.smartTolerance ?? 0.1,
-        );
-      } catch {
-        matches = false;
-      }
-      if (matches) {
-        setIsCropping(true);
-        try {
-          const optimized = await processImage(file, "cover");
-          const url = await field.onUploadFile(optimized);
-          field.onUrlChange(url);
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : t("uploadFailed");
-          toast.error(message);
-        } finally {
-          setIsCropping(false);
+  const { isUploading, handleFileChange, handleUrlCrop, cropModal } =
+    useCropUpload({
+      uploadFile: async (file) => {
+        if (!field.onUploadFile) throw new Error("Upload not available");
+        return field.onUploadFile(file);
+      },
+      onUrlChange: (url) => {
+        // If an image was already set, delete the old one from R2 on replace
+        if (field.url && field.url !== url) {
+          void deleteUploadedFile(field.url);
         }
-        return;
-      }
-    }
-
-    // HEIC/HEIF cannot be decoded by browsers, so the crop modal would fail
-    // to render. Upload them directly instead — the backend accepts HEIC/HEIF.
-    if (crop && field.onUploadFile && isHeic(file)) {
-      setIsCropping(true);
-      try {
-        const url = await field.onUploadFile(file);
         field.onUrlChange(url);
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : t("uploadFailed");
-        toast.error(message);
-      } finally {
-        setIsCropping(false);
-      }
-      return;
-    }
+      },
+      crop: crop ?? {
+        aspectRatio: 1,
+        outputWidth: 600,
+        outputHeight: 600,
+      },
+      enableUrlCrop: true,
+      filename: inputId,
+      errorMessage: t("uploadFailed"),
+    });
 
-    // If crop is configured and we have a single-file upload function,
-    // open the crop modal instead of uploading directly.
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (crop && field.onUploadFile) {
-      setCropFile(file);
-      return;
-    }
-
-    field.onChange(e);
-  };
-
-  const handleCropConfirm = async (blob: Blob) => {
-    if (!field.onUploadFile) return;
-    setIsCropping(true);
-    try {
-      const file = blobToFile(blob, inputId);
-      const url = await field.onUploadFile(file);
-      field.onUrlChange(url);
-      setCropFile(null);
-      setCropUrl(null);
-    } catch (error) {
-      setCropFile(null);
-      setCropUrl(null);
-      const message =
-        error instanceof Error ? error.message : t("uploadFailed");
-      toast.error(message);
-    } finally {
-      setIsCropping(false);
-    }
-  };
-
-  const handleCropCancel = () => {
-    setCropFile(null);
-    setCropUrl(null);
-  };
-
-  // When the user pastes an image URL instead of uploading from the computer,
-  // we still want the crop/optimization pipeline to run. Fetch the remote image
-  // (crossOrigin so the canvas stays untainted), then either smart-skip the
-  // crop if it already matches the target ratio, or open the crop modal.
-  const handleUrlCrop = async (url: string) => {
-    const trimmed = url.trim();
-    if (!trimmed || !crop || !field.onUploadFile) {
-      field.onUrlChange(trimmed);
-      return;
-    }
-
-    setIsCropping(true);
-    try {
-      // Fetch the remote image as a Blob so we can run it through the same
-      // resize/compress pipeline as a locally-picked file. This requires the
-      // remote server to allow CORS (R2/S3/Cloudinary do); otherwise we fall
-      // back to storing the URL as-is below.
-      const response = await fetch(trimmed);
-      if (!response.ok) throw new Error("Failed to fetch image");
-      const blob = await response.blob();
-
-      const image = await loadImage(blob);
-      const ratio = image.naturalWidth / image.naturalHeight;
-      const target = crop.aspectRatio ?? 3;
-      const tolerance = crop.smartTolerance ?? 0.1;
-
-      // Smart cover: if the remote image already matches the target ratio,
-      // resize + compress and upload it directly (no crop modal).
-      if (
-        crop.smartAspect &&
-        crop.freeCrop &&
-        Math.abs(ratio - target) / target <= tolerance
-      ) {
-        const optimized = await processImage(blob, "cover");
-        const uploaded = await field.onUploadFile(optimized);
-        field.onUrlChange(uploaded);
-        return;
-      }
-
-      // Otherwise open the crop modal with the remote URL as the source.
-      setCropUrl(trimmed);
-    } catch {
-      // If the URL can't be fetched/loaded as an image (CORS, invalid, etc.),
-      // fall back to storing it as-is so the user isn't blocked from saving
-      // their profile.
-      field.onUrlChange(trimmed);
-    } finally {
-      setIsCropping(false);
+      handleFileChange(e);
+    } else {
+      field.onChange(e);
     }
   };
 
@@ -282,18 +154,18 @@ function MediaUploadRow({
           ref={inputRef}
           type="file"
           accept={accept}
-          onChange={handleFileChange}
+          onChange={onFileChange}
           className="hidden"
-          disabled={field.isUploading}
+          disabled={field.isUploading || isUploading}
         />
         <Button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={field.isUploading}
+          disabled={field.isUploading || isUploading}
           className="h-11 px-3 bg-emerald-600 hover:bg-emerald-500 text-white shrink-0 cursor-pointer"
           aria-label={t("uploadFromComputer")}
         >
-          {field.isUploading ? (
+          {field.isUploading || isUploading ? (
             <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
           ) : (
             <Upload className="w-4 h-4" aria-hidden="true" />
@@ -308,36 +180,7 @@ function MediaUploadRow({
         />
       )}
 
-      {crop?.freeCrop ? (
-        <ImageCropModalFree
-          open={!!cropFile || !!cropUrl}
-          imageSrc={cropFile ?? cropUrl ?? ""}
-          aspectRatio={crop.aspectRatio ?? 3}
-          outputWidth={crop.outputWidth ?? 1920}
-          outputHeight={crop.outputHeight ?? crop.outputWidth ?? 640}
-          format="image/webp"
-          isSaving={isCropping}
-          onConfirm={handleCropConfirm}
-          onCancel={handleCropCancel}
-        />
-      ) : (
-        crop && (
-          <ImageCropModal
-            open={!!cropFile || !!cropUrl}
-            imageSrc={cropFile ?? cropUrl ?? ""}
-            aspectRatio={crop.aspectRatio ?? 1}
-            freeAspect={crop.freeAspect ?? false}
-            objectFit={crop.objectFit ?? "contain"}
-            cropShape={crop.cropShape ?? "rect"}
-            outputWidth={crop.outputWidth ?? 600}
-            outputHeight={crop.outputHeight ?? crop.outputWidth ?? 600}
-            format="image/webp"
-            isSaving={isCropping}
-            onConfirm={handleCropConfirm}
-            onCancel={handleCropCancel}
-          />
-        )
-      )}
+      {crop && cropModal}
     </div>
   );
 }
@@ -374,7 +217,7 @@ export function EnterpriseProfileMedia({
         <MediaUploadRow
           field={logo}
           inputId="logoUrl"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           uploadLabel={t("logoUrl") || "Logo"}
           previewLabel={t("logoPreview") || "Logo preview"}
           crop={{
@@ -387,7 +230,7 @@ export function EnterpriseProfileMedia({
         <MediaUploadRow
           field={cover}
           inputId="coverUrl"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           uploadLabel={t("coverUrl") || "Cover Photo"}
           previewLabel={t("coverPreview") || "Cover preview"}
           crop={{
@@ -410,7 +253,7 @@ export function EnterpriseProfileMedia({
         <MediaUploadRow
           field={aboutImage}
           inputId="aboutImage"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           uploadLabel={t("aboutImage") || "About Section Image"}
           previewLabel={t("aboutImagePreview") || "About section image preview"}
           crop={{
@@ -458,7 +301,7 @@ export function EnterpriseProfileMedia({
           <input
             ref={galleryInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
             onChange={gallery.onChange}
             className="hidden"
             disabled={gallery.isUploading}
@@ -490,24 +333,14 @@ export function EnterpriseProfileMedia({
                 role="listitem"
                 className="relative group aspect-square rounded-lg overflow-hidden border border-slate-600"
               >
-                {isVideoUrl(url) ? (
-                  <video
-                    src={getMediaUrl(url)}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                    preload="metadata"
-                  />
-                ) : (
-                  <img
-                    src={getMediaUrl(url)}
-                    alt={`${t("galleryImage") || "Gallery image"} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                )}
+                <img
+                  src={getMediaUrl(url)}
+                  alt={`${t("galleryImage") || "Gallery image"} ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
                 <button
                   type="button"
                   onClick={() => gallery.onRemove(index)}

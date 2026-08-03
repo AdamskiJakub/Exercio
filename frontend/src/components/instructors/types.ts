@@ -55,7 +55,6 @@ interface BaseMediaUploadProps {
   isUploading: boolean;
   label: string;
   hint?: string;
-  acceptVideo?: boolean;
 }
 
 // Avatar variant - single file upload

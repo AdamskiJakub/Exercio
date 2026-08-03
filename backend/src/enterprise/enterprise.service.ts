@@ -50,7 +50,9 @@ export class EnterpriseService extends EnterpriseBaseService {
             },
           },
         },
-        news: true,
+        news: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
   }

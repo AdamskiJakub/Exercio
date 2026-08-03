@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useEscapeKey } from "@/lib/hooks";
 import { useCityAutocomplete, type City } from "@/hooks/useCityAutocomplete";
+import { DEFAULT_CITY } from "@/lib/constants/cities";
 
 export interface CityAutocompleteProps {
   value?: string;
@@ -43,6 +44,14 @@ export function CityAutocomplete({
   React.useEffect(() => {
     setInputValue(value);
   }, [value]);
+
+  // Beachhead market mode: force the parent's city value to the single
+  // supported city so search/filters always use it.
+  React.useEffect(() => {
+    if (DEFAULT_CITY && value !== DEFAULT_CITY) {
+      onChange?.(DEFAULT_CITY);
+    }
+  }, [DEFAULT_CITY, value, onChange]);
 
   const closeDropdown = React.useCallback(() => {
     setIsOpen(false);
@@ -151,6 +160,31 @@ export function CityAutocomplete({
   const sizeStyles = size === "lg" ? "h-14 text-lg" : "h-12 text-base";
 
   const showDropdown = isOpen && query.trim().length >= 2;
+
+  if (DEFAULT_CITY) {
+    return (
+      <div className="relative">
+        <input
+          type="text"
+          id={id}
+          name={name}
+          value={DEFAULT_CITY}
+          readOnly
+          disabled={disabled}
+          aria-label={placeholder}
+          className={cn(
+            "flex w-full cursor-not-allowed items-center justify-between rounded-lg border-2 bg-slate-800/50 text-white placeholder:text-white outline-none transition-all",
+            "border-slate-700",
+            error && "border-red-500",
+            "px-4",
+            sizeStyles,
+            className,
+          )}
+        />
+        {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

@@ -835,7 +835,6 @@ export function InstructorProfileForm({
             isUploading={isUploadingGallery}
             label={t("gallery")}
             maxFiles={10}
-            acceptVideo={true}
           />
           {errors.gallery && (
             <p className="text-red-400 text-sm">{errors.gallery.message}</p>

@@ -62,7 +62,7 @@ export function EnterpriseProfileAmenities({
             />
             <Label
               htmlFor={field}
-              className="text-base font-medium text-slate-300 cursor-pointer"
+              className="text-base font-medium text-slate-300 cursor-pointer leading-none mb-0"
             >
               {t(field)}
             </Label>

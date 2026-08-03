@@ -309,12 +309,14 @@ export function EnterpriseDashboard() {
                   {t("showAllNews")} ({profile.news.length}) →
                 </Link>
               )}
-              <Link
-                href="/dashboard/enterprise/news"
-                className="block text-center text-sm text-slate-400 hover:text-slate-300 transition-colors mt-1"
-              >
-                {t("manageNews")}
-              </Link>
+              <div className="flex justify-center">
+                <Link
+                  href="/dashboard/enterprise/news"
+                  className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors text-sm font-medium"
+                >
+                  {t("manageNews")}
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="text-center py-8">

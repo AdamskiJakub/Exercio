@@ -11,6 +11,7 @@ export function useUploadHandler(
   field: string,
   options?: {
     onSuccess?: (url: string) => void;
+    onReplace?: (oldValue: string) => void;
     successMessage?: string;
     errorMessage?: string;
     isMultiFile?: boolean;
@@ -31,10 +32,17 @@ export function useUploadHandler(
           }));
         } else {
           const url = await uploadFn(files[0]);
-          setForm((prev: any) => ({
-            ...prev,
-            [field]: url,
-          }));
+          setForm((prev: any) => {
+            // Notify when an existing single-file value is being replaced
+            const oldValue = prev?.[field];
+            if (oldValue && oldValue !== url) {
+              options?.onReplace?.(oldValue);
+            }
+            return {
+              ...prev,
+              [field]: url,
+            };
+          });
           options?.onSuccess?.(url);
         }
         toast.success(options?.successMessage || "Upload successful");

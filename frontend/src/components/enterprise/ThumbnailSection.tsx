@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useCropUpload } from "@/hooks/useCropUpload";
+import { deleteUploadedFile } from "@/hooks/useFileUpload";
 import { ImageIcon, Upload, X, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { getMediaUrl } from "@/lib/utils/media";
@@ -15,52 +17,67 @@ interface ThumbnailSectionProps {
   onThumbnailChange: (url: string) => void;
 }
 
+// Thumbnails are displayed at 16:9 (1200×630 recommended).
+const THUMB_ASPECT = 16 / 9;
+const THUMB_WIDTH = 1200;
+const THUMB_HEIGHT = 630;
+
 export function ThumbnailSection({
   thumbnailUrl,
   onThumbnailChange,
 }: ThumbnailSectionProps) {
   const t = useTranslations("Dashboard.enterprise");
-  const [isUploading, setIsUploading] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [urlInput, setUrlInput] = useState(thumbnailUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    setHasError(false);
-    try {
+  const {
+    isUploading,
+    urlValue,
+    setUrlValue,
+    handleFileChange,
+    handleUrlCrop,
+    reset,
+    cropModal,
+  } = useCropUpload({
+    uploadFile: async (file) => {
       const formData = new FormData();
       formData.append("file", file);
       const response = await apiClient.post("/upload/thumbnail", formData);
-      const url = response.data.url as string;
-      onThumbnailChange(url);
-      setUrlInput(url);
-      toast.success(t("thumbnailUploaded") || "Thumbnail uploaded");
-    } catch (error: any) {
-      toast.error(t("thumbnailUploadFailed") || "Failed to upload thumbnail", {
-        description: error.response?.data?.message || error.message,
-      });
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      return response.data.url as string;
+    },
+    onUrlChange: (url) => {
+      // If a thumbnail was already set, delete the old one from R2 on replace
+      if (thumbnailUrl && thumbnailUrl !== url) {
+        void deleteUploadedFile(thumbnailUrl);
       }
-    }
-  };
+      onThumbnailChange(url);
+    },
+    crop: {
+      freeCrop: true,
+      aspectRatio: THUMB_ASPECT,
+      outputWidth: THUMB_WIDTH,
+      outputHeight: THUMB_HEIGHT,
+      smartAspect: true,
+      smartTolerance: 0.1,
+    },
+    enableUrlCrop: true,
+    filename: "thumbnail",
+    successMessage: t("thumbnailUploaded") || "Thumbnail uploaded",
+    errorMessage: t("thumbnailUploadFailed") || "Failed to upload thumbnail",
+  });
 
   const clearThumbnail = () => {
+    if (thumbnailUrl) void deleteUploadedFile(thumbnailUrl);
     onThumbnailChange("");
-    setUrlInput("");
+    setUrlValue("");
+    reset();
     setHasError(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  const showPreview = urlInput || thumbnailUrl;
+  const showPreview = urlValue || thumbnailUrl;
 
   return (
     <div className="space-y-2">
@@ -76,13 +93,13 @@ export function ThumbnailSection({
       {showPreview && !hasError ? (
         <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-slate-600 bg-slate-800">
           <img
-            src={getMediaUrl(urlInput || thumbnailUrl)}
+            src={getMediaUrl(urlValue || thumbnailUrl)}
             alt="Thumbnail preview"
             className="w-full h-full object-cover"
             onError={() => {
               setHasError(true);
               onThumbnailChange("");
-              setUrlInput("");
+              setUrlValue("");
             }}
           />
           <button
@@ -127,8 +144,8 @@ export function ThumbnailSection({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
-            onChange={handleUpload}
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif"
+            onChange={handleFileChange}
             className="hidden"
             id="thumbnail-upload"
           />
@@ -154,16 +171,25 @@ export function ThumbnailSection({
         <div className="flex-2">
           <Input
             type="text"
-            value={urlInput}
+            value={urlValue}
             onChange={(e) => {
-              setUrlInput(e.target.value);
+              setUrlValue(e.target.value);
               onThumbnailChange(e.target.value);
             }}
+            onBlur={(e) => handleUrlCrop(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleUrlCrop(e.currentTarget.value);
+              }
+            }}
             placeholder={t("imageUrlPlaceholder") || "Or paste image URL..."}
-            className="h-10 text-sm"
+            className="h-10 text-sm focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
       </div>
+
+      {cropModal}
     </div>
   );
 }

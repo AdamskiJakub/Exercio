@@ -9,6 +9,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
@@ -27,7 +28,6 @@ export class UploadService {
     'image/heic',
     'image/heif',
   ];
-  private readonly allowedVideoMimeTypes = ['video/mp4', 'video/webm'];
   private readonly maxFileSize = 5 * 1024 * 1024; // 5MB
 
   constructor(private configService: ConfigService) {
@@ -68,31 +68,20 @@ export class UploadService {
       'image/jpg': '.jpg',
       'image/png': '.png',
       'image/webp': '.webp',
-      'video/mp4': '.mp4',
-      'video/webm': '.webm',
     };
 
     return mimeToExt[mimetype] || '.bin';
   }
 
-  async uploadFile(
-    file: Express.Multer.File,
-    allowVideo = false,
-  ): Promise<string> {
+  async uploadFile(file: Express.Multer.File): Promise<string> {
     // Validate file
     if (!file) {
       throw new BadRequestException('No file provided');
     }
 
-    const allowedMimeTypes = allowVideo
-      ? [...this.allowedImageMimeTypes, ...this.allowedVideoMimeTypes]
-      : this.allowedImageMimeTypes;
-
-    if (!allowedMimeTypes.includes(file.mimetype)) {
+    if (!this.allowedImageMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(
-        allowVideo
-          ? 'Invalid file type. Only JPEG, PNG, WebP, MP4, and WebM are allowed.'
-          : 'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
+        'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
       );
     }
 
@@ -165,10 +154,7 @@ export class UploadService {
     return filename;
   }
 
-  async uploadMultipleFiles(
-    files: Express.Multer.File[],
-    allowVideo = false,
-  ): Promise<string[]> {
+  async uploadMultipleFiles(files: Express.Multer.File[]): Promise<string[]> {
     if (!files || files.length === 0) {
       throw new BadRequestException('No files provided');
     }
@@ -177,9 +163,7 @@ export class UploadService {
       throw new BadRequestException('Maximum 10 files allowed');
     }
 
-    const uploadPromises = files.map((file) =>
-      this.uploadFile(file, allowVideo),
-    );
+    const uploadPromises = files.map((file) => this.uploadFile(file));
     return Promise.all(uploadPromises);
   }
 
@@ -205,6 +189,42 @@ export class UploadService {
       }
       this.logger.error(`Failed to retrieve file from R2: ${filename}`, error);
       throw new BadRequestException('Failed to retrieve file.');
+    }
+  }
+
+  /**
+   * Extract the R2 object key (filename) from a stored URL.
+   * Handles full public URLs, API proxy URLs, and bare filenames.
+   */
+  private extractKeyFromUrl(url: string): string {
+    const trimmed = url.trim();
+    if (!trimmed) return '';
+    // Take the last path segment (the R2 key is always a bare filename like <uuid>.<ext>)
+    const segments = trimmed.split('/');
+    return segments[segments.length - 1] || '';
+  }
+
+  /**
+   * Delete a file from R2 by its stored URL or key.
+   * No-op when the URL is empty or not an R2-managed file.
+   */
+  async deleteFile(urlOrKey: string): Promise<void> {
+    if (!urlOrKey) return;
+
+    const key = this.extractKeyFromUrl(urlOrKey);
+    if (!key) return;
+
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+
+    try {
+      await this.s3Client.send(command);
+      this.logger.log(`File deleted from R2: ${key}`);
+    } catch (error) {
+      // Deleting a non-existent key is not an error in R2, but log any real failures.
+      this.logger.warn(`Failed to delete file from R2: ${key}`, error);
     }
   }
 }
