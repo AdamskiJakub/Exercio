@@ -29,6 +29,10 @@ export function ThumbnailSection({
   const t = useTranslations("Dashboard.enterprise");
   const [hasError, setHasError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Tracks the thumbnail URL whose R2 deletion has already been scheduled when
+  // the user replaces it by typing a raw URL. Prevents deleting on every
+  // keystroke while still cleaning up the old file once the value changes.
+  const replacedRef = useRef<string | null>(null);
 
   const {
     isUploading,
@@ -68,6 +72,7 @@ export function ThumbnailSection({
 
   const clearThumbnail = () => {
     if (thumbnailUrl) void deleteUploadedFile(thumbnailUrl);
+    replacedRef.current = null;
     onThumbnailChange("");
     setUrlValue("");
     reset();
@@ -173,8 +178,20 @@ export function ThumbnailSection({
             type="text"
             value={urlValue}
             onChange={(e) => {
-              setUrlValue(e.target.value);
-              onThumbnailChange(e.target.value);
+              const next = e.target.value;
+              setUrlValue(next);
+              onThumbnailChange(next);
+              // The raw URL path bypasses the crop pipeline, so delete the old
+              // thumbnail once when the value actually changes (not on every
+              // keystroke).
+              if (
+                thumbnailUrl &&
+                thumbnailUrl !== next &&
+                replacedRef.current !== thumbnailUrl
+              ) {
+                replacedRef.current = thumbnailUrl;
+                void deleteUploadedFile(thumbnailUrl);
+              }
             }}
             onBlur={(e) => handleUrlCrop(e.target.value)}
             onKeyDown={(e) => {

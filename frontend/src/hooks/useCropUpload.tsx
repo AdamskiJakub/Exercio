@@ -251,6 +251,7 @@ export function useCropUpload({
         // If the URL can't be fetched/loaded as an image (CORS, invalid, etc.),
         // fall back to storing it as-is so the user isn't blocked from saving.
         onUrlChange(trimmed);
+        setUrlValue(trimmed);
       } finally {
         setIsUploading(false);
       }

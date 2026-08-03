@@ -44,6 +44,9 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
     }
 
     // Use $transaction to ensure atomicity: news creation + notifications
+    // R2 deletions are deferred until AFTER the transaction commits so the DB
+    // transaction is not held open during network I/O to R2.
+    const excessThumbnails: string[] = [];
     const result = await this.prisma.$transaction(async (tx) => {
       const news = await tx.enterpriseNews.create({
         data: {
@@ -67,10 +70,10 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
         await tx.enterpriseNews.deleteMany({
           where: { id: { in: excess.map((n) => n.id) } },
         });
-        // Delete thumbnails of removed news from R2 (fire-and-forget, outside tx)
+        // Collect thumbnails to delete from R2 after the transaction commits
         for (const removed of excess) {
           if (removed.thumbnailUrl) {
-            await this.uploadService.deleteFile(removed.thumbnailUrl);
+            excessThumbnails.push(removed.thumbnailUrl);
           }
         }
       }
@@ -117,6 +120,12 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
 
       return news;
     });
+
+    // Delete thumbnails of removed news from R2 AFTER the transaction commits
+    // (fire-and-forget; deleteFile swallows errors internally).
+    for (const thumbnail of excessThumbnails) {
+      void this.uploadService.deleteFile(thumbnail);
+    }
 
     return result;
   }

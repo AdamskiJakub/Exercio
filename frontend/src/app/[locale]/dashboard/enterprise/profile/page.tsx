@@ -73,6 +73,10 @@ export default function EnterpriseProfilePage() {
   const { data: profile, isLoading: profileLoading } = useMyEnterpriseProfile();
   const queryClient = useQueryClient();
   const [isSaving, setIsSaving] = useState(false);
+  // URLs removed/replaced in the form but not yet deleted from R2. Deletion is
+  // deferred until the profile is successfully saved, so a cancelled form or a
+  // failed save never destroys a file that the DB still references.
+  const pendingDeletesRef = useRef<string[]>([]);
 
   const { mutateAsync: uploadPhoto, isPending: isUploadingLogo } =
     useUploadProfilePhoto();
@@ -159,14 +163,14 @@ export default function EnterpriseProfilePage() {
     successMessage: t("logoUploaded") || "Logo uploaded",
     errorMessage: t("uploadFailed") || "Upload failed",
     getCurrentValue: () => form.logoUrl || "",
-    onReplace: (oldValue) => void deleteUploadedFile(oldValue),
+    onReplace: (oldValue) => pendingDeletesRef.current.push(oldValue),
   });
 
   const handleCoverUpload = useUploadHandler(uploadCover, setForm, "coverUrl", {
     successMessage: t("coverUploaded") || "Cover photo uploaded",
     errorMessage: t("uploadFailed") || "Upload failed",
     getCurrentValue: () => form.coverUrl || "",
-    onReplace: (oldValue) => void deleteUploadedFile(oldValue),
+    onReplace: (oldValue) => pendingDeletesRef.current.push(oldValue),
   });
 
   const handleAboutImageUpload = useUploadHandler(
@@ -177,7 +181,7 @@ export default function EnterpriseProfilePage() {
       successMessage: t("aboutImageUploaded") || "About image uploaded",
       errorMessage: t("uploadFailed") || "Upload failed",
       getCurrentValue: () => form.aboutImage || "",
-      onReplace: (oldValue) => void deleteUploadedFile(oldValue),
+      onReplace: (oldValue) => pendingDeletesRef.current.push(oldValue),
     },
   );
 
@@ -209,21 +213,21 @@ export default function EnterpriseProfilePage() {
 
   const handleRemoveLogo = useCallback(() => {
     setForm((prev) => {
-      if (prev.logoUrl) void deleteUploadedFile(prev.logoUrl);
+      if (prev.logoUrl) pendingDeletesRef.current.push(prev.logoUrl);
       return { ...prev, logoUrl: "" };
     });
   }, []);
 
   const handleRemoveCover = useCallback(() => {
     setForm((prev) => {
-      if (prev.coverUrl) void deleteUploadedFile(prev.coverUrl);
+      if (prev.coverUrl) pendingDeletesRef.current.push(prev.coverUrl);
       return { ...prev, coverUrl: "" };
     });
   }, []);
 
   const handleRemoveAboutImage = useCallback(() => {
     setForm((prev) => {
-      if (prev.aboutImage) void deleteUploadedFile(prev.aboutImage);
+      if (prev.aboutImage) pendingDeletesRef.current.push(prev.aboutImage);
       return { ...prev, aboutImage: "" };
     });
   }, []);
@@ -231,7 +235,7 @@ export default function EnterpriseProfilePage() {
   const handleRemoveGalleryImage = useCallback((index: number) => {
     setForm((prev) => {
       const removed = (prev.gallery || [])[index];
-      if (removed) void deleteUploadedFile(removed);
+      if (removed) pendingDeletesRef.current.push(removed);
       return {
         ...prev,
         gallery: (prev.gallery || []).filter((_, i) => i !== index),
@@ -258,6 +262,14 @@ export default function EnterpriseProfilePage() {
     setIsSaving(true);
     try {
       await apiClient.patch(`/enterprise/${profile.id}`, form);
+      // Only after a successful save, delete the removed/replaced files from R2.
+      // If the save fails, the pending URLs are kept so the DB still references
+      // files that exist.
+      const pending = pendingDeletesRef.current;
+      pendingDeletesRef.current = [];
+      for (const url of pending) {
+        void deleteUploadedFile(url);
+      }
       queryClient.invalidateQueries({ queryKey: ["my-enterprise-profile"] });
       toast.success(t("profileUpdated"));
       // Redirect to public profile so the user can see how it looks
