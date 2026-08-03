@@ -208,6 +208,17 @@ export class UploadService {
   }
 
   /**
+   * All R2 keys are generated as `<uuid>.<ext>` (see uploadFile), so a valid
+   * deletable key must match that shape. This guardrail prevents the DELETE
+   * endpoint from being used to remove arbitrary keys that were never managed
+   * by this service (e.g. an external URL whose last segment happens to match
+   * an R2 object). It is a cheap mitigation; full per-user ownership checks
+   * are tracked separately (see PROJEKT-KONTEKST.md §14).
+   */
+  private readonly r2KeyPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]+$/i;
+
+  /**
    * Delete a file from R2 by its stored URL or key.
    * No-op when the URL is empty or not an R2-managed file.
    */
@@ -216,6 +227,13 @@ export class UploadService {
 
     const key = this.extractKeyFromUrl(urlOrKey);
     if (!key) return;
+
+    // Only delete keys that look like files this service actually created
+    // (<uuid>.<ext>). Anything else is not an R2-managed upload, so skip it.
+    if (!this.r2KeyPattern.test(key)) {
+      this.logger.warn(`Refusing to delete non-R2 key: ${key}`);
+      return;
+    }
 
     const command = new DeleteObjectCommand({
       Bucket: this.bucket,
