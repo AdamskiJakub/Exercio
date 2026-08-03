@@ -67,17 +67,17 @@ export default function EnterpriseNewsPage() {
       };
 
       if (editingNews) {
-        // If the thumbnail was replaced, delete the old one from R2
+        await apiClient.patch(
+          `/enterprise/${profile.id}/news/${editingNews.id}`,
+          payload,
+        );
+        // Only after a successful save, delete the replaced thumbnail from R2
         if (
           editingNews.thumbnailUrl &&
           editingNews.thumbnailUrl !== form.thumbnailUrl
         ) {
           void deleteUploadedFile(editingNews.thumbnailUrl);
         }
-        await apiClient.patch(
-          `/enterprise/${profile.id}/news/${editingNews.id}`,
-          payload,
-        );
         toast.success(t("newsUpdated"));
       } else {
         await apiClient.post(`/enterprise/${profile.id}/news`, payload);
@@ -103,12 +103,12 @@ export default function EnterpriseNewsPage() {
     if (!profile) return;
 
     try {
-      // Delete the thumbnail from R2 before removing the news record
       const newsItem = profile.news?.find((n) => n.id === newsId);
+      await apiClient.delete(`/enterprise/${profile.id}/news/${newsId}`);
+      // Only after a successful delete, remove the thumbnail from R2
       if (newsItem?.thumbnailUrl) {
         void deleteUploadedFile(newsItem.thumbnailUrl);
       }
-      await apiClient.delete(`/enterprise/${profile.id}/news/${newsId}`);
       queryClient.invalidateQueries({ queryKey: ["my-enterprise-profile"] });
       toast.success(t("newsDeleted"));
       setDeleteConfirmId(null);

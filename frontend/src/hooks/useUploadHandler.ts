@@ -12,6 +12,7 @@ export function useUploadHandler(
   options?: {
     onSuccess?: (url: string) => void;
     onReplace?: (oldValue: string) => void;
+    getCurrentValue?: () => string;
     successMessage?: string;
     errorMessage?: string;
     isMultiFile?: boolean;
@@ -32,17 +33,17 @@ export function useUploadHandler(
           }));
         } else {
           const url = await uploadFn(files[0]);
-          setForm((prev: any) => {
-            // Notify when an existing single-file value is being replaced
-            const oldValue = prev?.[field];
-            if (oldValue && oldValue !== url) {
-              options?.onReplace?.(oldValue);
-            }
-            return {
-              ...prev,
-              [field]: url,
-            };
-          });
+          // Notify when an existing single-file value is being replaced.
+          // Called OUTSIDE the setForm updater to avoid side effects in the
+          // updater (React StrictMode double-invokes updaters).
+          const oldValue = options?.getCurrentValue?.();
+          if (oldValue && oldValue !== url) {
+            options?.onReplace?.(oldValue);
+          }
+          setForm((prev: any) => ({
+            ...prev,
+            [field]: url,
+          }));
           options?.onSuccess?.(url);
         }
         toast.success(options?.successMessage || "Upload successful");

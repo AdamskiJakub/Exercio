@@ -158,12 +158,14 @@ export default function EnterpriseProfilePage() {
   const handleLogoUpload = useUploadHandler(uploadPhoto, setForm, "logoUrl", {
     successMessage: t("logoUploaded") || "Logo uploaded",
     errorMessage: t("uploadFailed") || "Upload failed",
+    getCurrentValue: () => form.logoUrl || "",
     onReplace: (oldValue) => void deleteUploadedFile(oldValue),
   });
 
   const handleCoverUpload = useUploadHandler(uploadCover, setForm, "coverUrl", {
     successMessage: t("coverUploaded") || "Cover photo uploaded",
     errorMessage: t("uploadFailed") || "Upload failed",
+    getCurrentValue: () => form.coverUrl || "",
     onReplace: (oldValue) => void deleteUploadedFile(oldValue),
   });
 
@@ -174,6 +176,7 @@ export default function EnterpriseProfilePage() {
     {
       successMessage: t("aboutImageUploaded") || "About image uploaded",
       errorMessage: t("uploadFailed") || "Upload failed",
+      getCurrentValue: () => form.aboutImage || "",
       onReplace: (oldValue) => void deleteUploadedFile(oldValue),
     },
   );
