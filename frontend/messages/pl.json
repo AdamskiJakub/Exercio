@@ -506,6 +506,8 @@
       "newsUpdateFailed": "Nie udało się zaktualizować aktualności",
       "newsDeleteFailed": "Nie udało się usunąć aktualności",
       "confirmDeleteNews": "Czy na pewno chcesz usunąć tę aktualność?",
+      "newsUrlRequired": "Podaj link URL dla aktualności typu Link",
+      "newsLimitInfo": "Możesz mieć maksymalnie 3 aktualności. Dodanie czwartej automatycznie usunie najstarszą.",
       "thumbnail": "Miniaturka",
       "thumbnailHint": "Prześlij obraz lub wklej URL obrazka. Zalecany rozmiar: 1200×630px",
       "noThumbnail": "Brak miniaturki",

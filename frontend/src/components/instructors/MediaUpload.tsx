@@ -2,24 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Upload, X, Loader2, Play } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ImageCropModal } from "@/components/ui/ImageCropModal";
-import { blobToFile, isHeic, processImage } from "@/lib/utils/cropImage";
+import { useCropUpload } from "@/hooks/useCropUpload";
+import { deleteUploadedFile } from "@/hooks/useFileUpload";
+import { isHeic, processImage } from "@/lib/utils/cropImage";
 import { MediaUploadProps } from "./types";
-import { getMediaUrl, IS_DEVELOPMENT, isVideoUrl } from "@/lib/utils/media";
+import { getMediaUrl, IS_DEVELOPMENT } from "@/lib/utils/media";
 import { toast } from "sonner";
 
 export function MediaUpload(props: MediaUploadProps) {
-  const {
-    variant,
-    onMediaChange,
-    onUpload,
-    isUploading,
-    label,
-    hint,
-    acceptVideo = false,
-  } = props;
+  const { variant, onMediaChange, onUpload, isUploading, label, hint } = props;
   const currentMediaUrl =
     variant === "avatar" ? props.currentMediaUrl : undefined;
   const currentMediaUrls =
@@ -34,14 +27,34 @@ export function MediaUpload(props: MediaUploadProps) {
       ? [{ url: currentMediaUrl, type: "image", isBlob: false }]
       : currentMediaUrls.map((url) => ({
           url,
-          type: isVideoUrl(url) ? "video" : "image",
+          type: "image",
           isBlob: false,
         })),
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // File currently being cropped (avatar variant)
-  const [cropFile, setCropFile] = useState<File | null>(null);
-  const [isCropping, setIsCropping] = useState(false);
+
+  // Shared crop + upload pipeline for the avatar variant (round, 1:1, 600×600).
+  // The hook is only used by the avatar variant, so narrow the union props.
+  const { handleFileChange, cropModal } = useCropUpload({
+    uploadFile: props.onUpload as (file: File) => Promise<string>,
+    onUrlChange: (url) => {
+      // If an avatar was already uploaded, delete the old one from R2
+      const previous = previews[0];
+      if (previous && !previous.isBlob && previous.url !== url) {
+        void deleteUploadedFile(previous.url);
+      }
+      setPreviews([{ url, type: "image", isBlob: false }]);
+      (props.onMediaChange as (url: string) => void)(url);
+    },
+    crop: {
+      aspectRatio: 1,
+      cropShape: "round",
+      outputWidth: 600,
+      outputHeight: 600,
+    },
+    filename: "avatar",
+    errorMessage: t("uploadError"),
+  });
 
   // Cleanup blob URLs on unmount or when previews change
   useEffect(() => {
@@ -56,9 +69,7 @@ export function MediaUpload(props: MediaUploadProps) {
 
   const getAcceptedTypes = () => {
     // HEIC/HEIF added for iOS compatibility
-    const imageTypes = "image/jpeg,image/png,image/webp,image/heic,image/heif";
-    const videoTypes = "video/mp4,video/webm";
-    return acceptVideo ? `${imageTypes},${videoTypes}` : imageTypes;
+    return "image/jpeg,image/png,image/webp,image/heic,image/heif";
   };
 
   const validateFile = (file: File): string | null => {
@@ -76,14 +87,13 @@ export function MediaUpload(props: MediaUploadProps) {
       "image/heic",
       "image/heif",
     ];
-    const allowedVideoTypes = ["video/mp4", "video/webm"];
 
+    // Videos are no longer supported anywhere on the platform.
     if (file.type.startsWith("video/")) {
-      if (!acceptVideo || !allowedVideoTypes.includes(file.type)) {
-        return t("invalidVideoFormat");
-      }
-      // TODO: Check video duration (requires loading video metadata)
-    } else if (!allowedImageTypes.includes(file.type)) {
+      return t("invalidVideoFormat");
+    }
+
+    if (!allowedImageTypes.includes(file.type)) {
       return t("invalidImageFormat");
     }
 
@@ -117,28 +127,10 @@ export function MediaUpload(props: MediaUploadProps) {
       return;
     }
 
-    // For avatar variant, open the crop modal instead of uploading directly.
+    // For avatar variant, delegate the crop/upload flow (HEIC bypass, crop
+    // modal, upload) to the shared useCropUpload hook.
     if (variant === "avatar") {
-      const file = files[0];
-      // HEIC/HEIF cannot be decoded by browsers, so the crop modal would fail
-      // to render (fileToDataUrl rejects -> modal closes immediately). Upload
-      // them directly instead — the backend converts HEIC/HEIF via sharp.
-      if (isHeic(file)) {
-        try {
-          setIsCropping(true);
-          const uploadResult = await props.onUpload(file);
-          setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
-          props.onMediaChange(uploadResult);
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : t("uploadError");
-          toast.error(message);
-        } finally {
-          setIsCropping(false);
-        }
-      } else {
-        setCropFile(file);
-      }
+      handleFileChange(event);
       // Reset input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -150,21 +142,16 @@ export function MediaUpload(props: MediaUploadProps) {
       // Create previews
       const newPreviews = files.map((file) => ({
         url: URL.createObjectURL(file),
-        type: file.type.startsWith("video/")
-          ? ("video" as const)
-          : ("image" as const),
+        type: "image" as const,
         isBlob: true,
       }));
 
       // Compress/resize image files before upload so R2 never stores raw
-      // multi-megabyte phone photos. Videos are uploaded as-is. HEIC/HEIF
-      // cannot be decoded by the browser, so upload them raw — the backend
-      // converts them via sharp.
+      // multi-megabyte phone photos. HEIC/HEIF cannot be decoded by the
+      // browser, so upload them raw — the backend converts them via sharp.
       const uploadFiles = await Promise.all(
         files.map(async (file) =>
-          file.type.startsWith("video/") || isHeic(file)
-            ? file
-            : processImage(file, "gallery"),
+          isHeic(file) ? file : processImage(file, "gallery"),
         ),
       );
 
@@ -175,7 +162,7 @@ export function MediaUpload(props: MediaUploadProps) {
       setPreviews(
         newUrls.map((url) => ({
           url,
-          type: isVideoUrl(url) ? "video" : "image",
+          type: "image",
           isBlob: false,
         })),
       );
@@ -185,8 +172,7 @@ export function MediaUpload(props: MediaUploadProps) {
       setPreviews(
         currentMediaUrls.map((url) => ({
           url,
-          type:
-            url.endsWith(".mp4") || url.endsWith(".webm") ? "video" : "image",
+          type: "image",
           isBlob: false,
         })),
       );
@@ -201,31 +187,12 @@ export function MediaUpload(props: MediaUploadProps) {
     }
   };
 
-  const handleCropConfirm = async (blob: Blob) => {
-    if (!cropFile) return;
-
-    if (variant !== "avatar") return;
-    setIsCropping(true);
-    try {
-      const file = blobToFile(blob, "avatar");
-      const uploadResult = await props.onUpload(file);
-      setPreviews([{ url: uploadResult, type: "image", isBlob: false }]);
-      props.onMediaChange(uploadResult);
-      setCropFile(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : t("uploadError");
-      toast.error(message);
-    } finally {
-      setIsCropping(false);
-    }
-  };
-
-  const handleCropCancel = () => {
-    setCropFile(null);
-  };
-
   const handleRemove = (index?: number) => {
     if (variant === "avatar") {
+      // Delete the uploaded file from R2 (skip local blob URLs)
+      if (previews[0] && !previews[0].isBlob) {
+        void deleteUploadedFile(previews[0].url);
+      }
       // Revoke blob URL if it exists
       if (previews[0]?.isBlob) {
         URL.revokeObjectURL(previews[0].url);
@@ -233,6 +200,10 @@ export function MediaUpload(props: MediaUploadProps) {
       setPreviews([]);
       onMediaChange("");
     } else if (index !== undefined) {
+      // Delete the uploaded file from R2 (skip local blob URLs)
+      if (previews[index] && !previews[index].isBlob) {
+        void deleteUploadedFile(previews[index].url);
+      }
       // Revoke blob URL if it exists
       if (previews[index]?.isBlob) {
         URL.revokeObjectURL(previews[index].url);
@@ -321,33 +292,13 @@ export function MediaUpload(props: MediaUploadProps) {
             )}
 
             <p className="text-xs text-slate-400">
-              {t("maxFileSize")} •{" "}
-              {acceptVideo
-                ? t("acceptedFormatsWithVideo")
-                : t("acceptedFormats")}
-              {acceptVideo && (
-                <>
-                  <br />
-                  {t("videoMaxDuration")}
-                </>
-              )}
+              {t("maxFileSize")} • {t("acceptedFormats")}
             </p>
           </div>
         </div>
 
-        {/* Avatar crop modal */}
-        <ImageCropModal
-          open={!!cropFile}
-          imageSrc={cropFile ?? ""}
-          aspectRatio={1}
-          cropShape="round"
-          outputWidth={600}
-          outputHeight={600}
-          format="image/webp"
-          isSaving={isCropping}
-          onConfirm={handleCropConfirm}
-          onCancel={handleCropCancel}
-        />
+        {/* Avatar crop modal (rendered by useCropUpload) */}
+        {cropModal}
       </div>
     );
   }
@@ -364,24 +315,11 @@ export function MediaUpload(props: MediaUploadProps) {
             key={index}
             className="relative aspect-square rounded-lg overflow-hidden border-2 border-slate-600 bg-slate-800/50 group"
           >
-            {preview.type === "video" ? (
-              <div className="relative size-full">
-                <video
-                  src={getMediaUrl(preview.url)}
-                  className="size-full object-cover"
-                  muted
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                  <Play className="size-8 text-white" />
-                </div>
-              </div>
-            ) : (
-              <img
-                src={preview.isBlob ? preview.url : getMediaUrl(preview.url)}
-                alt=""
-                className="size-full object-cover"
-              />
-            )}
+            <img
+              src={preview.isBlob ? preview.url : getMediaUrl(preview.url)}
+              alt=""
+              className="size-full object-cover"
+            />
 
             <Button
               type="button"
@@ -429,9 +367,7 @@ export function MediaUpload(props: MediaUploadProps) {
       />
 
       <p className="text-xs text-slate-500">
-        {t("maxFileSize")} •{" "}
-        {acceptVideo ? t("acceptedFormatsWithVideo") : t("acceptedFormats")}
-        {acceptVideo && <> • {t("videoMaxDuration")}</>}
+        {t("maxFileSize")} • {t("acceptedFormats")}
       </p>
     </div>
   );

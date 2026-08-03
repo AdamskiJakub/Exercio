@@ -13,9 +13,10 @@ import { EnterpriseNewsService } from './enterprise-news.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { EmailModule } from '../email/email.module';
 import { StaticConfigModule } from '../config/config.module';
+import { UploadModule } from '../upload/upload.module';
 
 @Module({
-  imports: [NotificationsModule, EmailModule, StaticConfigModule],
+  imports: [NotificationsModule, EmailModule, StaticConfigModule, UploadModule],
   controllers: [
     EnterpriseController,
     EnterpriseLeadsController,
