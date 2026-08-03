@@ -134,7 +134,7 @@ export function LinkPreviewSection({
         value={url}
         onChange={(e) => onUrlChange(e.target.value)}
         placeholder="https://..."
-        className="h-11"
+        className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
       />
       {isSocialUrl && <SocialMediaWarning t={t} />}
       {isFetchingOg && <FetchingPreview />}

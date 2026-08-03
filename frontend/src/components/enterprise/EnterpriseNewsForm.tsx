@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -73,6 +74,14 @@ export function EnterpriseNewsForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate: LINK type requires a URL. Show a localized message instead of
+    // relying on the backend's English error.
+    if (form.type === "link" && !form.url.trim()) {
+      toast.error(t("newsUrlRequired") || "URL is required for link-type news");
+      return;
+    }
+
     onSubmit(form);
   };
 
@@ -142,7 +151,7 @@ export function EnterpriseNewsForm({
           value={form.title}
           onChange={(e) => updateField("title", e.target.value)}
           required
-          className="h-11"
+          className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
         />
       </div>
 

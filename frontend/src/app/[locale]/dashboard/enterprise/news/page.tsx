@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
+import { deleteUploadedFile } from "@/hooks/useFileUpload";
 import { useQueryClient } from "@tanstack/react-query";
 import { EnterpriseNewsForm } from "@/components/enterprise/EnterpriseNewsForm";
 import { EnterpriseNewsList } from "@/components/enterprise/EnterpriseNewsList";
@@ -70,6 +71,13 @@ export default function EnterpriseNewsPage() {
           `/enterprise/${profile.id}/news/${editingNews.id}`,
           payload,
         );
+        // Only after a successful save, delete the replaced thumbnail from R2
+        if (
+          editingNews.thumbnailUrl &&
+          editingNews.thumbnailUrl !== form.thumbnailUrl
+        ) {
+          void deleteUploadedFile(editingNews.thumbnailUrl);
+        }
         toast.success(t("newsUpdated"));
       } else {
         await apiClient.post(`/enterprise/${profile.id}/news`, payload);
@@ -95,7 +103,12 @@ export default function EnterpriseNewsPage() {
     if (!profile) return;
 
     try {
+      const newsItem = profile.news?.find((n) => n.id === newsId);
       await apiClient.delete(`/enterprise/${profile.id}/news/${newsId}`);
+      // Only after a successful delete, remove the thumbnail from R2
+      if (newsItem?.thumbnailUrl) {
+        void deleteUploadedFile(newsItem.thumbnailUrl);
+      }
       queryClient.invalidateQueries({ queryKey: ["my-enterprise-profile"] });
       toast.success(t("newsDeleted"));
       setDeleteConfirmId(null);

@@ -64,6 +64,33 @@ async function uploadMultipleWithAxios(
   return { urls };
 }
 
+/**
+ * Extract the bare R2 filename (last path segment) from a stored URL or key.
+ * e.g. "https://api.exercio.app/upload/abc123.jpg" -> "abc123.jpg"
+ * If the value is already a bare filename, it is returned unchanged.
+ */
+export function extractUploadKey(urlOrKey: string): string {
+  const trimmed = urlOrKey.trim();
+  if (!trimmed) return "";
+  const segments = trimmed.split("/");
+  return segments[segments.length - 1] || "";
+}
+
+/**
+ * Delete an uploaded file from R2 by its stored URL or key.
+ * Fire-and-forget friendly: resolves even if the file was already gone.
+ */
+export async function deleteUploadedFile(urlOrKey: string): Promise<void> {
+  const key = extractUploadKey(urlOrKey);
+  if (!key) return;
+  try {
+    await uploadClient.delete(`/upload/${encodeURIComponent(key)}`);
+  } catch (error: any) {
+    // Deleting a non-existent file is not fatal - log and continue.
+    console.warn(`[upload] Failed to delete file from R2: ${key}`, error);
+  }
+}
+
 export function useUploadProfilePhoto() {
   return useMutation({
     mutationFn: async (file: File) => {

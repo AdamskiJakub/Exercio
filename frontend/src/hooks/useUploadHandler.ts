@@ -11,6 +11,8 @@ export function useUploadHandler(
   field: string,
   options?: {
     onSuccess?: (url: string) => void;
+    onReplace?: (oldValue: string) => void;
+    getCurrentValue?: () => string;
     successMessage?: string;
     errorMessage?: string;
     isMultiFile?: boolean;
@@ -31,6 +33,13 @@ export function useUploadHandler(
           }));
         } else {
           const url = await uploadFn(files[0]);
+          // Notify when an existing single-file value is being replaced.
+          // Called OUTSIDE the setForm updater to avoid side effects in the
+          // updater (React StrictMode double-invokes updaters).
+          const oldValue = options?.getCurrentValue?.();
+          if (oldValue && oldValue !== url) {
+            options?.onReplace?.(oldValue);
+          }
           setForm((prev: any) => ({
             ...prev,
             [field]: url,

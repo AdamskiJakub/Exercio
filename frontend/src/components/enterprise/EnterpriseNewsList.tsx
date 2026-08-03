@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Calendar,
   Link as LinkIcon,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { EnterpriseNews } from "@/types/enterprise";
@@ -50,6 +51,12 @@ export function EnterpriseNewsList({
             ({newsList.length})
           </span>
         </h2>
+      </div>
+
+      {/* Info about the max-news limit */}
+      <div className="mb-6 flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm">
+        <Info className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
+        <p>{t("newsLimitInfo")}</p>
       </div>
 
       {newsList.length > 0 ? (

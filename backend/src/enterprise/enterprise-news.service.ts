@@ -7,14 +7,19 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EnterpriseBaseService } from './enterprise-base.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/dto/create-notification.dto';
+import { UploadService } from '../upload/upload.service';
 import type { CreateEnterpriseNewsDto } from './dto/create-enterprise-news.dto';
 import type { UpdateEnterpriseNewsDto } from './dto/update-enterprise-news.dto';
 
 @Injectable()
 export class EnterpriseNewsService extends EnterpriseBaseService {
+  // Maximum number of news items a partner can keep. Adding a 4th deletes the oldest.
+  private static readonly MAX_NEWS = 3;
+
   constructor(
     prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly uploadService: UploadService,
   ) {
     super(prisma);
   }
@@ -39,6 +44,9 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
     }
 
     // Use $transaction to ensure atomicity: news creation + notifications
+    // R2 deletions are deferred until AFTER the transaction commits so the DB
+    // transaction is not held open during network I/O to R2.
+    const excessThumbnails: string[] = [];
     const result = await this.prisma.$transaction(async (tx) => {
       const news = await tx.enterpriseNews.create({
         data: {
@@ -50,6 +58,25 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
           thumbnailUrl: dto.thumbnailUrl ?? null,
         },
       });
+
+      const excess = await tx.enterpriseNews.findMany({
+        where: { enterpriseId },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, thumbnailUrl: true },
+        skip: EnterpriseNewsService.MAX_NEWS,
+      });
+
+      if (excess.length > 0) {
+        await tx.enterpriseNews.deleteMany({
+          where: { id: { in: excess.map((n) => n.id) } },
+        });
+        // Collect thumbnails to delete from R2 after the transaction commits
+        for (const removed of excess) {
+          if (removed.thumbnailUrl) {
+            excessThumbnails.push(removed.thumbnailUrl);
+          }
+        }
+      }
 
       // Fetch enterprise profile info for the notification
       const enterprise = await tx.enterpriseProfile.findUnique({
@@ -94,6 +121,12 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
       return news;
     });
 
+    // Delete thumbnails of removed news from R2 AFTER the transaction commits
+    // (fire-and-forget; deleteFile swallows errors internally).
+    for (const thumbnail of excessThumbnails) {
+      void this.uploadService.deleteFile(thumbnail);
+    }
+
     return result;
   }
 
@@ -127,10 +160,17 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
       throw new BadRequestException('URL is required for link-type news');
     }
 
-    return this.prisma.enterpriseNews.update({
+    const updated = await this.prisma.enterpriseNews.update({
       where: { id: newsId },
       data: dto,
     });
+
+    // If the thumbnail was replaced or removed, delete the old one from R2.
+    if (news.thumbnailUrl && news.thumbnailUrl !== updated.thumbnailUrl) {
+      await this.uploadService.deleteFile(news.thumbnailUrl);
+    }
+
+    return updated;
   }
 
   async remove(enterpriseId: string, newsId: string, userId: string) {
@@ -144,8 +184,15 @@ export class EnterpriseNewsService extends EnterpriseBaseService {
       throw new NotFoundException('News not found');
     }
 
-    return this.prisma.enterpriseNews.delete({
+    const deleted = await this.prisma.enterpriseNews.delete({
       where: { id: newsId },
     });
+
+    // Delete the thumbnail from R2 when the news is removed.
+    if (deleted.thumbnailUrl) {
+      await this.uploadService.deleteFile(deleted.thumbnailUrl);
+    }
+
+    return deleted;
   }
 }

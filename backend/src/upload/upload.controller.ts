@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   Post,
   Param,
@@ -25,7 +26,6 @@ const allowedImageTypes = [
   'image/heic',
   'image/heif',
 ];
-const allowedVideoTypes = ['video/mp4', 'video/webm'];
 
 const MAX_FILE_SIZE =
   parseInt(process.env.MAX_FILE_SIZE_BYTES ?? '', 10) || 5 * 1024 * 1024; // 5MB default
@@ -48,10 +48,10 @@ const profilePhotoMulterOptions = createMulterOptions(
   'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
 );
 
-// Multer options for gallery (images + videos)
+// Multer options for gallery (images only)
 const galleryMulterOptions = createMulterOptions(
-  [...allowedImageTypes, ...allowedVideoTypes],
-  'Invalid file type. Only JPEG, PNG, WebP, MP4, and WebM are allowed.',
+  allowedImageTypes,
+  'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
 );
 
 @Controller('upload')
@@ -62,7 +62,7 @@ export class UploadController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', profilePhotoMulterOptions))
   async uploadProfilePhoto(@UploadedFile() file: Express.Multer.File) {
-    const url = await this.uploadService.uploadFile(file, false);
+    const url = await this.uploadService.uploadFile(file);
     return { url };
   }
 
@@ -70,7 +70,7 @@ export class UploadController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('files', 10, galleryMulterOptions))
   async uploadGalleryPhotos(@UploadedFiles() files: Express.Multer.File[]) {
-    const urls = await this.uploadService.uploadMultipleFiles(files, true);
+    const urls = await this.uploadService.uploadMultipleFiles(files);
     return { urls };
   }
 
@@ -78,8 +78,19 @@ export class UploadController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', profilePhotoMulterOptions))
   async uploadThumbnail(@UploadedFile() file: Express.Multer.File) {
-    const url = await this.uploadService.uploadFile(file, false);
+    const url = await this.uploadService.uploadFile(file);
     return { url };
+  }
+
+  /**
+   * Delete an uploaded file from R2 by its filename (or full URL).
+   * Auth required - only authenticated users can delete files.
+   */
+  @Delete(':filename')
+  @UseGuards(JwtAuthGuard)
+  async deleteFile(@Param('filename') filename: string) {
+    await this.uploadService.deleteFile(filename);
+    return { success: true };
   }
 
   /**

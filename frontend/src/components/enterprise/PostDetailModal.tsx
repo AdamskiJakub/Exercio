@@ -49,6 +49,7 @@ export function PostDetailModal({
         className="bg-slate-900 border border-slate-700/80 text-white w-[calc(100%-2rem)] max-w-2xl sm:max-w-3xl max-h-[85vh] overflow-y-auto p-0 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-800"
         showCloseButton={false}
         aria-label={selectedPost?.title || t("newsPost")}
+        aria-describedby={undefined}
       >
         <button
           onClick={onClose}
@@ -65,7 +66,7 @@ export function PostDetailModal({
                 <img
                   src={getMediaUrl(selectedPost.thumbnailUrl)}
                   alt={selectedPost.title || ""}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
             )}
