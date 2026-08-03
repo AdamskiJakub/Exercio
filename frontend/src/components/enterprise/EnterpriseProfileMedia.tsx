@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { type CropShape } from "@/components/ui/ImageCropModal";
 import { useCropUpload } from "@/hooks/useCropUpload";
-import { deleteUploadedFile } from "@/hooks/useFileUpload";
 import { Image, Upload, Loader2, Plus, X } from "lucide-react";
 import { getMediaUrl } from "@/lib/utils/media";
 import type { MediaField, GalleryField } from "@/types/enterprise";
@@ -37,6 +36,12 @@ interface EnterpriseProfileMediaProps {
   cover: MediaField;
   aboutImage: MediaField;
   gallery: GalleryField;
+  /**
+   * Called when an existing image is replaced by a new one. The caller should
+   * defer the R2 deletion until the profile is saved, so a cancelled form or a
+   * failed save never destroys a file the DB still references.
+   */
+  onPendingDelete?: (url: string) => void;
 }
 
 function MediaPreview({
@@ -85,6 +90,7 @@ function MediaUploadRow({
   previewLabel,
   showPreview,
   crop,
+  onPendingDelete,
 }: {
   field: MediaField;
   inputId: string;
@@ -93,6 +99,7 @@ function MediaUploadRow({
   previewLabel: string;
   showPreview?: boolean;
   crop?: CropConfig;
+  onPendingDelete?: (url: string) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations("Dashboard.enterprise");
@@ -104,9 +111,10 @@ function MediaUploadRow({
         return field.onUploadFile(file);
       },
       onUrlChange: (url) => {
-        // If an image was already set, delete the old one from R2 on replace
+        // If an image was already set, defer deleting the old one from R2 until
+        // the profile is saved (the caller collects it via onPendingDelete).
         if (field.url && field.url !== url) {
-          void deleteUploadedFile(field.url);
+          onPendingDelete?.(field.url);
         }
         field.onUrlChange(url);
       },
@@ -190,6 +198,7 @@ export function EnterpriseProfileMedia({
   cover,
   aboutImage,
   gallery,
+  onPendingDelete,
 }: EnterpriseProfileMediaProps) {
   const t = useTranslations("Dashboard.enterprise");
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -220,6 +229,7 @@ export function EnterpriseProfileMedia({
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           uploadLabel={t("logoUrl") || "Logo"}
           previewLabel={t("logoPreview") || "Logo preview"}
+          onPendingDelete={onPendingDelete}
           crop={{
             aspectRatio: 1,
             cropShape: "rect",
@@ -233,6 +243,7 @@ export function EnterpriseProfileMedia({
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           uploadLabel={t("coverUrl") || "Cover Photo"}
           previewLabel={t("coverPreview") || "Cover preview"}
+          onPendingDelete={onPendingDelete}
           crop={{
             // Free-form resizable crop (react-image-crop) — the user grabs the
             // corners/edges to choose exactly which portion of the cover to keep.
@@ -256,6 +267,7 @@ export function EnterpriseProfileMedia({
           accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
           uploadLabel={t("aboutImage") || "About Section Image"}
           previewLabel={t("aboutImagePreview") || "About section image preview"}
+          onPendingDelete={onPendingDelete}
           crop={{
             // Portrait crop to match the tall "About Us" column (2 of 5 cols).
             aspectRatio: 3 / 4,

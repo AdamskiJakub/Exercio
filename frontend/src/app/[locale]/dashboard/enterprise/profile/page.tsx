@@ -212,36 +212,33 @@ export default function EnterpriseProfilePage() {
   };
 
   const handleRemoveLogo = useCallback(() => {
-    setForm((prev) => {
-      if (prev.logoUrl) pendingDeletesRef.current.push(prev.logoUrl);
-      return { ...prev, logoUrl: "" };
-    });
-  }, []);
+    // Push outside the setForm updater: updaters may run twice in StrictMode,
+    // which would duplicate the pending delete.
+    if (form.logoUrl) pendingDeletesRef.current.push(form.logoUrl);
+    setForm((prev) => ({ ...prev, logoUrl: "" }));
+  }, [form]);
 
   const handleRemoveCover = useCallback(() => {
-    setForm((prev) => {
-      if (prev.coverUrl) pendingDeletesRef.current.push(prev.coverUrl);
-      return { ...prev, coverUrl: "" };
-    });
-  }, []);
+    if (form.coverUrl) pendingDeletesRef.current.push(form.coverUrl);
+    setForm((prev) => ({ ...prev, coverUrl: "" }));
+  }, [form]);
 
   const handleRemoveAboutImage = useCallback(() => {
-    setForm((prev) => {
-      if (prev.aboutImage) pendingDeletesRef.current.push(prev.aboutImage);
-      return { ...prev, aboutImage: "" };
-    });
-  }, []);
+    if (form.aboutImage) pendingDeletesRef.current.push(form.aboutImage);
+    setForm((prev) => ({ ...prev, aboutImage: "" }));
+  }, [form]);
 
-  const handleRemoveGalleryImage = useCallback((index: number) => {
-    setForm((prev) => {
-      const removed = (prev.gallery || [])[index];
+  const handleRemoveGalleryImage = useCallback(
+    (index: number) => {
+      const removed = (form.gallery || [])[index];
       if (removed) pendingDeletesRef.current.push(removed);
-      return {
+      setForm((prev) => ({
         ...prev,
         gallery: (prev.gallery || []).filter((_, i) => i !== index),
-      };
-    });
-  }, []);
+      }));
+    },
+    [form],
+  );
 
   if (isChecking || !user || profileLoading) {
     return <LoadingSpinner />;
@@ -321,6 +318,7 @@ export default function EnterpriseProfilePage() {
 
           <div id="section-logo" className="scroll-mt-20">
             <EnterpriseProfileMedia
+              onPendingDelete={(url) => pendingDeletesRef.current.push(url)}
               logo={{
                 url: form.logoUrl || "",
                 isUploading: isUploadingLogo,

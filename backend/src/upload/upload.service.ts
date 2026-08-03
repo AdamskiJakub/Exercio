@@ -199,8 +199,11 @@ export class UploadService {
   private extractKeyFromUrl(url: string): string {
     const trimmed = url.trim();
     if (!trimmed) return '';
+    // Strip any query string or fragment so a URL like
+    // ".../<uuid>.jpg?v=123" still resolves to the bare key "<uuid>.jpg".
+    const withoutQuery = trimmed.split(/[?#]/)[0];
     // Take the last path segment (the R2 key is always a bare filename like <uuid>.<ext>)
-    const segments = trimmed.split('/');
+    const segments = withoutQuery.split('/');
     return segments[segments.length - 1] || '';
   }
 
