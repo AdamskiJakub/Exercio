@@ -122,7 +122,7 @@ export default function EnterpriseNewsPage() {
   const newsList = profile?.news || [];
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 md:p-8 pb-32">
+    <div className="bg-slate-900 p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function EnterpriseNewsPage() {
             {!showForm && (
               <Button
                 onClick={() => setShowForm(true)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-6 text-base font-semibold cursor-pointer"
+                className="hidden sm:inline-flex bg-emerald-600 hover:bg-emerald-500 text-white h-11 px-6 text-base font-semibold cursor-pointer"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {t("createNews")}
@@ -164,6 +164,20 @@ export default function EnterpriseNewsPage() {
           onCreateNew={() => setShowForm(true)}
         />
       </div>
+
+      {/* Mobile-only "Add news" button below the whole news container.
+          Kept OUTSIDE the space-y-8 container so it doesn't reserve space on desktop. */}
+      {!showForm && (
+        <div className="max-w-4xl mx-auto mt-8 sm:hidden">
+          <Button
+            onClick={() => setShowForm(true)}
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white h-11 text-base font-semibold cursor-pointer"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {t("createNews")}
+          </Button>
+        </div>
+      )}
 
       <BottomNavBar
         backText={t("backToDashboard") || "Back to Dashboard"}
