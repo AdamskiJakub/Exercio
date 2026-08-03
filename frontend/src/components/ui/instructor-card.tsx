@@ -120,67 +120,72 @@ export function InstructorCard({
 
   return (
     <div
-      className={`relative bg-slate-800/50 backdrop-blur-sm border border-slate-700 ${hoverBorderClasses[hoverColor]} rounded-xl overflow-hidden transition-colors duration-300 ${className}`}
+      className={`bg-slate-800/50 backdrop-blur-sm border border-slate-700 ${hoverBorderClasses[hoverColor]} rounded-xl overflow-hidden transition-colors duration-300 ${className}`}
     >
-      <Link href={href} className="flex items-center gap-4 p-4 group">
-        {/* Avatar */}
-        <UserAvatar
-          photoUrl={instructor.photoUrl}
-          avatarUrl={instructor.avatarUrl}
-          firstName={instructor.firstName}
-          lastName={instructor.lastName}
-          size={avatarSize}
-          alt={fullName}
-        />
+      <div className="flex flex-wrap items-center gap-3 p-4">
+        <Link
+          href={href}
+          className="flex items-center gap-4 flex-1 min-w-0 group"
+        >
+          {/* Avatar */}
+          <UserAvatar
+            photoUrl={instructor.photoUrl}
+            avatarUrl={instructor.avatarUrl}
+            firstName={instructor.firstName}
+            lastName={instructor.lastName}
+            size={avatarSize}
+            alt={fullName}
+          />
 
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h4
-              className={`text-sm font-semibold text-white truncate ${hoverTextClasses[hoverColor]} transition-colors`}
-            >
-              {fullName}
-            </h4>
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h4
+                className={`text-sm font-semibold text-white truncate ${hoverTextClasses[hoverColor]} transition-colors`}
+              >
+                {fullName}
+              </h4>
+            </div>
+
+            {/* Tagline (if provided) takes precedence over specialization */}
+            {instructor.tagline ? (
+              <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                {instructor.tagline}
+              </p>
+            ) : primarySpecName ? (
+              <p className="text-xs text-slate-400 mt-0.5 truncate">
+                {primarySpecName}
+              </p>
+            ) : null}
+
+            {/* City */}
+            {instructor.city && (
+              <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
+                <MapPin className="size-3" />
+                <span>{instructor.city}</span>
+              </div>
+            )}
           </div>
 
-          {/* Tagline (if provided) takes precedence over specialization */}
-          {instructor.tagline ? (
-            <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
-              {instructor.tagline}
-            </p>
-          ) : primarySpecName ? (
-            <p className="text-xs text-slate-400 mt-0.5 truncate">
-              {primarySpecName}
-            </p>
-          ) : null}
+          {/* Right side: price/duration, icon, and/or chevron */}
+          <div className="flex flex-col items-end shrink-0">
+            {instructor.sessionPrice != null && (
+              <span className="text-sm text-orange-400 font-medium whitespace-nowrap">
+                {instructor.sessionPrice} zł
+              </span>
+            )}
+            {instructor.sessionDuration != null && (
+              <span className="text-xs text-slate-400 whitespace-nowrap">
+                {instructor.sessionDuration} min
+              </span>
+            )}
+            {rightIcon}
+          </div>
+        </Link>
 
-          {/* City */}
-          {instructor.city && (
-            <div className="flex items-center gap-1 mt-1.5 text-xs text-slate-400">
-              <MapPin className="size-3" />
-              <span>{instructor.city}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Right side: price/duration, icon, and/or chevron */}
-        <div className="flex flex-col items-end shrink-0">
-          {instructor.sessionPrice != null && (
-            <span className="text-sm text-orange-400 font-medium whitespace-nowrap">
-              {instructor.sessionPrice} zł
-            </span>
-          )}
-          {instructor.sessionDuration != null && (
-            <span className="text-xs text-slate-400 whitespace-nowrap">
-              {instructor.sessionDuration} min
-            </span>
-          )}
-          {rightIcon}
-        </div>
-      </Link>
-
-      {/* Action button (e.g. remove from favorites) */}
-      {action && <div className="absolute top-3 right-3">{action}</div>}
+        {/* Action button (e.g. send invitation / remove from favorites) */}
+        {action && <div className="w-full sm:w-auto shrink-0">{action}</div>}
+      </div>
     </div>
   );
 }

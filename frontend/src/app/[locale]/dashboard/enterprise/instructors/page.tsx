@@ -181,7 +181,7 @@ export default function EnterpriseInstructorsPage() {
                             onClick={() => handleSendInvitation(instructor.id)}
                             disabled={sendInvitation.isPending}
                             size="sm"
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                            className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white"
                             aria-label={`${t("sendInvitation")} ${instructor.user?.firstName || ""} ${instructor.user?.lastName || ""}`}
                           >
                             <Mail className="w-4 h-4 mr-1" />

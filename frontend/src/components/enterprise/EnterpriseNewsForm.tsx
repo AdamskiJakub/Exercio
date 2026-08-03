@@ -103,23 +103,13 @@ export function EnterpriseNewsForm({
       onSubmit={handleSubmit}
       className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 space-y-4"
     >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-emerald-500/10 rounded-lg">
-            <Newspaper className="w-5 h-5 text-emerald-400" />
-          </div>
-          <h2 className="text-2xl font-semibold text-white">
-            {editingNews ? t("editNews") : t("createNews")}
-          </h2>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="p-2 bg-emerald-500/10 rounded-lg">
+          <Newspaper className="w-5 h-5 text-emerald-400" />
         </div>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-slate-400 hover:text-white transition-colors cursor-pointer"
-          aria-label={t("cancel") || "Cancel"}
-        >
-          <span className="text-sm">{t("cancel") || "Cancel"}</span>
-        </button>
+        <h2 className="text-2xl font-semibold text-white">
+          {editingNews ? t("editNews") : t("createNews")}
+        </h2>
       </div>
 
       <NewsTypeToggle

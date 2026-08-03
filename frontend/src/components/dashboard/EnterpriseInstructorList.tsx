@@ -72,12 +72,14 @@ export function EnterpriseInstructorList({
           </div>
         </NextLink>
       ))}
-      <Link
-        href="/dashboard/enterprise/instructors"
-        className="block text-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors mt-2"
-      >
-        {t("manageInstructors")} →
-      </Link>
+      <div className="flex justify-center">
+        <Link
+          href="/dashboard/enterprise/instructors"
+          className="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors text-sm font-medium"
+        >
+          {t("manageInstructors")}
+        </Link>
+      </div>
     </div>
   );
 }
