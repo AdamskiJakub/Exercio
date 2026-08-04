@@ -50,7 +50,7 @@ export function EnterpriseProfilePricing({
                 value={item.label}
                 onChange={(e) => onUpdate(index, "label", e.target.value)}
                 placeholder={t("pricingLabel")}
-                className="bg-slate-900/50 border-slate-700 text-white"
+                className="bg-slate-900/50 border-slate-700 text-white focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
               />
             </div>
             <div className="flex-1 space-y-2">
@@ -66,7 +66,7 @@ export function EnterpriseProfilePricing({
                   onUpdate(index, "price", parseFloat(e.target.value) || 0)
                 }
                 placeholder={t("pricingPrice")}
-                className="bg-slate-900/50 border-slate-700 text-white"
+                className="bg-slate-900/50 border-slate-700 text-white focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
               />
             </div>
             <button

@@ -65,7 +65,7 @@ export function EnterpriseProfileFaq({
                 value={item.question}
                 onChange={(e) => onUpdate(index, "question", e.target.value)}
                 placeholder={t("faqQuestion")}
-                className="bg-slate-900/50 border-slate-700 text-white"
+                className="bg-slate-900/50 border-slate-700 text-white focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
               />
             </div>
 
@@ -76,7 +76,7 @@ export function EnterpriseProfileFaq({
                 onChange={(e) => onUpdate(index, "answer", e.target.value)}
                 placeholder={t("faqAnswer")}
                 rows={3}
-                className="bg-slate-900/50 border-slate-700 text-white resize-none"
+                className="bg-slate-900/50 border-slate-700 text-white resize-none focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
               />
             </div>
           </div>

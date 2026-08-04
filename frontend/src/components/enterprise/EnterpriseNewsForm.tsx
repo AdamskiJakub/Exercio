@@ -14,6 +14,7 @@ import { NewsTypeToggle } from "./NewsTypeToggle";
 import { LinkPreviewSection } from "./LinkPreviewSection";
 import { ThumbnailSection } from "./ThumbnailSection";
 import type { EnterpriseNews } from "@/types/enterprise";
+import { isInstagramUrl, isSocialMediaUrl } from "@/lib/utils/url";
 
 interface NewsFormData {
   type: "link" | "post";
@@ -63,11 +64,14 @@ export function EnterpriseNewsForm({
       form.type === "link"
     ) {
       hasAutoFilled.current = true;
+      const isInstagram = isInstagramUrl(form.url);
       setForm((prev) => ({
         ...prev,
         title: prev.title || ogPreview.title,
         description: prev.description || ogPreview.description,
-        thumbnailUrl: prev.thumbnailUrl || ogPreview.image || "",
+        thumbnailUrl: isInstagram
+          ? prev.thumbnailUrl
+          : prev.thumbnailUrl || ogPreview.image || "",
       }));
     }
   }, [ogPreview, editingNews, form.type]);
@@ -187,23 +191,4 @@ export function EnterpriseNewsForm({
       </div>
     </motion.form>
   );
-}
-
-function isSocialMediaUrl(url: string): boolean {
-  const FACEBOOK_DOMAINS = [
-    "facebook.com",
-    "www.facebook.com",
-    "fb.com",
-    "m.facebook.com",
-    "instagram.com",
-    "www.instagram.com",
-  ];
-  try {
-    const hostname = new URL(url).hostname.toLowerCase();
-    return FACEBOOK_DOMAINS.some(
-      (domain) => hostname === domain || hostname.endsWith("." + domain),
-    );
-  } catch {
-    return false;
-  }
 }

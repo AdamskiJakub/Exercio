@@ -20,26 +20,6 @@ interface LinkPreviewSectionProps {
   isSocialUrl: boolean;
 }
 
-const FACEBOOK_DOMAINS = [
-  "facebook.com",
-  "www.facebook.com",
-  "fb.com",
-  "m.facebook.com",
-  "instagram.com",
-  "www.instagram.com",
-];
-
-function isSocialMediaUrl(url: string): boolean {
-  try {
-    const hostname = new URL(url).hostname.toLowerCase();
-    return FACEBOOK_DOMAINS.some(
-      (domain) => hostname === domain || hostname.endsWith("." + domain),
-    );
-  } catch {
-    return false;
-  }
-}
-
 function SocialMediaWarning({ t }: { t: (key: string) => string }) {
   return (
     <div className="mt-2 p-3 bg-amber-500/10 rounded-lg border border-amber-500/20 flex items-start gap-3">

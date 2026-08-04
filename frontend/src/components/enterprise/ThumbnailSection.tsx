@@ -102,7 +102,7 @@ export function ThumbnailSection({
             alt="Thumbnail preview"
             className="w-full h-full object-cover"
             onError={() => {
-              setHasError(true);
+              setHasError(false);
               onThumbnailChange("");
               setUrlValue("");
             }}

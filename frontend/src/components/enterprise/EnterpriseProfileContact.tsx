@@ -58,7 +58,7 @@ export function EnterpriseProfileContact({
             id="email"
             value={contact.email}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
 
@@ -72,7 +72,7 @@ export function EnterpriseProfileContact({
             id="phone"
             value={contact.phone}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
       </div>
@@ -92,7 +92,7 @@ export function EnterpriseProfileContact({
             id="website"
             value={contact.website}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder={t("websitePlaceholder")}
           />
         </div>
@@ -110,7 +110,7 @@ export function EnterpriseProfileContact({
             id="city"
             value={contact.city}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
       </div>
@@ -126,7 +126,7 @@ export function EnterpriseProfileContact({
             id="address"
             value={contact.address}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
 
@@ -140,7 +140,7 @@ export function EnterpriseProfileContact({
             id="postalCode"
             value={contact.postalCode}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
       </div>
@@ -166,7 +166,7 @@ export function EnterpriseProfileContact({
             id="facebookUrl"
             value={social.facebookUrl}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder="https://facebook.com/..."
           />
         </div>
@@ -182,7 +182,7 @@ export function EnterpriseProfileContact({
             id="instagramUrl"
             value={social.instagramUrl}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder="https://instagram.com/..."
           />
         </div>
@@ -200,7 +200,7 @@ export function EnterpriseProfileContact({
             id="youtubeUrl"
             value={social.youtubeUrl}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder="https://youtube.com/..."
           />
         </div>
@@ -216,7 +216,7 @@ export function EnterpriseProfileContact({
             id="tiktokUrl"
             value={social.tiktokUrl}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder="https://tiktok.com/..."
           />
         </div>
