@@ -6,6 +6,7 @@ import {
   IsInt,
   IsBoolean,
   IsIn,
+  IsNotEmpty,
   Min,
   ArrayMaxSize,
   MaxLength,
@@ -49,6 +50,7 @@ export class UpdateInstructorProfileDto {
   location?: string | null;
 
   @IsString()
+  @IsNotEmpty()
   @IsOptional()
   city?: string | null;
 
