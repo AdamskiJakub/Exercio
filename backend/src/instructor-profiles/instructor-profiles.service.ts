@@ -433,12 +433,15 @@ export class InstructorProfilesService {
       throw new ForbiddenException('You can only update your own profile');
     }
 
+    const data = { ...dto };
+
+    if ('city' in dto) {
+      data.city = this.resolveCity(dto.city);
+    }
+
     return this.prisma.instructorProfile.update({
       where: { id: profileId },
-      data: {
-        ...dto,
-        city: this.resolveCity(dto.city),
-      },
+      data,
       include: {
         user: {
           select: {
