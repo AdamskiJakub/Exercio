@@ -24,6 +24,8 @@ const BUSINESS_TYPES = [
   "danceSchool",
   "gym",
   "yogaStudio",
+  "pilatesStudio",
+  "personalTrainingStudio",
   "swimmingSchool",
   "sportsClub",
   "martialArts",
