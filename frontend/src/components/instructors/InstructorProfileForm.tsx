@@ -29,6 +29,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
+import { DEFAULT_CITY } from "@/lib/constants/cities";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -175,7 +176,7 @@ export function InstructorProfileForm({
       bio: profile?.bio || "",
       tagline: profile?.tagline || "",
       location: profile?.location || "",
-      city: profile?.city || "",
+      city: profile?.city || DEFAULT_CITY || "",
       packageDealsEnabled: profile?.packageDealsEnabled || false,
       packageDealsDescription: profile?.packageDealsDescription || "",
       photoUrl: profile?.photoUrl || "",
@@ -214,7 +215,7 @@ export function InstructorProfileForm({
         bio: profile.bio || "",
         tagline: profile.tagline || "",
         location: profile.location || "",
-        city: profile.city || "",
+        city: profile.city || DEFAULT_CITY || "",
         packageDealsEnabled: profile.packageDealsEnabled || false,
         packageDealsDescription: profile.packageDealsDescription || "",
         photoUrl: profile.photoUrl || "",

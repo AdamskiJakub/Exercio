@@ -128,4 +128,18 @@ export class StaticConfigService {
   isValidGoal(goalId: string): boolean {
     return this.validGoalIds.has(goalId);
   }
+
+  /**
+   * Default city in "beachhead market" mode (single supported city, e.g. Białystok).
+   *
+   * Driven by the `BEACHHEAD_CITY` env var so it can be switched off without code
+   * changes: set `BEACHHEAD_CITY=` (empty) once the platform supports multiple cities
+   * and the fallback automatically stops applying.
+   *
+   * Returns `null` when no single default city is configured.
+   */
+  getDefaultCity(): string | null {
+    const city = process.env.BEACHHEAD_CITY?.trim();
+    return city || null;
+  }
 }

@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -370,7 +371,7 @@ export class InstructorProfilesService {
           userId: userId,
           bio: dto.bio,
           specializations: dto.specializations || [],
-          city: dto.city,
+          city: this.resolveCityOrThrow(dto.city),
         },
         include: {
           user: {
@@ -433,9 +434,15 @@ export class InstructorProfilesService {
       throw new ForbiddenException('You can only update your own profile');
     }
 
+    const { city: _city, ...rest } = dto;
+    const data = {
+      ...rest,
+      ...('city' in dto ? { city: this.resolveCityOrThrow(dto.city) } : {}),
+    };
+
     return this.prisma.instructorProfile.update({
       where: { id: profileId },
-      data: dto,
+      data,
       include: {
         user: {
           select: {
@@ -449,6 +456,22 @@ export class InstructorProfilesService {
         },
       },
     });
+  }
+
+  private resolveCity(city?: string | null): string | null {
+    const trimmed = city?.trim();
+    if (trimmed) {
+      return trimmed;
+    }
+    return this.configService.getDefaultCity();
+  }
+
+  private resolveCityOrThrow(city?: string | null): string {
+    const resolved = this.resolveCity(city);
+    if (!resolved) {
+      throw new BadRequestException('City is required.');
+    }
+    return resolved;
   }
 
   /**

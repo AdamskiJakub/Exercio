@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import rawCitiesData from "polish-cities/data/city.json";
+import { getAvailableCities } from "@/lib/constants/cities";
 
 export interface RawCity {
   name: string;
@@ -77,6 +78,10 @@ export function useCityAutocomplete(): UseCityAutocompleteReturn {
 
   const allCities = useMemo(() => getCities(), []);
 
+  // Available cities from the centralized config. "ALL" means "open" mode —
+  // every city from polish-cities is available, so no filtering is applied.
+  const availableCities = useMemo(() => getAvailableCities(), []);
+
   const filteredCities = useMemo(() => {
     const trimmed = query.trim();
     if (trimmed.length < 2) return [];
@@ -84,10 +89,13 @@ export function useCityAutocomplete(): UseCityAutocompleteReturn {
     const normalizedQuery = normalizeDiacritics(trimmed);
 
     return allCities.filter((city) => {
+      if (availableCities !== "ALL" && !availableCities.includes(city.name)) {
+        return false;
+      }
       const normalizedName = normalizeDiacritics(city.name);
       return normalizedName.includes(normalizedQuery);
     });
-  }, [query, allCities]);
+  }, [query, allCities, availableCities]);
 
   return {
     query,

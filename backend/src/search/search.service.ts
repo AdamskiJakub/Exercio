@@ -386,7 +386,7 @@ export class SearchService {
     // Get all distinct cities from both tables
     const [instructorCities, enterpriseCities] = await Promise.all([
       this.prisma.instructorProfile.findMany({
-        where: { city: { not: null }, isDraft: false },
+        where: { isDraft: false },
         select: { city: true },
         distinct: ['city'],
       }),
@@ -465,7 +465,7 @@ export class SearchService {
     const [instructorCities, enterpriseCities] = await Promise.all([
       this.prisma.instructorProfile.groupBy({
         by: ['city'],
-        where: { city: { not: null }, isDraft: false },
+        where: { isDraft: false },
         _count: { id: true },
       }),
       this.prisma.enterpriseProfile.groupBy({
@@ -516,7 +516,6 @@ export class SearchService {
     // Get existing city+discipline pairs from instructor specializations
     const instructorsWithSpecs = await this.prisma.instructorProfile.findMany({
       where: {
-        city: { not: null },
         isDraft: false,
         specializations: { isEmpty: false },
       },
@@ -668,7 +667,6 @@ export class SearchService {
     const instructorsWithSpec = await this.prisma.instructorProfile.findMany({
       where: {
         specializations: { has: disciplineKey },
-        city: { not: null },
         isDraft: false,
       },
       select: { city: true },
@@ -733,7 +731,6 @@ export class SearchService {
     const [instructorCities, enterpriseCities] = await Promise.all([
       this.prisma.instructorProfile.findMany({
         where: {
-          city: { not: null },
           isDraft: false,
         },
         select: { city: true },

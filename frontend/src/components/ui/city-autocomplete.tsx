@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useEscapeKey } from "@/lib/hooks";
 import { useCityAutocomplete, type City } from "@/hooks/useCityAutocomplete";
-import { DEFAULT_CITY } from "@/lib/constants/cities";
+import { DEFAULT_CITY, isCityLocked } from "@/lib/constants/cities";
 
 export interface CityAutocompleteProps {
   value?: string;
@@ -44,14 +44,6 @@ export function CityAutocomplete({
   React.useEffect(() => {
     setInputValue(value);
   }, [value]);
-
-  // Beachhead market mode: force the parent's city value to the single
-  // supported city so search/filters always use it.
-  React.useEffect(() => {
-    if (DEFAULT_CITY && value !== DEFAULT_CITY) {
-      onChange?.(DEFAULT_CITY);
-    }
-  }, [DEFAULT_CITY, value, onChange]);
 
   const closeDropdown = React.useCallback(() => {
     setIsOpen(false);
@@ -161,14 +153,14 @@ export function CityAutocomplete({
 
   const showDropdown = isOpen && query.trim().length >= 2;
 
-  if (DEFAULT_CITY) {
+  if (isCityLocked) {
     return (
       <div className="relative">
         <input
           type="text"
           id={id}
           name={name}
-          value={DEFAULT_CITY}
+          value={DEFAULT_CITY ?? ""}
           readOnly
           disabled={disabled}
           aria-label={placeholder}
