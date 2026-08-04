@@ -38,21 +38,6 @@ function NewsCard({ item, onSelect, isLink = false }: NewsCardProps) {
     </Card>
   );
 
-  if (isLink) {
-    return (
-      <a
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-lg"
-        aria-label={`${item.title || t("news")} — ${t("opensInNewTab")}`}
-        role="listitem"
-      >
-        {cardContent}
-      </a>
-    );
-  }
-
   return (
     <div
       onClick={() => onSelect?.(item)}

@@ -2,8 +2,15 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { getMediaUrl } from "@/lib/utils/media";
-import { Calendar, FileText, X } from "lucide-react";
+import {
+  Calendar,
+  ExternalLink,
+  FileText,
+  Link as LinkIcon,
+  X,
+} from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
 import { useState, useCallback } from "react";
@@ -86,11 +93,20 @@ export function PostDetailModal({
                   </time>
                 )}
                 <span className="flex items-center gap-1.5 text-slate-400">
-                  <FileText
-                    className="w-4 h-4 text-emerald-500"
-                    aria-hidden="true"
-                  />
-                  {t("post") || "Post"}
+                  {selectedPost.type === "link" ? (
+                    <LinkIcon
+                      className="w-4 h-4 text-emerald-500"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <FileText
+                      className="w-4 h-4 text-emerald-500"
+                      aria-hidden="true"
+                    />
+                  )}
+                  {selectedPost.type === "link"
+                    ? t("link") || "Link"
+                    : t("post") || "Post"}
                 </span>
               </div>
 
@@ -104,6 +120,22 @@ export function PostDetailModal({
                 <div className="text-slate-200 leading-relaxed whitespace-pre-line text-base">
                   {selectedPost.description}
                 </div>
+              )}
+
+              {selectedPost.type === "link" && selectedPost.url && (
+                <Button
+                  asChild
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white gap-2 cursor-pointer"
+                >
+                  <a
+                    href={selectedPost.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                    {t("visitLink") || "Otwórz link"}
+                  </a>
+                </Button>
               )}
 
               <SocialShare copied={copied} onCopyLink={handleCopyLink} />

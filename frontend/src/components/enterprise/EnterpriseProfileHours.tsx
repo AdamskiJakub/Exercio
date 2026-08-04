@@ -38,7 +38,7 @@ export function EnterpriseProfileHours({
               type="text"
               value={openingHours?.[day] || ""}
               onChange={(e) => onUpdate(day, e.target.value)}
-              className="h-10 col-span-2"
+              className="h-10 col-span-2 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
               placeholder={t("hoursPlaceholder") || "e.g. 9:00 - 17:00"}
             />
           </div>

@@ -44,7 +44,7 @@ export function EnterpriseProfileHighlights({
                 type="text"
                 value={item.label}
                 onChange={(e) => onUpdate(index, "label", e.target.value)}
-                className="h-10"
+                className="h-10 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
                 placeholder={t("highlightLabel") || "Label (e.g. Students)"}
                 aria-label={`${t("highlightLabel") || "Highlight label"} ${index + 1}`}
               />
@@ -52,7 +52,7 @@ export function EnterpriseProfileHighlights({
                 type="text"
                 value={item.value}
                 onChange={(e) => onUpdate(index, "value", e.target.value)}
-                className="h-10"
+                className="h-10 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
                 placeholder={t("highlightValue") || "Value (e.g. 500+)"}
                 aria-label={`${t("highlightValue") || "Highlight value"} ${index + 1}`}
               />

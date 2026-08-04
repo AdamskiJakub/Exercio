@@ -43,7 +43,7 @@ export function EnterpriseProfileBasicInfo({
             id="companyName"
             value={companyName}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           />
         </div>
 
@@ -57,7 +57,7 @@ export function EnterpriseProfileBasicInfo({
             id="shortDescription"
             value={shortDescription}
             onChange={onChange}
-            className="h-11"
+            className="h-11 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder={
               t("shortDescriptionPlaceholder") ||
               "Brief tagline for your company"
@@ -75,7 +75,7 @@ export function EnterpriseProfileBasicInfo({
           id="description"
           value={description}
           onChange={onChange}
-          className="min-h-30"
+          className="min-h-30 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           placeholder={t("descriptionPlaceholder")}
         />
       </div>
