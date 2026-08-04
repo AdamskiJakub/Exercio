@@ -4,7 +4,6 @@ const FACEBOOK_DOMAINS = [
   "fb.com",
   "m.facebook.com",
   "instagram.com",
-  "www.instagram.com",
 ];
 
 function getHostname(url: string): string | null {
