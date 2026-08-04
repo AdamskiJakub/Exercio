@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsNotEmpty } from 'class-validator';
 import { IsValidConfigId } from '../../common/validators/is-valid-config-id.validator';
 
 export class CreateInstructorProfileDto {
@@ -16,8 +16,8 @@ export class CreateInstructorProfileDto {
   specializations?: string[];
 
   @IsString()
-  @IsOptional()
-  city?: string;
+  @IsNotEmpty()
+  city: string;
 
   // Note: Contact visibility settings (showPhone, showEmail, contactMessage)
   // are only available in update DTO, not during profile creation
