@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
+import { DEFAULT_CITY } from "@/lib/constants/cities";
 import { useEnterpriseApply } from "@/hooks/useEnterpriseApply";
 import { LegalCheckbox } from "@/components/ui/legal-checkbox";
 import type { CreateEnterpriseLeadDto } from "@/types/enterprise";
@@ -251,7 +252,9 @@ export function EnterpriseApplyForm() {
                 value={formData.city}
                 onChange={(value) => handleChange("city", value)}
                 className="bg-slate-800/50 border-emerald-900/50 text-white focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500"
-                placeholder={t("placeholders.city")}
+                placeholder={
+                  DEFAULT_CITY ? `np. ${DEFAULT_CITY}` : t("placeholders.city")
+                }
               />
             </div>
 
