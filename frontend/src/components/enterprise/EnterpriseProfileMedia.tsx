@@ -155,7 +155,7 @@ function MediaUploadRow({
               handleUrlCrop(e.currentTarget.value);
             }
           }}
-          className="h-11 flex-1"
+          className="h-11 flex-1 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
           placeholder={`https://example.com/${inputId}`}
         />
         <input
@@ -292,7 +292,7 @@ export function EnterpriseProfileMedia({
             inputMode="url"
             value={newGalleryUrl}
             onChange={(e) => setNewGalleryUrl(e.target.value)}
-            className="h-11 flex-1"
+            className="h-11 flex-1 focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50"
             placeholder={t("galleryUrlPlaceholder") || "Add image URL..."}
             onKeyDown={(e) => {
               if (e.key === "Enter") {

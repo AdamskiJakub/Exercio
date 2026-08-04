@@ -53,7 +53,7 @@ export function EnterpriseProfileBusinessType({
           {t("businessType")}
         </Label>
         <Select value={businessType} onValueChange={onChange}>
-          <SelectTrigger className="w-full bg-slate-900/50 border-slate-700 text-white">
+          <SelectTrigger className="w-full bg-slate-900/50 border-slate-700 text-white focus-visible:border-emerald-500 focus-visible:ring-emerald-500/50">
             <SelectValue placeholder={t("businessTypePlaceholder")} />
           </SelectTrigger>
           <SelectContent className="bg-slate-800 border-slate-700 text-white">

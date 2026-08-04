@@ -1549,6 +1549,8 @@
     "showLess": "Show less",
     "newsPost": "News post",
     "post": "Post",
+    "link": "Link",
+    "visitLink": "Open link",
     "share": "Share",
     "copyLink": "Copy link",
     "linkCopied": "Copied!",
