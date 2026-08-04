@@ -370,7 +370,7 @@ export class InstructorProfilesService {
           userId: userId,
           bio: dto.bio,
           specializations: dto.specializations || [],
-          city: dto.city,
+          city: this.resolveCity(dto.city),
         },
         include: {
           user: {
@@ -435,7 +435,10 @@ export class InstructorProfilesService {
 
     return this.prisma.instructorProfile.update({
       where: { id: profileId },
-      data: dto,
+      data: {
+        ...dto,
+        city: this.resolveCity(dto.city),
+      },
       include: {
         user: {
           select: {
@@ -449,6 +452,14 @@ export class InstructorProfilesService {
         },
       },
     });
+  }
+
+  private resolveCity(city?: string | null): string | null {
+    const trimmed = city?.trim();
+    if (trimmed) {
+      return trimmed;
+    }
+    return this.configService.getDefaultCity();
   }
 
   /**

@@ -1,28 +1,78 @@
 /**
- * Supported cities (beachhead market strategy).
+ * Market configuration and available cities.
  *
- * MVP obsługuje tylko jedno miasto — Białystok. Gdy `SUPPORTED_CITIES.length === 1`,
- * komponent `CityAutocomplete` renderuje zablokowane pole z tym miastem zamiast
- * pełnego autouzupełniania. Po dodaniu kolejnych miast (np. Warszawa, Lublin)
- * autouzupełnianie wraca automatycznie — bez dodatkowego refaktoru.
+ * Single source of truth for which cities are available in the app.
+ * Everything else (CityAutocomplete, forms, search) uses `getAvailableCities()`,
+ * so moving from one city to many cities or the whole of Poland is a config
+ * change, not a component rewrite.
  *
- * Uwaga: nazwy muszą dokładnie odpowiadać nazwom z biblioteki `polish-cities`
- * (używane do dopasowania w `useCityAutocomplete`).
+ * Market modes (`NEXT_PUBLIC_MARKET_MODE`):
+ *  - "beachhead" — one city (DEFAULT_CITY). The field is locked.
+ *  - "limited"   — a few cities from SUPPORTED_CITIES. Autocomplete is limited
+ *                  to those cities only.
+ *  - "open"      — the whole of Poland (all cities from polish-cities).
+ *
+ * Today:      MARKET_MODE=beachhead, DEFAULT_CITY=Białystok
+ * In 6 months: MARKET_MODE=limited, SUPPORTED_CITIES=["Białystok","Warszawa"]
+ * In 2 years:  MARKET_MODE=open (no code changes).
  */
-export const SUPPORTED_CITIES = ["Białystok"] as const;
+
+export type MarketMode = "beachhead" | "limited" | "open";
+
+/**
+ * Result of `getAvailableCities()`.
+ *  - "ALL"       — every city from polish-cities is available (open mode).
+ *  - string[]    — only these city names are available (beachhead/limited).
+ */
+export type AvailableCities = "ALL" | readonly string[];
+
+const rawMarketMode = process.env.NEXT_PUBLIC_MARKET_MODE?.trim().toLowerCase();
+
+export const MARKET_MODE: MarketMode =
+  rawMarketMode === "limited" || rawMarketMode === "open"
+    ? rawMarketMode
+    : "beachhead";
+
+const configuredCity = process.env.NEXT_PUBLIC_BEACHHEAD_CITY?.trim() || null;
+
+/**
+ * Cities in "limited" mode. In "beachhead" mode it only contains DEFAULT_CITY.
+ * Ignored in "open" mode (all Polish cities are available).
+ */
+export const SUPPORTED_CITIES: readonly string[] = configuredCity
+  ? [configuredCity]
+  : [];
 
 export type SupportedCity = (typeof SUPPORTED_CITIES)[number];
 
 /**
- * Tryb "beachhead market" — aplikacja celowo koncentruje się na jednym mieście
- * (MVP), zamiast udawać platformę ogólnopolską. Gdy w przyszłości dodamy kolejne
- * miasta, ta flaga automatycznie stanie się `false`.
+ * Default (only) city in "beachhead" mode, or `null` when the app supports
+ * multiple cities. Components just check `if (DEFAULT_CITY)`.
  */
-export const isBeachheadMarket = SUPPORTED_CITIES.length === 1;
+export const DEFAULT_CITY: string | null = configuredCity;
 
 /**
- * Domyślne (jedyne) obsługiwane miasto w trybie beachhead, lub `null` gdy
- * aplikacja wspiera wiele miast. Komponent sprawdza po prostu `if (DEFAULT_CITY)`.
+ * Whether the city field should be locked (readOnly). Only true in
+ * "beachhead" mode with DEFAULT_CITY set.
  */
-export const DEFAULT_CITY: string | null =
-  SUPPORTED_CITIES.length === 1 ? SUPPORTED_CITIES[0] : null;
+export const isCityLocked = MARKET_MODE === "beachhead" && !!DEFAULT_CITY;
+
+/**
+ * Centralized source of available cities.
+ *
+ * Returns the city names the user can pick, or "ALL" when every city from
+ * polish-cities is available (open mode). "ALL" is an explicit signal — not
+ * `null`, which would read like an error.
+ */
+export function getAvailableCities(): AvailableCities {
+  switch (MARKET_MODE) {
+    case "beachhead":
+      return DEFAULT_CITY ? [DEFAULT_CITY] : [];
+    case "limited":
+      return SUPPORTED_CITIES;
+    case "open":
+      return "ALL";
+    default:
+      return DEFAULT_CITY ? [DEFAULT_CITY] : [];
+  }
+}
