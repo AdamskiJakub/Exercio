@@ -108,8 +108,8 @@ export class UsersService {
     }
 
     // Create InstructorProfile and update role in a transaction
-    const [updatedUser] = await this.prisma.$transaction([
-      this.prisma.user.update({
+    const updatedUser = await this.prisma.$transaction(async (tx) => {
+      return tx.user.update({
         where: { id: userId },
         data: {
           role: 'INSTRUCTOR',
@@ -123,7 +123,7 @@ export class UsersService {
               gallery: [],
               languages: [],
               location: null,
-              city: null,
+              city: this.resolveDefaultCity(),
               hourlyRate: null,
               photoUrl: null,
               verified: false,
@@ -135,8 +135,8 @@ export class UsersService {
         include: {
           instructorProfile: true,
         },
-      }),
-    ]);
+      });
+    });
 
     return {
       message:
@@ -171,5 +171,13 @@ export class UsersService {
     });
 
     return { message: 'Account deleted successfully' };
+  }
+
+  private resolveDefaultCity(): string {
+    const city = process.env.BEACHHEAD_CITY?.trim();
+    if (!city) {
+      throw new BadRequestException('BEACHHEAD_CITY is not configured.');
+    }
+    return city;
   }
 }

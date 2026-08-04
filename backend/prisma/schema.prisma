@@ -43,7 +43,7 @@ model InstructorProfile {
   bio                     String?
   specializations         String[]
   location                String?
-  city                    String?
+  city                    String
   hourlyRate              Float?
   photoUrl                String?
   verified                Boolean                 @default(false)
