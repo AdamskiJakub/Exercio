@@ -50,3 +50,7 @@ prisma/migrations/migration_lock.toml
 DOCS.md
 NOTES.md
 TODO.md
+
+# Internal admin scripts (private - not for GitHub)
+/scripts/resend-activation.sh
+/scripts/deploy-backend.sh

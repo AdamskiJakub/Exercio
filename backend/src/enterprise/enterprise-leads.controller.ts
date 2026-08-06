@@ -106,6 +106,31 @@ export class EnterpriseLeadsController {
     return this.leadsService.approve(id);
   }
 
+  @Post('leads/resend-activation')
+  async resendActivation(
+    @Body('email') email: string,
+    @Headers('authorization') authHeader?: string,
+  ) {
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw new UnauthorizedException(
+        'Missing or invalid authorization header',
+      );
+    }
+
+    const token = authHeader.slice(7);
+    const approveSecret = this.configService.get<string>('APPROVE_SECRET');
+
+    if (!approveSecret || token !== approveSecret) {
+      throw new ForbiddenException('Invalid approve secret');
+    }
+
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    return this.leadsService.resendActivation(email);
+  }
+
   @Patch('leads/:id/reject')
   @UseGuards(JwtAuthGuard)
   async reject(@Param('id') id: string, @Req() req: Request) {
