@@ -1614,6 +1614,7 @@
       "PERSONAL_TRAINING_STUDIO": "Studio Treningu Personalnego",
       "SWIMMING_POOL": "Basen / Szkoła Pływania",
       "MARTIAL_ARTS": "Sztuki Walki",
+      "PHYSIOTHERAPY": "Fizjoterapia",
       "OTHER": "Inne"
     },
     "foundingPartner": "Founding Partner",
@@ -1705,6 +1706,7 @@
       "swimmingPool": "Basen",
       "personalTrainingStudio": "Studio treningu personalnego",
       "sportsCenter": "Centrum sportowe",
+      "physiotherapy": "Fizjoterapia",
       "other": "Inne"
     },
     "placeholders": {

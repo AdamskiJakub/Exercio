@@ -26,6 +26,7 @@ const BUSINESS_TYPE_I18N_MAP: Record<string, string> = {
   SWIMMING_POOL: "swimmingPool",
   PERSONAL_TRAINING_STUDIO: "personalTrainingStudio",
   SPORTS_CENTER: "sportsCenter",
+  PHYSIOTHERAPY: "physiotherapy",
   OTHER: "other",
 };
 
