@@ -241,6 +241,79 @@ export class EnterpriseLeadsService {
     return result;
   }
 
+  async resendActivation(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (!user) {
+      throw new NotFoundException(
+        `No user found with email "${normalizedEmail}"`,
+      );
+    }
+
+    if (user.role !== 'ENTERPRISE') {
+      throw new BadRequestException(
+        'Only enterprise accounts can be re-activated',
+      );
+    }
+
+    if (user.password) {
+      throw new BadRequestException(
+        'Account is already activated — no need to resend',
+      );
+    }
+
+    // Generate a fresh activation token (48h expiry)
+    const activationToken = crypto.randomBytes(32).toString('hex');
+    const activationExpires = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        activationToken,
+        activationExpires,
+        isEmailVerified: false,
+      },
+    });
+
+    // Send the activation email with the new link
+    try {
+      const frontendUrl = this.configService.get<string>(
+        'FRONTEND_URL',
+        'http://localhost:3000',
+      );
+      const activationUrl = `${frontendUrl}/activate?token=${activationToken}`;
+      const locale = this.configService.get<string>(
+        'DEFAULT_LOCALE',
+        'pl',
+      ) as Language;
+      await this.emailService.sendEnterpriseAccountActivation(
+        normalizedEmail,
+        locale,
+        activationUrl,
+      );
+      this.logger.log(
+        `Resent activation email to ${normalizedEmail} for user ${user.id}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to resend activation email to ${normalizedEmail}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+      );
+      throw new BadRequestException(
+        'Failed to send activation email. Please try again.',
+      );
+    }
+
+    return {
+      message: `New activation link sent to ${normalizedEmail}. It expires in 48 hours.`,
+    };
+  }
+
   async activateAccount(token: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: { activationToken: token },
