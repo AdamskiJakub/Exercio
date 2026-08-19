@@ -1614,6 +1614,7 @@
       "PERSONAL_TRAINING_STUDIO": "Personal Training Studio",
       "SWIMMING_POOL": "Swimming Pool / Swim School",
       "MARTIAL_ARTS": "Martial Arts",
+      "PHYSIOTHERAPY": "Physiotherapy",
       "OTHER": "Other"
     },
     "foundingPartner": "Founding Partner",
@@ -1705,6 +1706,7 @@
       "swimmingPool": "Swimming Pool",
       "personalTrainingStudio": "Personal Training Studio",
       "sportsCenter": "Sports Center",
+      "physiotherapy": "Physiotherapy",
       "other": "Other"
     },
     "placeholders": {

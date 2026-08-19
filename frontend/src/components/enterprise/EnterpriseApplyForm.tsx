@@ -31,6 +31,7 @@ const BUSINESS_TYPES = [
   "sportsClub",
   "martialArts",
   "academy",
+  "physiotherapy",
   "other",
 ] as const;
 
